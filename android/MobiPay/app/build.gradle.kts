@@ -10,7 +10,8 @@ android {
     defaultConfig {
         applicationId = "com.kimnlee.mobipay"
         minSdk = 28
-        targetSdk = 34
+        maxSdk = 34
+        targetSdk = 33
         versionCode = 1
         versionName = "1.0"
 
