@@ -4,7 +4,7 @@ import androidx.car.app.CarContext
 import androidx.car.app.Screen
 import com.kimnlee.cardmanagement.navigation.CardManagementAutoNavigation
 import com.kimnlee.memberinvitation.navigation.MemberInvitationAutoNavigation
-import com.kimnlee.mobipay.ui.AutoHomeScreen
+import com.kimnlee.mobipay.presentation.screen.AutoHomeScreen
 import com.kimnlee.payment.navigation.PaymentAutoNavigation
 import com.kimnlee.vehiclemanagement.navigation.VehicleManagementAutoNavigation
 

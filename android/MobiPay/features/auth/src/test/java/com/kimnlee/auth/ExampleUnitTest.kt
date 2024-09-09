@@ -1,4 +1,4 @@
-package com.kimnlee.vehiclerecognition
+package com.kimnlee.auth
 
 import org.junit.Test
 

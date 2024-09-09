@@ -1,12 +1,11 @@
 package com.kimnlee.mobipay
 
 import android.content.Intent
-import android.util.Log
 import androidx.car.app.CarAppService
 import androidx.car.app.Screen
 import androidx.car.app.Session
 import androidx.car.app.validation.HostValidator
-import com.kimnlee.mobipay.ui.AutoHomeScreen
+import com.kimnlee.mobipay.presentation.screen.AutoHomeScreen
 
 class MobiPayCarAppService : CarAppService() {
     override fun createHostValidator(): HostValidator {

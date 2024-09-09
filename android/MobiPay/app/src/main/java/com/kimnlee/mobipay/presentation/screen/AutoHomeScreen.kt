@@ -1,8 +1,7 @@
-package com.kimnlee.mobipay.ui
+package com.kimnlee.mobipay.presentation.screen
 
 import androidx.car.app.CarContext
 import androidx.car.app.Screen
-import androidx.car.app.model.Action
 import androidx.car.app.model.ItemList
 import androidx.car.app.model.ListTemplate
 import androidx.car.app.model.Template

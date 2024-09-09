@@ -1,4 +1,4 @@
-package com.kimnlee.mobipay.ui
+package com.kimnlee.mobipay.presentation.screen
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*

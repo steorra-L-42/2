@@ -6,7 +6,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.kimnlee.cardmanagement.navigation.cardManagementNavGraph
 import com.kimnlee.memberinvitation.navigation.memberInvitationNavGraph
-import com.kimnlee.mobipay.ui.HomeScreen
+import com.kimnlee.mobipay.presentation.screen.HomeScreen
 import com.kimnlee.payment.navigation.paymentNavGraph
 import com.kimnlee.vehiclemanagement.navigation.vehiclemanagementNavGraph
 

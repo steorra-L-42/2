@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.kimnlee.vehiclerecognition"
+    namespace = "com.kimnlee.auth"
     compileSdk = 34
 
     defaultConfig {
@@ -36,12 +36,25 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.9"
     }
+    sourceSets {
+        getByName("main") {
+            java.srcDirs("src/main/java", "src/mobile/java", "src/auto/java")
+            res.srcDirs("src/main/res", "src/mobile/res", "src/auto/res")
+        }
+    }
 }
 
 dependencies {
 
+    implementation(project(":api"))
+
+    implementation(libs.retrofit)
     implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.ui)
+    implementation(libs.androidx.material3)
+    implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.app)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
