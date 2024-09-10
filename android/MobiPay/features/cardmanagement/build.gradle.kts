@@ -55,7 +55,13 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.app)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.camera.lifecycle)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    // camera
+    implementation(libs.androidx.ui.tooling.preview.android)
+    implementation(libs.androidx.camera.camera2)
+    implementation(libs.androidx.camera.lifecycle.v130)
+    implementation(libs.androidx.camera.view)
 }

@@ -16,6 +16,7 @@ import com.kimnlee.cardmanagement.presentation.viewmodel.UserUiState
 fun CardManagementScreen(
     onNavigateToDetail: () -> Unit,
     onNavigateToHome: () -> Unit,
+    onNavigateToRegistration: () -> Unit,
     viewModel: CardManagementViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -36,6 +37,9 @@ fun CardManagementScreen(
             Text("상세 화면으로 이동")
         }
         Spacer(modifier = Modifier.height(8.dp))
+        Button(onClick = onNavigateToRegistration) {
+            Text("카드 등록화면으로 이동")
+        }
         Button(onClick = onNavigateToHome) {
             Text("홈으로 돌아가기")
         }
