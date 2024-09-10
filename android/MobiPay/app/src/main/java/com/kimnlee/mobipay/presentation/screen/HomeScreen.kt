@@ -3,12 +3,20 @@ package com.kimnlee.mobipay.presentation.screen
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.kimnlee.common.auth.AuthManager
+import kotlinx.coroutines.launch
 
 @Composable
-fun HomeScreen(navController: NavController) {
+fun HomeScreen(
+    authManager: AuthManager,
+    navController: NavController
+) {
+    val coroutineScope = rememberCoroutineScope()
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -20,9 +28,18 @@ fun HomeScreen(navController: NavController) {
         )
         Spacer(modifier = Modifier.height(16.dp))
         Button(
-            onClick = { navController.navigate("auth") }
+            onClick = {
+                coroutineScope.launch {
+                    authManager.setLoggedIn(false)
+                    navController.navigate("auth") {
+                        popUpTo(navController.graph.startDestinationId) {
+                            inclusive = true
+                        }
+                    }
+                }
+            }
         ) {
-            Text("로그인")
+            Text("로그아웃")
         }
         Spacer(modifier = Modifier.height(16.dp))
         Button(
