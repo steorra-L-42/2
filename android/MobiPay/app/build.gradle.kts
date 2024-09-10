@@ -52,6 +52,7 @@ android {
 
 dependencies {
     implementation(project(":common"))
+    implementation(project(":features:auth"))
     implementation(project(":features:payment"))
     implementation(project(":features:cardmanagement"))
     implementation(project(":features:vehiclemanagement"))

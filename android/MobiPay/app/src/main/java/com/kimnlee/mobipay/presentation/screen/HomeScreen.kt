@@ -20,6 +20,12 @@ fun HomeScreen(navController: NavController) {
         )
         Spacer(modifier = Modifier.height(16.dp))
         Button(
+            onClick = { navController.navigate("auth") }
+        ) {
+            Text("로그인")
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+        Button(
             onClick = { navController.navigate("payment") }
         ) {
             Text("결제")

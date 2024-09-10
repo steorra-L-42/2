@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.kimnlee.auth.navigation.authNavGraph
 import com.kimnlee.cardmanagement.navigation.cardManagementNavGraph
 import com.kimnlee.memberinvitation.navigation.memberInvitationNavGraph
 import com.kimnlee.mobipay.presentation.screen.HomeScreen
@@ -16,6 +17,7 @@ fun AppNavGraph(navController: NavHostController) {
         composable("home") {
             HomeScreen(navController = navController)
         }
+        authNavGraph(navController)
         paymentNavGraph(navController)
         cardManagementNavGraph(navController)
         vehiclemanagementNavGraph(navController)
