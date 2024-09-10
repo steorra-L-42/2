@@ -7,7 +7,7 @@ import androidx.navigation.navigation
 import com.kimnlee.vehiclemanagement.presentation.screen.VehicleManagementDetailScreen
 import com.kimnlee.vehiclemanagement.presentation.screen.VehiclemanagementScreen
 
-fun NavGraphBuilder.vehiclemanagementNavGraph(navController: NavHostController) {
+fun NavGraphBuilder.vehicleManagementNavGraph(navController: NavHostController) {
     navigation(startDestination = "vehiclemanagement_main", route = "vehiclemanagement") {
         composable("vehiclemanagement_main") {
             VehiclemanagementScreen(
