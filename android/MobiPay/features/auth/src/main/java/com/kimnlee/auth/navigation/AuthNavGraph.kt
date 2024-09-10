@@ -4,22 +4,22 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
-import com.kimnlee.auth.presentation.screen.AuthDetailScreen
-import com.kimnlee.auth.presentation.screen.AuthScreen
+import com.kimnlee.auth.presentation.screen.LoginScreen
+import com.kimnlee.common.auth.AuthManager
 
-fun NavGraphBuilder.authNavGraph(navController: NavHostController) {
+fun NavGraphBuilder.authNavGraph(
+    navController: NavHostController,
+    authManager: AuthManager
+) {
     navigation(startDestination = "auth_main", route = "auth") {
         composable("auth_main") {
-            AuthScreen(
-                onNavigateToDetail = { navController.navigate("auth_detail") },
-                onNavigateToHome = { navController.navigate("home") {
-                    popUpTo("home") { inclusive = true }
-                }}
-            )
-        }
-        composable("auth_detail") {
-            AuthDetailScreen(
-                onNavigateBack = { navController.navigateUp() }
+            LoginScreen(
+                authManager = authManager,
+                onNavigateToHome = {
+                    navController.navigate("home") {
+                        popUpTo("auth") { inclusive = true }
+                    }
+                }
             )
         }
     }
