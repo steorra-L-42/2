@@ -37,7 +37,7 @@ fun VehicleRegistrationScreen(
 
         Button(
             onClick = {
-                viewModel.addVehicle(licensePlate)
+                viewModel.addVehicle(licensePlate) // 실제로는 api 욫청을 보냄
                 onNavigateBack() // 차량 등록 후 뒤로 가기
             },
             modifier = Modifier.fillMaxWidth()

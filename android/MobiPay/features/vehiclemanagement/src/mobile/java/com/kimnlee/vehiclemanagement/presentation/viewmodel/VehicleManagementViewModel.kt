@@ -14,7 +14,7 @@ class VehicleManagementViewModel : ViewModel() {
     val vehicles: StateFlow<List<Vehicle>> = _vehicles
 
     init {
-        // 더미 데이터로 초기화
+        // 더미 데이터로 초기화(실제로는 데이터베이스에서 가져와야 합니다)
         viewModelScope.launch {
             _vehicles.value = listOf(
                 Vehicle(1, "123 가 4567", R.drawable.genesis_g90),
@@ -33,7 +33,7 @@ class VehicleManagementViewModel : ViewModel() {
                 imageResId = R.drawable.genesis_g90 // 기본 이미지 설정
             )
             updatedList.add(newVehicle)
-            _vehicles.value = updatedList // 새로운 리스트를 다시 할당
+            _vehicles.value = updatedList // 새로운 리스트를 다시 할당(실제로는 데이터베이스에 저장)
             println("New vehicle list size: ${_vehicles.value.size}")
         }
     }

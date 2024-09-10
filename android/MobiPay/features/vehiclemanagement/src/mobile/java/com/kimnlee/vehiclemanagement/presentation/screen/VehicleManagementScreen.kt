@@ -64,6 +64,7 @@ fun VehicleManagementScreen(
     }
 }
 
+// 실제로는 DB에 요청해서 리스트를 받아옴
 @Composable
 fun VehicleItem(vehicle: com.kimnlee.vehiclemanagement.presentation.viewmodel.Vehicle) {
     Card(
