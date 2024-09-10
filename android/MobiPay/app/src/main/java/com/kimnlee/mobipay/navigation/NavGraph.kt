@@ -12,7 +12,7 @@ import com.kimnlee.memberinvitation.navigation.memberInvitationNavGraph
 import com.kimnlee.common.auth.AuthManager
 import com.kimnlee.mobipay.presentation.screen.HomeScreen
 import com.kimnlee.payment.navigation.paymentNavGraph
-import com.kimnlee.vehiclemanagement.navigation.vehiclemanagementNavGraph
+import com.kimnlee.vehiclemanagement.navigation.vehicleManagementNavGraph
 
 @Composable
 fun AppNavGraph(
@@ -35,7 +35,7 @@ fun AppNavGraph(
         authNavGraph(navController, authManager)
         paymentNavGraph(navController)
         cardManagementNavGraph(navController)
-        vehiclemanagementNavGraph(navController)
+        vehicleManagementNavGraph(navController)
         memberInvitationNavGraph(navController)
         // 다른 기능 모듈의 내비게이션 그래프 추가
     }
