@@ -5,20 +5,27 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.kimnlee.vehiclemanagement.presentation.screen.VehicleManagementDetailScreen
-import com.kimnlee.vehiclemanagement.presentation.screen.VehiclemanagementScreen
+import com.kimnlee.vehiclemanagement.presentation.screen.VehicleManagementScreen
+import com.kimnlee.vehiclemanagement.presentation.screen.VehicleRegistrationScreen
 
 fun NavGraphBuilder.vehicleManagementNavGraph(navController: NavHostController) {
     navigation(startDestination = "vehiclemanagement_main", route = "vehiclemanagement") {
         composable("vehiclemanagement_main") {
-            VehiclemanagementScreen(
+            VehicleManagementScreen(
                 onNavigateToDetail = { navController.navigate("vehiclemanagement_detail") },
                 onNavigateToHome = { navController.navigate("home") {
                     popUpTo("home") { inclusive = true }
-                }}
+                }},
+                onNavigateToRegistration = { navController.navigate("vehiclemanagement_registration") }
             )
         }
         composable("vehiclemanagement_detail") {
             VehicleManagementDetailScreen(
+                onNavigateBack = { navController.navigateUp() }
+            )
+        }
+        composable("vehiclemanagement_registration") {
+            VehicleRegistrationScreen(
                 onNavigateBack = { navController.navigateUp() }
             )
         }
