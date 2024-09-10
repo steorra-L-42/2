@@ -47,6 +47,7 @@ android {
 dependencies {
 
     implementation(project(":api"))
+    implementation(project(":common"))
 
     implementation(libs.retrofit)
     implementation(libs.androidx.core.ktx)
@@ -55,6 +56,7 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.app)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.runtime)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
