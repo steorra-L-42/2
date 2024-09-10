@@ -16,7 +16,7 @@ import com.kimnlee.common.auth.AuthManager
 import kotlinx.coroutines.launch
 
 @Composable
-fun AuthMainScreen(
+fun LoginScreen(
     authManager: AuthManager,
     onNavigateToHome: () -> Unit
 ) {
