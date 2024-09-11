@@ -12,15 +12,21 @@ fun NavGraphBuilder.vehicleManagementNavGraph(navController: NavHostController) 
     navigation(startDestination = "vehiclemanagement_main", route = "vehiclemanagement") {
         composable("vehiclemanagement_main") {
             VehicleManagementScreen(
-                onNavigateToDetail = { navController.navigate("vehiclemanagement_detail") },
-                onNavigateToHome = { navController.navigate("home") {
-                    popUpTo("home") { inclusive = true }
-                }},
+                onNavigateToDetail = { vehicleId ->
+                    navController.navigate("vehiclemanagement_detail/$vehicleId")
+                },
+                onNavigateToHome = {
+                    navController.navigate("home") {
+                        popUpTo("home") { inclusive = true }
+                    }
+                },
                 onNavigateToRegistration = { navController.navigate("vehiclemanagement_registration") }
             )
         }
-        composable("vehiclemanagement_detail") {
+        composable("vehiclemanagement_detail/{vehicleId}") { backStackEntry ->
+            val vehicleId = backStackEntry.arguments?.getString("vehicleId")?.toIntOrNull() ?: -1
             VehicleManagementDetailScreen(
+                vehicleId = vehicleId,
                 onNavigateBack = { navController.navigateUp() }
             )
         }
