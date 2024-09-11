@@ -13,6 +13,7 @@ import com.kimnlee.memberinvitation.navigation.memberInvitationNavGraph
 import com.kimnlee.common.auth.AuthManager
 import com.kimnlee.common.components.BottomNavigation
 import com.kimnlee.mobipay.presentation.screen.HomeScreen
+import com.kimnlee.mobipay.presentation.screen.SettingScreen
 import com.kimnlee.payment.navigation.paymentNavGraph
 import com.kimnlee.vehiclemanagement.navigation.vehicleManagementNavGraph
 
@@ -31,7 +32,12 @@ fun AppNavGraph(
 
         composable("home") {
             ScreenWithBottomNav(navController) {
-                HomeScreen(navController = navController, authManager = authManager)
+                HomeScreen(authManager = authManager, navController = navController)
+            }
+        }
+        composable("settings") {
+            ScreenWithBottomNav(navController) {
+                SettingScreen(authManager = authManager, navController = navController)
             }
         }
 
