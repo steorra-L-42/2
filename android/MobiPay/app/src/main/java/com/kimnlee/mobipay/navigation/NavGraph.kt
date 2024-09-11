@@ -6,11 +6,14 @@ import androidx.compose.runtime.getValue
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navigation
 import com.kimnlee.auth.navigation.authNavGraph
 import com.kimnlee.cardmanagement.navigation.cardManagementNavGraph
 import com.kimnlee.memberinvitation.navigation.memberInvitationNavGraph
 import com.kimnlee.common.auth.AuthManager
+import com.kimnlee.common.components.BottomNavigation
 import com.kimnlee.mobipay.presentation.screen.HomeScreen
+import com.kimnlee.mobipay.presentation.screen.SettingScreen
 import com.kimnlee.payment.navigation.paymentNavGraph
 import com.kimnlee.vehiclemanagement.navigation.vehicleManagementNavGraph
 
@@ -19,24 +22,38 @@ fun AppNavGraph(
     navController: NavHostController,
     authManager: AuthManager
 ) {
-
     val isLoggedIn by authManager.isLoggedIn.collectAsState(initial = false)
 
     NavHost(
-        navController,
+        navController = navController,
         startDestination = if (isLoggedIn) "home" else "auth"
     ) {
-        composable("home") {
-            HomeScreen(
-                navController = navController,
-                authManager = authManager
-            )
-        }
         authNavGraph(navController, authManager)
+
+        composable("home") {
+            ScreenWithBottomNav(navController) {
+                HomeScreen(authManager = authManager, navController = navController)
+            }
+        }
+        composable("settings") {
+            ScreenWithBottomNav(navController) {
+                SettingScreen(authManager = authManager, navController = navController)
+            }
+        }
+
         paymentNavGraph(navController)
         cardManagementNavGraph(navController)
         vehicleManagementNavGraph(navController)
         memberInvitationNavGraph(navController)
-        // 다른 기능 모듈의 내비게이션 그래프 추가
+    }
+}
+
+@Composable
+fun ScreenWithBottomNav(
+    navController: NavHostController,
+    content: @Composable () -> Unit
+) {
+    BottomNavigation(navController = navController) {
+        content()
     }
 }

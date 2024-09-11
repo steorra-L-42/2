@@ -47,6 +47,7 @@ android {
 dependencies {
 
     implementation(project(":api"))
+    implementation(project(":common"))
 
     implementation(libs.retrofit)
     implementation(libs.androidx.core.ktx)
