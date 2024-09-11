@@ -46,6 +46,8 @@ android {
 
 dependencies {
 
+    implementation(project(":common"))
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.ui)
     implementation(libs.androidx.material3)
