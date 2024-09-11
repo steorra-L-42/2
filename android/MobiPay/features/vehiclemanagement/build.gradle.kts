@@ -56,4 +56,9 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+
+    implementation("androidx.activity:activity-compose:1.7.0")
+    implementation("androidx.core:core-ktx:1.10.1")
+    implementation("com.google.dagger:dagger:2.52")
+    implementation("com.google.dagger:hilt-android:2.52")
 }
