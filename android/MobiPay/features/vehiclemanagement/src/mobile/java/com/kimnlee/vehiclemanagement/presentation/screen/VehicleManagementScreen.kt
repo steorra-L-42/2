@@ -12,13 +12,15 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kimnlee.vehiclemanagement.presentation.viewmodel.VehicleManagementViewModel
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.Alignment
+import com.kimnlee.vehiclemanagement.presentation.viewmodel.Vehicle
 
 
 @Composable
 fun VehicleManagementScreen(
-    onNavigateToDetail: () -> Unit,
+    onNavigateToDetail: (Int) -> Unit,
     onNavigateToHome: () -> Unit,
     onNavigateToRegistration: () -> Unit,
     viewModel: VehicleManagementViewModel = viewModel()
@@ -40,7 +42,7 @@ fun VehicleManagementScreen(
         // 누르면 각 차량의 상세 페이지로 이동하도록 추후 추가
         LazyColumn {
             items(vehicles) { vehicle ->
-                VehicleItem(vehicle)
+                VehicleItem(vehicle, onClick = { onNavigateToDetail(vehicle.id) })
             }
         }
 
@@ -52,9 +54,9 @@ fun VehicleManagementScreen(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        Button(onClick = onNavigateToDetail) {
-            Text("상세 화면으로 이동")
-        }
+//        Button(onClick = onNavigateToDetail) {
+//            Text("상세 화면으로 이동")
+//        }
 
         Spacer(modifier = Modifier.height(8.dp))
 
@@ -66,11 +68,12 @@ fun VehicleManagementScreen(
 
 // 실제로는 DB에 요청해서 리스트를 받아옴
 @Composable
-fun VehicleItem(vehicle: com.kimnlee.vehiclemanagement.presentation.viewmodel.Vehicle) {
+fun VehicleItem(vehicle: Vehicle, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp)
+            .clickable(onClick = onClick),
     ) {
         Column(
             modifier = Modifier

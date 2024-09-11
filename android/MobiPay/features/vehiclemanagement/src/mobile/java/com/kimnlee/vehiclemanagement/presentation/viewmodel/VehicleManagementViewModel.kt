@@ -37,4 +37,8 @@ class VehicleManagementViewModel : ViewModel() {
             println("New vehicle list size: ${_vehicles.value.size}")
         }
     }
+
+    fun getVehicleById(id: Int): Vehicle? {
+        return _vehicles.value.find { it.id == id }
+    }
 }
