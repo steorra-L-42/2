@@ -14,6 +14,17 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 
+import android.util.Log
+import android.view.ViewGroup
+import android.widget.Toast
+import androidx.camera.core.*
+import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.compose.ui.viewinterop.AndroidView
+import java.util.concurrent.Executors
+import androidx.camera.core.Preview
+import androidx.camera.core.CameraSelector
+import androidx.lifecycle.compose.LocalLifecycleOwner
+
 
 @Composable
 fun VehicleRegistrationScreen(
@@ -22,15 +33,17 @@ fun VehicleRegistrationScreen(
 ) {
     var licensePlate by remember { mutableStateOf("") }
     val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val cameraExecutor = remember { Executors.newSingleThreadExecutor() }
+
 
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
         onResult = { isGranted ->
             if (isGranted) {
-                // 권한 승인 되면 카메라 호출
+                Toast.makeText(context, "Camera permission granted", Toast.LENGTH_SHORT).show()
             } else {
-                // 권한 거부된 경우 처리
-
+                Toast.makeText(context, "Camera permission denied", Toast.LENGTH_SHORT).show()
             }
         }
     )
@@ -63,6 +76,46 @@ fun VehicleRegistrationScreen(
         ) {
             Text("카메라로 차량 번호 인식")
         }
+
+        AndroidView(
+            factory = { ctx ->
+                val previewView = androidx.camera.view.PreviewView(ctx).apply {
+                    layoutParams = ViewGroup.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT
+                    )
+                }
+
+                val cameraProviderFuture = ProcessCameraProvider.getInstance(ctx)
+                cameraProviderFuture.addListener({
+                    val cameraProvider = cameraProviderFuture.get()
+                    val preview = Preview.Builder().build()
+
+                    val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
+
+                    preview.setSurfaceProvider(previewView.surfaceProvider)
+
+                    try {
+                        cameraProvider.unbindAll()
+                        cameraProvider.bindToLifecycle(
+                            lifecycleOwner,
+                            cameraSelector,
+                            preview
+                        )
+                    } catch (e: Exception) {
+                        Log.e("CameraPreview", "Use case binding failed", e)
+                    }
+                }, ContextCompat.getMainExecutor(ctx))
+
+                previewView
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(300.dp)
+                .aspectRatio(16 / 9f)
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
 
         OutlinedTextField(
             value = licensePlate,
