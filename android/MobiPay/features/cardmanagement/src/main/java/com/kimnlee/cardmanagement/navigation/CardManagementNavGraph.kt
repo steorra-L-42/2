@@ -5,6 +5,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.kimnlee.cardmanagement.presentation.screen.CardManagementDetailScreen
+import com.kimnlee.cardmanagement.presentation.screen.CardManagementDirectRegistrationScreen
 import com.kimnlee.cardmanagement.presentation.screen.CardManagementRegistrationScreen
 import com.kimnlee.cardmanagement.presentation.screen.CardManagementScreen
 
@@ -21,6 +22,12 @@ fun NavGraphBuilder.cardManagementNavGraph(navController: NavHostController) {
         }
         composable("card_registration") {
             CardManagementRegistrationScreen(
+                onNavigateBack = { navController.navigateUp() },
+                onNavigateToDirectRegistration = { navController.navigate("card_direct_registration") },
+            )
+        }
+        composable("card_direct_registration") {
+            CardManagementDirectRegistrationScreen(
                 onNavigateBack = { navController.navigateUp() }
             )
         }
