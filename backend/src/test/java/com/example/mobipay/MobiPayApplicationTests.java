@@ -1,10 +1,10 @@
-package com.example.carpay;
+package com.example.mobipay;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class CarPayApplicationTests {
+class MobiPayApplicationTests {
 
     @Test
     void contextLoads() {
