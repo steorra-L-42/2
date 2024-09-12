@@ -10,7 +10,7 @@ import androidx.navigation.NavController
 @Composable
 fun PaymentScreen(
     onNavigateToDetail: () -> Unit,
-    onNavigateToHome: () -> Unit
+    onNavigateBack: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -26,8 +26,8 @@ fun PaymentScreen(
             Text("상세 화면으로 이동")
         }
         Spacer(modifier = Modifier.height(8.dp))
-        Button(onClick = onNavigateToHome) {
-            Text("홈으로 돌아가기")
+        Button(onClick = onNavigateBack) {
+            Text("뒤로 가기")
         }
     }
 }

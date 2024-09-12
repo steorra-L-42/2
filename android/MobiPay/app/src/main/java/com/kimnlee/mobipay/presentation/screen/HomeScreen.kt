@@ -41,18 +41,6 @@ fun HomeScreen(
         ) {
             Text("로그아웃")
         }
-        Spacer(modifier = Modifier.height(16.dp))
-        Button(
-            onClick = { navController.navigate("payment") }
-        ) {
-            Text("결제")
-        }
-        Spacer(modifier = Modifier.height(8.dp))
-        Button(
-            onClick = { navController.navigate("cardmanagement") }
-        ) {
-            Text("카드 관리")
-        }
         Spacer(modifier = Modifier.height(8.dp))
         Button(
             onClick = { navController.navigate("vehiclemanagement") }
