@@ -1,13 +1,13 @@
-package com.example.carpay;
+package com.example.mobipay;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class CarPayApplication {
+public class MobiPayApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(CarPayApplication.class, args);
+        SpringApplication.run(MobiPayApplication.class, args);
     }
 
 }
