@@ -77,6 +77,8 @@ fun VehicleRegistrationScreen(
             Text("카메라로 차량 번호 인식")
         }
 
+        Spacer(modifier = Modifier.height(120.dp))
+
         AndroidView(
             factory = { ctx ->
                 val previewView = androidx.camera.view.PreviewView(ctx).apply {
@@ -115,7 +117,7 @@ fun VehicleRegistrationScreen(
                 .aspectRatio(16 / 9f)
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(120.dp))
 
         OutlinedTextField(
             value = licensePlate,

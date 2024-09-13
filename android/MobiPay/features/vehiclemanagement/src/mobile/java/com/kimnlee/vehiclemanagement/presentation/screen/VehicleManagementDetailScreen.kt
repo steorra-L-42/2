@@ -11,7 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.res.painterResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 
-//여기가 메인입니다(파일 이름 수정해야함, 안 바꾸고 합의해도 됨 아니면 여기 코드를 메인모듈로 옮기거나)
+//여기가 메인입니다(파일 이름 수정해야함, 안 바꾸고 합의해도 됨)
 
 @Composable
 fun VehicleManagementDetailScreen(
@@ -28,11 +28,16 @@ fun VehicleManagementDetailScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         vehicle?.let {
-            Text(
-                text = "MobiPay",
-                style = MaterialTheme.typography.headlineMedium,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Button(onClick = onNavigateBack) {
+                Text("차량 선택")
+            }
+//            Text(
+//                text = "MobiPay",
+//                style = MaterialTheme.typography.headlineMedium,
+//                modifier = Modifier.padding(bottom = 8.dp)
+//            )
             Image(
                 painter = painterResource(id = it.imageResId),
                 contentDescription = "Vehicle Image",
@@ -41,13 +46,13 @@ fun VehicleManagementDetailScreen(
                     .padding(bottom = 16.dp)
             )
             Text(
-                text = "차량 번호: ${it.name}",
+                text = it.name,
                 style = MaterialTheme.typography.headlineSmall
             )
-            Text( // 테스트용 실제 통신 구현시 확인 후 삭제 예정
-                text = "차량 ID: ${it.id}",
-                style = MaterialTheme.typography.bodyLarge
-            )
+//            Text( // 테스트용 실제 통신 구현시 확인 후 삭제 예정
+//                text = "차량 ID: ${it.id}",
+//                style = MaterialTheme.typography.bodyLarge
+//            )
         } ?: Text("차량을 찾을 수 없습니다.")
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -72,8 +77,8 @@ fun VehicleManagementDetailScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Button(onClick = onNavigateBack) {
-            Text("뒤로 가기")
-        }
+//        Button(onClick = onNavigateBack) {
+//            Text("뒤로 가기")
+//        }
     }
 }
