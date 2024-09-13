@@ -29,12 +29,17 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import android.content.Context
 import android.net.Uri
 import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
+
+import com.google.mlkit.vision.common.InputImage
+import com.google.mlkit.vision.text.TextRecognition
+import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 
 @Composable
 fun VehicleRegistrationScreen(
@@ -80,6 +85,7 @@ fun VehicleRegistrationScreen(
                 Button(
                     onClick = {
                         cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+                        hasCameraPermission = true
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -158,8 +164,8 @@ fun VehicleRegistrationScreen(
                             takePhoto(
                                 imageCapture,
                                 context,
-                                onPhotoTaken = { uri ->
-                                    Toast.makeText(context, "Photo captured: $uri", Toast.LENGTH_SHORT).show()
+                                onPhotoTaken = { recognizedText  ->
+                                    licensePlate = recognizedText // OCR로 추출한 텍스트를 차량 번호로 설정
                                     // 사진 촬영 후 권한 해제
                                     hasCameraPermission = false
                                 }
@@ -168,6 +174,8 @@ fun VehicleRegistrationScreen(
                         modifier = Modifier
                             .align(Alignment.BottomCenter)
                             .padding(bottom = 16.dp)
+                            .size(80.dp)
+                            .background(Color.LightGray, shape = CircleShape)
                     ) {
                         Icon(
                             painter = painterResource(id = android.R.drawable.ic_menu_camera),
@@ -236,7 +244,7 @@ fun VehicleRegistrationScreen(
 private fun takePhoto(
     imageCapture: ImageCapture?,
     context: Context,
-    onPhotoTaken: (Uri) -> Unit
+    onPhotoTaken: (String) -> Unit
 ) {
     imageCapture?.let {
         val photoFile = File(
@@ -252,7 +260,11 @@ private fun takePhoto(
             object : ImageCapture.OnImageSavedCallback {
                 override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
                     val savedUri = Uri.fromFile(photoFile)
-                    onPhotoTaken(savedUri)
+                    // 이미지에서 텍스트 추출
+                    // 추후 팀에서 학습시킨 AI로 대체
+                    extractTextFromImage(context, savedUri) { recognizedText ->
+                        onPhotoTaken(recognizedText)
+                    }
                 }
 
                 override fun onError(exception: ImageCaptureException) {
@@ -260,5 +272,24 @@ private fun takePhoto(
                 }
             }
         )
+    }
+}
+
+private fun extractTextFromImage(context: Context, imageUri: Uri, onTextExtracted: (String) -> Unit) {
+    val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
+
+    try {
+        val image = InputImage.fromFilePath(context, imageUri)
+        recognizer.process(image)
+            .addOnSuccessListener { visionText ->
+                // 텍스트 인식 성공 시
+                val recognizedText = visionText.text
+                onTextExtracted(recognizedText)
+            }
+            .addOnFailureListener { e ->
+                Log.e("TextRecognition", "Text recognition failed: ${e.message}")
+            }
+    } catch (e: Exception) {
+        Log.e("TextRecognition", "Failed to load image: ${e.message}")
     }
 }
