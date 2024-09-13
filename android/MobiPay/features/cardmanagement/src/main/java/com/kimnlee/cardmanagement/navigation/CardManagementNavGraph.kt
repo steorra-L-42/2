@@ -16,12 +16,12 @@ fun NavGraphBuilder.cardManagementNavGraph(navController: NavHostController) {
             BottomNavigation(navController) {
                 CardManagementScreen(
                     onNavigateToDetail = { navController.navigate("cardmanagement_detail") },
-                    onNavigateToRegistration = { navController.navigate("card_registration") },
-                    onNavigateToHome = {
-                        navController.navigate("home") {
-                            popUpTo("home") { inclusive = true }
-                        }
-                    }
+                    onNavigateToRegistration = { navController.navigate("cardmanagement_registration") },
+//                    onNavigateToHome = {
+//                        navController.navigate("home") {
+//                            popUpTo("home") { inclusive = true }
+//                        }
+//                    }
                 )
             }
         }
@@ -31,13 +31,17 @@ fun NavGraphBuilder.cardManagementNavGraph(navController: NavHostController) {
                     onNavigateBack = { navController.navigateUp() }
                 )
             }
-            composable("card_registration") {
+        }
+        composable("cardmanagement_registration") {
+            BottomNavigation(navController) {
                 CardManagementRegistrationScreen(
                     onNavigateBack = { navController.navigateUp() },
-                    onNavigateToDirectRegistration = { navController.navigate("card_direct_registration") },
+                    onNavigateToDirectRegistration = { navController.navigate("cardmanagement_direct_registration") },
                 )
             }
-            composable("card_direct_registration") {
+        }
+        composable("cardmanagement_direct_registration") {
+            BottomNavigation(navController) {
                 CardManagementDirectRegistrationScreen(
                     onNavigateBack = { navController.navigateUp() }
                 )

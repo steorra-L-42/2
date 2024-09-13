@@ -63,6 +63,5 @@ dependencies {
     // camera
     implementation(libs.androidx.ui.tooling.preview.android)
     implementation(libs.androidx.camera.camera2)
-    implementation(libs.androidx.camera.lifecycle.v130)
     implementation(libs.androidx.camera.view)
 }
