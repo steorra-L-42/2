@@ -48,6 +48,8 @@ fun VehicleRegistrationScreen(
 
     var imageCapture: ImageCapture? by remember { mutableStateOf(null) }
     var hasCameraPermission by remember { mutableStateOf(false) }
+    var vehicleNumberCheck by remember { mutableStateOf(false)}
+    var showDialog by remember { mutableStateOf(false) }
 
     val cameraPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
@@ -72,106 +74,152 @@ fun VehicleRegistrationScreen(
         )
         Spacer(modifier = Modifier.height(16.dp))
 
-        if (!hasCameraPermission) {
+
+        if (!vehicleNumberCheck) {
+            if (!hasCameraPermission) {
+                Button(
+                    onClick = {
+                        cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("카메라로 차량 번호 인식하기")
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                OutlinedTextField(
+                    value = licensePlate,
+                    onValueChange = { licensePlate = it },
+                    label = { Text("차량 번호") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Button(
+                    onClick = {
+                        viewModel.addVehicle(licensePlate)
+                        showDialog = true
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("다음")
+                }
+            } else { // 실제 촬영 시 OCR로 차량 번호 인식 후 자동 입력
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                        .background(Color.Black)
+                ) {
+                    AndroidView(
+                        factory = { ctx ->
+                            val previewView = PreviewView(ctx).apply {
+                                layoutParams = ViewGroup.LayoutParams(
+                                    ViewGroup.LayoutParams.MATCH_PARENT,
+                                    ViewGroup.LayoutParams.MATCH_PARENT
+                                )
+                            }
+
+                            val cameraProviderFuture = ProcessCameraProvider.getInstance(ctx)
+                            cameraProviderFuture.addListener({
+                                val cameraProvider = cameraProviderFuture.get()
+                                val preview = Preview.Builder().build()
+
+                                val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
+
+                                imageCapture = ImageCapture.Builder()
+                                    .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
+                                    .build()
+
+                                preview.setSurfaceProvider(previewView.surfaceProvider)
+
+                                try {
+                                    cameraProvider.unbindAll()
+                                    cameraProvider.bindToLifecycle(
+                                        lifecycleOwner,
+                                        cameraSelector,
+                                        preview,
+                                        imageCapture
+                                    )
+                                } catch (e: Exception) {
+                                    Log.e("CameraPreview", "Use case binding failed", e)
+                                }
+                            }, ContextCompat.getMainExecutor(ctx))
+
+                            previewView
+                        },
+                        modifier = Modifier.fillMaxSize()
+                    )
+
+                    IconButton(
+                        onClick = {
+                            takePhoto(
+                                imageCapture,
+                                context,
+                                onPhotoTaken = { uri ->
+                                    Toast.makeText(context, "Photo captured: $uri", Toast.LENGTH_SHORT).show()
+                                    // 사진 촬영 후 권한 해제
+                                    hasCameraPermission = false
+                                }
+                            )
+                        },
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .padding(bottom = 16.dp)
+                    ) {
+                        Icon(
+                            painter = painterResource(id = android.R.drawable.ic_menu_camera),
+                            contentDescription = "Take Photo",
+                            tint = Color.White
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            if (showDialog) {
+                AlertDialog(
+                    onDismissRequest = { showDialog = false },
+                    title = { Text(licensePlate) }, // 입력된 차량 번호를 받아오기
+                    text = { Text("이 차량 번호가 맞나요?.") },
+                    confirmButton = {
+                        Button(
+                            onClick = {
+                                showDialog = false
+                                vehicleNumberCheck = true
+                            }
+                        ) {
+                            Text("확인")
+                        }
+                        Button(
+                            onClick = {
+                                showDialog = false
+                            }
+                        ) {
+                            Text("취소")
+                        }
+                    }
+                )
+            }
+        } else {
+            Spacer(modifier = Modifier.height(150.dp))
+
+            Text("차량 이미지 추가를 위한 공간") // 자동차 이미지 등록을 위한 선택지 or 검색 제공 기능 추가해야 함
+
+            Spacer(modifier = Modifier.height(150.dp))
+
             Button(
                 onClick = {
-                    cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+                    onNavigateBack()
+                    vehicleNumberCheck = false
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("카메라로 차량 번호 인식하기")
+                Text("등록")
             }
-        } else { // 실제 촬영 시 OCR로 차량 번호 인식 후 자동 입력
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-                    .background(Color.Black)
-            ) {
-                AndroidView(
-                    factory = { ctx ->
-                        val previewView = PreviewView(ctx).apply {
-                            layoutParams = ViewGroup.LayoutParams(
-                                ViewGroup.LayoutParams.MATCH_PARENT,
-                                ViewGroup.LayoutParams.MATCH_PARENT
-                            )
-                        }
-
-                        val cameraProviderFuture = ProcessCameraProvider.getInstance(ctx)
-                        cameraProviderFuture.addListener({
-                            val cameraProvider = cameraProviderFuture.get()
-                            val preview = Preview.Builder().build()
-
-                            val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
-
-                            imageCapture = ImageCapture.Builder()
-                                .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
-                                .build()
-
-                            preview.setSurfaceProvider(previewView.surfaceProvider)
-
-                            try {
-                                cameraProvider.unbindAll()
-                                cameraProvider.bindToLifecycle(
-                                    lifecycleOwner,
-                                    cameraSelector,
-                                    preview,
-                                    imageCapture
-                                )
-                            } catch (e: Exception) {
-                                Log.e("CameraPreview", "Use case binding failed", e)
-                            }
-                        }, ContextCompat.getMainExecutor(ctx))
-
-                        previewView
-                    },
-                    modifier = Modifier.fillMaxSize()
-                )
-
-                IconButton(
-                    onClick = {
-                        takePhoto(
-                            imageCapture,
-                            context,
-                            onPhotoTaken = { uri ->
-                                Toast.makeText(context, "Photo captured: $uri", Toast.LENGTH_SHORT).show()
-                                // 사진 촬영 후 권한 해제
-                                hasCameraPermission = false
-                            }
-                        )
-                    },
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(bottom = 16.dp)
-                ) {
-                    Icon(
-                        painter = painterResource(id = android.R.drawable.ic_menu_camera),
-                        contentDescription = "Take Photo",
-                        tint = Color.White
-                    )
-                }
-            }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        OutlinedTextField(
-            value = licensePlate,
-            onValueChange = { licensePlate = it },
-            label = { Text("차량 번호") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Button(
-            onClick = {
-                viewModel.addVehicle(licensePlate)
-                onNavigateBack()
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("등록")
         }
 
         Spacer(modifier = Modifier.height(8.dp))

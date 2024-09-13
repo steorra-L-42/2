@@ -1,5 +1,6 @@
 package com.kimnlee.vehiclemanagement.presentation.screen
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -30,7 +31,16 @@ fun VehicleManagementDetailScreen(
         vehicle?.let {
             Spacer(modifier = Modifier.height(8.dp))
 
-            Button(onClick = onNavigateBack) {
+            OutlinedButton(
+                onClick = onNavigateBack,
+                modifier = Modifier.width(200.dp).height(50.dp),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    containerColor = MaterialTheme.colorScheme.background, // 흰색 배경
+                    contentColor = MaterialTheme.colorScheme.onBackground // 검은색 텍스트
+                ),
+                border = BorderStroke(2.dp, MaterialTheme.colorScheme.onBackground),
+                shape = MaterialTheme.shapes.medium
+            ) {
                 Text("차량 선택")
             }
 //            Text(
@@ -55,7 +65,7 @@ fun VehicleManagementDetailScreen(
 //            )
         } ?: Text("차량을 찾을 수 없습니다.")
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         Row(
             modifier = Modifier
