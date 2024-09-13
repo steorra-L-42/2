@@ -27,9 +27,9 @@ public class Parking {
     @Column(name = "entry", nullable = false)
     private LocalDateTime entry;
 
-    @Column(name = "exit")
+    @Column(name = "`exit`")
     private LocalDateTime exit;
-    
+
     @Column(name = "paid", nullable = false)
     private Boolean paid = false;
 }
