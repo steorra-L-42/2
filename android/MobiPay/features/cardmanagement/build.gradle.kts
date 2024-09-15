@@ -60,8 +60,10 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-    // camera
+    // plus JB - 24.09.10~
     implementation(libs.androidx.ui.tooling.preview.android)
+    implementation(libs.coil.compose)
+    // camera
     implementation(libs.androidx.camera.camera2)
     implementation(libs.androidx.camera.view)
 }
