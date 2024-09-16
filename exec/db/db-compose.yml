@@ -1,0 +1,57 @@
+services:
+  mobi-db:
+    image: mysql:8.4.1
+    volumes:
+      - mobi-db-data:/var/lib/mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MOBI_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MOBI_DATABASE}
+      MYSQL_USER: ${MOBI_USER}
+      MYSQL_PASSWORD: ${MOBI_PASSWORD}
+      TZ: Asia/Soeul
+      LANG: C.UTF-8
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 20s
+      timeout: 10s
+      retries: 3
+    expose:
+      - 3306
+    networks:
+      - mobi-network
+    container_name: mobi-db
+
+  mer-db:
+    image: mysql:8.4.1
+    volumes:
+      - mer-db-data:/var/lib/mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MER_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MER_DATABASE}
+      MYSQL_USER: ${MER_USER}
+      MYSQL_PASSWORD: ${MER_PASSWORD}
+      TZ: Asia/Soeul
+      LANG: C.UTF-8
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 20s
+      timeout: 10s
+      retries: 3
+    expose:
+      - 3306
+    networks:
+      - mer-network
+    container_name: mer-db
+
+volumes:
+  mobi-db-data:
+  mer-db-data:
+
+networks:
+  mobi-network:
+    driver: bridge
+  mer-network:
+    driver: bridge
+      

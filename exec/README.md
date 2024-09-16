@@ -12,26 +12,26 @@ docker-compose -f ./cert/cert-compose.yml up
 ---
 # 2. DB 설치
 
-`exec`에서 실행.
+`exec/db`에서 실행.
 ```
-docker-compose -f ./db/db-compose.yml up -d
+docker-compose -f ./db-compose.yml up -d
 ```
 
 ---
 # 3. Jenkins - CI/CD
 
-`exec`에서 실행.
+`exec/jenkins`에서 실행.
 ```
-docker-compose -f ./jenkins/jenkins-compose.yml up -d
+docker-compose -f ./jenkins-compose.yml up -d
 ```
 실행 후 Jenkins 설정할 것.
 
 ---
 # 4. 수동으로 배포
 
-`exec`에서 실행.
+`exec/app`에서 실행.
 ```
-docker-compose -f ./app/app-compose.yml up -d
+docker-compose -f ./app-compose.yml up -d
 ```
 
 ---
