@@ -2,13 +2,11 @@
 
 `exec`에서 실행.
 ```
-docker-compose -f ./cert/cert-compose.yml up -d
+docker-compose -f ./cert/cert-compose.yml up
 ```
+
 `cert/data/certbot/conf`에 인증서가 생성되었다면 성공한 것.
 
-```
-docker-compose -f ./cert/cert-compose.yml down
-```
 인증서 생성 후 컨테이너를 내린다.
 
 ---
