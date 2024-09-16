@@ -14,7 +14,7 @@ services:
 
   certbot:
     image: certbot/certbot
-    command: certonly --webroot --webroot-path=/var/www/certbot -d mobipay.kr -d merchant.mobipay.kr
+    command: certonly --webroot --webroot-path=/var/www/certbot -d mobipay.kr -d merchant.mobipay.kr --email fkaus4598@naver.com --agree-tos --non-interactive
     volumes:
       - ./data/certbot/conf:/etc/letsencrypt
       - ./data/certbot/www:/var/www/certbot
