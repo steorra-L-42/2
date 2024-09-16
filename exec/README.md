@@ -4,7 +4,11 @@
 ```
 docker-compose -f ./cert/cert-compose.yml up -d
 ```
+정상적으로 컨테이너 2개 생성되었는지 확인한다.
 
+```
+docker-compose run --rm certbot certonly --webroot --webroot-path=/var/www/certbot -d mobipay.kr -d merchant.mobipay.kr
+```
 `cert/data/certbot/conf`에 인증서가 생성되었다면 성공한 것.
 
 ```
