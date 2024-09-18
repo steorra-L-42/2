@@ -19,6 +19,6 @@ class ExampleInstrumentedTest {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertEquals("com.mobi.freedrive.test", appContext.packageName)
+        assertEquals("com.kimnlee.freedrive.test", appContext.packageName)
     }
 }

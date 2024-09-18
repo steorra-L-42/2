@@ -1,4 +1,4 @@
-package com.mobi.testnavi.navi.car
+package com.kimnlee.freedrive.presentation.screen
 
 import androidx.car.app.CarContext
 import androidx.car.app.Screen

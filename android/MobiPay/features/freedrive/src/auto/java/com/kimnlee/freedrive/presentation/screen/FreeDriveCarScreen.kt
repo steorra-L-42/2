@@ -1,4 +1,4 @@
-package com.mobi.testnavi.navi.car
+package com.kimnlee.freedrive.presentation.screen
 
 import androidx.annotation.UiThread
 import androidx.car.app.Screen
@@ -18,10 +18,6 @@ import com.mapbox.androidauto.navigation.speedlimit.CarSpeedLimitRenderer
 import com.mapbox.androidauto.preview.CarRouteLineRenderer
 import com.mapbox.androidauto.screenmanager.MapboxScreen
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import androidx.car.app.model.Action
-import androidx.car.app.model.CarIcon
-import androidx.core.graphics.drawable.IconCompat
-import com.mobi.testnavi.R
 
 /**
  * LSC

@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.mobi.freedrive"
+    namespace = "com.kimnlee.freedrive"
     compileSdk = 34
 
     defaultConfig {
@@ -24,20 +24,45 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "17"
+    }
+    buildFeatures {
+        compose = true
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.9"
+    }
+    sourceSets {
+        getByName("main") {
+            java.srcDirs("src/main/java", "src/auto/java")
+            res.srcDirs("src/main/res", "src/auto/res")
+        }
     }
 }
 
 dependencies {
 
+    implementation(project(":common"))
+
     implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.ui)
+    implementation(libs.androidx.material3)
     implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.app)
     implementation(libs.material)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+
+    implementation("androidx.startup:startup-runtime:1.1.1")
+    implementation("androidx.localbroadcastmanager:localbroadcastmanager:1.1.0")
+
+//    implementation("androidx.car.app:app:1.2.0")
+    api("com.mapbox.navigation:ui-androidauto:0.22.0")
+    api("com.mapbox.navigation:ui-dropin:2.20.2")
 }

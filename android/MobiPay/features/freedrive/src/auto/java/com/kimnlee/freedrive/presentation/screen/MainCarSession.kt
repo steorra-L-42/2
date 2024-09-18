@@ -1,10 +1,12 @@
-package com.mobi.testnavi.navi.car
+package com.kimnlee.freedrive.presentation.screen
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Canvas
@@ -26,75 +28,50 @@ import com.mapbox.androidauto.map.compass.CarCompassRenderer
 import com.mapbox.androidauto.map.logo.CarLogoRenderer
 import com.mapbox.androidauto.screenmanager.MapboxScreen
 import com.mapbox.androidauto.screenmanager.MapboxScreenManager
-import com.mapbox.bindgen.Value
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.Point
-import com.mapbox.maps.MAPBOX_ACCESS_TOKEN_RESOURCE_NAME
-//import com.mapbox.androidauto.screenmanager.prepareScreens
 import com.mapbox.maps.MapboxExperimental
-import com.mapbox.maps.ResourceOptions
-import com.mapbox.maps.Style
 import com.mapbox.maps.extension.androidauto.mapboxMapInstaller
-import com.mapbox.maps.extension.style.StyleContract
-import com.mapbox.maps.extension.style.StyleExtensionImpl
 import com.mapbox.maps.extension.style.image.ImageExtensionImpl
-import com.mapbox.maps.extension.style.image.image
 import com.mapbox.maps.extension.style.layers.generated.SymbolLayer
 import com.mapbox.maps.extension.style.layers.properties.generated.IconAnchor
 import com.mapbox.maps.extension.style.layers.properties.generated.TextAnchor
-import com.mapbox.maps.extension.style.light.generated.light
 import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
-import com.mapbox.maps.extension.style.sources.generated.ImageSource
-import com.mapbox.maps.extension.style.sources.generated.geoJsonSource
-import com.mapbox.maps.extension.style.sources.generated.imageSource
 import com.mapbox.maps.extension.style.style
 import com.mapbox.maps.logE
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.lifecycle.requireMapboxNavigation
 import com.mapbox.navigation.core.trip.session.TripSessionState
-import com.mobi.testnavi.R
-import com.mobi.testnavi.navi.CarAppSyncComponent
-import com.mobi.testnavi.navi.ReplayRouteTripSession
+import com.kimnlee.freedrive.R
 import kotlinx.coroutines.launch
 import androidx.car.app.AppManager
 import androidx.car.app.model.Action
 import androidx.car.app.model.Alert
 import androidx.car.app.model.CarIcon
 import androidx.car.app.model.CarText
+import androidx.core.app.ActivityCompat
 import androidx.core.graphics.drawable.IconCompat
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 
 private const val TAG = "MainCarSession"
-//private val customStyleUrl = "mapbox://styles/harveyl/cm13cb05003n201pqdyqn4was"
 private val customStyleUrl = "mapbox://styles/harveyl/cm163kfgg019r01q1a4nc9hm3"
 
 
 @OptIn(MapboxExperimental::class)
 class MainCarSession : Session() {
 
-    // The MapboxCarMapLoader will automatically load the map with night and day styles.
-//    private val mapboxCarMapLoader = MapboxCarMapLoader()
     private val mapboxCarMapLoader = MapboxCarMapLoader()
-//        .setLightStyleOverride(style(customStyleUrl){})
-//        .setDarkStyleOverride(style(customStyleUrl){})
 
-
-    // Use the mapboxMapInstaller for installing the Session lifecycle to a MapboxCarMap.
-    // Customizations that you want to be part of any Screen with a Mapbox Map can be done here.
+    // installer 사용해서 MapboxCarMap에 lifecycle 등록
+    // MapboxMap 화면은 여기서 커스텀 하면 되긴 한데..
     private val mapboxCarMap = mapboxMapInstaller()
         .onCreated(mapboxCarMapLoader)
         .onResumed(CarLogoRenderer(), CarCompassRenderer())
         .install()
 
-    // Prepare an AndroidAuto experience with MapboxCarContext.
     private val mapboxCarContext = MapboxCarContext(lifecycle, mapboxCarMap)
         .prepareScreens()
 
-//    private val mapboxCarContext = MapboxCarContext(lifecycle, mapboxCarMap)
-//    private val mapboxCarContext = MapboxCarContext(lifecycle, mapboxCarMap).mapboxScreenManager.createScreen("1")
-
-    // Many operations and customizations are available through MapboxNavigation.
+    // 커스텀 가능
     private val mapboxNavigation by requireMapboxNavigation()
 
     private val alertReceiver = object : BroadcastReceiver() {
@@ -124,7 +101,7 @@ class MainCarSession : Session() {
                     Action.Builder()
                         .setTitle("결제 승인")
                         .setOnClickListener {
-                            // Handle approve action
+                            // 결제승인 처리
                         }
                         .build()
                 )
@@ -132,7 +109,7 @@ class MainCarSession : Session() {
 //                    Action.Builder()
 //                        .setTitle("거절")
 //                        .setOnClickListener {
-//                            // Handle reject action
+//                            // 결제 거절 처리 근데 그냥 timeout으로 두자
 //                        }
 //                        .build()
 //                )
@@ -141,8 +118,8 @@ class MainCarSession : Session() {
     }
 
     private fun registerAlertReceiver() {
-        // Use getCarContext() instead of carContext to ensure you are using the proper context
-        val intentFilter = IntentFilter("com.mobi.testnavi.SHOW_ALERT")
+        // carContext 헷갈리면 getCarContext() 사용
+        val intentFilter = IntentFilter("com.kimnlee.mobipay.SHOW_ALERT")
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             carContext.registerReceiver(alertReceiver, intentFilter, Context.RECEIVER_EXPORTED)
         }else{
@@ -155,11 +132,8 @@ class MainCarSession : Session() {
     }
 
     init {
-        // Decide how you want the car and app to interact. In this example, the car and app
-        // are kept in sync where they essentially mirror each other.
 
-//        mapboxCarMap.carMapSurface?.mapSurface?.getMapboxMap()?.loadStyle(style(customStyleUrl){})
-        // Register the BroadcastReceiver during session lifecycle initialization
+        // 결제 알림 수행을 위한 Receiver 등록
         lifecycle.addObserver(object : DefaultLifecycleObserver {
             override fun onCreate(owner: LifecycleOwner) {
                 super.onCreate(owner)
@@ -172,11 +146,6 @@ class MainCarSession : Session() {
             }
         })
 
-//        val intentFilter = IntentFilter("com.mobi.testnavi.SHOW_ALERT")
-
-        CarAppSyncComponent.getInstance().setCarSession(this)
-
-        // Add BitmapWidgets to the map that will be shown whenever the map is visible.
         lifecycle.addObserver(object : DefaultLifecycleObserver {
             override fun onCreate(owner: LifecycleOwner) {
                 checkLocationPermissions()
@@ -194,101 +163,64 @@ class MainCarSession : Session() {
 
         return bitmap
     }
-    // This logic is for you to decide. In this example the MapboxScreenManager.replaceTop is
-    // declared in other logical places. At this point the screen key should be already set.
-    override fun onCreateScreen(intent: Intent): Screen {
 
-//      mapboxCarMap.carMapSurface?.mapSurface?.getMapboxMap()?.loadStyle(style(customStyleUrl){})
-//        mapboxCarMapLoader.setLightStyleOverride(style(customStyleUrl){})
+
+    override fun onCreateScreen(intent: Intent): Screen {
 
         mapboxCarMapLoader.setLightStyleOverride(style(customStyleUrl){
 
-            // Define the point for the pin location
+            // 핀 찍을 좌표 설정
             val pinLocation = Point.fromLngLat(128.42016424518943, 36.104488876950704) // Example coordinates
 
-            // Add the GeoJsonSource for the pin
+            // GeoJson으로 변환
             val geoJsonSource = GeoJsonSource.Builder("pin-source")
                 .feature(Feature.fromGeometry(pinLocation))
                 .build()
 
-            // Add the source using the unary operator
+            // Unary 연산자(+)로 GeoJson 등록
             +geoJsonSource
 
-            // Create a Bitmap for the pin icon (resize as needed)
+            // 핀 아이콘 설정
             val baseWidth = 50
             val baseHeight = 50
             val pinBitmap = getResizedBitmapFromVectorDrawable(carContext, R.drawable.ic_mobipay, baseWidth, baseHeight)
 
-            // Check if bitmap creation was successful
+            // 변환 성공일 시
             if (pinBitmap != null) {
-                // Add the pin icon image to the style
-                +ImageExtensionImpl(ImageExtensionImpl.Builder("my-pin-icon").bitmap(pinBitmap))
-//                +ImageExtensionImpl.Builder("my-pin-icon").bitmap(pinBitmap)
 
-                // Create a SymbolLayer for the pin with icon and text
+                // 지도 style로 핀 이미지 등록
+                +ImageExtensionImpl(ImageExtensionImpl.Builder("mobi-pin-icon").bitmap(pinBitmap))
+
+                // 실제로 지도에 핀이 들어갈 layer 작성
                 val symbolLayer = SymbolLayer("pin-layer", "pin-source")
-                    .iconImage("my-pin-icon")
+                    .iconImage("mobi-pin-icon")
                     .iconAllowOverlap(true)
                     .iconIgnorePlacement(true)
-                    .textField("맥도날드 구미 인동점") // Add your label text
+                    .textField("맥도날드 구미 인동점") // 가맹점 명
                     .textSize(12.0)
                     .textColor("black")
                     .iconAnchor(IconAnchor.BOTTOM)
                     .textAnchor(TextAnchor.TOP)
 
-                // Add the SymbolLayer using the unary operator
+                // Unary 연산자(+)로 symbolLayer를 지도에 추가
                 +symbolLayer
             } else {
-                logE(TAG, "Failed to decode vector drawable to bitmap.")
+                logE(TAG, "비트맵 변환 실패!!")
             }
 
         })
-
-
-//        carContext.getCarService(AppManager::class.java).showAlert(
-//            Alert.Builder(
-//                /*alertId*/ 1,
-//                /*title*/ CarText.create("모비페이 결제요청"),
-//                /*durationMillis*/ 5000
-//            )
-//                // The fields below are optional
-////                .addAction(firstAction)
-////                .addAction(secondAction)
-//                .addAction(
-//                    Action.Builder()
-//                        .setTitle("승인")
-//                        .setOnClickListener {
-//                        }
-//                        .build()
-//                )
-//                .addAction(
-//                    Action.Builder()
-//                        .setTitle("거절")
-//                        .setOnClickListener {
-//                        }
-//                        .build()
-//                )
-//                .setSubtitle(CarText.create("맥도날드 구미 인동점\n13,000원"))
-//            .setIcon(CarIcon.APP_ICON)
-////            .setCallback(...)
-//        .build()
-//        )
 
         val screenKey = MapboxScreenManager.current()?.key
         Log.d(TAG, "onCreateScreen: 키: ${screenKey}")
         checkNotNull(screenKey) { "The screen key should be set before the Screen is requested." }
 
         return mapboxCarContext.mapboxScreenManager.createScreen(screenKey)
-//        return MyScreen(carContext)
     }
 
-    // Forward the CarContext to the MapboxCarMapLoader with the configuration changes.
     override fun onCarConfigurationChanged(newConfiguration: Configuration) {
         mapboxCarMapLoader.onCarConfigurationChanged(carContext)
     }
 
-    // Handle the geo deeplink for voice activated navigation. This will handle the case when
-    // you ask the head unit to "Navigate to coffee shop".
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
@@ -297,8 +229,7 @@ class MainCarSession : Session() {
         }
     }
 
-    // Location permissions are required for this example. Check the state and replace the current
-    // screen if there is not one already set.
+    // 위치 권한 없으면 위치 권한 요청 스크린으로 이동
     private fun checkLocationPermissions() {
         PermissionsManager.areLocationPermissionsGranted(carContext).also { isGranted ->
             val currentKey = MapboxScreenManager.current()?.key
@@ -310,9 +241,6 @@ class MainCarSession : Session() {
         }
     }
 
-    // Enable auto drive. Open the app on the head unit and then execute the following from your
-    // computer terminal.
-    // adb shell dumpsys activity service com.mapbox.navigation.examples.androidauto.car.MainCarAppService AUTO_DRIVE
     private fun observeAutoDrive() {
         lifecycleScope.launch {
             lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -323,7 +251,6 @@ class MainCarSession : Session() {
         }
     }
 
-    @SuppressLint("MissingPermission")
     private fun refreshTripSession() {
         val isAutoDriveEnabled = mapboxCarContext.mapboxNavigationManager
             .autoDriveEnabledFlow.value
@@ -332,12 +259,13 @@ class MainCarSession : Session() {
             return
         }
 
-        if (isAutoDriveEnabled) {
-            MapboxNavigationApp.registerObserver(ReplayRouteTripSession)
-        } else {
-            MapboxNavigationApp.unregisterObserver(ReplayRouteTripSession)
+        if (!isAutoDriveEnabled) {
             if (mapboxNavigation.getTripSessionState() != TripSessionState.STARTED) {
-                mapboxNavigation.startTripSession()
+                if (ActivityCompat.checkSelfPermission(carContext,Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                    && ActivityCompat.checkSelfPermission(carContext, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED)
+                {
+                    mapboxNavigation.startTripSession()
+                }
             }
         }
     }

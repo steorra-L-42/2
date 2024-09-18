@@ -20,6 +20,7 @@ import androidx.core.app.NotificationCompat.VISIBILITY_PUBLIC
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.RemoteInput
 import androidx.core.graphics.drawable.IconCompat
+import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.kimnlee.api.network.ApiClient
@@ -27,16 +28,30 @@ import com.kimnlee.api.network.BackendService
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import com.kimnlee.mobipay.R
 
 
 private const val TAG = "MyFirebaseMessagingServ"
 
-class MyFirebaseMessagingService : FirebaseMessagingService() {
+class FCMService : FirebaseMessagingService() {
     private lateinit var mNotificationManager: NotificationManagerCompat
 
     override fun onCreate() {
         Log.d(TAG, "onCreate: FCM onCreate")
+
+        /*
+        // FCM 토큰 확인
+        FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                val token = task.result
+                Log.d(TAG, "FCM Token: $token")
+                sendTokenToServer(token) // 서버에 전송
+            } else {
+                Log.w(TAG, "Fetching FCM token failed", task.exception)
+            }
+        }
+        */
+        Log.d(TAG, "onCreate: BASE URL = ${retrofit.baseUrl()}")
+
         mNotificationManager = NotificationManagerCompat.from(applicationContext)
     }
 
@@ -151,7 +166,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         val messagingStyle = createMessagingStyle(context, appConversation)
 
         // Creates the notification.
-        val notification = NotificationCompat.Builder(context, "noti_a")
+        val notification = NotificationCompat.Builder(context, "payment_request")
             .setSmallIcon(R.drawable.ic_mobipay)
             .setCategory(CATEGORY_MESSAGE)
             .setLargeIcon(appConversation.icon)
@@ -175,7 +190,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
     fun sendCarNotification(title: String, content: String) {
         // Create a builder for the notification
-        val builder = NotificationCompat.Builder(applicationContext, "noti_a")
+        val builder = NotificationCompat.Builder(applicationContext, "payment_request")
             .setSmallIcon(R.drawable.ic_mobipay) // Notification icon
             .setContentTitle(title) // Notification title
             .setContentText(content) // Notification content
@@ -228,7 +243,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             list2.add(user2)
             notify(applicationContext, MobiConversation(77, "Title1", list2, BitmapFactory.decodeResource(resources, R.drawable.ic_mobipay)))
 
-            val intent2 = Intent("com.mobi.testnavi.SHOW_ALERT")
+            val intent2 = Intent("com.kimnlee.mobipay.SHOW_ALERT")
             intent2.putExtra("title", "모비페이 결제요청")
             intent2.putExtra("content", notification.body)
             sendBroadcast(intent2)

@@ -1,6 +1,6 @@
 @file:JvmName("MapboxScreenGraph")
 
-package com.mobi.testnavi.navi.car
+package com.kimnlee.freedrive.presentation.screen
 
 import com.mapbox.androidauto.screenmanager.MapboxScreenFactory
 import com.mapbox.androidauto.MapboxCarContext

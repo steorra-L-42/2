@@ -1,4 +1,4 @@
-package com.mobi.firebase
+package com.kimnlee.firebase
 
 import org.junit.Test
 

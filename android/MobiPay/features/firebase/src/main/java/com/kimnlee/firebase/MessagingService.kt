@@ -1,4 +1,4 @@
-package com.mobi.firebase
+package com.kimnlee.firebase
 
 import android.app.IntentService
 import android.content.Intent

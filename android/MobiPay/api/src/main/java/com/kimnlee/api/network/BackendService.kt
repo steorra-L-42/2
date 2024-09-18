@@ -1,4 +1,4 @@
-package com.kimnlee.mobipay
+package com.kimnlee.api.network
 
 import retrofit2.Call
 import retrofit2.http.Body
