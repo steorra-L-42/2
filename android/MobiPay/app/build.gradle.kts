@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -57,6 +58,9 @@ dependencies {
     implementation(project(":features:cardmanagement"))
     implementation(project(":features:vehiclemanagement"))
     implementation(project(":features:memberinvitation"))
+    implementation(project(":features:freedrive"))
+    implementation(project(":features:firebase"))
+
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

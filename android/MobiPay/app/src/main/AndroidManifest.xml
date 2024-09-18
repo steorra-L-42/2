@@ -2,14 +2,17 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
     <!--  인터넷 사용권한 요청  -->
     <uses-permission android:name="android.permission.INTERNET" />
     <!-- 카메라 권한 요청 -->
     <uses-permission android:name="android.permission.CAMERA" />
-    <!-- 저장 권한 요청 (선택적) -->
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <!-- 저장 권한 요청 (선택적, Android 10 미만용) -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
 
     <application
+        android:name=".MobiPayApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -36,7 +39,7 @@
             android:foregroundServiceType="specialUse">
             <intent-filter>
                 <action android:name="androidx.car.app.CarAppService" />
-                <category android:name="androidx.car.app.category.POI" />
+                <category android:name="androidx.car.app.category.NAVIGATION" />
             </intent-filter>
         </service>
 
@@ -46,7 +49,11 @@
 
         <meta-data
             android:name="androidx.car.app.minCarApiLevel"
-            android:value="1"/>
+            android:value="3"/>
+
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="payment_request" />
 
     </application>
 

@@ -21,6 +21,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
 import com.kimnlee.cardmanagement.R
 import com.kimnlee.cardmanagement.presentation.viewmodel.CardManagementViewModel
@@ -30,9 +31,8 @@ import com.kimnlee.cardmanagement.presentation.viewmodel.PhotoUiState
 fun CardManagementScreen(
     onNavigateToDetail: () -> Unit,
     onNavigateToRegistration: () -> Unit,
-    viewModel: CardManagementViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+    viewModel: CardManagementViewModel = viewModel()
 ) {
-    val uiState by viewModel.uiState.collectAsState()
     val photoUiState by viewModel.photoUiState.collectAsState()
 
     Column(

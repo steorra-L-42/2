@@ -57,4 +57,9 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.navigation.compose)
+
+    implementation(libs.androidx.legacy.support.v4)
+    implementation(libs.androidx.legacy.support.v13)
+    implementation(libs.androidx.runtime.android)
+    implementation(libs.core)
 }
