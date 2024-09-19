@@ -31,7 +31,7 @@ pipeline {
                         stage('Nginx Build') {
                             steps {
                                 echo "Nginx Building.."
-                                // dir('../frontend/merchant_frontend') {
+                                // dir('../../frontend/merchant_frontend') {
                                     // withCredentials([file(credentialsId: 'merchant-frontend-env', variable: 'ENV_FILE')]) {
                                     //     sh 'cat $ENV_FILE > .env'
                                     // }
@@ -43,7 +43,7 @@ pipeline {
                         stage('Nginx Image Push') {
                             steps {
                                 echo "Push Nginx Image.."
-                                dir('../frontend/merchant_frontend') {
+                                dir('../../frontend/merchant_frontend') {
                                     echo "Delivery Nginx Image.."
                                     withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
                                         sh "echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin"
@@ -62,7 +62,7 @@ pipeline {
                         stage('Mobipay Build') {
                             steps {
                                 echo "Mobipay Building.."
-                                dir('../backend/mobipay_backend') {
+                                dir('../../backend/mobipay_backend') {
                                     sh 'chmod +x ./gradlew'
                                     sh './gradlew clean build -x test'
                                 }
@@ -70,7 +70,7 @@ pipeline {
                         }
                         stage('Mobipay Image Push') {
                             steps {
-                                dir('../backend/mobipay_backend') {
+                                dir('../../backend/mobipay_backend') {
                                     echo "Push Mobipay Image.."
                                     withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
                                         sh "echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin"
@@ -89,7 +89,7 @@ pipeline {
                         stage('Merchant Build') {
                             steps {
                                 echo "Merchant Building.."
-                                dir('../backend/merchant_backend') {
+                                dir('../../backend/merchant_backend') {
                                     sh 'chmod +x ./gradlew'
                                     sh './gradlew clean build -x test'
                                 }
@@ -97,7 +97,7 @@ pipeline {
                         }
                         stage('Merchant Image Push') {
                             steps {
-                                dir('../backend/merchant_backend') {
+                                dir('../../backend/merchant_backend') {
                                     echo "Push Merchant Image.."
                                     withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
                                         sh "echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin"
