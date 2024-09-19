@@ -1,0 +1,167 @@
+pipeline {
+    agent any
+    options {
+        skipDefaultCheckout(true)
+    }
+    tools { nodejs "20.15.0"}
+    environment {
+        AWS_IP = credentials('AWS_IP')
+    }
+    stages {
+        stage ('clean workspace') {
+            steps {
+                echo 'Cleaning workspace...'
+                cleanWs()
+                echo 'Cleaning done'
+            } 
+        }
+        stage ('clone') {
+            steps {
+                echo 'Cloning...'
+                checkout scm
+                git branch: 'dev', credentialsId: 'Gitlab', url: 'https://lab.ssafy.com/s11-fintech-finance-sub1/S11P21D102.git'
+                echo 'Cloning done'
+            }
+        }
+        stage ('build') {
+            parallel{
+                stage('Nginx Proccess'){
+                    stages{
+                        stage('Nginx Build') {
+                            steps {
+                                echo "Nginx Building.."
+                                // dir('../frontend/merchant_frontend') {
+                                    // withCredentials([file(credentialsId: 'merchant-frontend-env', variable: 'ENV_FILE')]) {
+                                    //     sh 'cat $ENV_FILE > .env'
+                                    // }
+                                    // sh 'npm install'
+                                    // sh 'npm run build'
+                                // }
+                            }
+                        }
+                        stage('Nginx Image Push') {
+                            steps {
+                                echo "Push Nginx Image.."
+                                dir('../frontend/merchant_frontend') {
+                                    echo "Delivery Nginx Image.."
+                                    withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                                        sh "echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin"
+                                        sh "docker build -t $DOCKER_USERNAME/mobipay_nginx:${env.BUILD_ID} ."
+                                        sh "docker tag $DOCKER_USERNAME/mobipay_nginx:${env.BUILD_ID} $DOCKER_USERNAME/mobipay_nginx:latest"
+                                        sh "docker push $DOCKER_USERNAME/mobipay_nginx:${env.BUILD_ID}"
+                                        sh "docker push $DOCKER_USERNAME/mobipay_nginx:latest"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                stage('Mobipay Proccess'){
+                    stages{
+                        stage('Mobipay Build') {
+                            steps {
+                                echo "Mobipay Building.."
+                                dir('../backend/mobipay_backend') {
+                                    sh 'chmod +x ./gradlew'
+                                    sh './gradlew clean build -x test'
+                                }
+                            }
+                        }
+                        stage('Mobipay Image Push') {
+                            steps {
+                                dir('../backend/mobipay_backend') {
+                                    echo "Push Mobipay Image.."
+                                    withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                                        sh "echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin"
+                                        sh "docker build -t $DOCKER_USERNAME/mobipay_mobipay:${env.BUILD_ID} ."
+                                        sh "docker tag $DOCKER_USERNAME/mobipay_mobipay:${env.BUILD_ID} $DOCKER_USERNAME/mobipay_mobipay:latest"
+                                        sh "docker push $DOCKER_USERNAME/mobipay_mobipay:${env.BUILD_ID}"
+                                        sh "docker push $DOCKER_USERNAME/mobipay_mobipay:latest"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                stage('Merchant Proccess'){
+                    stages{
+                        stage('Merchant Build') {
+                            steps {
+                                echo "Merchant Building.."
+                                dir('../backend/merchant_backend') {
+                                    sh 'chmod +x ./gradlew'
+                                    sh './gradlew clean build -x test'
+                                }
+                            }
+                        }
+                        stage('Merchant Image Push') {
+                            steps {
+                                dir('../backend/merchant_backend') {
+                                    echo "Push Merchant Image.."
+                                    withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                                        sh "echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin"
+                                        sh "docker build -t $DOCKER_USERNAME/mobipay_merchat:${env.BUILD_ID} ."
+                                        sh "docker tag $DOCKER_USERNAME/mobipay_merchat:${env.BUILD_ID} $DOCKER_USERNAME/mobipay_merchant:latest"
+                                        sh "docker push $DOCKER_USERNAME/mobipay_merchat:${env.BUILD_ID}"
+                                        sh "docker push $DOCKER_USERNAME/mobipay_merchat:latest"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                // stage('Android Proccess'){
+                //     stages{
+                //         stage('SDK Manager') {
+                //             steps {
+                //                 echo "SDK Manager.."
+                //                 dir('../android/Mobipay') {
+                //                     // sh 'echo y | sdkmanager "platform-tools" "platforms;android-29" "build-tools;29.0.3" "extras;android;m2repository" "extras;google;m2repository"'
+                //                 }
+                //             }
+                //         }
+                //         stage('Android Build') {
+                //             steps {
+                //                 echo "Android Building.."
+                //                 dir('../android/Mobipay') {
+                //                     sh 'chmod +x ./gradlew'
+                //                     sh './gradlew clean bundleDebug assembleDebug -x test '
+                //                 }
+                //             }
+                //         }
+                //         stage('Android Deloy') {
+                //             steps {
+                //                 dir('../android/Mobipay') {
+                //                     echo "Deploy Android ..."
+                //                     // MM 사용해서 APK, ABB 배포
+                //                 }
+                //             }
+                //         }
+                //     }
+                // }
+            }
+        }
+        stage('Deploy to EC2') {
+            steps {
+                echo 'EC2에 배포 시작!'
+                withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                    sshagent(credentials: ['ubuntu']) { 
+                        sh "ssh -o StrictHostKeyChecking=no ubuntu@$AWS_IP 'cd S11P21D102/exec/app && sudo docker-compose -f app-compose.yml down'"
+                        // sh "ssh -o StrictHostKeyChecking=no ubuntu@$AWS_IP 'nginx_images=\$(sudo docker images -q $DOCKER_USERNAME/mobipay_nginx:latest) && if [ -n \"\$nginx_images\" ]; then sudo docker rmi -f \$nginx_images; fi'"
+                        // sh "ssh -o StrictHostKeyChecking=no ubuntu@$AWS_IP 'mobipay_images=\$(sudo docker images -q $DOCKER_USERNAME/mobipay_mobipay:latest) && if [ -n \"\$mobipay_images\" ]; then sudo docker rmi -f \$mobipay_images; fi'"
+                        // sh "ssh -o StrictHostKeyChecking=no ubuntu@$AWS_IP 'merchant_images=\$(sudo docker images -q $DOCKER_USERNAME/mobipay_merchant:latest) && if [ -n \"\$merchant_images\" ]; then sudo docker rmi -f \$merchant_images; fi'"
+                        sh "ssh -o StrictHostKeyChecking=no ubuntu@$AWS_IP 'sudo docker image prune -f'"
+                        sh "ssh -o StrictHostKeyChecking=no ubuntu@$AWS_IP 'cd S11P21D102/exec/app && sudo docker-compose -f app-compose.yml up -d'"
+                    }
+                }
+                echo 'EC2에 배포 완료!'
+            } 
+        }
+    }
+    post {
+        always {
+            cleanWs(cleanWhenNotBuilt: false, deleteDirs: true, 
+            disableDeferredWipeout: true, notFailBuild: true)
+        }
+    }
+}
