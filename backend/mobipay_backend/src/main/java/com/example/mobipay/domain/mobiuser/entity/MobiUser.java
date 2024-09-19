@@ -1,5 +1,7 @@
 package com.example.mobipay.domain.mobiuser.entity;
 
+import static com.example.mobipay.domain.mobiuser.enums.Role.USER;
+
 import com.example.mobipay.domain.car.entity.Car;
 import com.example.mobipay.domain.cargroup.entity.CarGroup;
 import com.example.mobipay.domain.common.AuditableCreatedEntity;
@@ -56,7 +58,7 @@ public class MobiUser extends AuditableCreatedEntity {
 
     @Enumerated(value = EnumType.STRING)
     @Column(name = "role", nullable = false)
-    private Role role = Role.USER;
+    private Role role = USER;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "refresh_token_id")
@@ -87,4 +89,14 @@ public class MobiUser extends AuditableCreatedEntity {
 
     @OneToMany(mappedBy = "mobiUser")
     private List<Account> accounts;
+
+    public static MobiUser create(String email, String name, String phoneNumber, String picture) {
+        MobiUser mobiUser = new MobiUser();
+        mobiUser.email = email;
+        mobiUser.name = name;
+        mobiUser.phoneNumber = phoneNumber;
+        mobiUser.picture = picture;
+        mobiUser.role = USER; // 기본 역할 설정
+        return mobiUser;
+    }
 }

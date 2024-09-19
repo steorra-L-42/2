@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kotlin API Test</title>
+    <script>
+        async function fetchMainAPI() {
+            const response = await fetch("http://localhost:8080/");
+            const data = await response.text();
+            document.getElementById("main-result").innerText = "Response from /: " + data;
+        }
+
+        async function fetchMyAPI() {
+            const response = await fetch("http://localhost:8080/my");
+            const data = await response.text();
+            document.getElementById("my-result").innerText = "Response from /my: " + data;
+        }
+    </script>
+</head>
+<body>
+<h1>Spring Boot Kotlin API Test</h1>
+
+<button onclick="fetchMainAPI()">Call Main API</button>
+<p id="main-result">Response from /: </p>
+
+<button onclick="fetchMyAPI()">Call My API</button>
+<p id="my-result">Response from /my: </p>
+</body>
+</html>
