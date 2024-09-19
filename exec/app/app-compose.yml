@@ -1,0 +1,69 @@
+services:
+  reverse-proxy:
+    image: ramen4598/mobipay_nginx:latest
+    depends_on:
+      - mobi-backend
+      - mer-backend
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/:/etc/nginx/
+      - ../cert/data/certbot/conf:/etc/letsencrypt
+      - ../cert/data/certbot/www:/var/www/certbot
+    networks:
+      - reverse-proxy
+    restart: always
+    container_name: reverse-proxy
+
+  mobi-backend:
+    image: ramen4598/mobipay_mobipay:latest
+    depends_on:
+      mobi-db:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      MYSQL_HOST: mobi-db
+      MYSQL_PORT: 3306
+      MYSQL_DB: ${MOBI_DB}
+      MYSQL_USER: ${MOBI_USER}
+      MYSQL_PASSWORD: ${MOBI_PASSWORD}
+      TZ: Asia/Seoul
+    expose:
+      - 8080
+    networks:
+      - reverse-proxy
+      - mobi-network
+    restart: always
+    container_name: mobi-backend
+
+  mer-backend:
+    image: ramen4598/mobipay_merchant:latest
+    depends_on:
+      mer-db:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      MYSQL_HOST: mer-db
+      MYSQL_PORT: 3306
+      MYSQL_DB: ${MER_DB}
+      MYSQL_USER: ${MER_USER}
+      MYSQL_PASSWORD: ${MER_PASSWORD}
+      TZ: Asia/Seoul
+    expose:
+      - 8080
+    networks:
+      - reverse-proxy
+      - mer-network
+    restart: always
+    container_name: mer-backend
+
+networks:
+  reverse-proxy:
+    driver: bridge
+  mobi-network:
+    external: true
+  mer-network:
+    external: true
