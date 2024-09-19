@@ -18,6 +18,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 fun VehicleManagementDetailScreen(
     vehicleId: Int,
     onNavigateBack: () -> Unit,
+    onNavigateToMemberInvitation: (Int) -> Unit,
     viewModel: VehicleManagementViewModel = viewModel()
 ) {
     val vehicle = viewModel.getVehicleById(vehicleId)
@@ -76,6 +77,17 @@ fun VehicleManagementDetailScreen(
         ) {
             Text("멤버들의 프로필 이미지 공간") //추후 프로필 이미지를 넣을 공간(더하기 버튼을 통해 멤버추가 버튼도 만들어야함(멤버추가 모듈로 넘어가게 할듯))
         }
+
+        Button(
+            onClick = { onNavigateToMemberInvitation(vehicleId) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp)
+        ) {
+            Text("멤버 초대")
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
 
         Row(
             modifier = Modifier
