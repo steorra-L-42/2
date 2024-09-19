@@ -1,3 +1,10 @@
+# 0. 준비물
+
+- Docker
+- Docker Compose
+
+---
+
 # 1. HTTPS 인증서
 
 `exec`에서 실행.
