@@ -15,6 +15,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -49,4 +50,19 @@ public class Car extends AuditableCreatedEntity {
 
     @OneToMany(mappedBy = "car")
     private List<ApprovalWaiting> approvalWaitings = new ArrayList<>();
+
+    public static Car from(String number) {
+        Car car = new Car();
+        car.number = number;
+
+        return car;
+    }
+
+    public void setOwner(MobiUser mobiUser) {
+        if (this.owner != null) {
+            this.owner.getCars().remove(this);
+        }
+        this.owner = mobiUser;
+        mobiUser.getCars().add(this);
+    }
 }

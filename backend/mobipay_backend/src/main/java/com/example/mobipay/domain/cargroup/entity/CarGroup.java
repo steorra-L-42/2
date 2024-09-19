@@ -33,8 +33,28 @@ public class CarGroup {
     @JoinColumn(name = "car_id")
     private Car car;
 
-    @Id
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "mobi_user_id")
     private MobiUser mobiUser;
+
+    public static CarGroup of(Car car, MobiUser mobiUser) {
+        CarGroup carGroup = new CarGroup();
+        carGroup.addRelation(car, mobiUser);
+        return carGroup;
+    }
+
+    // 연관관계 설정 메서드
+    public void addRelation(Car car, MobiUser mobiUser) {
+        if (this.car != null) {
+            this.car.getCarGroups().remove(this);
+        }
+        this.car = car;
+        car.getCarGroups().add(this);
+
+        if (this.mobiUser != null) {
+            this.mobiUser.getCarGroups().remove(this);
+        }
+        this.mobiUser = mobiUser;
+        mobiUser.getCarGroups().add(this);
+    }
 }
