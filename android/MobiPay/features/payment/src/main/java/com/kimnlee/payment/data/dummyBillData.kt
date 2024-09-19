@@ -15,7 +15,7 @@ package com.kimnlee.payment.data
 
 val dummyBillData = listOf(
     mapOf(
-        "transaction_unique_no" to 1,
+        "transaction_unique_no" to 0,
         "store_name" to "스타벅스",
         "transaction_date" to "2024-09-01",
         "transaction_time" to "10:30 AM",
@@ -23,7 +23,7 @@ val dummyBillData = listOf(
         "payment_balance" to 5500
     ),
     mapOf(
-        "transaction_unique_no" to 2,
+        "transaction_unique_no" to 1,
         "store_name" to "이마트",
         "transaction_date" to "2024-09-02",
         "transaction_time" to "02:45 PM",
@@ -31,7 +31,7 @@ val dummyBillData = listOf(
         "payment_balance" to 25000
     ),
     mapOf(
-        "transaction_unique_no" to 3,
+        "transaction_unique_no" to 2,
         "store_name" to "GS25",
         "transaction_date" to "2024-09-03",
         "transaction_time" to "09:15 PM",
@@ -39,7 +39,7 @@ val dummyBillData = listOf(
         "payment_balance" to 3200
     ),
     mapOf(
-        "transaction_unique_no" to 4,
+        "transaction_unique_no" to 3,
         "store_name" to "맥도날드",
         "transaction_date" to "2024-09-04",
         "transaction_time" to "07:00 PM",
@@ -47,7 +47,7 @@ val dummyBillData = listOf(
         "payment_balance" to 7800
     ),
     mapOf(
-        "transaction_unique_no" to 5,
+        "transaction_unique_no" to 4,
         "store_name" to "CU 편의점",
         "transaction_date" to "2024-09-05",
         "transaction_time" to "11:20 AM",
@@ -55,7 +55,7 @@ val dummyBillData = listOf(
         "payment_balance" to 4300
     ),
     mapOf(
-        "transaction_unique_no" to 6,
+        "transaction_unique_no" to 5,
         "store_name" to "스타벅스",
         "transaction_date" to "2024-09-01",
         "transaction_time" to "10:30 AM",
@@ -63,7 +63,7 @@ val dummyBillData = listOf(
         "payment_balance" to 5500
     ),
     mapOf(
-        "transaction_unique_no" to 7,
+        "transaction_unique_no" to 6,
         "store_name" to "이마트",
         "transaction_date" to "2024-09-02",
         "transaction_time" to "02:45 PM",
@@ -71,7 +71,7 @@ val dummyBillData = listOf(
         "payment_balance" to 25000
     ),
     mapOf(
-        "transaction_unique_no" to 8,
+        "transaction_unique_no" to 7,
         "store_name" to "GS25",
         "transaction_date" to "2024-09-03",
         "transaction_time" to "09:15 PM",
@@ -79,7 +79,7 @@ val dummyBillData = listOf(
         "payment_balance" to 3200
     ),
     mapOf(
-        "transaction_unique_no" to 9,
+        "transaction_unique_no" to 8,
         "store_name" to "맥도날드",
         "transaction_date" to "2024-09-04",
         "transaction_time" to "07:00 PM",
@@ -87,7 +87,7 @@ val dummyBillData = listOf(
         "payment_balance" to 7800
     ),
     mapOf(
-        "transaction_unique_no" to 10,
+        "transaction_unique_no" to 9,
         "store_name" to "CU 편의점",
         "transaction_date" to "2024-09-05",
         "transaction_time" to "11:20 AM",
