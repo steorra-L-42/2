@@ -19,7 +19,8 @@ pipeline {
             steps {
                 echo 'Cloning...'
                 checkout scm
-                git branch: 'dev', credentialsId: 'Gitlab', url: 'https://lab.ssafy.com/s11-fintech-finance-sub1/S11P21D102.git'
+                git branch: 'com/feature/cicd', credentialsId: 'Gitlab', url: 'https://lab.ssafy.com/s11-fintech-finance-sub1/S11P21D102.git'
+                // git branch: 'dev', credentialsId: 'Gitlab', url: 'https://lab.ssafy.com/s11-fintech-finance-sub1/S11P21D102.git'
                 echo 'Cloning done'
             }
         }
