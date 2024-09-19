@@ -3,7 +3,7 @@ package com.kimnlee.vehiclemanagement.presentation.screen
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.kimnlee.vehiclemanagement.presentation.viewmodel.VehicleManagementViewModel
@@ -21,6 +21,7 @@ fun VehicleManagementDetailScreen(
     viewModel: VehicleManagementViewModel = viewModel()
 ) {
     val vehicle = viewModel.getVehicleById(vehicleId)
+    var isCardEnabled by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -76,13 +77,30 @@ fun VehicleManagementDetailScreen(
             Text("멤버들의 프로필 이미지 공간") //추후 프로필 이미지를 넣을 공간(더하기 버튼을 통해 멤버추가 버튼도 만들어야함(멤버추가 모듈로 넘어가게 할듯))
         }
 
-        Box(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(8.dp)
-                .height(50.dp) // 추후 높이 조절 추가
+                .padding(8.dp),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("카드 프로필 이미지 공간", modifier = Modifier.align(Alignment.Center)) //추후 카드 이미지를 넣을 공간
+            Switch(
+                checked = isCardEnabled,
+                onCheckedChange = { isCardEnabled = it }
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("내 카드로 자동결제")
+        }
+
+        if (isCardEnabled) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp)
+                    .height(50.dp)
+            ) {
+                Text("카드 이미지 공간", modifier = Modifier.align(Alignment.Center))
+            }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
