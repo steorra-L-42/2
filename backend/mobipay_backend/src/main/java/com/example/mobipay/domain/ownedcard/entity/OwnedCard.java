@@ -15,6 +15,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -45,7 +46,7 @@ public class OwnedCard extends AuditableCreatedEntity {
     private String cardExpiryDate;
 
     @OneToMany(mappedBy = "ownedCard")
-    private List<RegisteredCard> registeredCards;
+    private List<RegisteredCard> registeredCards = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "mobi_user_id")

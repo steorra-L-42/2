@@ -13,6 +13,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -40,7 +41,7 @@ public class Account extends AuditableCreatedEntity {
     private MobiUser mobiUser;
 
     @OneToMany(mappedBy = "account")
-    private List<OwnedCard> ownedCards;
+    private List<OwnedCard> ownedCards = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "account_type_unique_no")

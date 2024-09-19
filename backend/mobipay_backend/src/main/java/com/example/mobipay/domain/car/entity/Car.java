@@ -42,11 +42,11 @@ public class Car extends AuditableCreatedEntity {
     private MobiUser owner; // MobiUser객체는 Car Entity에서 차주(Owner)를 뜻함.
 
     @OneToMany(mappedBy = "car")
-    private List<CarGroup> carGroups;
+    private List<CarGroup> carGroups = new ArrayList<>();
 
     @OneToMany(mappedBy = "car")
-    private List<Invitation> invitations;
+    private List<Invitation> invitations = new ArrayList<>();
 
     @OneToMany(mappedBy = "car")
-    private List<ApprovalWaiting> approvalWaitings;
+    private List<ApprovalWaiting> approvalWaitings = new ArrayList<>();
 }
