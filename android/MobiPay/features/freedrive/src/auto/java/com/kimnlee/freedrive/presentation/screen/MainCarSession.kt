@@ -51,6 +51,7 @@ import androidx.car.app.model.CarIcon
 import androidx.car.app.model.CarText
 import androidx.core.app.ActivityCompat
 import androidx.core.graphics.drawable.IconCompat
+import com.mapbox.androidauto.search.PlaceRecord
 
 private const val TAG = "MainCarSession"
 private val customStyleUrl = "mapbox://styles/harveyl/cm163kfgg019r01q1a4nc9hm3"
@@ -58,6 +59,33 @@ private val customStyleUrl = "mapbox://styles/harveyl/cm163kfgg019r01q1a4nc9hm3"
 
 @OptIn(MapboxExperimental::class)
 class MainCarSession : Session() {
+
+    companion object {
+        // 가맹점 목록 데이터 정의
+        val merchantList = listOf(
+            PlaceRecord(
+                id = "1",
+                name = "맥도날드 구미 인동점",
+                coordinate = Point.fromLngLat(128.42016424518943, 36.104488876950704),
+                description = "경상북도 구미시 인동가산로 20",
+                categories = listOf("음식점", "패스트푸드")
+            ),
+            PlaceRecord(
+                id = "2",
+                name = "스타벅스 구미인동DT점",
+                coordinate = Point.fromLngLat(128.41955, 36.10396),
+                description = "경상북도 구미시 인동가산로 14",
+                categories = listOf("카페", "음료")
+            ),
+            PlaceRecord(
+                id = "3",
+                name = "구미역사주차장",
+                coordinate = Point.fromLngLat(128.33131, 36.12825),
+                description = "경상북도 구미시 구미중앙로 45",
+                categories = listOf("교통", "기차역")
+            )
+        )
+    }
 
     private val mapboxCarMapLoader = MapboxCarMapLoader()
 
@@ -169,17 +197,6 @@ class MainCarSession : Session() {
 
         mapboxCarMapLoader.setLightStyleOverride(style(customStyleUrl){
 
-            // 핀 찍을 좌표 설정
-            val pinLocation = Point.fromLngLat(128.42016424518943, 36.104488876950704) // Example coordinates
-
-            // GeoJson으로 변환
-            val geoJsonSource = GeoJsonSource.Builder("pin-source")
-                .feature(Feature.fromGeometry(pinLocation))
-                .build()
-
-            // Unary 연산자(+)로 GeoJson 등록
-            +geoJsonSource
-
             // 핀 아이콘 설정
             val baseWidth = 50
             val baseHeight = 50
@@ -188,26 +205,30 @@ class MainCarSession : Session() {
             // 변환 성공일 시
             if (pinBitmap != null) {
 
-                // 지도 style로 핀 이미지 등록
-                +ImageExtensionImpl(ImageExtensionImpl.Builder("mobi-pin-icon").bitmap(pinBitmap))
+                // 가맹점 마커 추가
+                merchantList.forEach { merchant ->
+                    val geoJsonSource = GeoJsonSource.Builder("${merchant.id}-source")
+                        .feature(Feature.fromGeometry(merchant.coordinate))
+                        .build()
 
-                // 실제로 지도에 핀이 들어갈 layer 작성
-                val symbolLayer = SymbolLayer("pin-layer", "pin-source")
-                    .iconImage("mobi-pin-icon")
-                    .iconAllowOverlap(true)
-                    .iconIgnorePlacement(true)
-                    .textField("맥도날드 구미 인동점") // 가맹점 명
-                    .textSize(12.0)
-                    .textColor("black")
-                    .iconAnchor(IconAnchor.BOTTOM)
-                    .textAnchor(TextAnchor.TOP)
+                    +geoJsonSource
+                    +ImageExtensionImpl(ImageExtensionImpl.Builder("mobi-pin-icon").bitmap(pinBitmap))
 
-                // Unary 연산자(+)로 symbolLayer를 지도에 추가
-                +symbolLayer
+                    val symbolLayer = SymbolLayer("${merchant.id}-layer", "${merchant.id}-source")
+                        .iconImage("mobi-pin-icon")
+                        .iconAllowOverlap(true)
+                        .iconIgnorePlacement(true)
+                        .textField(merchant.name)
+                        .textSize(12.0)
+                        .textColor("black")
+                        .iconAnchor(IconAnchor.BOTTOM)
+                        .textAnchor(TextAnchor.TOP)
+
+                    +symbolLayer
+                }
             } else {
                 logE(TAG, "비트맵 변환 실패!!")
             }
-
         })
 
         val screenKey = MapboxScreenManager.current()?.key
