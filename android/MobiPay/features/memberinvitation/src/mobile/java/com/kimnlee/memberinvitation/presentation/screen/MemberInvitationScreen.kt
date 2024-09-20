@@ -9,16 +9,22 @@ import androidx.navigation.NavController
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.Alignment
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.kimnlee.memberinvitation.presentation.viewmodel.MemberInvitationViewModel
 
 @Composable
 fun MemberInvitationScreen(
     vehicleId: Int,
     onNavigateBack: () -> Unit,
     onNavigateToDetail: () -> Unit,
-    onNavigateToHome: () -> Unit
+    onNavigateToHome: () -> Unit,
+    viewModel: MemberInvitationViewModel = viewModel()
 ) {
-    var phoneNumber by remember { mutableStateOf("") }
+    val uiState by viewModel.uiState.collectAsState()
+    val phoneNumber by viewModel.phoneNumber.collectAsState()
 
     Column(
         modifier = Modifier
@@ -46,19 +52,35 @@ fun MemberInvitationScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // 전화번호 입력 칸
         OutlinedTextField(
             value = phoneNumber,
-            onValueChange = { phoneNumber = it },
+            onValueChange = { viewModel.updatePhoneNumber(it) },
             label = { Text("전화번호로 초대하기") },
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-            trailingIcon = { // 전화번호 검색 시 가입된 유저이면 초대 알림 전송, 아니면 알림 띄우기
-                IconButton(onClick = { /* 전화번호 초대 로직 구현 */ }) {
-                    Icon(Icons.Default.Search, contentDescription = "추가")
+            trailingIcon = {
+                IconButton(onClick = { viewModel.inviteMember() }) {
+                    Icon(Icons.Default.Add, contentDescription = "초대")
                 }
             },
             modifier = Modifier.fillMaxWidth()
         )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        when (uiState) {
+            is MemberInvitationViewModel.UiState.Loading -> {
+                CircularProgressIndicator()
+            }
+            is MemberInvitationViewModel.UiState.InvitationSent -> {
+                Text("초대가 완료되었습니다.", color = MaterialTheme.colorScheme.primary)
+            }
+            is MemberInvitationViewModel.UiState.UserNotFound -> {
+                Text("가입된 유저가 아닙니다.", color = MaterialTheme.colorScheme.error)
+            }
+            else -> {} // 초기 상태, 아무것도 안 함
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
