@@ -51,7 +51,9 @@ volumes:
 
 networks:
   mobi-network:
+    name: mobi-network
     driver: bridge
   mer-network:
+    name: mer-network
     driver: bridge
       

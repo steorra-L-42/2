@@ -33,7 +33,7 @@ pipeline {
                         stage('Nginx Build') {
                             steps {
                                 echo "Nginx Building.."
-                                // dir('../../frontend/merchant_frontend') {
+                                // dir('./frontend/merchant_frontend') {
                                     // withCredentials([file(credentialsId: 'merchant-frontend-env', variable: 'ENV_FILE')]) {
                                     //     sh 'cat $ENV_FILE > .env'
                                     // }
