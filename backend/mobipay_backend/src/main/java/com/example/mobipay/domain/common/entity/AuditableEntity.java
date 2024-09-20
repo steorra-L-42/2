@@ -1,4 +1,4 @@
-package com.example.mobipay.domain.common;
+package com.example.mobipay.domain.common.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;

@@ -5,6 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -24,5 +25,5 @@ public class Bank {
     private String bankName;
 
     @OneToMany(mappedBy = "bank")
-    private List<AccountProduct> accountProducts;
+    private List<AccountProduct> accountProducts = new ArrayList<>();
 }
