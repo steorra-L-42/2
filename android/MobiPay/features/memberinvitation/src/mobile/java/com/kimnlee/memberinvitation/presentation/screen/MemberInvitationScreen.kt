@@ -94,11 +94,5 @@ fun MemberInvitationScreen(
         Text(
             text = "이 차량에 속한 멤버 표시(이름과 전화번호)" // 첫번째는 오너, 두번째 부터 멤버
         )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Button(onClick = onNavigateToHome) {
-            Text("홈으로 돌아가기")
-        }
     }
 }
