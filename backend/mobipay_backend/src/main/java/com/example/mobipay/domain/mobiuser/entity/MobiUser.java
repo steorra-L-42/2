@@ -43,9 +43,6 @@ public class MobiUser extends AuditableCreatedEntity {
     @Column(name = "email", nullable = false, unique = true, length = 40)
     private String email;
 
-    @Column(name = "password", nullable = false, length = 25)
-    private String password;
-
     @Column(name = "name", nullable = false, length = 25)
     private String name;
 
@@ -88,4 +85,15 @@ public class MobiUser extends AuditableCreatedEntity {
 
     @OneToMany(mappedBy = "mobiUser")
     private List<Account> accounts = new ArrayList<>();
+
+    private MobiUser(String email, String name, String phoneNumber, String picture) {
+        this.email = email;
+        this.name = name;
+        this.phoneNumber = phoneNumber;
+        this.picture = picture;
+    }
+
+    public static MobiUser of(String email, String name, String phoneNumber, String picture) {
+        return new MobiUser(email, name, phoneNumber, picture);
+    }
 }
