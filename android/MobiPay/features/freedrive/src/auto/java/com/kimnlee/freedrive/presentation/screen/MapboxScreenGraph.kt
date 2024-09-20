@@ -58,7 +58,7 @@ fun MapboxCarContext.prepareScreens() = apply {
         SEARCH_FEEDBACK
                 to SearchPlacesFeedbackScreenFactory(mapboxCarContext),
         FAVORITES
-                to FavoritesScreenFactory(mapboxCarContext),
+                to MerchantListScreenFactory(mapboxCarContext),
         FAVORITES_FEEDBACK
                 to FavoritesFeedbackScreenFactory(mapboxCarContext),
         GEO_DEEPLINK
