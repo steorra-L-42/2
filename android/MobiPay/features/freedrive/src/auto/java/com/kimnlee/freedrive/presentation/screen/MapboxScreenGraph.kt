@@ -20,7 +20,6 @@ import com.mapbox.androidauto.screenmanager.MapboxScreen.SEARCH
 import com.mapbox.androidauto.screenmanager.MapboxScreen.SEARCH_FEEDBACK
 import com.mapbox.androidauto.screenmanager.MapboxScreen.SETTINGS
 import com.mapbox.androidauto.screenmanager.factories.ActiveGuidanceFeedbackScreenFactory
-import com.mapbox.androidauto.screenmanager.factories.ActiveGuidanceScreenFactory
 import com.mapbox.androidauto.screenmanager.factories.ArrivalScreenFactory
 import com.mapbox.androidauto.screenmanager.factories.FavoritesFeedbackScreenFactory
 import com.mapbox.androidauto.screenmanager.factories.FreeDriveFeedbackScreenFactory
