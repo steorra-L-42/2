@@ -15,6 +15,7 @@ fun NavGraphBuilder.memberInvitationNavGraph(navController: NavHostController) {
             BottomNavigation(navController) {
                 MemberInvitationScreen(
                     vehicleId = vehicleId,
+                    onNavigateBack = { navController.navigateUp() },
                     onNavigateToDetail = { navController.navigate("member_detail") },
                     onNavigateToHome = { navController.navigate("home") {
                         popUpTo("home") { inclusive = true }
