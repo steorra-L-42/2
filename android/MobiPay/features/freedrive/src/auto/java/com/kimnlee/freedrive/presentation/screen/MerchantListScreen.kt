@@ -52,6 +52,11 @@ internal class MerchantListScreen @UiThread constructor(
 
     private val carNavigationCamera = CarLocationsOverviewCamera()
     private var carLocationRenderer = CarLocationRenderer()
+
+    // 여기서 부터 주석 처리된 코드들은 기존 예제코드에 있던 placesProvider를 구현해야 하는데
+    // 그러려면 com.mapbox.common:common의 버전 충돌을 해결해야 함
+    // placesProvider는 크게 필요하지 않은 것 같음
+    // 그래서 일단 더미 데이터를 MainCarSession에 만들어서 받아오고 나중에 api 따로 만들어서 구현하는 방법으로 가볼까 함
 //    private val placesListOnMapManager = PlacesListOnMapManager(placesProvider)
 
     init {
@@ -99,13 +104,10 @@ internal class MerchantListScreen @UiThread constructor(
 
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     override fun onGetTemplate(): Template {
+
         return PlaceListNavigationTemplate.Builder()
             .setItemList(itemList)
             .setHeader(Header.Builder().setTitle("가맹점 목록").setStartHeaderAction(Action.BACK).build())
-            .setActionStrip(
-                mapboxCarContext.options.actionStripProvider
-                    .getActionStrip(this, MapboxScreen.FAVORITES)
-            )
             .build()
     }
 

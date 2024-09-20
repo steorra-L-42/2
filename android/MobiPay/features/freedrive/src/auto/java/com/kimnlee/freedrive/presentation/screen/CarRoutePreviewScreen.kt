@@ -88,6 +88,7 @@ internal class CarRoutePreviewScreen @UiThread constructor(
 
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     override fun onGetTemplate(): Template {
+
         val listBuilder = ItemList.Builder()
         navigationRoutes.forEach { navigationRoute ->
             val route = navigationRoute.directionsRoute
@@ -119,10 +120,6 @@ internal class CarRoutePreviewScreen @UiThread constructor(
         return RoutePreviewNavigationTemplate.Builder()
             .setItemList(listBuilder.build())
             .setHeader(Header.Builder().setTitle("추천 경로").setStartHeaderAction(Action.BACK).build())
-            .setActionStrip(
-                mapboxCarContext.options.actionStripProvider
-                    .getActionStrip(this, MapboxScreen.ROUTE_PREVIEW)
-            )
             .setNavigateAction(
                 Action.Builder()
                     .setTitle("한번 더 터치하여 안내 시작")

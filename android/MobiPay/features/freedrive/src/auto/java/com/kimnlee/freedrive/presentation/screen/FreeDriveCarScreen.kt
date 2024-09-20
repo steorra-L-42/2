@@ -71,10 +71,11 @@ internal class FreeDriveCarScreen @UiThread constructor(
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     override fun onGetTemplate(): Template {
 
-        val actionStrip1 =
-            mapboxCarContext.options.actionStripProvider
-                .getActionStrip(this, MapboxScreen.FREE_DRIVE)
+//        val actionStrip1 =
+//            mapboxCarContext.options.actionStripProvider
+//                .getActionStrip(this, MapboxScreen.FREE_DRIVE)
 
+        // ---------------- 커스텀 ActionStrip 코드들 ----------------
         fun customBuildSettingsAction() = Action.Builder()
             .setIcon(
                 CarIcon.Builder(
@@ -115,6 +116,7 @@ internal class FreeDriveCarScreen @UiThread constructor(
             .addAction(customBuildSearchAction())
             .addAction(customBuildFavoritesAction())
             .build()
+        // ---------------- 커스텀 ActionStrip 코드들 끝 ----------------
 
 //        actionStrip1
 //            .actions
@@ -127,7 +129,6 @@ internal class FreeDriveCarScreen @UiThread constructor(
 //                    }
 //                    .build()
 //            )
-
 
         return NavigationTemplate.Builder()
             .setBackgroundColor(CarColor.PRIMARY)
