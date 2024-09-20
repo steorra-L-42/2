@@ -1,5 +1,6 @@
 package com.example.mobipay.domain.car.service;
 
+import com.example.mobipay.domain.car.dto.CarListResponse;
 import com.example.mobipay.domain.car.dto.CarRegisterRequest;
 import com.example.mobipay.domain.car.dto.CarRegisterResponse;
 import com.example.mobipay.domain.car.entity.Car;
@@ -11,6 +12,7 @@ import com.example.mobipay.domain.mobiuser.entity.MobiUser;
 import com.example.mobipay.domain.mobiuser.error.MobiUserNotFoundException;
 import com.example.mobipay.domain.mobiuser.repository.MobiUserRepository;
 import com.example.mobipay.oauth2.dto.CustomOAuth2User;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -73,5 +75,19 @@ public class CarService {
 
         return mobiUserRepository.findById(mobiUserId)
                 .orElseThrow(MobiUserNotFoundException::new);
+    }
+
+    /**
+     * mobiUser의 차량 목록을 조회한다.
+     *
+     * @param oauth2User 인증된 mobiUser 사용자
+     * @return CarListResponse
+     */
+    @Transactional(readOnly = true)
+    public CarListResponse getCars(CustomOAuth2User oauth2User) {
+        MobiUser mobiUser = findMobiUser(oauth2User.getMobiUserId());
+        List<Car> cars = carRepository.findAllByOwner(mobiUser);
+        
+        return CarListResponse.from(cars);
     }
 }
