@@ -101,7 +101,7 @@ internal class MerchantListScreen @UiThread constructor(
     override fun onGetTemplate(): Template {
         return PlaceListNavigationTemplate.Builder()
             .setItemList(itemList)
-            .setHeader(Header.Builder().setStartHeaderAction(Action.BACK).build())
+            .setHeader(Header.Builder().setTitle("가맹점 목록").setStartHeaderAction(Action.BACK).build())
             .setActionStrip(
                 mapboxCarContext.options.actionStripProvider
                     .getActionStrip(this, MapboxScreen.FAVORITES)
