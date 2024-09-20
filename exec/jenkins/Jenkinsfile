@@ -160,9 +160,9 @@ pipeline {
                 withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
                     sshagent(credentials: ['ubuntu']) { 
                         sh "ssh -o StrictHostKeyChecking=no ubuntu@$AWS_IP 'cd S11P21D102/exec/app && sudo docker-compose -f app-compose.yml down'"
-                        // sh "ssh -o StrictHostKeyChecking=no ubuntu@$AWS_IP 'nginx_images=\$(sudo docker images -q $DOCKER_USERNAME/mobipay_nginx:latest) && if [ -n \"\$nginx_images\" ]; then sudo docker rmi -f \$nginx_images; fi'"
-                        // sh "ssh -o StrictHostKeyChecking=no ubuntu@$AWS_IP 'mobipay_images=\$(sudo docker images -q $DOCKER_USERNAME/mobipay_mobipay:latest) && if [ -n \"\$mobipay_images\" ]; then sudo docker rmi -f \$mobipay_images; fi'"
-                        // sh "ssh -o StrictHostKeyChecking=no ubuntu@$AWS_IP 'merchant_images=\$(sudo docker images -q $DOCKER_USERNAME/mobipay_merchant:latest) && if [ -n \"\$merchant_images\" ]; then sudo docker rmi -f \$merchant_images; fi'"
+                        sh "ssh -o StrictHostKeyChecking=no ubuntu@$AWS_IP 'nginx_images=\$(sudo docker images -q $DOCKER_USERNAME/mobipay_nginx:latest) && if [ -n \"\$nginx_images\" ]; then sudo docker rmi -f \$nginx_images; fi'"
+                        sh "ssh -o StrictHostKeyChecking=no ubuntu@$AWS_IP 'mobipay_images=\$(sudo docker images -q $DOCKER_USERNAME/mobipay_mobipay:latest) && if [ -n \"\$mobipay_images\" ]; then sudo docker rmi -f \$mobipay_images; fi'"
+                        sh "ssh -o StrictHostKeyChecking=no ubuntu@$AWS_IP 'merchant_images=\$(sudo docker images -q $DOCKER_USERNAME/mobipay_merchant:latest) && if [ -n \"\$merchant_images\" ]; then sudo docker rmi -f \$merchant_images; fi'"
                         sh "ssh -o StrictHostKeyChecking=no ubuntu@$AWS_IP 'sudo docker image prune -f'"
                         sh "ssh -o StrictHostKeyChecking=no ubuntu@$AWS_IP 'cd S11P21D102/exec/app && sudo docker-compose -f app-compose.yml up -d'"
                     }
