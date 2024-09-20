@@ -11,11 +11,6 @@ services:
       MYSQL_PASSWORD: ${MOBI_PASSWORD}
       TZ: Asia/Soeul
       LANG: C.UTF-8
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 20s
-      timeout: 10s
-      retries: 3
     expose:
       - 3306
     networks:
@@ -34,11 +29,6 @@ services:
       MYSQL_PASSWORD: ${MER_PASSWORD}
       TZ: Asia/Soeul
       LANG: C.UTF-8
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 20s
-      timeout: 10s
-      retries: 3
     expose:
       - 3306
     networks:
