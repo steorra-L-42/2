@@ -2,7 +2,7 @@ package com.example.mobipay.domain.mobiuser.entity;
 
 import com.example.mobipay.domain.car.entity.Car;
 import com.example.mobipay.domain.cargroup.entity.CarGroup;
-import com.example.mobipay.domain.common.AuditableCreatedEntity;
+import com.example.mobipay.domain.common.entity.AuditableCreatedEntity;
 import com.example.mobipay.domain.invitation.entity.Invitation;
 import com.example.mobipay.domain.kakaotoken.entity.KakaoToken;
 import com.example.mobipay.domain.mobiuser.enums.Role;

@@ -1,6 +1,6 @@
 package com.example.mobipay.domain.ownedcard.entity;
 
-import com.example.mobipay.domain.common.AuditableCreatedEntity;
+import com.example.mobipay.domain.common.entity.AuditableCreatedEntity;
 import com.example.mobipay.domain.mobiuser.entity.MobiUser;
 import com.example.mobipay.domain.registeredcard.entity.RegisteredCard;
 import com.example.mobipay.domain.setupdomain.account.entity.Account;
