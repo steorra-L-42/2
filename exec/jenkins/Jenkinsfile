@@ -46,6 +46,7 @@ pipeline {
                                 dir('../../frontend/merchant_frontend') {
                                     echo "Delivery Nginx Image.."
                                     withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+										sh "ls -al"
                                         sh "echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin"
                                         sh "docker build -t $DOCKER_USERNAME/mobipay_nginx:${env.BUILD_ID} ."
                                         sh "docker tag $DOCKER_USERNAME/mobipay_nginx:${env.BUILD_ID} $DOCKER_USERNAME/mobipay_nginx:latest"
@@ -63,6 +64,7 @@ pipeline {
                             steps {
                                 echo "Mobipay Building.."
                                 dir('../../backend/mobipay_backend') {
+									sh "ls -al"
                                     sh 'chmod +x ./gradlew'
                                     sh './gradlew clean build -x test'
                                 }
@@ -73,6 +75,7 @@ pipeline {
                                 dir('../../backend/mobipay_backend') {
                                     echo "Push Mobipay Image.."
                                     withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+										sh "ls -al"
                                         sh "echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin"
                                         sh "docker build -t $DOCKER_USERNAME/mobipay_mobipay:${env.BUILD_ID} ."
                                         sh "docker tag $DOCKER_USERNAME/mobipay_mobipay:${env.BUILD_ID} $DOCKER_USERNAME/mobipay_mobipay:latest"
@@ -90,6 +93,7 @@ pipeline {
                             steps {
                                 echo "Merchant Building.."
                                 dir('../../backend/merchant_backend') {
+									sh "ls -al"
                                     sh 'chmod +x ./gradlew'
                                     sh './gradlew clean build -x test'
                                 }
@@ -100,6 +104,7 @@ pipeline {
                                 dir('../../backend/merchant_backend') {
                                     echo "Push Merchant Image.."
                                     withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+										sh "ls -al"
                                         sh "echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin"
                                         sh "docker build -t $DOCKER_USERNAME/mobipay_merchat:${env.BUILD_ID} ."
                                         sh "docker tag $DOCKER_USERNAME/mobipay_merchat:${env.BUILD_ID} $DOCKER_USERNAME/mobipay_merchant:latest"
