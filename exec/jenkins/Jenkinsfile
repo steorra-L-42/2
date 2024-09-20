@@ -113,10 +113,10 @@ pipeline {
 										sh "pwd"
 										sh "ls -al"
                                         sh "echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin"
-                                        sh "docker build -t $DOCKER_USERNAME/mobipay_merchat:${env.BUILD_ID} ."
-                                        sh "docker tag $DOCKER_USERNAME/mobipay_merchat:${env.BUILD_ID} $DOCKER_USERNAME/mobipay_merchant:latest"
-                                        sh "docker push $DOCKER_USERNAME/mobipay_merchat:${env.BUILD_ID}"
-                                        sh "docker push $DOCKER_USERNAME/mobipay_merchat:latest"
+                                        sh "docker build -t $DOCKER_USERNAME/mobipay_merchant:${env.BUILD_ID} ."
+                                        sh "docker tag $DOCKER_USERNAME/mobipay_merchant:${env.BUILD_ID} $DOCKER_USERNAME/mobipay_merchant:latest"
+                                        sh "docker push $DOCKER_USERNAME/mobipay_merchant:${env.BUILD_ID}"
+                                        sh "docker push $DOCKER_USERNAME/mobipay_merchant:latest"
                                     }
                                 }
                             }
