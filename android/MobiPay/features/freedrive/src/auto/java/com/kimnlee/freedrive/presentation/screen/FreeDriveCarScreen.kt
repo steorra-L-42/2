@@ -104,7 +104,7 @@ internal class FreeDriveCarScreen @UiThread constructor(
             .build()
 
         fun customBuildFavoritesAction(): Action = Action.Builder()
-            .setTitle("가맹점 전체보기")
+            .setTitle("주변가맹점 보기")
             .setOnClickListener {
                 MapboxScreenManager.push(MapboxScreen.FAVORITES)
             }
