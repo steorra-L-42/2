@@ -43,10 +43,9 @@ public class CarService {
         // 차량 & 차량 그룹 생성 및 연관관계 설정
         Car car = Car.from(request.getNumber());
         car.setOwner(mobiUser);
-        CarGroup carGroup = CarGroup.of(car, mobiUser);
-
-        // DB 저장
         carRepository.save(car);
+
+        CarGroup carGroup = CarGroup.of(car, mobiUser);
         carGroupRepository.save(carGroup);
 
         return CarRegisterResponse.of(car);
@@ -87,7 +86,7 @@ public class CarService {
     public CarListResponse getCars(CustomOAuth2User oauth2User) {
         MobiUser mobiUser = findMobiUser(oauth2User.getMobiUserId());
         List<Car> cars = carRepository.findAllByOwner(mobiUser);
-        
+
         return CarListResponse.from(cars);
     }
 }
