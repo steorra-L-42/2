@@ -8,6 +8,6 @@ import lombok.NoArgsConstructor;
 @EqualsAndHashCode
 public class CarGroupId implements Serializable {
 
-    private String carId;
-    private String mobiUserId;
+    private Long carId;
+    private Long mobiUserId;
 }

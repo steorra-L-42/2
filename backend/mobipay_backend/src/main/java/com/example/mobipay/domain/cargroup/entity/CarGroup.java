@@ -24,21 +24,23 @@ public class CarGroup {
     @Id
     @Column(name = "car_id")
     private Long carId;
-    
+
     @Id
     @Column(name = "mobi_user_id")
     private Long mobiUserId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "car_id")
+    @JoinColumn(name = "car_id", insertable = false, updatable = false)
     private Car car;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "mobi_user_id")
+    @JoinColumn(name = "mobi_user_id", insertable = false, updatable = false)
     private MobiUser mobiUser;
 
     public static CarGroup of(Car car, MobiUser mobiUser) {
         CarGroup carGroup = new CarGroup();
+        carGroup.carId = car.getId(); // carId 설정
+        carGroup.mobiUserId = mobiUser.getId(); // mobiUserId 설정
         carGroup.addRelation(car, mobiUser);
         return carGroup;
     }
