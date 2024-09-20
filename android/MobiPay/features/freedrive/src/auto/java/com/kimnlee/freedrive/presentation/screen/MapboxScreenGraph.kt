@@ -23,15 +23,11 @@ import com.mapbox.androidauto.screenmanager.factories.ActiveGuidanceFeedbackScre
 import com.mapbox.androidauto.screenmanager.factories.ActiveGuidanceScreenFactory
 import com.mapbox.androidauto.screenmanager.factories.ArrivalScreenFactory
 import com.mapbox.androidauto.screenmanager.factories.FavoritesFeedbackScreenFactory
-import com.mapbox.androidauto.screenmanager.factories.FavoritesScreenFactory
 import com.mapbox.androidauto.screenmanager.factories.FreeDriveFeedbackScreenFactory
-//import com.mapbox.androidauto.screenmanager.factories.FreeDriveScreenFactory
 import com.mapbox.androidauto.screenmanager.factories.GeoDeeplinkPlacesCarScreenFactory
 import com.mapbox.androidauto.screenmanager.factories.GeoDeeplinkPlacesFeedbackScreenFactory
 import com.mapbox.androidauto.screenmanager.factories.NeedsLocationPermissionScreenFactory
 import com.mapbox.androidauto.screenmanager.factories.RoutePreviewFeedbackScreenFactory
-import com.mapbox.androidauto.screenmanager.factories.RoutePreviewScreenFactory
-import com.mapbox.androidauto.screenmanager.factories.RoutePreviewScreenFactory2
 import com.mapbox.androidauto.screenmanager.factories.SearchPlacesFeedbackScreenFactory
 import com.mapbox.androidauto.screenmanager.factories.SearchPlacesScreenFactory
 import com.mapbox.androidauto.screenmanager.factories.SettingsScreenFactory
@@ -80,5 +76,5 @@ fun MapboxCarContext.prepareScreens() = apply {
 
 @ExperimentalPreviewMapboxNavigationAPI
 fun MapboxCarContext.prepareExperimentalRoutePreviewScreen() = apply {
-    mapboxScreenManager[ROUTE_PREVIEW] = RoutePreviewScreenFactory2(mapboxCarContext = this)
+    mapboxScreenManager[ROUTE_PREVIEW] = RoutePreviewScreenFactory(mapboxCarContext = this)
 }
