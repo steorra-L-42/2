@@ -29,6 +29,11 @@ public class JWTUtil {
                 .get("email", String.class);
     }
 
+    public Long getUserId(String token) {
+        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload()
+                .get("userId", Long.class);
+    }
+
     public String getName(String token) {
 
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload()
@@ -59,20 +64,26 @@ public class JWTUtil {
                 .before(new Date());
     }
 
-    public String createAccessToken(String email, String name, String phoneNumber, String picture, String role) {
-        return createJwt(ACCESS.getType(), email, name, phoneNumber, picture, role, ACCESS.getExpiration() * MS_TO_S);
+    public String createAccessToken(String email, Long userId, String name, String phoneNumber, String picture,
+                                    String role) {
+        return createJwt(ACCESS.getType(), email, userId, name, phoneNumber, picture, role,
+                ACCESS.getExpiration() * MS_TO_S);
     }
 
-    public String createRefreshToken(String email, String name, String phoneNumber, String picture, String role) {
-        return createJwt(REFRESH.getType(), email, name, phoneNumber, picture, role, REFRESH.getExpiration() * MS_TO_S);
+    public String createRefreshToken(String email, Long userId, String name, String phoneNumber, String picture,
+                                     String role) {
+        return createJwt(REFRESH.getType(), email, userId, name, phoneNumber, picture, role,
+                REFRESH.getExpiration() * MS_TO_S);
     }
 
-    public String createJwt(String category, String email, String name, String phoneNumber, String picture, String role,
+    public String createJwt(String category, String email, Long userId, String name, String phoneNumber, String picture,
+                            String role,
                             Long expiredMs) {
 
         return Jwts.builder()
                 .claim("category", category) // access, refresh 판단
                 .claim("email", email)
+                .claim("userId", userId)
                 .claim("name", name)
                 .claim("phoneNumber", phoneNumber)
                 .claim("picture", picture)

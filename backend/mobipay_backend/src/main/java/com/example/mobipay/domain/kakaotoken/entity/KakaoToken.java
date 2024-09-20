@@ -10,6 +10,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -36,4 +37,11 @@ public class KakaoToken {
 
     @OneToOne(mappedBy = "kakaoToken", fetch = FetchType.LAZY)
     private MobiUser mobiUser;
+
+    @Builder
+    private KakaoToken(String refreshValue, String accessValue, MobiUser mobiUser) {
+        this.refreshValue = refreshValue;
+        this.accessValue = accessValue;
+        this.mobiUser = mobiUser;
+    }
 }

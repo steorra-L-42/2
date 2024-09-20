@@ -27,6 +27,7 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.util.List;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -90,13 +91,20 @@ public class MobiUser extends AuditableCreatedEntity {
     @OneToMany(mappedBy = "mobiUser")
     private List<Account> accounts;
 
-    public static MobiUser create(String email, String name, String phoneNumber, String picture) {
-        MobiUser mobiUser = new MobiUser();
-        mobiUser.email = email;
-        mobiUser.name = name;
-        mobiUser.phoneNumber = phoneNumber;
-        mobiUser.picture = picture;
-        mobiUser.role = USER; // 기본 역할 설정
-        return mobiUser;
+    @Builder
+    private MobiUser(String email, String name, String phoneNumber, String picture) {
+        this.email = email;
+        this.name = name;
+        this.phoneNumber = phoneNumber;
+        this.picture = picture;
+    }
+
+
+    public void updatePicture(String picture) {
+        this.picture = picture;
+    }
+
+    public void deleteRefreshToken() {
+        this.refreshToken = null;
     }
 }

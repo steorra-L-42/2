@@ -1,13 +1,14 @@
 package com.example.mobipay.oauth2.dto;
 
+import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 
 @Getter
-@Setter
+@Builder
 public class UserDTO {
 
     //    private String username;
+    private Long userId;
     private String email;
     private String name;
     private String picture;

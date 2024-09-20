@@ -95,8 +95,10 @@ public class SecurityConfig {
         //oauth2
         http
                 .oauth2Login((oauth2) -> oauth2
-                        .userInfoEndpoint((userInfoEndpointConfig -> userInfoEndpointConfig
-                                .userService(customOauth2UserService)))
+                        .authorizationEndpoint(authorizationEndpointConfig ->
+                                authorizationEndpointConfig.baseUri("/api/v1/oauth2/authorization"))
+                        .userInfoEndpoint((userInfoEndpointConfig ->
+                                userInfoEndpointConfig.userService(customOauth2UserService)))
                         .successHandler(customSuccessHandler)
                 );
 

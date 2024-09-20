@@ -11,7 +11,7 @@ public interface OAuth2Response {
     String getEmail();
 
     // 사용자 닉네임
-    String getname();
+    String getName();
 
     // 프로필 이미지 URL
     String getPicture();
