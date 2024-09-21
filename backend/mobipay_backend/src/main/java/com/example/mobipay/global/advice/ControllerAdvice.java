@@ -1,6 +1,8 @@
 package com.example.mobipay.global.advice;
 
+import com.example.mobipay.domain.car.error.CarNotFoundException;
 import com.example.mobipay.domain.car.error.DuplicatedCarNumberException;
+import com.example.mobipay.domain.car.error.NotOwnerException;
 import com.example.mobipay.domain.mobiuser.error.MobiUserNotFoundException;
 import com.example.mobipay.global.error.ErrorCode;
 import com.example.mobipay.global.error.ErrorResponseDto;
@@ -23,6 +25,18 @@ public class ControllerAdvice {
     public ResponseEntity<ErrorResponseDto> handleMobiUserNotFoundException(MobiUserNotFoundException e) {
         log.info(e.getMessage());
         return getResponse(ErrorCode.MOBI_USER_NOT_FOUND);
+    }
+
+    @ExceptionHandler(CarNotFoundException.class)
+    public ResponseEntity<ErrorResponseDto> handleCarNotFoundException(CarNotFoundException e) {
+        log.info(e.getMessage());
+        return getResponse(ErrorCode.CAR_NOT_FOUND);
+    }
+
+    @ExceptionHandler(NotOwnerException.class)
+    public ResponseEntity<ErrorResponseDto> handleNotOwnerException(NotOwnerException e) {
+        log.info(e.getMessage());
+        return getResponse(ErrorCode.NOT_OWNER);
     }
 
     private ResponseEntity<ErrorResponseDto> getResponse(ErrorCode errorCode) {

@@ -1,5 +1,7 @@
 package com.example.mobipay.util;
 
+import static org.mockito.Mockito.when;
+
 import com.example.mobipay.oauth2.dto.CustomOAuth2User;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -15,4 +17,8 @@ public class SecurityTestUtil {
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 
+    public static void setUpMockUser(CustomOAuth2User customOAuth2User, Long mobiUserId) {
+        when(customOAuth2User.getMobiUserId()).thenReturn(mobiUserId);
+        SecurityTestUtil.setUpSecurityContext(customOAuth2User);
+    }
 }

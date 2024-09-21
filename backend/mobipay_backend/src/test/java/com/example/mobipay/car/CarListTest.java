@@ -1,7 +1,7 @@
 package com.example.mobipay.car;
 
-import static com.example.mobipay.global.error.ErrorCode.DUPLICATED_CAR_NUMBER;
 import static com.example.mobipay.global.error.ErrorCode.MOBI_USER_NOT_FOUND;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -9,22 +9,18 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.example.mobipay.MobiPayApplication;
 import com.example.mobipay.domain.car.entity.Car;
 import com.example.mobipay.domain.car.repository.CarRepository;
-import com.example.mobipay.domain.cargroup.repository.CarGroupRepository;
 import com.example.mobipay.domain.mobiuser.entity.MobiUser;
 import com.example.mobipay.domain.mobiuser.repository.MobiUserRepository;
 import com.example.mobipay.oauth2.dto.CustomOAuth2User;
 import com.example.mobipay.util.SecurityTestUtil;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -36,44 +32,24 @@ import org.springframework.web.filter.CharacterEncodingFilter;
 @SpringBootTest
 @ContextConfiguration(classes = MobiPayApplication.class)
 @AutoConfigureMockMvc
+public class CarListTest {
 
-public class CarRegisterTest {
+    private static final Integer TEST_CAR_COUNT = 5;
+    private static final String TEST_CAR_PREFIX = "testCar";
 
     @Autowired
     private MockMvc mockMvc;
     @Autowired
     private WebApplicationContext context;
     @Autowired
-    private ObjectMapper objectMapper;
-    @Autowired
     private CarRepository carRepository;
-    @Autowired
-    private CarGroupRepository carGroupRepository;
     @Autowired
     private MobiUserRepository mobiUserRepository;
 
     @Mock
     private CustomOAuth2User customOAuth2User;
     private MobiUser testUser;
-
-    private static Stream<Arguments> validParameter() {
-        return Stream.of(
-                Arguments.of("차량 등록 테스트", "09너3649"),
-                Arguments.of("차량 등록 테스트", "77칠7777")
-        );
-    }
-
-    private static Stream<Arguments> ConflictParameter() {
-        return Stream.of(
-                Arguments.of("중복된 차량 등록 테스트", "testCar")
-        );
-    }
-
-    private static Stream<Arguments> NotFoundParameter() {
-        return Stream.of(
-                Arguments.of("존재하지 않는 유저 차량 등록 테스트", "12삼4567")
-        );
-    }
+    private Long[] carIds;
 
     @BeforeEach()
     void EncodingSetUp() {
@@ -86,7 +62,6 @@ public class CarRegisterTest {
     @Transactional
     @BeforeEach
     void mockMvcSetUp() {
-        carGroupRepository.deleteAll();
         carRepository.deleteAll();
         mobiUserRepository.deleteAll();
         mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
@@ -96,49 +71,69 @@ public class CarRegisterTest {
     void entitySetUp() {
         testUser = MobiUser.of("email", "name", "phoneNumber", "picture");
         mobiUserRepository.save(testUser);
-
-        Car testCar = Car.from("testCar");
-        testCar.setOwner(testUser);
-        carRepository.save(testCar);
     }
 
-    @ParameterizedTest(name = "{index}: {0}")
-    @MethodSource("validParameter")
-    @DisplayName("[OK] car register : 자동차 등록")
-    void 올바른_차량_등록_테스트(String testName, String carNumber) throws Exception {
+    @Test
+    @DisplayName("[OK] car list : 자동차 조회")
+    void 올바른_차량_조회_테스트() throws Exception {
         SecurityTestUtil.setUpMockUser(customOAuth2User, testUser.getId());
+        createCars();
+
         // when
-        ResultActions result = CarTestUtil.performCarRegistration(mockMvc, objectMapper, carNumber);
-        Car createdCar = carRepository.findByNumber(carNumber).get();
+        ResultActions result = performViewCarList();
+
+        Car createdCar = carRepository.findByNumber(TEST_CAR_PREFIX + TEST_CAR_COUNT).get();
+        Long ownerId = createdCar.getOwner().getId();
         // then
         result.andExpect(status().isOk())
-                .andExpect(jsonPath("$.carId").value(createdCar.getId()))
-                .andExpect(jsonPath("$.number").value(carNumber))
-                .andExpect(jsonPath("$.autoPayStatus").value(false))
-                .andExpect(jsonPath("$.ownerId").value(testUser.getId()));
+                .andExpect(jsonPath("$.items.length()").value(TEST_CAR_COUNT)); // 차량 개수 테스트
+
+        // carId, number, autoPayStatus, ownerId 테스트
+        for (int i = 0; i < TEST_CAR_COUNT; i++) {
+            result.andExpect(jsonPath("$.items[" + i + "].carId").value(carIds[i]))
+                    .andExpect(jsonPath("$.items[" + i + "].number").value(TEST_CAR_PREFIX + (i + 1)))
+                    .andExpect(jsonPath("$.items[" + i + "].autoPayStatus").value(false))
+                    .andExpect(jsonPath("$.items[" + i + "].ownerId").value(ownerId));
+        }
     }
 
-    @ParameterizedTest(name = "{index}: {0}")
-    @MethodSource("ConflictParameter")
-    @DisplayName("[Conflict] car register : 자동차 등록")
-    void 중복된_차량_등록_테스트(String testName, String carNumber) throws Exception {
+    @Test
+    @DisplayName("[NoContent] car list : 자동차 조회")
+    void 차량_없는경우_테스트() throws Exception {
         SecurityTestUtil.setUpMockUser(customOAuth2User, testUser.getId());
+
         // when
-        ResultActions result = CarTestUtil.performCarRegistration(mockMvc, objectMapper, carNumber);
+        ResultActions result = performViewCarList();
         // then
-        result.andExpect(status().isConflict())
-                .andExpect(jsonPath("$.message").value(DUPLICATED_CAR_NUMBER.getMessage()));
+        result.andExpect(status().isNoContent());
     }
 
-    @ParameterizedTest(name = "{index}: {0}")
-    @MethodSource("NotFoundParameter")
-    @DisplayName("[NotFound] car register : 자동차 등록")
-    void 존재하지_않는_유저_차량_등록_테스트(String testName, String carNumber) throws Exception {
+    @Test
+    @DisplayName("[NotFound] car list : 자동차 조회")
+    void 존재하지_않는_유저_차량_등록_테스트() throws Exception {
         SecurityTestUtil.setUpMockUser(customOAuth2User, 123456789L);
+
         // when
-        ResultActions result = CarTestUtil.performCarRegistration(mockMvc, objectMapper, carNumber);
+        ResultActions result = performViewCarList();
         // then
         result.andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value(MOBI_USER_NOT_FOUND.getMessage()));
+    }
+
+    private void createCars() {
+        carIds = new Long[TEST_CAR_COUNT];
+
+        for (int i = 0; i < TEST_CAR_COUNT; i++) {
+            Car testCar = Car.from(TEST_CAR_PREFIX + (i + 1));
+            testCar.setOwner(testUser);
+            carRepository.save(testCar);
+            carIds[i] = testCar.getId();
+        }
+    }
+
+    private ResultActions performViewCarList() throws Exception {
+        return mockMvc.perform(get("/api/v1/cars")
+                .accept(MediaType.APPLICATION_JSON_VALUE)
+                .contentType(MediaType.APPLICATION_JSON_VALUE));
     }
 }

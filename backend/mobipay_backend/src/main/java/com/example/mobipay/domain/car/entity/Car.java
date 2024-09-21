@@ -65,4 +65,8 @@ public class Car extends AuditableCreatedEntity {
         this.owner = mobiUser;
         mobiUser.getCars().add(this);
     }
+
+    public void changeAutoPayStatus(Boolean status) {
+        this.autoPayStatus = status;
+    }
 }

@@ -1,5 +1,7 @@
 package com.example.mobipay.domain.car.controller;
 
+import com.example.mobipay.domain.car.dto.CarAutoPayChangeRequest;
+import com.example.mobipay.domain.car.dto.CarAutoPayChangeResponse;
 import com.example.mobipay.domain.car.dto.CarListResponse;
 import com.example.mobipay.domain.car.dto.CarRegisterRequest;
 import com.example.mobipay.domain.car.dto.CarRegisterResponse;
@@ -10,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -39,5 +42,14 @@ public class CarController {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.ok(carListResponse);
+    }
+
+    @PatchMapping("/auto-pay")
+    public ResponseEntity<CarAutoPayChangeResponse> changeAutoPayStatus(
+            @RequestBody @Valid CarAutoPayChangeRequest request, @AuthenticationPrincipal CustomOAuth2User oauth2User) {
+
+        CarAutoPayChangeResponse response = carService.changeAutoPayStatus(request, oauth2User);
+
+        return ResponseEntity.ok(response);
     }
 }
