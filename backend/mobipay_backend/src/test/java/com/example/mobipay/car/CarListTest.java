@@ -1,6 +1,6 @@
 package com.example.mobipay.car;
 
-import static org.mockito.Mockito.when;
+import static com.example.mobipay.global.error.ErrorCode.MOBI_USER_NOT_FOUND;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -34,6 +34,9 @@ import org.springframework.web.filter.CharacterEncodingFilter;
 @AutoConfigureMockMvc
 public class CarListTest {
 
+    private static final Integer TEST_CAR_COUNT = 5;
+    private static final String TEST_CAR_PREFIX = "testCar";
+
     @Autowired
     private MockMvc mockMvc;
     @Autowired
@@ -46,10 +49,7 @@ public class CarListTest {
     @Mock
     private CustomOAuth2User customOAuth2User;
     private MobiUser testUser;
-
     private Long[] carIds;
-    private static final Integer TEST_CAR_COUNT = 5;
-    private static final String TEST_CAR_PREFIX = "testCar";
 
     @BeforeEach()
     void EncodingSetUp() {
@@ -76,7 +76,7 @@ public class CarListTest {
     @Test
     @DisplayName("[OK] car list : 자동차 조회")
     void 올바른_차량_조회_테스트() throws Exception {
-        setUpSecurity(testUser.getId());
+        SecurityTestUtil.setUpMockUser(customOAuth2User, testUser.getId());
         createCars();
 
         // when
@@ -100,7 +100,7 @@ public class CarListTest {
     @Test
     @DisplayName("[NoContent] car list : 자동차 조회")
     void 차량_없는경우_테스트() throws Exception {
-        setUpSecurity(testUser.getId());
+        SecurityTestUtil.setUpMockUser(customOAuth2User, testUser.getId());
 
         // when
         ResultActions result = performViewCarList();
@@ -111,17 +111,13 @@ public class CarListTest {
     @Test
     @DisplayName("[NotFound] car list : 자동차 조회")
     void 존재하지_않는_유저_차량_등록_테스트() throws Exception {
-        setUpSecurity(123456789L);
+        SecurityTestUtil.setUpMockUser(customOAuth2User, 123456789L);
 
         // when
         ResultActions result = performViewCarList();
         // then
-        result.andExpect(status().isNotFound());
-    }
-
-    private void setUpSecurity(Long mobiUserId) {
-        when(customOAuth2User.getMobiUserId()).thenReturn(mobiUserId);
-        SecurityTestUtil.setUpSecurityContext(customOAuth2User);
+        result.andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value(MOBI_USER_NOT_FOUND.getMessage()));
     }
 
     private void createCars() {

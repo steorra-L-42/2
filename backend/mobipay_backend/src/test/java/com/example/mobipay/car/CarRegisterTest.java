@@ -2,14 +2,11 @@ package com.example.mobipay.car;
 
 import static com.example.mobipay.global.error.ErrorCode.DUPLICATED_CAR_NUMBER;
 import static com.example.mobipay.global.error.ErrorCode.MOBI_USER_NOT_FOUND;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.example.mobipay.MobiPayApplication;
-import com.example.mobipay.domain.car.dto.CarRegisterRequest;
 import com.example.mobipay.domain.car.entity.Car;
 import com.example.mobipay.domain.car.repository.CarRepository;
 import com.example.mobipay.domain.cargroup.repository.CarGroupRepository;
@@ -28,7 +25,6 @@ import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -110,9 +106,9 @@ public class CarRegisterTest {
     @MethodSource("validParameter")
     @DisplayName("[OK] car register : 자동차 등록")
     void 올바른_차량_등록_테스트(String testName, String carNumber) throws Exception {
-        setUpSecurity(testUser.getId());
+        SecurityTestUtil.setUpMockUser(customOAuth2User, testUser.getId());
         // when
-        ResultActions result = performCarRegistration(carNumber);
+        ResultActions result = CarTestUtil.performCarRegistration(mockMvc, objectMapper, carNumber);
         Car createdCar = carRepository.findByNumber(carNumber).get();
         // then
         result.andExpect(status().isOk())
@@ -126,9 +122,9 @@ public class CarRegisterTest {
     @MethodSource("ConflictParameter")
     @DisplayName("[Conflict] car register : 자동차 등록")
     void 중복된_차량_등록_테스트(String testName, String carNumber) throws Exception {
-        setUpSecurity(testUser.getId());
+        SecurityTestUtil.setUpMockUser(customOAuth2User, testUser.getId());
         // when
-        ResultActions result = performCarRegistration(carNumber);
+        ResultActions result = CarTestUtil.performCarRegistration(mockMvc, objectMapper, carNumber);
         // then
         result.andExpect(status().isConflict())
                 .andExpect(jsonPath("$.message").value(DUPLICATED_CAR_NUMBER.getMessage()));
@@ -138,30 +134,11 @@ public class CarRegisterTest {
     @MethodSource("NotFoundParameter")
     @DisplayName("[NotFound] car register : 자동차 등록")
     void 존재하지_않는_유저_차량_등록_테스트(String testName, String carNumber) throws Exception {
-        setUpSecurity(123456789L);
+        SecurityTestUtil.setUpMockUser(customOAuth2User, 123456789L);
         // when
-        ResultActions result = performCarRegistration(carNumber);
+        ResultActions result = CarTestUtil.performCarRegistration(mockMvc, objectMapper, carNumber);
         // then
         result.andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value(MOBI_USER_NOT_FOUND.getMessage()));
-    }
-
-    private void setUpSecurity(Long mobiUserId) {
-        when(customOAuth2User.getMobiUserId()).thenReturn(mobiUserId);
-        SecurityTestUtil.setUpSecurityContext(customOAuth2User);
-    }
-
-
-    private String createCarRegisterRequest(String carNumber) throws Exception {
-        CarRegisterRequest carRegisterRequest = new CarRegisterRequest(carNumber);
-        return objectMapper.writeValueAsString(carRegisterRequest);
-    }
-
-    private ResultActions performCarRegistration(String carNumber) throws Exception {
-        String requestBody = createCarRegisterRequest(carNumber);
-        return mockMvc.perform(post("/api/v1/cars")
-                .accept(MediaType.APPLICATION_JSON_VALUE)
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(requestBody));
     }
 }
