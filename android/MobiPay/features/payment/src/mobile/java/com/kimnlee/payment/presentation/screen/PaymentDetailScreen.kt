@@ -1,41 +1,31 @@
 package com.kimnlee.payment.presentation.screen
 
-import androidx.compose.foundation.Canvas
+import android.content.Context
+import android.location.Geocoder
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.focusModifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.PathEffect
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.layout.AlignmentLine
-import androidx.compose.ui.layout.VerticalAlignmentLine
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.font.FontWeight.Companion.W100
-import androidx.compose.ui.text.font.FontWeight.Companion.W900
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kimnlee.common.R
-import org.w3c.dom.Text
+import com.kimnlee.common.components.DashedDivider
+import com.kimnlee.payment.data.MerchantTransaction
+import com.kimnlee.payment.data.dummyMerchants
+import java.util.Locale
 
 @Composable
 fun PaymentDetailScreen(
-    bill: Map<String, Any>, onNavigateBack: () -> Unit
+    transaction: MerchantTransaction,
+    onNavigateBack: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -43,6 +33,7 @@ fun PaymentDetailScreen(
             .padding(32.dp)
             .verticalScroll(rememberScrollState())
     ) {
+        val merchant = dummyMerchants.find { it.merchant_id == transaction.merchant_id }
         Box(modifier = Modifier.fillMaxWidth()) {
             Button(
                 onClick = onNavigateBack,
@@ -58,11 +49,11 @@ fun PaymentDetailScreen(
         }
         Spacer(modifier = Modifier.padding(16.dp))
         // 기게 이름
-        Text(text = "${bill["store_name"]}", style = MaterialTheme.typography.headlineMedium)
+        Text(text = merchant!!.merchant_name, style = MaterialTheme.typography.headlineMedium)
         // 소요 금액
         Row {
             Text(
-                text = "${bill["payment_balance"]}",
+                text = "${transaction.payment_balance}",
                 fontWeight = FontWeight(700),
                 fontSize = 32.sp,
                 style = MaterialTheme.typography.headlineMedium,
@@ -89,7 +80,7 @@ fun PaymentDetailScreen(
         HorizontalDivider(thickness = 4.dp, color = Color.Black)
         //공급가액 부가세 봉사료
         Column {
-            DetailItem(title = "공급가액", content = "${bill["payment_balance"]}")
+            DetailItem(title = "공급가액", content = "${transaction.payment_balance}")
             DetailItem(title = "부가세", content = "0")
             DetailItem(title = "봉사료", content = "0")
         }
@@ -100,7 +91,7 @@ fun PaymentDetailScreen(
                 .padding(vertical = 16.dp),
             color = Color(0, 0, 0, 50)
         )
-        DetailItem(title = "결제금액", content = "${bill["payment_balance"]} + 부가세 + 봉사료")
+        DetailItem(title = "결제금액", content = "${transaction.payment_balance} + 부가세 + 봉사료")
 
         HorizontalDivider(
             thickness = 8.dp,
@@ -112,12 +103,12 @@ fun PaymentDetailScreen(
             DetailItem(title = "거래구분", content = "싸피카드(5612)")
             DetailItem(title = "거래 유형", content = "국내 승인")
             DetailItem(
-                title = "거래 일시", content = "${bill["transaction_date"]} ${bill["transaction_time"]}"
+                title = "거래 일시", content = "${transaction.transaction_date} ${transaction.transaction_time}"
             )
             DetailItem(title = "승인 번호", content = "31961357")
-            DetailItem(title = "할부", content = "${bill["info"]}")
-            DetailItem(title = "가맹점 번호", content = "761635802")
-            DetailItem(title = "결제 금액", content = "${bill["payment_balance"]}")
+            DetailItem(title = "할부", content = transaction.info)
+            DetailItem(title = "가맹점 번호", content = "${transaction.merchant_id}")
+            DetailItem(title = "결제 금액", content = "${transaction.payment_balance}")
         }
         DashedDivider(
             thickness = 1.dp,
@@ -128,10 +119,8 @@ fun PaymentDetailScreen(
         )
         // 상호 ~ 주소
         Column {
-            DetailItem(title = "상호", content = "${bill["store_name"]}")
-            DetailItem(title = "사업자 번호", content = "123-45-67890")
-            DetailItem(title = "대표자명", content = "싸피왕")
-            DetailItem(title = "전화번호", content = "02-1588-3366")
+            DetailItem(title = "상호", content = merchant.merchant_name)
+            DetailItem(title = "가맹점 종류", content = merchant.category_id)
             DetailItem("주소", "서울특별시 송파구 잠실로 51-31")
         }
     }
@@ -153,25 +142,19 @@ fun DetailItem(
     }
 }
 
-// 점선
-@Composable
-fun DashedDivider(
-    thickness: Dp,
-    color: Color = MaterialTheme.colorScheme.onSurfaceVariant,
-    phase: Float = 10f,
-    intervals: FloatArray = floatArrayOf(10f, 10f),
-    modifier: Modifier
-) {
-    Canvas(
-        modifier = modifier
-    ) {
-        val dividerHeight = thickness.toPx()
-        drawRoundRect(
-            color = color, style = Stroke(
-                width = dividerHeight, pathEffect = PathEffect.dashPathEffect(
-                    intervals = intervals, phase = phase
-                )
-            )
-        )
+//위도 경도로 주소 구하는 Reverse-GeoCoding
+private fun getAddressFromLocation(context: Context, latitude: Double, longitude: Double): String? {
+    try {
+        val geocoder = Geocoder(context, Locale.KOREA)
+        val addresses = geocoder.getFromLocation(latitude, longitude, 1)
+
+        // 주소가 존재할 경우
+        if (addresses != null && addresses.isNotEmpty()) {
+            val address = addresses[0]
+            return address.getAddressLine(0) // 전체 주소 반환
+        }
+    } catch (e: Exception) {
+        e.printStackTrace() // 예외 발생시 로그 출력
     }
+    return null
 }

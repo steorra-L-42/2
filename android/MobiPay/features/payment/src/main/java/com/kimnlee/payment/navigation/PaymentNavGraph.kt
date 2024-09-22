@@ -5,7 +5,10 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.kimnlee.common.components.BottomNavigation
-import com.kimnlee.payment.data.dummyBillData
+import com.kimnlee.payment.data.Merchant
+import com.kimnlee.payment.data.MerchantTransaction
+import com.kimnlee.payment.data.dummyMerchants
+import com.kimnlee.payment.data.dummyTransactions
 import com.kimnlee.payment.presentation.screen.PaymentDetailScreen
 import com.kimnlee.payment.presentation.screen.PaymentScreen
 
@@ -14,20 +17,30 @@ fun NavGraphBuilder.paymentNavGraph(navController: NavHostController) {
         composable("payment_main") {
             BottomNavigation(navController) {
                 PaymentScreen(
-                    onNavigateToDetail = { bill ->
-                        val transactionUniqueNo = bill["transaction_unique_no"].toString()
-                        navController.navigate("payment_detail/$transactionUniqueNo")
+                    transactions = dummyTransactions,
+                    merchants = dummyMerchants,
+                    onNavigateToDetail = { transaction ->
+                        navController.navigate("payment_detail/${transaction.transaction_unique_no}")
                     },
                     onNavigateBack = { navController.navigateUp() }
                 )
             }
         }
-        composable("payment_detail/{id}") {
-            val id = it.arguments?.getString("id")?.toIntOrNull()
+        composable("payment_detail/{transactionUniqueNo}") {
+            val transactionUniqueNo = it.arguments?.getString("transactionUniqueNo")?.toLongOrNull() ?: 0L
             BottomNavigation(navController) {
                 PaymentDetailScreen(
-//                    id = id, // 이거 이렇게 넣어도 되는거 맞나?
-                    bill =  dummyBillData[id!!],
+                    transaction =  dummyTransactions.find { it.transaction_unique_no == transactionUniqueNo} ?: MerchantTransaction(
+                        transaction_unique_no = 0,
+                        transaction_date = "",
+                        transaction_time = "",
+                        payment_balance = 0,
+                        info = "",
+                        cancelled = false,
+                        merchant_id = 0,
+                        mobi_user_id = 0,
+                        owned_card_id = 0
+                    ),
                     onNavigateBack = { navController.navigateUp() }
                 )
             }

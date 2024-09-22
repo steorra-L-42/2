@@ -23,11 +23,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.kimnlee.common.R
-import com.kimnlee.payment.data.dummyBillData
+import com.kimnlee.payment.data.Merchant
+import com.kimnlee.payment.data.MerchantTransaction
+import com.kimnlee.payment.data.dummyTransactions
 
 @Composable
 fun PaymentScreen(
-    onNavigateToDetail: (bill : Map<String,Any>) -> Unit,
+    transactions: List<MerchantTransaction>,
+    merchants: List<Merchant>,
+    onNavigateToDetail: (transaction : MerchantTransaction) -> Unit,
     onNavigateBack: () -> Unit
 ) {
 
@@ -49,7 +53,7 @@ fun PaymentScreen(
         LazyColumn(
 //            modifier = Modifier.fillMaxWidth(),
         ){
-            items(dummyBillData) { bill ->
+            items(transactions) { transaction ->
                 Row(
                     modifier = Modifier
                         .padding(8.dp) // 카드 간의 간격 설정
@@ -59,18 +63,20 @@ fun PaymentScreen(
                 ) {
                     Column (modifier = Modifier
                         .weight(0.5f)
-//                        .background(Color.Red)
                     ){
                         // 가게이름
-                        Text(text = "${bill["store_name"]}",style = MaterialTheme.typography.headlineSmall)
+                        Text(
+                            text = merchants.find { it.merchant_id == transaction.merchant_id }?.merchant_name ?: "Unknown Merchant",
+                            style = MaterialTheme.typography.headlineSmall
+                        )
                         //시간 + 일시불
                         Row (
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceAround
                         ){
-                            Text("${bill["transaction_date"]}")
-                            Text("${bill["transaction_time"]}")
-                            Text("${bill["info"]}" )
+                            Text(transaction.transaction_date)
+                            Text(transaction.transaction_time)
+                            Text(transaction.info)
                         }
                     }
                     Box( // Box를 사용하여 이미지의 높이를 부모에 맞춤
@@ -85,11 +91,11 @@ fun PaymentScreen(
                             contentScale = ContentScale.Crop,
                             modifier = Modifier.fillMaxSize()
                                 .background(Color.Gray)
-                                .clickable { onNavigateToDetail(bill) }
+                                .clickable {onNavigateToDetail(transaction)}
                         )
                     }
                     Text(
-                        text = "${bill["payment_balance"]}원",
+                        text = "${transaction.payment_balance}원",
                         modifier = Modifier
 //                            .background(Color.Red)
                             .weight(0.2f),
