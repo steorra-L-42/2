@@ -10,7 +10,6 @@ import com.mapbox.androidauto.navigation.lanes.CarLanesImageRenderer
 import com.mapbox.androidauto.navigation.maneuver.CarManeuverIconOptions
 import com.mapbox.androidauto.navigation.maneuver.CarManeuverIconRenderer
 import com.mapbox.androidauto.navigation.maneuver.CarManeuverInstructionRenderer
-import com.mapbox.maps.MAPBOX_ACCESS_TOKEN_RESOURCE_NAME
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.formatter.MapboxDistanceFormatter
 import com.mapbox.navigation.ui.maneuver.api.MapboxManeuverApi
@@ -64,12 +63,7 @@ internal class CarNavigationInfoServices {
 
     private fun Context.getResourceAccessToken(): String? =
         runCatching {
-            val resId = resources.getIdentifier(
-                MAPBOX_ACCESS_TOKEN_RESOURCE_NAME,
-                "string",
-                packageName
-            )
-            getString(resId)
+            getString(com.kimnlee.common.R.string.mapbox_access_token)
         }.getOrNull()
 
     fun mapUserStyleObserver() = MapUserStyleObserver()
