@@ -1,6 +1,5 @@
 package com.kimnlee.freedrive.presentation.screen
 
-import android.util.Log
 import androidx.car.app.Screen
 import androidx.car.app.model.Action
 import androidx.car.app.model.ActionStrip
@@ -18,7 +17,6 @@ import com.mapbox.androidauto.navigation.CarActiveGuidanceMarkers
 import com.mapbox.androidauto.navigation.CarArrivalTrigger
 import com.mapbox.androidauto.navigation.CarCameraMode
 import com.mapbox.androidauto.navigation.CarNavigationCamera
-import com.mapbox.androidauto.navigation.CarNavigationInfoProvider
 import com.mapbox.androidauto.navigation.audioguidance.CarAudioGuidanceAction
 import com.mapbox.androidauto.navigation.roadlabel.CarRoadLabelRenderer
 import com.mapbox.androidauto.navigation.speedlimit.CarSpeedLimitRenderer
@@ -89,8 +87,9 @@ internal class ActiveGuidanceScreen constructor(
                 "The CarArrivalTrigger must be attached while in active guidance."
             }
             // 여기에 남은 거리 초기화 시켜주기
-
             MapboxNavigationApp.current()?.setNavigationRoutes(emptyList())
+            navigationInfoProvider.resetNavigationInfo()
+            // 경로 안내 취소 후 자유주행 화면으로 이동
             MapboxScreenManager.replaceTop(MapboxScreen.FREE_DRIVE)
         }
 
