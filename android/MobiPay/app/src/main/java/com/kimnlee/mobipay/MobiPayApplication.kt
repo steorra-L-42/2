@@ -5,7 +5,6 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.media.AudioAttributes
 import android.media.RingtoneManager
-import android.os.Build
 import android.util.Log
 import com.google.firebase.FirebaseApp
 import com.mapbox.navigation.base.options.NavigationOptions
@@ -25,7 +24,7 @@ class MobiPayApplication : Application() {
         MapboxNavigationApp.setup(
 
             NavigationOptions.Builder(applicationContext)
-                .accessToken(getString(R.string.mapbox_access_token))
+                .accessToken(getString(com.kimnlee.common.R.string.mapbox_access_token))
                 .build()
         ).attachAllActivities(this)
     }
