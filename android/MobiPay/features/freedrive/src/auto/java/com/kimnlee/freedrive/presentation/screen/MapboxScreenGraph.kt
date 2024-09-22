@@ -28,7 +28,6 @@ import com.mapbox.androidauto.screenmanager.factories.GeoDeeplinkPlacesFeedbackS
 import com.mapbox.androidauto.screenmanager.factories.NeedsLocationPermissionScreenFactory
 import com.mapbox.androidauto.screenmanager.factories.RoutePreviewFeedbackScreenFactory
 import com.mapbox.androidauto.screenmanager.factories.SearchPlacesFeedbackScreenFactory
-import com.mapbox.androidauto.screenmanager.factories.SearchPlacesScreenFactory
 import com.mapbox.androidauto.screenmanager.factories.SettingsScreenFactory
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 
