@@ -65,4 +65,7 @@ dependencies {
 //    implementation("androidx.car.app:app:1.2.0")
     api("com.mapbox.navigation:ui-androidauto:0.22.0")
     api("com.mapbox.navigation:ui-dropin:2.20.2")
+    api("com.mapbox.search:mapbox-search-android-ui:1.4.0")
+    api("com.mapbox.search:mapbox-search-android:1.4.0")
+    // mapbox navigation이랑 search sdk는 이렇게 호환되므로 버전 변경시 mapbox 깃헙에서 호환되는거 확인해야 함
 }
