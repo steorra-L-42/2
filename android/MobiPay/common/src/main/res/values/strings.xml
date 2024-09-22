@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="home">Home</string>
+    <string name="payment">결제 내역</string>
+    <string name="card_management">카드 관리</string>
+    <string name="settings">설정</string>
+
+    <string name="mapbox_access_token" translatable="false" tools:ignore="UnusedResources">pk.eyJ1IjoiaGFydmV5bCIsImEiOiJjbTEzN2wydmMxMHo1MmxwdDZ5ZHJ4bWk3In0.EnJcX2e8Lv2wSmoMaMW4tQ</string>
+</resources>

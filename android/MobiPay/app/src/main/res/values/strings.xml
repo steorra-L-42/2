@@ -1,6 +1,5 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">MobiPay</string>
-    <string name="mapbox_access_token" translatable="false" tools:ignore="UnusedResources">pk.eyJ1IjoiaGFydmV5bCIsImEiOiJjbTEzN2wydmMxMHo1MmxwdDZ5ZHJ4bWk3In0.EnJcX2e8Lv2wSmoMaMW4tQ</string>
     <string name="BASE_URL">http://54.250.106.89:8080/</string>
 <!--    <string name="BASE_URL">https://ec2.mobipay.kr</string>-->
 </resources>
