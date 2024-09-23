@@ -10,6 +10,9 @@ import android.util.Patterns
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.ImeAction
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 @Composable
 fun SignUpScreen(
@@ -19,6 +22,15 @@ fun SignUpScreen(
 ) {
     var email by remember { mutableStateOf("") }
     var emailError by remember { mutableStateOf(false) }
+    var isLoading by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf("") }
+    var signUpSuccess by remember { mutableStateOf(false) }
+
+    LaunchedEffect(signUpSuccess) {
+        if (signUpSuccess) {
+            onNavigateToHome()
+        }
+    }
 
     Column {
         Spacer(modifier = Modifier.height(300.dp))
@@ -45,20 +57,38 @@ fun SignUpScreen(
                 modifier = Modifier.padding(start = 16.dp)
             )
         }
+        if (errorMessage.isNotEmpty()) {
+            Text(
+                text = errorMessage,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.padding(start = 16.dp)
+            )
+        }
         Spacer(modifier = Modifier.height(16.dp))
-        Button(
-            onClick = {
-                if (!emailError) {
-                    onNavigateToHome() // api 요청 보내기
-                }
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(50.dp)
-        ) {
-            Text("Sign Up")
+
+        if (isLoading) {
+            CircularProgressIndicator()
+        } else {
+            Button(
+                onClick = {
+                    if (!emailError) {
+                        isLoading = true
+                        CoroutineScope(Dispatchers.Main).launch {
+                            signUp(email, authManager, { signUpSuccess = true }, { errorMessage = it }) {
+                                isLoading = false
+                            }
+                        }
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp)
+            ) {
+                Text("회원가입")
+            }
         }
         Spacer(modifier = Modifier.height(150.dp))
+
         Button(
             onClick = { onNavigateToBack() },
             modifier = Modifier
@@ -72,4 +102,25 @@ fun SignUpScreen(
 
 private fun isValidEmail(email: String): Boolean {
     return Patterns.EMAIL_ADDRESS.matcher(email).matches()
+}
+
+private suspend fun signUp(
+    email: String,
+    authManager: AuthManager,
+    onSuccess: () -> Unit,
+    onError: (String) -> Unit,
+    onFinally: () -> Unit
+) {
+    try {
+        val response = authManager.signUp(email)
+        if (response.success) {
+            onSuccess()
+        } else {
+            onError(response.message)
+        }
+    } catch (e: Exception) {
+        onError("회원가입 중 오류가 발생했습니다.")
+    } finally {
+        onFinally()
+    }
 }
