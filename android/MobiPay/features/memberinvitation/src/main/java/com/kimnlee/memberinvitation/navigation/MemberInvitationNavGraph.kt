@@ -7,6 +7,7 @@ import androidx.navigation.navigation
 import com.kimnlee.common.components.BottomNavigation
 import com.kimnlee.memberinvitation.presentation.screen.MemberInvitationDetailScreen
 import com.kimnlee.memberinvitation.presentation.screen.MemberInvitationScreen
+import com.kimnlee.memberinvitation.presentation.screen.MemberInvitationConfirmationScreen
 
 fun NavGraphBuilder.memberInvitationNavGraph(navController: NavHostController) {
     navigation(startDestination = "member_main/{vehicleId}", route = "memberinvitation") {
@@ -26,6 +27,14 @@ fun NavGraphBuilder.memberInvitationNavGraph(navController: NavHostController) {
         composable("member_detail") {
             BottomNavigation(navController) {
                 MemberInvitationDetailScreen(
+                    onNavigateBack = { navController.navigateUp() },
+                    onNavigateToConfirmation = { navController.navigate("member_confirmation") }
+                )
+            }
+        }
+        composable("member_confirmation") {
+            BottomNavigation(navController) {
+                MemberInvitationConfirmationScreen(
                     onNavigateBack = { navController.navigateUp() }
                 )
             }
