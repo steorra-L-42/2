@@ -16,7 +16,7 @@ fun MemberInvitationDetailScreen(
             .padding(16.dp)
     ) {
         Text(
-            text = "멤버 초대 상세",
+            text = "근처 멤버 초대",
             style = MaterialTheme.typography.headlineMedium
         )
         Spacer(modifier = Modifier.height(16.dp))
