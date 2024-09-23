@@ -3,7 +3,6 @@ plugins {
     alias(libs.plugins.jetbrains.kotlin.android)
     id("com.google.gms.google-services")
 }
-
 android {
     namespace = "com.kimnlee.mobipay"
     compileSdk = 34
@@ -73,6 +72,7 @@ dependencies {
     implementation(libs.androidx.app)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.runtime)
+    implementation(libs.firebase.common.ktx)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
