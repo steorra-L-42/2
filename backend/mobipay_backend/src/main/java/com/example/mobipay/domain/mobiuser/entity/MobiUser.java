@@ -45,9 +45,6 @@ public class MobiUser extends AuditableCreatedEntity {
     @Column(name = "email", nullable = false, unique = true, length = 40)
     private String email;
 
-    @Column(name = "password", nullable = false, length = 25)
-    private String password;
-
     @Column(name = "name", nullable = false, length = 25)
     private String name;
 
@@ -92,11 +89,13 @@ public class MobiUser extends AuditableCreatedEntity {
     private List<Account> accounts;
 
     @Builder
-    private MobiUser(String email, String name, String phoneNumber, String picture) {
+    private MobiUser(Long userId, String email, String name, String phoneNumber, String picture) {
+        this.id = userId;
         this.email = email;
         this.name = name;
         this.phoneNumber = phoneNumber;
         this.picture = picture;
+//        this.role = Role.valueOf(role);
     }
 
 
@@ -104,7 +103,13 @@ public class MobiUser extends AuditableCreatedEntity {
         this.picture = picture;
     }
 
+    public void addRefreshToken(RefreshToken refreshToken) {
+        this.refreshToken = refreshToken;
+    }
+
     public void deleteRefreshToken() {
         this.refreshToken = null;
     }
+
+
 }

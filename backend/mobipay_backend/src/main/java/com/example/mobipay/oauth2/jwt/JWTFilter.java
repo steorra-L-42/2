@@ -1,94 +1,144 @@
 package com.example.mobipay.oauth2.jwt;
 
+import static com.example.mobipay.oauth2.enums.JWTFilterMessage.EXPIRED_ACCESS_TOKEN;
+import static com.example.mobipay.oauth2.enums.JWTFilterMessage.NO_ACCESS_TOKEN;
+import static com.example.mobipay.oauth2.enums.TokenType.ACCESS;
+import static com.example.mobipay.oauth2.enums.TokenType.BEARER;
+
 import com.example.mobipay.oauth2.dto.CustomOAuth2User;
 import com.example.mobipay.oauth2.dto.UserDTO;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.PrintWriter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+@RequiredArgsConstructor
 public class JWTFilter extends OncePerRequestFilter {
 
     private final JWTUtil jwtUtil;
 
-    public JWTFilter(JWTUtil jwtUtil) {
-        this.jwtUtil = jwtUtil;
-    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        String authorization = null;
-        Cookie[] cookies = request.getCookies();
-        for (Cookie cookie : cookies) {
+//        if (isExemptedUri(request)) {
+//            doFilter(request, response, filterChain);
+//            return;
+//        }
 
-            if (cookie.getName().equals("Authorization")) {
-
-                authorization = cookie.getValue();
-            }
-        }
-        //Authorization 헤더 검증
-        if (authorization == null) {
-
-            System.out.println("token null");
-            filterChain.doFilter(request, response);
-
-            //조건이 해당되면 메소드 종료 (필수)
+        String header = request.getHeader(ACCESS.getType());
+        if (header == null) {
+            doFilter(request, response, filterChain);
             return;
         }
 
-        //토큰
-        String token = authorization;
-
-        //토큰 소멸 시간 검증
-        if (jwtUtil.isExpired(token)) {
-
-            System.out.println("token expired");
-            filterChain.doFilter(request, response);
-
-            //조건이 해당되면 메소드 종료 (필수)
+        if (invalidPrefix(response, header)) {
             return;
         }
 
-//        private String email;
-//        private String name;
-//        private String picture;
-//        private String phonenumber;
-//        private String role;
+        String accessToken = extractToken(header);
+        if (isTokenInvalid(accessToken, response)) {
+            return;
+        }
 
-        //토큰에서 username과 role 획득
-        String email = jwtUtil.getEmail(token);
-        Long userId = jwtUtil.getUserId(token);
-        String name = jwtUtil.getName(token);
-        String picture = jwtUtil.getPicture(token);
-        String phonenumber = jwtUtil.getPhoneNumber(token);
-        String role = jwtUtil.getRole(token);
+        setUpAuthentication(accessToken);
+        filterChain.doFilter(request, response);
+    }
 
-        //userDTO를 생성하여 값 set
-        UserDTO userDTO = new UserDTO();
-        userDTO.setEmail(email);
-        userDTO.set
-        userDTO.setName(name);
-        userDTO.setPicture(picture);
-        userDTO.setPhonenumber(phonenumber);
-        userDTO.setRole(role);
+    private boolean invalidPrefix(HttpServletResponse response, String header) throws IOException {
+        String prefix = extractPrefix(header);
 
-        //UserDetails에 회원 정보 객체 담기
+//        접두사가 일ㅊ ㅣ한다면 false 반환
+        if (prefix.equals((BEARER.getType()))) {
+            return false;
+        }
+//        접두사가 일치하지 않는다면 예외처리
+        setResponse(response, EXPIRED_ACCESS_TOKEN.toJson());
+        return true;
+    }
+
+    private boolean isNotAccessToken(String accessToken, HttpServletResponse response) throws IOException {
+        if (jwtUtil.getCategory(accessToken).equals(ACCESS.getType())) {
+            return false;
+        }
+        // 엑세스토큰이 아닐 경우
+        setResponse(response, NO_ACCESS_TOKEN.toJson());
+        return true;
+    }
+
+    //  접두사 추출
+    private String extractPrefix(String header) {
+        return header.substring(0, BEARER.getType().length());
+    }
+
+    // 토큰 추출
+    private String extractToken(String header) {
+        return header.substring(BEARER.getType().length());
+    }
+
+
+    private void setResponse(HttpServletResponse response, String message) throws IOException {
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+
+        //헤더설정
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        //Responsebody 섲정
+        PrintWriter writer = response.getWriter();
+        writer.print(message);
+        writer.flush();
+    }
+
+    private void setUpAuthentication(String accessToken) {
+        String email = jwtUtil.getEmail(accessToken);
+        Long userId = jwtUtil.getUserId(accessToken);
+        String name = jwtUtil.getName(accessToken);
+        String picture = jwtUtil.getPicture(accessToken);
+        String phonenumber = jwtUtil.getPhoneNumber(accessToken);
+        String role = jwtUtil.getRole(accessToken);
+
+        UserDTO userDTO = UserDTO.builder()
+                .email(email)
+                .userId(userId)
+                .name(name)
+                .picture(picture)
+                .phonenumber(phonenumber)
+                .role(role)
+                .build();
+        //CustomOAuth2User에 유저 정보 담기
         CustomOAuth2User customOAuth2User = new CustomOAuth2User(userDTO);
-
-        //스프링 시큐리티 인증 토큰 생성
+        // 스프링 시큐리티 인증 토큰 생성
         Authentication authToken = new UsernamePasswordAuthenticationToken(customOAuth2User, null,
                 customOAuth2User.getAuthorities());
-        //세션에 사용자 등록
+        System.out.println("JWTFilter authToken : " + authToken);
+        // SecurityContextHolder에 일시적인 세션 생성
         SecurityContextHolder.getContext().setAuthentication(authToken);
+    }
 
-        filterChain.doFilter(request, response);
+
+    private boolean isTokenInvalid(String accessToken, HttpServletResponse response) throws IOException {
+        return isTokenExpired(accessToken, response) || isNotAccessToken(accessToken, response);
+    }
+
+    private boolean isTokenExpired(String accessToken, HttpServletResponse response) throws IOException {
+        try {
+            jwtUtil.isExpired(accessToken);
+            // 정상적이라면 Exception이 발생하지 않음
+            return false;
+        } catch (ExpiredJwtException e) {
+            // 만료된 Jwt 토큰이라면
+            setResponse(response, EXPIRED_ACCESS_TOKEN.toJson());
+            return true;
+        }
     }
 }

@@ -5,6 +5,8 @@ import static com.example.mobipay.oauth2.enums.TokenType.REFRESH;
 
 import io.jsonwebtoken.Jwts;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -46,6 +48,12 @@ public class JWTUtil {
                 .get("phoneNumber", String.class);
     }
 
+    // Category 값 얻기
+    public String getCategory(String token) {
+        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload()
+                .get("category", String.class);
+    }
+
     public String getPicture(String token) {
 
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload()
@@ -58,6 +66,17 @@ public class JWTUtil {
                 .get("role", String.class);
     }
 
+    public LocalDateTime getIssuedAt(String token) {
+        return LocalDateTime.ofInstant(Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload()
+                .getIssuedAt().toInstant(), ZoneId.systemDefault());
+    }
+
+    public LocalDateTime getExpiredAt(String token) {
+        return LocalDateTime.ofInstant(Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload()
+                .getExpiration().toInstant(), ZoneId.systemDefault());
+    }
+
+    // 만료 유무
     public Boolean isExpired(String token) {
 
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().getExpiration()
@@ -66,12 +85,14 @@ public class JWTUtil {
 
     public String createAccessToken(String email, Long userId, String name, String phoneNumber, String picture,
                                     String role) {
+        System.out.println("Creating access token for user: " + email);
         return createJwt(ACCESS.getType(), email, userId, name, phoneNumber, picture, role,
                 ACCESS.getExpiration() * MS_TO_S);
     }
 
     public String createRefreshToken(String email, Long userId, String name, String phoneNumber, String picture,
                                      String role) {
+        System.out.println("Creating refresh token for user: " + email);
         return createJwt(REFRESH.getType(), email, userId, name, phoneNumber, picture, role,
                 REFRESH.getExpiration() * MS_TO_S);
     }
@@ -79,6 +100,9 @@ public class JWTUtil {
     public String createJwt(String category, String email, Long userId, String name, String phoneNumber, String picture,
                             String role,
                             Long expiredMs) {
+        System.out.println("Creating JWT with category: " + category);
+        System.out.println("User info: " + email + ", " + userId + ", " + name + ", " + role + ", " + phoneNumber + ", "
+                + picture);
 
         return Jwts.builder()
                 .claim("category", category) // access, refresh 판단

@@ -10,6 +10,8 @@ public interface OAuth2Response {
     //이메일
     String getEmail();
 
+    String getFreshValue();
+
     // 사용자 닉네임
     String getName();
 

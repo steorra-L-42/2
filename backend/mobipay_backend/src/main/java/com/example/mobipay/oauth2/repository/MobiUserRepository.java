@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface MobiUserRepository extends JpaRepository<MobiUser, Long> {
 
-    Optional<MobiUser> findByAuthIdAndActivated(String username, boolean tf);
+    Optional<MobiUser> findByEmail(String email);
 
-    boolean existsByEmail(String email);
+//    boolean existsByEmail(String email);
 }

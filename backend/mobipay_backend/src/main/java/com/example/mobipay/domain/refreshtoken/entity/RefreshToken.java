@@ -11,6 +11,7 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -39,5 +40,12 @@ public class RefreshToken {
 
     @OneToOne(mappedBy = "refreshToken", fetch = FetchType.LAZY)
     private MobiUser mobiUser;
+
+    @Builder
+    public RefreshToken(String value, LocalDateTime issuedAt, LocalDateTime expiredAt) {
+        this.value = value;
+        this.issuedAt = issuedAt;
+        this.expiredAt = expiredAt;
+    }
 }
 

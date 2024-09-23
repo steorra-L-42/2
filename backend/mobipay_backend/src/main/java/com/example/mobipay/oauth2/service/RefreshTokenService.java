@@ -6,6 +6,7 @@ import com.example.mobipay.oauth2.jwt.JWTUtil;
 import com.example.mobipay.oauth2.repository.MobiUserRepository;
 import com.example.mobipay.oauth2.repository.RefreshTokenRepository;
 import jakarta.transaction.Transactional;
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +19,7 @@ public class RefreshTokenService {
     private final JWTUtil jwtUtil;
 
     @Transactional
-    public Void addRefreshToken(MobiUser mobiUser, String value) {
+    public void addRefreshToken(MobiUser mobiUser, String value) {
         RefreshToken refreshToken = getRefreshToken(value);
 
         if (mobiUser.getRefreshToken() != null) {
@@ -29,11 +30,24 @@ public class RefreshTokenService {
             refreshToken = createRefreshToken(value);
             mobiUser.addRefreshToken(refreshToken);
         }
+        System.out.println(refreshToken);
 
+        saveRefreshTokenAndUser(mobiUser, refreshToken);
     }
 
     private RefreshToken getRefreshToken(String value) {
         return refreshTokenRepository.findByValue(value);
+    }
+
+    private RefreshToken createRefreshToken(String value) {
+        LocalDateTime issuedAt = jwtUtil.getIssuedAt(value);
+        LocalDateTime expiredAt = jwtUtil.getExpiredAt(value);
+
+        return RefreshToken.builder()
+                .value(value)
+                .issuedAt(issuedAt)
+                .expiredAt(expiredAt)
+                .build();
     }
 
     private void revokeExistingRefreshToken(MobiUser mobiUser) {
@@ -41,5 +55,9 @@ public class RefreshTokenService {
         mobiUser.deleteRefreshToken();
     }
 
+    private void saveRefreshTokenAndUser(MobiUser mobiuser, RefreshToken refreshToken) {
+        refreshTokenRepository.save(refreshToken);
+        mobiUserRepository.save(mobiuser);
+    }
 
 }

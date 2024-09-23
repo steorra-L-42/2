@@ -32,8 +32,8 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
 
         OAuth2User oAuth2User = super.loadUser(userRequest);
         String authValue = userRequest.getAccessToken().getTokenValue();
-//        String freshValue = userRequest.getAccessToken().getRef
-        System.out.println(authValue);
+//        String freshValue = userRequest.get
+        System.out.println("authValue" + authValue);
 
         OAuth2Response oAuth2Response = new KakaoResponse(oAuth2User.getAttributes());
 
@@ -42,11 +42,18 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
 //        String authId = AuthIdCreator.getAuthId(oAuth2Response);
         //MobiUser가 null값인 것을 방지하기 위한 장치 Optional
         String email = oAuth2Response.getEmail();
-        Optional<MobiUser> optionalUser = mobiUserRepository.findByAuthIdAndActivated(email, true);
+        Optional<MobiUser> optionalUser = mobiUserRepository.findByEmail(email);
 
+        String userId = oAuth2Response.getProviderId();
+        String freshValue = oAuth2Response.getFreshValue();
         String name = oAuth2Response.getName();
         String picture = oAuth2Response.getPicture();
         String phonenumber = oAuth2Response.getPhoneNumber();
+        System.out.println("userId" + userId);
+        System.out.println("freshValue" + freshValue);
+        System.out.println("name" + name);
+        System.out.println("picture" + picture);
+        System.out.println("phonenumber" + phonenumber);
 
         // 기존에 존재하는 유저는 handleExistingUser
         // 새로 가입한 유저는 handleNewUser
