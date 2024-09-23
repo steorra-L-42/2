@@ -2,6 +2,7 @@ package com.kimnlee.cardmanagement.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kimnlee.cardmanagement.data.model.Photos
 import com.kimnlee.cardmanagement.data.model.User
 import com.kimnlee.cardmanagement.data.repository.CardManagementRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -10,29 +11,27 @@ import kotlinx.coroutines.launch
 
 class CardManagementViewModel : ViewModel() {
     private val repository = CardManagementRepository()
-
-    private val _uiState = MutableStateFlow<UserUiState>(UserUiState.Loading)
-    val uiState: StateFlow<UserUiState> = _uiState
+    private val _photoUiState = MutableStateFlow<PhotoUiState>(PhotoUiState.Loading)
+    val photoUiState: StateFlow<PhotoUiState> = _photoUiState
 
     init {
-        fetchUsers()
+        fetchPhotos()
     }
-
-    fun fetchUsers() {
+    fun fetchPhotos() {
         viewModelScope.launch {
-            _uiState.value = UserUiState.Loading
+            _photoUiState.value = PhotoUiState.Loading
             try {
-                val users = repository.getUsers()
-                _uiState.value = UserUiState.Success(users)
+                val photos = repository.getPhotos()
+                _photoUiState.value = PhotoUiState.Success(photos)
             } catch (e: Exception) {
-                _uiState.value = UserUiState.Error("Failed to fetch users: ${e.message}")
+                _photoUiState.value = PhotoUiState.Error("Failed to fetch users: ${e.message}")
             }
         }
     }
 }
 
-sealed class UserUiState {
-    object Loading : UserUiState()
-    data class Success(val users: List<User>) : UserUiState()
-    data class Error(val message: String) : UserUiState()
+sealed class PhotoUiState {
+    object Loading : PhotoUiState()
+    data class Success(val photos: List<Photos>) : PhotoUiState()
+    data class Error(val message: String) : PhotoUiState()
 }
