@@ -22,5 +22,40 @@ fun SettingScreen(
             text = "설정",
             style = MaterialTheme.typography.headlineMedium
         )
+        Spacer(modifier = Modifier.padding(16.dp))
+        Button(onClick = { navController.navigate("payment") }) {
+            Text(
+                text = "결제페이지",
+                style = MaterialTheme.typography.bodyLarge
+            )
+        }
+        Spacer(modifier = Modifier.padding(16.dp))
+            Button(onClick = { /*TODO*/ }) {
+                Text(
+                    text = "설정 2",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            }
+        Spacer(modifier = Modifier.padding(16.dp))
+            Button(onClick = { /*TODO*/ }) {
+                Text(
+                    text = "설정 3",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            }
+        Spacer(modifier = Modifier.padding(16.dp))
+            Button(onClick = { /*TODO*/ }) {
+                Text(
+                    text = "설정 4",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            }
+        Spacer(modifier = Modifier.padding(16.dp))
+            Button(onClick = { /*TODO*/ }) {
+                Text(
+                    text = "설정 5",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+        }
     }
 }

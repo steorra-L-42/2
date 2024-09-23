@@ -23,5 +23,6 @@ fun CardManagementDetailScreen(
         Button(onClick = onNavigateBack) {
             Text("뒤로 가기")
         }
+
     }
 }

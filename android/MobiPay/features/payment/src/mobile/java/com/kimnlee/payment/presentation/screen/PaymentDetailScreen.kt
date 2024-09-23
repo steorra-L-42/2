@@ -9,8 +9,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalContext
+import androidx.compose.runtime.currentCompositionLocalContext
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -18,8 +21,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kimnlee.common.R
 import com.kimnlee.common.components.DashedDivider
-import com.kimnlee.payment.data.MerchantTransaction
 import com.kimnlee.payment.data.dummyMerchants
+import com.kimnlee.payment.data.model.MerchantTransaction
 import java.util.Locale
 
 @Composable
@@ -33,6 +36,7 @@ fun PaymentDetailScreen(
             .padding(32.dp)
             .verticalScroll(rememberScrollState())
     ) {
+        val context = LocalContext.current
         val merchant = dummyMerchants.find { it.merchant_id == transaction.merchant_id }
         Box(modifier = Modifier.fillMaxWidth()) {
             Button(
@@ -121,7 +125,7 @@ fun PaymentDetailScreen(
         Column {
             DetailItem(title = "상호", content = merchant.merchant_name)
             DetailItem(title = "가맹점 종류", content = merchant.category_id)
-            DetailItem("주소", "서울특별시 송파구 잠실로 51-31")
+            DetailItem("주소", getCurrentAddress(context, merchant.lat, merchant.lng))
         }
     }
 }
@@ -142,8 +146,10 @@ fun DetailItem(
     }
 }
 
+
 //위도 경도로 주소 구하는 Reverse-GeoCoding
-private fun getAddressFromLocation(context: Context, latitude: Double, longitude: Double): String? {
+private fun getCurrentAddress(context: Context, latitude: Double, longitude: Double): String {
+//    val addresses: List<Address>?
     try {
         val geocoder = Geocoder(context, Locale.KOREA)
         val addresses = geocoder.getFromLocation(latitude, longitude, 1)
@@ -156,5 +162,5 @@ private fun getAddressFromLocation(context: Context, latitude: Double, longitude
     } catch (e: Exception) {
         e.printStackTrace() // 예외 발생시 로그 출력
     }
-    return null
+    return ""
 }

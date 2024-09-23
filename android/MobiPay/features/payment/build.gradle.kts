@@ -56,4 +56,6 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    // 생체 인식 알파 버젼 1.4 안정화버젼 1.1
+    implementation(libs.androidx.biometric)
 }

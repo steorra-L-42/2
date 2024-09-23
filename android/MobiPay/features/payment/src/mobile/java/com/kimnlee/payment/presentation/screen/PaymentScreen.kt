@@ -1,109 +1,121 @@
 package com.kimnlee.payment.presentation.screen
 
-import android.graphics.Paint
+import android.content.Context
+import android.util.Log
+import androidx.biometric.BiometricManager
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import com.kimnlee.common.R
-import com.kimnlee.payment.data.Merchant
-import com.kimnlee.payment.data.MerchantTransaction
-import com.kimnlee.payment.data.dummyTransactions
 
 @Composable
 fun PaymentScreen(
-    transactions: List<MerchantTransaction>,
-    merchants: List<Merchant>,
-    onNavigateToDetail: (transaction : MerchantTransaction) -> Unit,
-    onNavigateBack: () -> Unit
-) {
 
+) {
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.SpaceBetween
     ) {
-        // 시작
-        Text(
-            text = "결제",
-            style = MaterialTheme.typography.headlineMedium
+        val context = LocalContext.current
+        checkAvailableAuth(context)
+        // 제목
+        Text(text = "결제 페이지")
+        // 코인 사진
+        Image(
+            painter = painterResource(id = R.drawable.settings_24px),
+            contentDescription = "영수증 사진",
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color.Gray)
+                .weight(0.3f)
+                .padding(50.dp),
         )
-        Spacer(modifier = Modifier.height(16.dp))
-        Button(onClick = onNavigateBack) {
-            Text("뒤로 가기")
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(0.1f)
+                .height(10.dp),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.credit_card_24px),
+                contentDescription = "카드 사진",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .fillMaxHeight()
+
+                    .background(Color.Gray)
+            )
+            Spacer(modifier = Modifier.padding(16.dp))
+            Text(
+                text = "맥도날드 구미 인동점",
+                style = MaterialTheme.typography.headlineSmall,
+            )
         }
-        // 더미 데이터를 사용
-        LazyColumn(
-//            modifier = Modifier.fillMaxWidth(),
-        ){
-            items(transactions) { transaction ->
-                Row(
-                    modifier = Modifier
-                        .padding(8.dp) // 카드 간의 간격 설정
-                        .fillMaxWidth()
-                        .height(IntrinsicSize.Min),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                ) {
-                    Column (modifier = Modifier
-                        .weight(0.5f)
-                    ){
-                        // 가게이름
-                        Text(
-                            text = merchants.find { it.merchant_id == transaction.merchant_id }?.merchant_name ?: "Unknown Merchant",
-                            style = MaterialTheme.typography.headlineSmall
-                        )
-                        //시간 + 일시불
-                        Row (
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceAround
-                        ){
-                            Text(transaction.transaction_date)
-                            Text(transaction.transaction_time)
-                            Text(transaction.info)
-                        }
-                    }
-                    Box( // Box를 사용하여 이미지의 높이를 부모에 맞춤
-                        modifier = Modifier
-                            .fillMaxHeight()
-                            .weight(0.1f)
-                            .aspectRatio(1f) // 이미지의 종횡비를 유지하기 위해 aspectRatio를 사용
-                    ) {
-                        Image(
-                            painter = painterResource(id = R.drawable.receipt_long_24px),
-                            contentDescription = "영수증 사진",
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier.fillMaxSize()
-                                .background(Color.Gray)
-                                .clickable {onNavigateToDetail(transaction)}
-                        )
-                    }
-                    Text(
-                        text = "${transaction.payment_balance}원",
-                        modifier = Modifier
-//                            .background(Color.Red)
-                            .weight(0.2f),
-                        textAlign = TextAlign.End
-                    )
-                }
-            }
+        // 가격
+        Text(
+            text = "13,500원",
+            style = MaterialTheme.typography.headlineLarge,
+            modifier = Modifier
+                .weight(0.1f)
+                .background(Color.Red)
+                .fillMaxHeight()
+                .wrapContentHeight(align = Alignment.CenterVertically),
+        )
+        // 지문
+        Box(
+            modifier = Modifier
+                .weight(0.2f)
+                .fillMaxSize()
+                .background(Color.Gray)
+        ) {
+            Text(text = "지문")
         }
-        // 끝
+    }
+}
+private fun checkAvailableAuth(context : Context) {
+    val biometricManager = BiometricManager.from(context)
+    when (biometricManager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_WEAK)) {
+        BiometricManager.BIOMETRIC_SUCCESS -> {
+            //  생체 인증 가능
+        }
+        BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE -> {
+            //  기기에서 생체 인증을 지원하지 않는 경우
+        }
+        BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE -> {
+            Log.d("MainActivity", "Biometric facility is currently not available")
+        }
+        BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED -> {
+            //  생체 인식 정보가 등록되지 않은 경우
+        }
+        else -> {
+            //   기타 실패
+        }
     }
 }
