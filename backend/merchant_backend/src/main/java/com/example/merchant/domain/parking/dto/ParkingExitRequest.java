@@ -19,10 +19,6 @@ public class ParkingExitRequest {
     @Size(min = 8, max = 8, message = "Car number must be 8 characters")
     private String carNumber;
 
-    @NotNull(message = "Entry time is empty")
-    @Past(message = "Exit time must be in the past")
-    private LocalDateTime entry;
-
     @NotNull(message = "Exit time is empty")
     @Past(message = "Exit time must be in the past")
     private LocalDateTime exit;
