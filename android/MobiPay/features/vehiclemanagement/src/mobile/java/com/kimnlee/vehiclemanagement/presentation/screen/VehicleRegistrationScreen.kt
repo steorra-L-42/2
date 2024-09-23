@@ -30,9 +30,11 @@ import android.content.Context
 import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.sp
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
@@ -40,6 +42,9 @@ import java.util.*
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
+
+import androidx.compose.ui.text.input.KeyboardType
+
 
 @Composable
 fun VehicleRegistrationScreen(
@@ -50,6 +55,8 @@ fun VehicleRegistrationScreen(
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val cameraExecutor = remember { Executors.newSingleThreadExecutor() }
+    var oneTimeLimit by remember { mutableStateOf("") }
+    var oneDayLimit by remember { mutableStateOf("") }
 
     var imageCapture: ImageCapture? by remember { mutableStateOf(null) }
     var hasCameraPermission by remember { mutableStateOf(false) }
@@ -98,10 +105,15 @@ fun VehicleRegistrationScreen(
                     value = licensePlate,
                     onValueChange = { licensePlate = it },
                     label = { Text("차량 번호") },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(100.dp))
+
+                Text("차량 이미지 추가를 위한 공간") // 자동차 이미지 등록을 위한 선택지 or 검색 제공 기능 추가해야 함
+
+                Spacer(modifier = Modifier.height(100.dp))
 
                 Button(
                     onClick = {
@@ -213,11 +225,55 @@ fun VehicleRegistrationScreen(
                 )
             }
         } else {
-            Spacer(modifier = Modifier.height(150.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-            Text("차량 이미지 추가를 위한 공간") // 자동차 이미지 등록을 위한 선택지 or 검색 제공 기능 추가해야 함
+            Text("차량 번호: $licensePlate")
 
-            Spacer(modifier = Modifier.height(150.dp))
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text("주결제 카드 등록")
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            Text("카드 목록 공간") // API 목록 받아오기
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            Row {
+                OutlinedTextField(
+                    value = oneDayLimit,
+                    onValueChange = { newValue ->
+                        if (newValue.all { it.isDigit() }) {
+                            oneDayLimit = newValue
+                        }
+                    },
+                    label = { Text("1일 한도") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.width(300.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("원", fontSize = 48.sp)
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row {
+                OutlinedTextField(
+                    value = oneTimeLimit,
+                    onValueChange = { newValue ->
+                        if (newValue.all { it.isDigit() }) {
+                            oneTimeLimit = newValue
+                        }
+                    },
+                    label = { Text("1회 한도") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.width(300.dp),
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("원", fontSize = 48.sp)
+            }
+
+            Spacer(modifier = Modifier.height(48.dp))
 
             Button(
                 onClick = {
@@ -227,6 +283,17 @@ fun VehicleRegistrationScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("등록")
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Button(
+                onClick = {
+                    vehicleNumberCheck = false
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("이전")
             }
         }
 
