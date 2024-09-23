@@ -76,20 +76,6 @@ internal class FreeDriveCarScreen @UiThread constructor(
 //                .getActionStrip(this, MapboxScreen.FREE_DRIVE)
 
         // ---------------- 커스텀 ActionStrip 코드들 ----------------
-        fun customBuildSettingsAction() = Action.Builder()
-            .setIcon(
-                CarIcon.Builder(
-                    IconCompat.createWithResource(
-                        carContext,
-                        R.drawable.ic_settings
-                    )
-                ).build()
-            )
-            .setOnClickListener {
-                MapboxScreenManager.push(MapboxScreen.SETTINGS)
-            }
-            .build()
-
         fun customBuildSearchAction(): Action = Action.Builder()
             .setIcon(
                 CarIcon.Builder(
@@ -112,23 +98,10 @@ internal class FreeDriveCarScreen @UiThread constructor(
             .build()
 
         val customFreeDriveActionStrip = ActionStrip.Builder()
-            .addAction(customBuildSettingsAction())
             .addAction(customBuildSearchAction())
             .addAction(customBuildFavoritesAction())
             .build()
         // ---------------- 커스텀 ActionStrip 코드들 끝 ----------------
-
-//        actionStrip1
-//            .actions
-//            .add(
-//                Action.Builder()
-//                    .setTitle("근처 모비페이 가맹점: 맥도날드 구미 인동점")
-//                    .setOnClickListener {
-//                        // Action for Location 1 (e.g., zoom to a point on the map)
-////          carCameraController.zoomTo(Point.fromLngLat(37.7749, -122.4194)) // Example: San Francisco
-//                    }
-//                    .build()
-//            )
 
         return NavigationTemplate.Builder()
             .setBackgroundColor(CarColor.PRIMARY)
