@@ -105,7 +105,8 @@ fun VehicleRegistrationScreen(
                     value = licensePlate,
                     onValueChange = { licensePlate = it },
                     label = { Text("차량 번호") },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
                 )
 
                 Spacer(modifier = Modifier.height(100.dp))
