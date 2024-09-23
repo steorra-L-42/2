@@ -18,8 +18,8 @@ import lombok.NoArgsConstructor;
 public class CardIssuer {
 
     @Id
-    @Column(name = "card_issuer_no", length = 4)
-    private String cardIssuerNo;
+    @Column(name = "card_issuer_code", length = 4)
+    private String cardIssuerCode;
 
     @Column(name = "card_issuer_name", nullable = false, length = 20)
     private String cardIssuerName;
