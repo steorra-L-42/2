@@ -1,7 +1,7 @@
 package com.example.mobipay.domain.invitation.entity;
 
 import com.example.mobipay.domain.car.entity.Car;
-import com.example.mobipay.domain.common.AuditableEntity;
+import com.example.mobipay.domain.common.entity.AuditableEntity;
 import com.example.mobipay.domain.invitation.enums.ApproveStatus;
 import com.example.mobipay.domain.mobiuser.entity.MobiUser;
 import jakarta.persistence.Column;

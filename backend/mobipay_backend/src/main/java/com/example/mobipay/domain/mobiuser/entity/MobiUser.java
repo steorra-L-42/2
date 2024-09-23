@@ -2,7 +2,7 @@ package com.example.mobipay.domain.mobiuser.entity;
 
 import com.example.mobipay.domain.car.entity.Car;
 import com.example.mobipay.domain.cargroup.entity.CarGroup;
-import com.example.mobipay.domain.common.AuditableCreatedEntity;
+import com.example.mobipay.domain.common.entity.AuditableCreatedEntity;
 import com.example.mobipay.domain.invitation.entity.Invitation;
 import com.example.mobipay.domain.kakaotoken.entity.KakaoToken;
 import com.example.mobipay.domain.mobiuser.enums.Role;
@@ -23,6 +23,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -41,9 +42,6 @@ public class MobiUser extends AuditableCreatedEntity {
 
     @Column(name = "email", nullable = false, unique = true, length = 40)
     private String email;
-
-    @Column(name = "password", nullable = false, length = 25)
-    private String password;
 
     @Column(name = "name", nullable = false, length = 25)
     private String name;
@@ -71,20 +69,31 @@ public class MobiUser extends AuditableCreatedEntity {
     private SsafyUser ssafyUser;
 
     @OneToMany(mappedBy = "owner")
-    private List<Car> cars;
+    private List<Car> cars = new ArrayList<>();
 
     @OneToMany(mappedBy = "mobiUser")
-    private List<CarGroup> carGroups;
+    private List<CarGroup> carGroups = new ArrayList<>();
 
     @OneToMany(mappedBy = "mobiUser")
-    private List<Invitation> invitations;
+    private List<Invitation> invitations = new ArrayList<>();
 
     @OneToMany(mappedBy = "mobiUser")
-    private List<RegisteredCard> registeredCards;
+    private List<RegisteredCard> registeredCards = new ArrayList<>();
 
     @OneToMany(mappedBy = "mobiUser")
-    private List<OwnedCard> ownedCards;
+    private List<OwnedCard> ownedCards = new ArrayList<>();
 
     @OneToMany(mappedBy = "mobiUser")
-    private List<Account> accounts;
+    private List<Account> accounts = new ArrayList<>();
+
+    private MobiUser(String email, String name, String phoneNumber, String picture) {
+        this.email = email;
+        this.name = name;
+        this.phoneNumber = phoneNumber;
+        this.picture = picture;
+    }
+
+    public static MobiUser of(String email, String name, String phoneNumber, String picture) {
+        return new MobiUser(email, name, phoneNumber, picture);
+    }
 }
