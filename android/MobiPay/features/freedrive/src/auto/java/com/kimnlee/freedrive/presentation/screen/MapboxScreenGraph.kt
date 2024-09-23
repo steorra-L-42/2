@@ -20,20 +20,14 @@ import com.mapbox.androidauto.screenmanager.MapboxScreen.SEARCH
 import com.mapbox.androidauto.screenmanager.MapboxScreen.SEARCH_FEEDBACK
 import com.mapbox.androidauto.screenmanager.MapboxScreen.SETTINGS
 import com.mapbox.androidauto.screenmanager.factories.ActiveGuidanceFeedbackScreenFactory
-import com.mapbox.androidauto.screenmanager.factories.ActiveGuidanceScreenFactory
 import com.mapbox.androidauto.screenmanager.factories.ArrivalScreenFactory
 import com.mapbox.androidauto.screenmanager.factories.FavoritesFeedbackScreenFactory
-import com.mapbox.androidauto.screenmanager.factories.FavoritesScreenFactory
 import com.mapbox.androidauto.screenmanager.factories.FreeDriveFeedbackScreenFactory
-//import com.mapbox.androidauto.screenmanager.factories.FreeDriveScreenFactory
 import com.mapbox.androidauto.screenmanager.factories.GeoDeeplinkPlacesCarScreenFactory
 import com.mapbox.androidauto.screenmanager.factories.GeoDeeplinkPlacesFeedbackScreenFactory
 import com.mapbox.androidauto.screenmanager.factories.NeedsLocationPermissionScreenFactory
 import com.mapbox.androidauto.screenmanager.factories.RoutePreviewFeedbackScreenFactory
-import com.mapbox.androidauto.screenmanager.factories.RoutePreviewScreenFactory
-import com.mapbox.androidauto.screenmanager.factories.RoutePreviewScreenFactory2
 import com.mapbox.androidauto.screenmanager.factories.SearchPlacesFeedbackScreenFactory
-import com.mapbox.androidauto.screenmanager.factories.SearchPlacesScreenFactory
 import com.mapbox.androidauto.screenmanager.factories.SettingsScreenFactory
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 
@@ -58,7 +52,7 @@ fun MapboxCarContext.prepareScreens() = apply {
         SEARCH_FEEDBACK
                 to SearchPlacesFeedbackScreenFactory(mapboxCarContext),
         FAVORITES
-                to FavoritesScreenFactory(mapboxCarContext),
+                to MerchantListScreenFactory(mapboxCarContext),
         FAVORITES_FEEDBACK
                 to FavoritesFeedbackScreenFactory(mapboxCarContext),
         GEO_DEEPLINK
@@ -80,5 +74,5 @@ fun MapboxCarContext.prepareScreens() = apply {
 
 @ExperimentalPreviewMapboxNavigationAPI
 fun MapboxCarContext.prepareExperimentalRoutePreviewScreen() = apply {
-    mapboxScreenManager[ROUTE_PREVIEW] = RoutePreviewScreenFactory2(mapboxCarContext = this)
+    mapboxScreenManager[ROUTE_PREVIEW] = RoutePreviewScreenFactory(mapboxCarContext = this)
 }
