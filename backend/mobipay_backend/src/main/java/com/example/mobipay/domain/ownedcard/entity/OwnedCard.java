@@ -1,6 +1,6 @@
 package com.example.mobipay.domain.ownedcard.entity;
 
-import com.example.mobipay.domain.common.AuditableCreatedEntity;
+import com.example.mobipay.domain.common.entity.AuditableCreatedEntity;
 import com.example.mobipay.domain.mobiuser.entity.MobiUser;
 import com.example.mobipay.domain.registeredcard.entity.RegisteredCard;
 import com.example.mobipay.domain.setupdomain.account.entity.Account;
@@ -15,6 +15,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -45,7 +46,7 @@ public class OwnedCard extends AuditableCreatedEntity {
     private String cardExpiryDate;
 
     @OneToMany(mappedBy = "ownedCard")
-    private List<RegisteredCard> registeredCards;
+    private List<RegisteredCard> registeredCards = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "mobi_user_id")
