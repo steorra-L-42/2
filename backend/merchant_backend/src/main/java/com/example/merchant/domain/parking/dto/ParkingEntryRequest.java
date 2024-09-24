@@ -1,5 +1,7 @@
 package com.example.merchant.domain.parking.dto;
 
+import com.example.merchant.global.annotation.ValidRequestTime;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -21,6 +23,6 @@ public class ParkingEntryRequest {
     private String carNumber;
 
     @NotNull(message = "Entry time is empty")
-    @Past(message = "Entry time must be in the past")
+    @ValidRequestTime(message = "Entry time must be within +-1 minute of the current time")
     private LocalDateTime entry;
 }
