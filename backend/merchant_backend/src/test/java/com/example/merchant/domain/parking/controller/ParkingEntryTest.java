@@ -107,7 +107,7 @@ class ParkingEntryTest {
             throws Exception {
         // given
         final String url = "/api/v1/merchants/parking/entry";
-        final ParkingEntryRequest parkingEntryRequest = new ParkingEntryRequest(carNumber, parseDateTime(entry));
+        final ParkingEntryRequest parkingEntryRequest = new ParkingEntryRequest(carNumber, TimeUtil.parseDateTime(entry));
         final String requestBody = objectMapper.writeValueAsString(parkingEntryRequest);
 
         // when
@@ -175,7 +175,7 @@ class ParkingEntryTest {
             throws Exception {
         // given
         final String url = "/api/v1/merchants/parking/entry";
-        final ParkingEntryRequest parkingEntryRequest = new ParkingEntryRequest(carNumber, parseDateTime(entry));
+        final ParkingEntryRequest parkingEntryRequest = new ParkingEntryRequest(carNumber, TimeUtil.parseDateTime(entry));
         final String requestBody = objectMapper.writeValueAsString(parkingEntryRequest);
 
         // when
@@ -188,15 +188,8 @@ class ParkingEntryTest {
         result.andExpect(status().isOk());
         List<Parking> parkingList = parkingRepository.findAll();
         assertThat(parkingList.size()).isEqualTo(1);
-        assertThat(TimeUtil.isSimilarDateTime(parkingList.get(0).getEntry(), parseDateTime(entry))).isTrue();
+        assertThat(TimeUtil.isSimilarDateTime(parkingList.get(0).getEntry(), TimeUtil.parseDateTime(entry))).isTrue();
         assertThat(parkingList.get(0).getPaid()).isFalse();
         assertThat(parkingList.get(0).getExit()).isNull();
-    }
-
-    private LocalDateTime parseDateTime(String dateTime) {
-        return switch (dateTime) {
-            case "null" -> null;
-            default -> LocalDateTime.parse(dateTime);
-        };
     }
 }
