@@ -2,11 +2,8 @@ package com.example.merchant.domain.parking.controller;
 
 import com.example.merchant.domain.parking.dto.ParkingEntryRequest;
 import com.example.merchant.domain.parking.dto.ParkingEntryResponse;
-import com.example.merchant.domain.parking.entity.Parking;
 import com.example.merchant.domain.parking.service.ParkingService;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PatchMapping;
