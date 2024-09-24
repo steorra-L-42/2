@@ -57,6 +57,7 @@ android {
 dependencies {
 
     api("com.kakao.sdk:v2-user:2.20.6") // 카카오 로그인 API 모듈
+    api(libs.retrofit)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.ui)
