@@ -18,9 +18,8 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 //테스트를 위한 회원가입용 임포트문 삭제예정(api 통신에 필요할 경우 남길 수 있음)
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.Retrofit
-import retrofit2.http.Body
-import retrofit2.http.POST
 import kotlin.coroutines.resume
+import retrofit2.http.*
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "auth")
 
@@ -94,13 +93,13 @@ class AuthManager(private val context: Context) {
     }
     // 카카오 로그인 로직 끝 -------------------------------------------------------------
 
-    suspend fun signUp(email: String): SignUpResponse {
-        return authService.signUp(SignUpRequest(email))
+    suspend fun signUp(email: String, name: String, phoneNumber: String): SignUpResponse {
+        return authService.signUp(SignUpRequest(email, name, phoneNumber))
     }
 
     private fun createAuthService(): AuthService {
         val retrofit = Retrofit.Builder()
-            .baseUrl("http://localhost:8080") // baseUrl 수정해야함ㄴ
+            .baseUrl("http://localhost:8080") // baseUrl 수정해야함
             .addConverterFactory(GsonConverterFactory.create())
             .build()
         return retrofit.create(AuthService::class.java)
@@ -117,5 +116,5 @@ interface AuthService {
     suspend fun signUp(@Body request: SignUpRequest): SignUpResponse
 }
 
-data class SignUpRequest(val email: String)
+data class SignUpRequest(val email: String, val name: String, val phoneNumber: String)
 data class SignUpResponse(val success: Boolean, val message: String)

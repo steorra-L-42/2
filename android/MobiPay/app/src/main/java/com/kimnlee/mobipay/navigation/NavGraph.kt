@@ -1,5 +1,6 @@
 package com.kimnlee.mobipay.navigation
 
+import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -7,7 +8,6 @@ import androidx.compose.runtime.getValue
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.navigation
 import com.kimnlee.auth.navigation.authNavGraph
 import com.kimnlee.auth.presentation.screen.PaymentScreen
 import com.kimnlee.auth.presentation.viewmodel.LoginViewModel
@@ -23,7 +23,8 @@ import com.kimnlee.vehiclemanagement.navigation.vehicleManagementNavGraph
 @Composable
 fun AppNavGraph(
     navController: NavHostController,
-    authManager: AuthManager
+    authManager: AuthManager,
+    context: Context
 ) {
     val loginViewModel = LoginViewModel(authManager)
     val isLoggedIn by loginViewModel.isLoggedIn.collectAsState()
@@ -46,7 +47,8 @@ fun AppNavGraph(
             ScreenWithBottomNav(navController) {
                 HomeScreen(
                     viewModel = loginViewModel,
-                    navController = navController
+                    navController = navController,
+                    context = context
                 )
             }
         }

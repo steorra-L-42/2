@@ -20,7 +20,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             MobiPayTheme {
                 val navController = rememberNavController()
-                AppNavGraph(navController, authManager)
+                AppNavGraph(navController, authManager, applicationContext)
             }
         }
     }

@@ -39,6 +39,7 @@ legacySupportV13 = "1.0.0"
 navigationCommonKtx = "2.8.0"
 firebaseCommonKtx = "21.0.0"
 gson = "2.11.0"
+playServicesLocation = "21.3.0"
 securityCrypto = "1.0.0"
 
 [libraries]
@@ -85,6 +86,7 @@ core = { group = "com.google.ar", name = "core", version.ref = "core" }
 androidx-navigation-common-ktx = { group = "androidx.navigation", name = "navigation-common-ktx", version.ref = "navigationCommonKtx" }
 firebase-common-ktx = { group = "com.google.firebase", name = "firebase-common-ktx", version.ref = "firebaseCommonKtx" }
 gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
+play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
 androidx-security-crypto = { group = "androidx.security", name = "security-crypto", version.ref = "securityCrypto" }
 
 [plugins]
