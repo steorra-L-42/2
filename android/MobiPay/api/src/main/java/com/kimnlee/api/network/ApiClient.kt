@@ -1,6 +1,6 @@
 package com.kimnlee.api.network
 
-import com.kimnlee.api.BuildConfig
+import com.kimnlee.common.BuildConfig
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -17,4 +17,15 @@ object ApiClient {
         .client(okHttpClient)
         .addConverterFactory(GsonConverterFactory.create())
         .build()
+
+
+    val ocrService: OCRService by lazy {
+        Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(OCRService::class.java)
+    }
+
+
 }

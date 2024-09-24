@@ -3,19 +3,33 @@ package com.kimnlee.mobipay.presentation.screen
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.kimnlee.auth.presentation.viewmodel.LoginViewModel
 import com.kimnlee.common.auth.AuthManager
 import kotlinx.coroutines.launch
 
 @Composable
 fun HomeScreen(
-    authManager: AuthManager,
+    viewModel: LoginViewModel,
     navController: NavController
 ) {
-    val coroutineScope = rememberCoroutineScope()
+    val isLoggedIn by viewModel.isLoggedIn.collectAsState()
+
+    LaunchedEffect(isLoggedIn) {
+        if (!isLoggedIn) {
+            navController.navigate("auth") {
+                popUpTo(navController.graph.startDestinationId) {
+                    inclusive = true
+                }
+            }
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -29,12 +43,10 @@ fun HomeScreen(
         Spacer(modifier = Modifier.height(16.dp))
         Button(
             onClick = {
-                coroutineScope.launch {
-                    authManager.setLoggedIn(false)
-                    navController.navigate("auth") {
-                        popUpTo(navController.graph.startDestinationId) {
-                            inclusive = true
-                        }
+                viewModel.logout()
+                navController.navigate("auth") {
+                    popUpTo(navController.graph.startDestinationId) {
+                        inclusive = true
                     }
                 }
             }
