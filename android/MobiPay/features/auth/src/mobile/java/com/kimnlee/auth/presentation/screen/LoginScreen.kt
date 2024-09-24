@@ -10,6 +10,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -23,19 +26,26 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.min
 import androidx.compose.ui.unit.sp
 import com.kimnlee.auth.R
+import com.kimnlee.auth.presentation.viewmodel.LoginViewModel
 import com.kimnlee.common.auth.AuthManager
 import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreen(
-    authManager: AuthManager,
+    viewModel: LoginViewModel,
     onNavigateToHome: () -> Unit,
     onNavigateToSignUp: () -> Unit
 ) {
-    val coroutineScope = rememberCoroutineScope()
+    val isLoggedIn by viewModel.isLoggedIn.collectAsState()
     val configuration = LocalConfiguration.current
     val screenHeight = configuration.screenHeightDp.dp
     val screenWidth = configuration.screenWidthDp.dp
+
+    LaunchedEffect(isLoggedIn) {
+        if (isLoggedIn) {
+            onNavigateToHome()
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -77,15 +87,8 @@ fun LoginScreen(
             }
             Spacer(modifier = Modifier.height(16.dp))
 
-            val interactionSource = remember { MutableInteractionSource() }
             Surface(
-                onClick = {
-                    coroutineScope.launch {
-                        authManager.setLoggedIn(true)
-                        onNavigateToHome()
-                    }
-                },
-                interactionSource = interactionSource,
+                onClick = { viewModel.login() },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(min(screenHeight * 0.08f, 56.dp))
