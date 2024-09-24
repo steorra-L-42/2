@@ -101,19 +101,15 @@ public class JWTFilter extends OncePerRequestFilter {
 
     private void setUpAuthentication(String accessToken) {
         String email = jwtUtil.getEmail(accessToken);
-        Long userId = jwtUtil.getUserId(accessToken);
         String name = jwtUtil.getName(accessToken);
         String picture = jwtUtil.getPicture(accessToken);
         String phonenumber = jwtUtil.getPhoneNumber(accessToken);
-        String role = jwtUtil.getRole(accessToken);
 
         UserDTO userDTO = UserDTO.builder()
                 .email(email)
-                .userId(userId)
                 .name(name)
                 .picture(picture)
                 .phonenumber(phonenumber)
-                .role(role)
                 .build();
         //CustomOAuth2User에 유저 정보 담기
         CustomOAuth2User customOAuth2User = new CustomOAuth2User(userDTO);

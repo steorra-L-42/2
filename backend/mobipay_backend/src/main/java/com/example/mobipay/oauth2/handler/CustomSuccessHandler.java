@@ -54,8 +54,8 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         String picture = customUserDetails.getPicture();
         String role = extractUserRole(authentication);
 
-        String accessToken = jwtUtil.createAccessToken(email, userId, name, phoneNumber, picture, role);
-        String refreshToken = jwtUtil.createRefreshToken(email, userId, name, phoneNumber, picture, role);
+        String accessToken = jwtUtil.createAccessToken(email, name, phoneNumber, picture);
+        String refreshToken = jwtUtil.createRefreshToken(email, name, phoneNumber, picture);
         System.out.println("accessToken" + accessToken);
         System.out.println("refreshToken" + refreshToken);
 

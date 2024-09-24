@@ -3,6 +3,7 @@ package com.example.mobipay.oauth2.service;
 import com.example.mobipay.domain.mobiuser.entity.MobiUser;
 import com.example.mobipay.domain.refreshtoken.entity.RefreshToken;
 import com.example.mobipay.oauth2.Component.JwtTokenProvider;
+import com.example.mobipay.oauth2.jwt.JWTUtil;
 import com.example.mobipay.oauth2.repository.MobiUserRepository;
 import com.example.mobipay.oauth2.repository.RefreshTokenRepository;
 import java.time.LocalDateTime;
@@ -16,6 +17,7 @@ public class UserService {
     private final MobiUserRepository mobiUserRepository;
     private final RefreshTokenRepository refreshTokenRepository;
     private final JwtTokenProvider jwtTokenProvider;
+    private final JWTUtil jwtUtil;
 
     // 1. 이메일로 사용자 조회(중복 유무 확인 후, 중복이 되지 않는다면 createUser 수행)
     public MobiUser findOrCreateUser(String email, String name, String phoneNumber, String picture) {
@@ -25,6 +27,8 @@ public class UserService {
         }
         return mobiUserRepository.findByEmail(email)
                 .orElseGet(() -> createUser(email, name, phoneNumber, picture));
+        // 싼피 계정 조회 로직 추가 필요
+
     }
 
 
@@ -72,14 +76,30 @@ public class UserService {
         mobiUserRepository.save(mobiUser);
     }
 
-    public String generateJwtToken(MobiUser mobiUser) {
-        // 사용자 정보를 기반으로 JWT 생성
-        return jwtTokenProvider.createToken(
+    //    public String generateJwtToken(MobiUser mobiUser) {}
+    // 사용자 정보를 기반으로 JWT 생성
+//        return jwtTokenProvider.createToken(
+//                mobiUser.getEmail(),
+//                mobiUser.getName(),
+//                mobiUser.getPicture(),
+//                mobiUser.getPhoneNumber()
+////                mobiUser.getRole().name()
+//        );
+    public String generateJwtAccessToken(MobiUser mobiUser) {
+        return jwtUtil.createAccessToken(
                 mobiUser.getEmail(),
                 mobiUser.getName(),
                 mobiUser.getPicture(),
-                mobiUser.getPhoneNumber(),
-                mobiUser.getRole().name()
+                mobiUser.getPhoneNumber()
+        );
+    }
+
+    public String generateJwtRefreshToken(MobiUser mobiUser) {
+        return jwtUtil.createRefreshToken(
+                mobiUser.getEmail(),
+                mobiUser.getName(),
+                mobiUser.getPicture(),
+                mobiUser.getPhoneNumber()
         );
     }
 

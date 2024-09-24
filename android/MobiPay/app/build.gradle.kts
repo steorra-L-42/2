@@ -57,6 +57,7 @@ dependencies {
     implementation(project(":features:cardmanagement"))
     implementation(project(":features:vehiclemanagement"))
     implementation(project(":features:memberinvitation"))
+    implementation ("com.squareup.okhttp3:okhttp:4.9.3")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

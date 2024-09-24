@@ -1,7 +1,11 @@
 package com.example.mobipay.oauth2.dto;
 
 import java.time.LocalDateTime;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
+@Getter
+@AllArgsConstructor
 public class JwtResponseDto {
 
     private String token;         // JWT 토큰
@@ -10,12 +14,12 @@ public class JwtResponseDto {
     private Boolean revoked;      // 거절 여부
 
     // 생성자
-    public JwtResponseDto(String token, LocalDateTime issuedAt, LocalDateTime expiredAt, Boolean revoked) {
-        this.token = token;
-        this.issuedAt = issuedAt;
-        this.expiredAt = expiredAt;
-        this.revoked = revoked;
-    }
+//    public JwtResponseDto(String token, LocalDateTime issuedAt, LocalDateTime expiredAt, Boolean revoked) {
+//        this.token = token;
+//        this.issuedAt = issuedAt;
+//        this.expiredAt = expiredAt;
+//        this.revoked = revoked;
+//    }
 
     // Getter & Setter
     public String getToken() {

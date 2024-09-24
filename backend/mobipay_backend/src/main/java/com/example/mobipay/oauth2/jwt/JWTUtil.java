@@ -25,16 +25,22 @@ public class JWTUtil {
                 Jwts.SIG.HS256.key().build().getAlgorithm());
     }
 
+    // Category 값 얻기
+    public String getCategory(String token) {
+        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload()
+                .get("category", String.class);
+    }
+
     public String getEmail(String token) {
 
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload()
                 .get("email", String.class);
     }
 
-    public Long getUserId(String token) {
-        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload()
-                .get("userId", Long.class);
-    }
+//    public Long getUserId(String token) {
+//        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload()
+//                .get("userId", Long.class);
+//    }
 
     public String getName(String token) {
 
@@ -48,11 +54,6 @@ public class JWTUtil {
                 .get("phoneNumber", String.class);
     }
 
-    // Category 값 얻기
-    public String getCategory(String token) {
-        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload()
-                .get("category", String.class);
-    }
 
     public String getPicture(String token) {
 
@@ -60,11 +61,11 @@ public class JWTUtil {
                 .get("picture", String.class);
     }
 
-    public String getRole(String token) {
-
-        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload()
-                .get("role", String.class);
-    }
+//    public String getRole(String token) {
+//
+//        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload()
+//                .get("role", String.class);
+//    }
 
     public LocalDateTime getIssuedAt(String token) {
         return LocalDateTime.ofInstant(Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload()
@@ -83,35 +84,27 @@ public class JWTUtil {
                 .before(new Date());
     }
 
-    public String createAccessToken(String email, Long userId, String name, String phoneNumber, String picture,
-                                    String role) {
+    public String createAccessToken(String email, String name, String phoneNumber, String picture) {
         System.out.println("Creating access token for user: " + email);
-        return createJwt(ACCESS.getType(), email, userId, name, phoneNumber, picture, role,
-                ACCESS.getExpiration() * MS_TO_S);
+        return createJwt(ACCESS.getType(), email, name, phoneNumber, picture, ACCESS.getExpiration() * MS_TO_S);
     }
 
-    public String createRefreshToken(String email, Long userId, String name, String phoneNumber, String picture,
-                                     String role) {
+    public String createRefreshToken(String email, String name, String phoneNumber, String picture) {
         System.out.println("Creating refresh token for user: " + email);
-        return createJwt(REFRESH.getType(), email, userId, name, phoneNumber, picture, role,
-                REFRESH.getExpiration() * MS_TO_S);
+        return createJwt(REFRESH.getType(), email, name, phoneNumber, picture, REFRESH.getExpiration() * MS_TO_S);
     }
 
-    public String createJwt(String category, String email, Long userId, String name, String phoneNumber, String picture,
-                            String role,
+    public String createJwt(String category, String email, String name, String phoneNumber, String picture,
                             Long expiredMs) {
         System.out.println("Creating JWT with category: " + category);
-        System.out.println("User info: " + email + ", " + userId + ", " + name + ", " + role + ", " + phoneNumber + ", "
-                + picture);
+        System.out.println("User info: " + email + ", " + name + ", " + phoneNumber + ", " + picture);
 
         return Jwts.builder()
                 .claim("category", category) // access, refresh 판단
                 .claim("email", email)
-                .claim("userId", userId)
                 .claim("name", name)
                 .claim("phoneNumber", phoneNumber)
                 .claim("picture", picture)
-                .claim("role", role)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + expiredMs))
                 .signWith(secretKey)

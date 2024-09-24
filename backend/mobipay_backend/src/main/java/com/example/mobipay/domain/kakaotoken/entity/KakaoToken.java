@@ -39,9 +39,9 @@ public class KakaoToken {
     private MobiUser mobiUser;
 
     @Builder
-    private KakaoToken(String refreshValue, String accessValue, MobiUser mobiUser) {
-        this.refreshValue = refreshValue;
+    public KakaoToken(String accessValue, String refreshValue, MobiUser mobiUser) {
         this.accessValue = accessValue;
+        this.refreshValue = refreshValue;
         this.mobiUser = mobiUser;
     }
 }

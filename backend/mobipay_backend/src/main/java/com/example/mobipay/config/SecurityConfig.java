@@ -38,6 +38,8 @@ public class SecurityConfig {
 
     String[] whitelist_post = {
             "/api/v1/users/reissue",
+            "http://localhost:8080/api/v1/login",
+            "/api/v1/login"
     };
     String[] whitelist_get = {
             "/",
@@ -45,6 +47,7 @@ public class SecurityConfig {
             "/login/**",
 //            "/api/v1/login/oauth2/code/kakao",
             "/login/oauth2/**",
+            "/api/v1/login"
     };
 
 //    @Value()

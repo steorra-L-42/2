@@ -7,63 +7,79 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
-@NoArgsConstructor //역직렬화를 위한 기본 생성자
+@NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class KakaoUserInfoResponseDto {
 
-    //회원 번호
+    // 회원 번호
     @JsonProperty("id")
-    public Long userId;
+    private Long userId;
 
-    //사용자 프로퍼티
+    // 사용자 프로퍼티
     @JsonProperty("properties")
-    public HashMap<String, String> properties;
+    private HashMap<String, String> properties;
 
-    //카카오 계정 정보
+    // 카카오 계정 정보
     @JsonProperty("kakao_account")
-    public KakaoAccount kakaoAccount;
+    private KakaoAccount kakaoAccount;
 
     @Getter
     @NoArgsConstructor
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public class KakaoAccount {
+    public static class KakaoAccount {
 
-        //프로필 정보 제공 동의 여부
+        // 프로필 정보 제공 동의 여부
         @JsonProperty("profile_needs_agreement")
-        public Boolean isProfileAgree;
+        private Boolean isProfileAgree;
 
-        //사용자 프로필 정보
+        // 프로필 정보
         @JsonProperty("profile")
-        public Profile profile;
+        private Profile profile;
 
-        //이메일 제공 동의 여부
+        // 이름 제공 동의 여부
+        @JsonProperty("name_needs_agreement")
+        private Boolean isNameAgree;
+
+        // 사용자 이름
+        @JsonProperty("name")
+        private String name;
+
+        // 이메일 제공 동의 여부
         @JsonProperty("email_needs_agreement")
-        public Boolean isEmailAgree;
+        private Boolean isEmailAgree;
 
-        //카카오계정 대표 이메일
+        // 이메일
         @JsonProperty("email")
-        public String email;
+        private String email;
 
-        //전화번호 제공 동의 여부
+        // 전화번호 제공 동의 여부
         @JsonProperty("phone_number_needs_agreement")
-        public Boolean isPhoneNumberAgree;
+        private Boolean isPhoneNumberAgree;
 
-        //전화번호
+        // 전화번호
         @JsonProperty("phone_number")
-        public String phoneNumber;
+        private String phoneNumber;
 
         @Getter
         @NoArgsConstructor
         @JsonIgnoreProperties(ignoreUnknown = true)
-        public class Profile {
+        public static class Profile {
 
-            //닉네임
+            // 닉네임
             @JsonProperty("nickname")
-            public String nickName;
+            private String nickName;
 
-            //프로필 사진 URL
+            // 프로필 이미지 URL
             @JsonProperty("profile_image_url")
-            public String profileImageUrl;
+            private String picture;
+
+            // 썸네일 이미지 URL
+            @JsonProperty("thumbnail_image_url")
+            private String thumbnailImageUrl;
+
+            // 기본 이미지 여부
+            @JsonProperty("is_default_image")
+            private Boolean isDefaultImage;
         }
     }
 }
