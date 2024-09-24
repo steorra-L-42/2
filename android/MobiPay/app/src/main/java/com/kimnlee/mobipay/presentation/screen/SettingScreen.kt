@@ -23,7 +23,9 @@ fun SettingScreen(
             style = MaterialTheme.typography.headlineMedium
         )
         Spacer(modifier = Modifier.padding(16.dp))
-        Button(onClick = { navController.navigate("payment") }) {
+        Button(onClick = {
+//            navController.navigate("payment")
+        }) {
             Text(
                 text = "결제페이지",
                 style = MaterialTheme.typography.bodyLarge

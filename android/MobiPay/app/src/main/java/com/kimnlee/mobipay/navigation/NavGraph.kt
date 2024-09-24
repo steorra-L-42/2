@@ -15,7 +15,6 @@ import com.kimnlee.common.components.BottomNavigation
 import com.kimnlee.mobipay.presentation.screen.HomeScreen
 import com.kimnlee.mobipay.presentation.screen.SettingScreen
 import com.kimnlee.payment.navigation.paymentNavGraph
-import com.kimnlee.payment.presentation.screen.PaymentScreen
 import com.kimnlee.vehiclemanagement.navigation.vehicleManagementNavGraph
 
 @Composable
@@ -41,12 +40,7 @@ fun AppNavGraph(
                 SettingScreen(authManager = authManager, navController = navController)
             }
         }
-        composable("payment") {
-            ScreenWithBottomNav(navController) {
-                PaymentScreen(
-                )
-            }
-        }
+
         paymentNavGraph(navController)
         cardManagementNavGraph(navController)
         vehicleManagementNavGraph(navController)
