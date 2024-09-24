@@ -7,6 +7,7 @@ import android.media.AudioAttributes
 import android.media.RingtoneManager
 import android.util.Log
 import com.google.firebase.FirebaseApp
+import com.kimnlee.common.auth.KakaoSdkInitializer
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 
@@ -15,6 +16,9 @@ class MobiPayApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
+
+        // 카카오 SDK 초기화
+        KakaoSdkInitializer.initialize(this)
 
         Log.d(TAG, "[모비페이] onCreate: FCM init")
         FirebaseApp.initializeApp(this)
