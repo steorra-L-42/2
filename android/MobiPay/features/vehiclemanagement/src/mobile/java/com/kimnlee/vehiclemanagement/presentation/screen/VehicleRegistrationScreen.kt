@@ -1,50 +1,53 @@
 package com.kimnlee.vehiclemanagement.presentation.screen
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.kimnlee.vehiclemanagement.presentation.viewmodel.VehicleManagementViewModel
 import android.Manifest
-import android.content.pm.PackageManager
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.content.ContextCompat
-
 import android.util.Log
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.camera.core.*
-import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.compose.ui.viewinterop.AndroidView
-import java.util.concurrent.Executors
-import androidx.camera.core.Preview
-import androidx.camera.view.PreviewView
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.CameraSelector
-import androidx.lifecycle.compose.LocalLifecycleOwner
-
-import android.content.Context
-import android.net.Uri
+import androidx.camera.core.ImageAnalysis
+import androidx.camera.core.Preview
+import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.camera.view.PreviewView
 import androidx.compose.foundation.background
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.ui.Alignment
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.sp
-import java.io.File
-import java.text.SimpleDateFormat
-import java.util.*
-
-import com.google.mlkit.vision.common.InputImage
-import com.google.mlkit.vision.text.TextRecognition
-import com.google.mlkit.vision.text.latin.TextRecognizerOptions
-
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.kimnlee.vehiclemanagement.data.model.LicensePlateAnalyzer
+import com.kimnlee.vehiclemanagement.presentation.viewmodel.VehicleManagementViewModel
+import java.util.concurrent.Executors
 
+private const val TAG = "VehicleRegistrationScreen"
 
 @Composable
 fun VehicleRegistrationScreen(
@@ -58,10 +61,12 @@ fun VehicleRegistrationScreen(
     var oneTimeLimit by remember { mutableStateOf("") }
     var oneDayLimit by remember { mutableStateOf("") }
 
-    var imageCapture: ImageCapture? by remember { mutableStateOf(null) }
     var hasCameraPermission by remember { mutableStateOf(false) }
-    var vehicleNumberCheck by remember { mutableStateOf(false)}
+    var vehicleNumberCheck by remember { mutableStateOf(false) }
     var showDialog by remember { mutableStateOf(false) }
+
+    var recognizedLicensePlate by remember { mutableStateOf("") }
+    var isAnalyzing by remember { mutableStateOf(true) }
 
     val cameraPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
@@ -86,13 +91,14 @@ fun VehicleRegistrationScreen(
         )
         Spacer(modifier = Modifier.height(16.dp))
 
-
         if (!vehicleNumberCheck) {
             if (!hasCameraPermission) {
                 Button(
                     onClick = {
                         cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
                         hasCameraPermission = true
+                        recognizedLicensePlate = ""
+                        isAnalyzing = true
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -111,7 +117,7 @@ fun VehicleRegistrationScreen(
 
                 Spacer(modifier = Modifier.height(100.dp))
 
-                Text("차량 이미지 추가를 위한 공간") // 자동차 이미지 등록을 위한 선택지 or 검색 제공 기능 추가해야 함
+                Text("차량 이미지 추가를 위한 공간")
 
                 Spacer(modifier = Modifier.height(100.dp))
 
@@ -124,7 +130,7 @@ fun VehicleRegistrationScreen(
                 ) {
                     Text("다음")
                 }
-            } else { // 실제 촬영 시 OCR로 차량 번호 인식 후 자동 입력
+            } else {
                 Box(
                     modifier = Modifier
                         .weight(1f)
@@ -147,9 +153,20 @@ fun VehicleRegistrationScreen(
 
                                 val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
 
-                                imageCapture = ImageCapture.Builder()
-                                    .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
+                                val imageAnalyzer = ImageAnalysis.Builder()
+                                    .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                                     .build()
+
+                                imageAnalyzer.setAnalyzer(
+                                    cameraExecutor,
+                                    LicensePlateAnalyzer(
+                                        context = ctx,
+                                        isAnalyzing = { isAnalyzing },
+                                        onLicensePlateRecognized = { plateNumber ->
+                                            recognizedLicensePlate = plateNumber
+                                        }
+                                    )
+                                )
 
                                 preview.setSurfaceProvider(previewView.surfaceProvider)
 
@@ -159,7 +176,7 @@ fun VehicleRegistrationScreen(
                                         lifecycleOwner,
                                         cameraSelector,
                                         preview,
-                                        imageCapture
+                                        imageAnalyzer
                                     )
                                 } catch (e: Exception) {
                                     Log.e("CameraPreview", "Use case binding failed", e)
@@ -170,30 +187,13 @@ fun VehicleRegistrationScreen(
                         },
                         modifier = Modifier.fillMaxSize()
                     )
+                }
 
-                    IconButton(
-                        onClick = {
-                            takePhoto(
-                                imageCapture,
-                                context,
-                                onPhotoTaken = { recognizedText  ->
-                                    licensePlate = recognizedText // OCR로 추출한 텍스트를 차량 번호로 설정
-                                    // 사진 촬영 후 권한 해제
-                                    hasCameraPermission = false
-                                }
-                            )
-                        },
-                        modifier = Modifier
-                            .align(Alignment.BottomCenter)
-                            .padding(bottom = 16.dp)
-                            .size(80.dp)
-                            .background(Color.LightGray, shape = CircleShape)
-                    ) {
-                        Icon(
-                            painter = painterResource(id = android.R.drawable.ic_menu_camera),
-                            contentDescription = "Take Photo",
-                            tint = Color.White
-                        )
+                LaunchedEffect(recognizedLicensePlate) {
+                    if (recognizedLicensePlate.isNotEmpty()) {
+                        licensePlate = recognizedLicensePlate
+                        hasCameraPermission = false
+                        isAnalyzing = false
                     }
                 }
             }
@@ -203,7 +203,7 @@ fun VehicleRegistrationScreen(
             if (showDialog) {
                 AlertDialog(
                     onDismissRequest = { showDialog = false },
-                    title = { Text(licensePlate) }, // 입력된 차량 번호를 받아오기
+                    title = { Text(licensePlate) },
                     text = { Text("이 차량 번호가 맞나요?.") },
                     confirmButton = {
                         Button(
@@ -305,58 +305,5 @@ fun VehicleRegistrationScreen(
         ) {
             Text("취소")
         }
-    }
-}
-
-private fun takePhoto(
-    imageCapture: ImageCapture?,
-    context: Context,
-    onPhotoTaken: (String) -> Unit
-) {
-    imageCapture?.let {
-        val photoFile = File(
-            context.externalMediaDirs.firstOrNull(),
-            "VehicleRegistration-${SimpleDateFormat("yyyy-MM-dd-HH-mm-ss-SSS", Locale.US).format(System.currentTimeMillis())}.jpg"
-        )
-
-        val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
-
-        it.takePicture(
-            outputOptions,
-            ContextCompat.getMainExecutor(context),
-            object : ImageCapture.OnImageSavedCallback {
-                override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
-                    val savedUri = Uri.fromFile(photoFile)
-                    // 이미지에서 텍스트 추출
-                    // 추후 팀에서 학습시킨 AI로 대체
-                    extractTextFromImage(context, savedUri) { recognizedText ->
-                        onPhotoTaken(recognizedText)
-                    }
-                }
-
-                override fun onError(exception: ImageCaptureException) {
-                    Log.e("TakePhoto", "Photo capture failed: ${exception.message}", exception)
-                }
-            }
-        )
-    }
-}
-
-private fun extractTextFromImage(context: Context, imageUri: Uri, onTextExtracted: (String) -> Unit) {
-    val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
-
-    try {
-        val image = InputImage.fromFilePath(context, imageUri)
-        recognizer.process(image)
-            .addOnSuccessListener { visionText ->
-                // 텍스트 인식 성공 시
-                val recognizedText = visionText.text
-                onTextExtracted(recognizedText)
-            }
-            .addOnFailureListener { e ->
-                Log.e("TextRecognition", "Text recognition failed: ${e.message}")
-            }
-    } catch (e: Exception) {
-        Log.e("TextRecognition", "Failed to load image: ${e.message}")
     }
 }
