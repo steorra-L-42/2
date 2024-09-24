@@ -1,4 +1,4 @@
-package com.example.mobipay.global.service;
+package com.example.mobipay.global.authentication.service;
 
 import com.example.mobipay.domain.mobiuser.entity.MobiUser;
 
