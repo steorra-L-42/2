@@ -7,6 +7,7 @@ import android.media.AudioAttributes
 import android.media.RingtoneManager
 import android.util.Log
 import com.google.firebase.FirebaseApp
+import com.kimnlee.firebase.FCMService
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 
@@ -18,6 +19,12 @@ class MobiPayApplication : Application() {
 
         Log.d(TAG, "[모비페이] onCreate: FCM init")
         FirebaseApp.initializeApp(this)
+
+        val fcmService = FCMService()
+
+        fcmService.getToken { token ->
+            Log.d(TAG, "이 기기의 FCM 토큰: $token")
+        }
 
         createNotificationChannel()
         // Setup MapboxNavigation

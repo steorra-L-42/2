@@ -30,15 +30,29 @@ import retrofit2.Callback
 import retrofit2.Response
 
 
-private const val TAG = "MyFirebaseMessagingServ"
+private const val TAG = "FCMService"
 
 class FCMService : FirebaseMessagingService() {
+
     private lateinit var mNotificationManager: NotificationManagerCompat
+
+    fun getToken(callback: (String) -> Unit) {
+        FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                val token = task.result
+                Log.d(TAG, "FCM Token: $token")
+                callback(token)
+            } else {
+                Log.w(TAG, "Fetching FCM token failed", task.exception)
+                callback("Failed")
+            }
+        }
+    }
 
     override fun onCreate() {
         Log.d(TAG, "onCreate: FCM onCreate")
 
-        /*
+
         // FCM 토큰 확인
         FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
             if (task.isSuccessful) {
@@ -49,7 +63,7 @@ class FCMService : FirebaseMessagingService() {
                 Log.w(TAG, "Fetching FCM token failed", task.exception)
             }
         }
-        */
+
         Log.d(TAG, "onCreate: BASE URL = ${retrofit.baseUrl()}")
 
         mNotificationManager = NotificationManagerCompat.from(applicationContext)
@@ -160,12 +174,11 @@ class FCMService : FirebaseMessagingService() {
 
     @RequiresApi(Build.VERSION_CODES.R)
     fun notify(context: Context, appConversation: MobiConversation) {
-        // Creates the actions and MessagingStyle.
+
         val replyAction = createReplyAction(context, appConversation)
         val markAsReadAction = createMarkAsReadAction(context, appConversation)
         val messagingStyle = createMessagingStyle(context, appConversation)
 
-        // Creates the notification.
         val notification = NotificationCompat.Builder(context, "payment_request")
             .setSmallIcon(R.drawable.ic_mobipay)
             .setCategory(CATEGORY_MESSAGE)
@@ -176,66 +189,26 @@ class FCMService : FirebaseMessagingService() {
             .setStyle(messagingStyle)
             .setPriority(NotificationCompat.PRIORITY_MAX)
 
-            // Adds reply action.
             .addAction(replyAction)
 
             .build()
 
-        // Posts the notification for the user to see.
+
         val notificationManagerCompat = NotificationManagerCompat.from(context)
         notificationManagerCompat.notify(appConversation.id, notification)
 
     }
 
-
-    fun sendCarNotification(title: String, content: String) {
-        // Create a builder for the notification
-        val builder = NotificationCompat.Builder(applicationContext, "payment_request")
-            .setSmallIcon(R.drawable.ic_mobipay) // Notification icon
-            .setContentTitle(title) // Notification title
-            .setContentText(content) // Notification content
-            .setPriority(NotificationCompat.PRIORITY_HIGH) // High priority for visibility on Auto
-
-        val icon = BitmapFactory.decodeResource(
-            applicationContext.getResources(),
-            R.drawable.ic_mobipay
-        )
-
-        // Add Android Auto car extensions
-        val notification = builder
-            .extend(
-                CarExtender()
-                    .setColor(Color.YELLOW) // Set notification color
-                    .setLargeIcon(icon)
-            )
-            .build()
-
-        // Notify using NotificationManagerCompat for Android Auto compatibility
-        val notificationManager = NotificationManagerCompat.from(applicationContext)
-        if (ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.POST_NOTIFICATIONS
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-
-            return
-        }
-        notificationManager.notify(1, notification) // Post the notification
-    }
-
-
     @RequiresApi(Build.VERSION_CODES.R)
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         super.onMessageReceived(remoteMessage)
-        Log.d("FCM Serv", "From: ${remoteMessage.from}")
-        // Handle notification payload
-        remoteMessage.notification?.let { notification ->
-            // Log notification details
-            Log.d("FCM Serv", "Notification Title: ${notification.title}")
-            Log.d("FCM Serv", "Notification Body: ${notification.body}")
+        Log.d(TAG, "From: ${remoteMessage.from}")
 
-            // Custom action based on notification
-            // You can trigger an internal action or log this event
+        remoteMessage.notification?.let { notification ->
+
+            Log.d(TAG, "Notification Title: ${notification.title}")
+            Log.d(TAG, "Notification Body: ${notification.body}")
+
             confirmFCMReceived(remoteMessage.messageId ?: "No Message ID")
 
             val user2 = MobiUser(15, "MobiUserTMP", IconCompat.createWithResource(applicationContext, R.drawable.ic_mobipay))
@@ -251,20 +224,22 @@ class FCMService : FirebaseMessagingService() {
         }
     }
 
+    /**
+     * 서버에 FCM 정상 수신을 알리는 함수
+     */
     private fun confirmFCMReceived(msgId: String) {
-        // Assuming you have a method in your BackendService to register the token
         val call = backendService.confirmFCMReceived(msgId)
         call.enqueue(object : Callback<Void> {
             override fun onResponse(call: Call<Void>, response: Response<Void>) {
                 if (response.isSuccessful) {
-                    // Handle successful registration (e.g., log it or notify the user)
+                    Log.d(TAG, "onResponse: FCM 수신 confirm 완료")
                 } else {
-                    // Handle unsuccessful registration (e.g., log the error)
+                    Log.d(TAG, "onResponse: FCM 수신 confirm 실패")
                 }
             }
 
             override fun onFailure(call: Call<Void>, t: Throwable) {
-                // Handle failure (e.g., log the error or retry)
+                Log.d(TAG, "onFailure: FCM 수신 컨펌 서버 통신 오류 \n${t.stackTrace}")
             }
         })
     }
@@ -272,24 +247,23 @@ class FCMService : FirebaseMessagingService() {
     override fun onNewToken(token: String) {
         super.onNewToken(token)
         Log.d("Token", "새 토큰: " + token)
-        // Send the new token to your backend server
+        // 백엔드 서버에 FCM 토큰 전송
         sendTokenToServer(token)
     }
 
     private fun sendTokenToServer(token: String) {
-        // Assuming you have a method in your BackendService to register the token
         val call = backendService.registerToken(token)
         call.enqueue(object : Callback<Void> {
             override fun onResponse(call: Call<Void>, response: Response<Void>) {
                 if (response.isSuccessful) {
-                    // Handle successful registration (e.g., log it or notify the user)
+                    Log.d(TAG, "onResponse: FCM 토큰 정상 등록됨")
                 } else {
-                    // Handle unsuccessful registration (e.g., log the error)
+                    Log.d(TAG, "onResponse: FCM 토큰 등록 실패")
                 }
             }
 
             override fun onFailure(call: Call<Void>, t: Throwable) {
-                // Handle failure (e.g., log the error or retry)
+                Log.d(TAG, "onFailure: FCM 토큰 서버 통신 오류 \n${t.stackTrace}")
             }
         })
     }
