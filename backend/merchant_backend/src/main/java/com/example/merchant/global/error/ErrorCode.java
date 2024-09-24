@@ -7,9 +7,9 @@ import org.springframework.http.HttpStatus;
 @Getter
 @AllArgsConstructor
 public enum ErrorCode {
-    ;
-//     example of error code
-//    NOT_OWNER(HttpStatus.FORBIDDEN, "차주가 아닙니다.");
+
+    DUPLICATEDPARKING(HttpStatus.BAD_REQUEST, "중복된 주차가 존재합니다."),
+    INVALIDMERAPIKEY(HttpStatus.UNAUTHORIZED , "잘못된 merApiKey 입니다.");
 
     private final HttpStatus status;
     private final String message;
