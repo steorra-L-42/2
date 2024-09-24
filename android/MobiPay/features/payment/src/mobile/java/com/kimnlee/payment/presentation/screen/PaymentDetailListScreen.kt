@@ -18,7 +18,7 @@ import com.kimnlee.payment.data.model.Merchant
 import com.kimnlee.payment.data.model.MerchantTransaction
 
 @Composable
-fun PaymentScreen(
+fun PaymentDetailListScreen(
     transactions: List<MerchantTransaction>,
     merchants: List<Merchant>,
     onNavigateToDetail: (transaction : MerchantTransaction) -> Unit,

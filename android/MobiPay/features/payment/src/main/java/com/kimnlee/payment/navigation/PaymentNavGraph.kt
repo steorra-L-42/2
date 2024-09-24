@@ -8,14 +8,15 @@ import com.kimnlee.common.components.BottomNavigation
 import com.kimnlee.payment.data.dummyMerchants
 import com.kimnlee.payment.data.dummyTransactions
 import com.kimnlee.payment.data.model.MerchantTransaction
+import com.kimnlee.payment.presentation.screen.PaymentDetailListScreen
 import com.kimnlee.payment.presentation.screen.PaymentDetailScreen
-import com.kimnlee.payment.presentation.screen.PaymentScreen
+
 
 fun NavGraphBuilder.paymentNavGraph(navController: NavHostController) {
     navigation(startDestination = "payment_main", route = "payment_detail") {
         composable("payment_main") {
             BottomNavigation(navController) {
-                PaymentScreen(
+                PaymentDetailListScreen(
                     transactions = dummyTransactions,
                     merchants = dummyMerchants,
                     onNavigateToDetail = { transaction ->
