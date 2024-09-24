@@ -8,9 +8,11 @@ import com.example.mobipay.oauth2.repository.MobiUserRepository;
 import com.example.mobipay.oauth2.repository.RefreshTokenRepository;
 import com.example.mobipay.oauth2.service.CustomOauth2UserService;
 import com.example.mobipay.oauth2.util.CookieMethods;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -39,7 +41,9 @@ public class SecurityConfig {
     String[] whitelist_post = {
             "/api/v1/users/reissue",
             "http://localhost:8080/api/v1/login",
-            "/api/v1/login"
+            "http://localhost:8080/api/v1/zz",
+            "/api/v1/login",
+            "/api/v1/zz"
     };
     String[] whitelist_get = {
             "/",
@@ -50,37 +54,41 @@ public class SecurityConfig {
             "/api/v1/login"
     };
 
-//    @Value()
-//    String corsURL;
+    @Value("${cors.url}")
+    private String corsURL;
 
 //    @Bean
-//    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+//    public HttpFirewall allowUrlEncodedDoubleSlashHttpFirewall() {
+//        StrictHttpFirewall firewall = new StrictHttpFirewall();
+//        firewall.setAllowUrlEncodedDoubleSlash(true);
+//        return firewall;
+//    }
+//    // 인코딩된 URL 이중 슬래시 ㅎ용
 //
-//        return configuration.getAuthenticationManager();
+//    @Bean
+//    public WebSecurityCustomizer webSecurityCustomizer() {
+//        return (web) -> web.httpFirewall(allowUrlEncodedDoubleSlashHttpFirewall())
+//                .ignoring()
+//                .requestMatchers(PathRequest.toStaticResources().atCommonLocations());
 //    }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-//        String[] allowedOrigins = Arrays.stream(corsURL.split(","))
-//                .map(String::trim)
-//                .toArray(String[]::new);
+        String[] allowedOrigins = Arrays.stream(corsURL.split(","))
+                .map(String::trim)
+                .toArray(String[]::new);
 
         http
                 .cors(corsCustomizer -> corsCustomizer.configurationSource(request -> {
 
                     CorsConfiguration configuration = new CorsConfiguration();
 
-                    configuration.setAllowedOrigins(List.of(
-                            "https://mobipay.kr/api/v1/**",
-                            "http://localhost:8080",
-                            "http://10.0.2.2:8080",   // 안드로이드 에뮬레이터
-                            "http://172.18.96.1:8080" // 로컬 네트워크에서 접근하는 실제 기기 (IP는 본인의 IP로 변경)
-                    ));
-                    configuration.setAllowedMethods(Collections.singletonList("*"));
-                    configuration.setAllowCredentials(true);
-                    configuration.setAllowedHeaders(Collections.singletonList("*"));
-                    configuration.setMaxAge(3600L);
-                    configuration.setExposedHeaders(List.of("Set-Cookie", "Authorization"));
+                    configuration.setAllowedOrigins(List.of(allowedOrigins)); //CORS 허용 도메인 설정
+                    configuration.setAllowedMethods(Collections.singletonList("*")); //허용된 HTTP 메서드 설정
+                    configuration.setAllowCredentials(true); //쿠키와 인증 정보 허용
+                    configuration.setAllowedHeaders(Collections.singletonList("*")); //허용된 요청 헤더 설정
+                    configuration.setMaxAge(3600L); //프리플라이트 요청 캐싱 시간
+                    configuration.setExposedHeaders(List.of("Set-Cookie", "Authorization")); //클라이언트에게 노출할 응답 헤더
 
                     return configuration;
                 }));
@@ -115,7 +123,7 @@ public class SecurityConfig {
 
         http
                 .addFilterBefore(
-                        new CustomLogoutFilter(jwtUtil, refreshTokenRepository, cookieMethods, mobiUserRepository),
+                        new CustomLogoutFilter(jwtUtil, refreshTokenRepository, mobiUserRepository, cookieMethods),
                         LogoutFilter.class);
 
         http

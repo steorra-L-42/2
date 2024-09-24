@@ -2,7 +2,6 @@ package com.example.mobipay.oauth2.service;
 
 import com.example.mobipay.domain.mobiuser.entity.MobiUser;
 import com.example.mobipay.domain.refreshtoken.entity.RefreshToken;
-import com.example.mobipay.oauth2.Component.JwtTokenProvider;
 import com.example.mobipay.oauth2.jwt.JWTUtil;
 import com.example.mobipay.oauth2.repository.MobiUserRepository;
 import com.example.mobipay.oauth2.repository.RefreshTokenRepository;
@@ -16,7 +15,6 @@ public class UserService {
 
     private final MobiUserRepository mobiUserRepository;
     private final RefreshTokenRepository refreshTokenRepository;
-    private final JwtTokenProvider jwtTokenProvider;
     private final JWTUtil jwtUtil;
 
     // 1. 이메일로 사용자 조회(중복 유무 확인 후, 중복이 되지 않는다면 createUser 수행)

@@ -4,6 +4,7 @@ import static com.example.mobipay.oauth2.enums.TokenType.ACCESS;
 import static com.example.mobipay.oauth2.enums.TokenType.REFRESH;
 
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -20,9 +21,11 @@ public class JWTUtil {
     private SecretKey secretKey;
 
     public JWTUtil(@Value("${spring.jwt.secret}") String secret) {
-
+//        this.secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
         secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8),
                 Jwts.SIG.HS256.key().build().getAlgorithm());
+
+
     }
 
     // Category 값 얻기
@@ -32,7 +35,6 @@ public class JWTUtil {
     }
 
     public String getEmail(String token) {
-
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload()
                 .get("email", String.class);
     }
@@ -67,6 +69,7 @@ public class JWTUtil {
 //                .get("role", String.class);
 //    }
 
+    // 만료 유무
     public LocalDateTime getIssuedAt(String token) {
         return LocalDateTime.ofInstant(Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload()
                 .getIssuedAt().toInstant(), ZoneId.systemDefault());
@@ -85,7 +88,7 @@ public class JWTUtil {
     }
 
     public String createAccessToken(String email, String name, String phoneNumber, String picture) {
-        System.out.println("Creating access token for user: " + email);
+        System.out.println("Creating refresh token for user: " + email);
         return createJwt(ACCESS.getType(), email, name, phoneNumber, picture, ACCESS.getExpiration() * MS_TO_S);
     }
 
@@ -99,7 +102,7 @@ public class JWTUtil {
         System.out.println("Creating JWT with category: " + category);
         System.out.println("User info: " + email + ", " + name + ", " + phoneNumber + ", " + picture);
 
-        return Jwts.builder()
+        String jwt = Jwts.builder()
                 .claim("category", category) // access, refresh 판단
                 .claim("email", email)
                 .claim("name", name)
@@ -107,7 +110,10 @@ public class JWTUtil {
                 .claim("picture", picture)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + expiredMs))
-                .signWith(secretKey)
+                .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact();
+
+        System.out.println(jwt);
+        return jwt;
     }
 }

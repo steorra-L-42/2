@@ -30,6 +30,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     private final MobiUserRepository mobiUserRepository;
     private final RefreshTokenService refreshTokenService;
 
+
     @Value("${app.redirect.uri}")
     private String appRedirectUri;
 
@@ -54,9 +55,9 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         String picture = customUserDetails.getPicture();
         String role = extractUserRole(authentication);
 
-        String accessToken = jwtUtil.createAccessToken(email, name, phoneNumber, picture);
+//        String accessToken = jwtUtil.createAccessToken(email, name, phoneNumber, picture);
         String refreshToken = jwtUtil.createRefreshToken(email, name, phoneNumber, picture);
-        System.out.println("accessToken" + accessToken);
+//        System.out.println("accessToken" + accessToken);
         System.out.println("refreshToken" + refreshToken);
 
         // Refresh 토큰 저장
@@ -64,7 +65,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         addRefreshTokenToResponse(response, refreshToken);
 
         // Redirect
-        redirectToTargetWithToken(request, response, accessToken);
+//        redirectToTargetWithToken(request, response, accessToken);
     }
 
     private String extractUserRole(Authentication authentication) {
