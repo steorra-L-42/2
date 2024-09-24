@@ -38,9 +38,9 @@ import org.springframework.web.filter.CharacterEncodingFilter;
 @SpringBootTest
 @ContextConfiguration(classes = MerchantApplication.class)
 @AutoConfigureMockMvc
-class ParkingControllerTest {
+class ParkingEntryTest {
 
-    private static final Logger log = LoggerFactory.getLogger(ParkingControllerTest.class);
+    private static final Logger log = LoggerFactory.getLogger(ParkingEntryTest.class);
 
     @Value("${merchant.api.key}")
     private String validMerApiKey;
@@ -51,8 +51,8 @@ class ParkingControllerTest {
     protected ObjectMapper objectMapper;
 
     @Autowired
-    public ParkingControllerTest(WebApplicationContext context, MockMvc mockMvc,
-                                 ObjectMapper objectMapper, ParkingRepository parkingRepository) {
+    public ParkingEntryTest(WebApplicationContext context, MockMvc mockMvc,
+                            ObjectMapper objectMapper, ParkingRepository parkingRepository) {
         this.context = context;
         this.parkingRepository = parkingRepository;
         this.mockMvc = mockMvc;
