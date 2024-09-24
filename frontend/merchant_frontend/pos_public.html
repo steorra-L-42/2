@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>모비페이 차량번호인식 테스트</title>
+  <!-- TensorFlow.js 불러옴 -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
+  <!-- COCO-SSD 모델 불러옴 -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@latest"></script>
+  <style>
+    #video {
+      width: 320px;
+      height: 240px;
+    }
+    #status, #lpno {
+      font-size: 24px;
+      font-weight: bold;
+    }
+    #status {
+      margin-bottom: 10px;
+      color: red;
+    }
+    #lpno {
+      color: black;
+    }
+  </style>
+</head>
+<body>
+
+  <div>현재는 PC의 경우 웹캠 해상도가 작아서 차량을 카메라 가까이 대야 OCR 시작됩니다.</div>
+  <div>자동차 감지는 서버가 아닌 브라우저에서 진행됩니다.</div>
+  
+  <div id="status">차량 없음</div>
+  
+  <div id="lpno">차량 번호: N/A</div>
+  <!--
+  <div id="lastlpno">N/A</div>
+  <div id="reqstatus">0</div>
+  <div id="convtime"></div>
+  -->
+  <br>
+
+  <video id="video" autoplay muted></video>
+
+  <script>
+    const video = document.getElementById('video');
+    const statusDiv = document.getElementById('status');
+    const lpnoDiv = document.getElementById('lpno');
+    let car_present = false;
+
+    let model; 
+	
+    function startCamera(facingMode) {
+      return navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: facingMode,
+		  width: { ideal: 1920 },
+		  height: { ideal: 1080 },
+          frameRate: { ideal: 60 }
+        }
+      });
+    }
+
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      startCamera({ exact: 'environment' })
+        .then(stream => {
+          video.srcObject = stream;
+          video.play();
+          const track = stream.getVideoTracks()[0];
+          const settings = track.getSettings();
+		  video.width = settings.width;
+		  video.height = settings.height; 
+		  cocoSsd.load().then(loadedModel => {
+		    model = loadedModel;
+  		    detectObjects();
+		  }).catch(error => {
+		    console.error('모델 로드 실패: ', error);
+		  });
+        })
+        .catch(error => {
+          console.warn('후면카메라 사용 불가하여 전면 카메라를 사용합니다.');
+          startCamera('user') 
+            .then(stream => {
+              video.srcObject = stream;
+              video.play();
+			  const track = stream.getVideoTracks()[0];
+			  const settings = track.getSettings();
+			  video.width = settings.width;
+			  video.height = settings.height; 
+			  cocoSsd.load().then(loadedModel => {
+			    model = loadedModel;
+  			    detectObjects();
+			  }).catch(error => {
+			    console.error('모델 로드 실패: ', error);
+			  });
+            })
+            .catch(error => {
+              console.error('전면카메라 사용 불가: ', error);
+            });
+        });
+    } else {
+      console.error('getUserMedia 사용불가.');
+    }
+
+    async function detectObjects() {
+      try {
+        const predictions = await model.detect(video);
+        car_present = false;
+
+        predictions.forEach(prediction => {
+          if (prediction.class === 'car') {
+            car_present = true;
+
+            statusDiv.textContent = '차량 감지';
+            statusDiv.style.color = 'green';
+
+            const [x, y, width, height] = prediction.bbox;
+
+            if(height > 240 && width > 350){
+
+              const startTime = performance.now();
+              const canvas = document.createElement('canvas');
+              canvas.width = width;
+              canvas.height = height;
+              const context = canvas.getContext('2d');
+
+              context.drawImage(video, x, y, width, height, 0, 0, width, height);
+
+
+              canvas.toBlob(async (blob) => {
+                const formData = new FormData();
+                formData.append('file', blob, 'image.jpg');
+                const endTime = performance.now();
+                const duration = endTime - startTime;
+				console.log("변환 시간: " + duration.toFixed(3) + "ms");
+                try {
+                  const response = await fetch('https://anpr.mobipay.kr/predict/', {
+                    method: 'POST',
+                    body: formData
+                  });
+
+                  const data = await response.json();
+                  const confidence = parseFloat(data.confidence);
+
+                  if (confidence > 0.85) {
+                    lpnoDiv.textContent = "차량 번호: " + data.predicted_text;
+                  }
+
+                } catch (error) {
+                  console.error('POST 실패: ', error);
+                }
+              });
+            }
+          }
+        });
+
+        if (!car_present) {
+          statusDiv.textContent = '차량 없음';
+          statusDiv.style.color = 'red';
+        }
+
+        setTimeout(() => {
+          requestAnimationFrame(detectObjects);
+        }, 600);
+
+      } catch (error) {
+        console.error('물체 감지 실패: ', error);
+
+        setTimeout(() => {
+          requestAnimationFrame(detectObjects);
+        }, 600);
+      }
+    }
+
+  </script>
+</body>
+</html>

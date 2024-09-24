@@ -35,7 +35,9 @@ fun VehicleManagementDetailScreen(
 
             OutlinedButton(
                 onClick = onNavigateBack,
-                modifier = Modifier.width(200.dp).height(50.dp),
+                modifier = Modifier
+                    .width(200.dp)
+                    .height(50.dp),
                 colors = ButtonDefaults.outlinedButtonColors(
                     containerColor = MaterialTheme.colorScheme.background, // 흰색 배경
                     contentColor = MaterialTheme.colorScheme.onBackground // 검은색 텍스트
@@ -112,6 +114,9 @@ fun VehicleManagementDetailScreen(
                     .height(50.dp)
             ) {
                 Text("카드 이미지 공간", modifier = Modifier.align(Alignment.Center))
+            }
+            Button(onClick = { /*등록된 카드 목록 띄우기(페이지 및 API 기능 구현 필요)*/ }) {
+                Text("바꾸기")
             }
         }
 
