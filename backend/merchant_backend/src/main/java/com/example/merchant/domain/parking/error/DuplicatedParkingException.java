@@ -3,7 +3,7 @@ package com.example.merchant.domain.parking.error;
 public class DuplicatedParkingException extends IllegalArgumentException {
 
     public DuplicatedParkingException() {
-        super();
+        super("Duplicated parking");
     }
 
     public DuplicatedParkingException(String message) {

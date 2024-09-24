@@ -3,7 +3,7 @@ package com.example.merchant.domain.parking.error;
 public class InvalidMerApiKeyException extends IllegalArgumentException {
 
     public InvalidMerApiKeyException() {
-        super();
+        super("Invalid merApiKey");
     }
 
     public InvalidMerApiKeyException(String message) {
