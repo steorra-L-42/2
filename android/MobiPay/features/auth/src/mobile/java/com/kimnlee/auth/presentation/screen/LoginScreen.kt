@@ -29,7 +29,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun LoginScreen(
     authManager: AuthManager,
-    onNavigateToHome: () -> Unit
+    onNavigateToHome: () -> Unit,
+    onNavigateToSignUp: () -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
     val configuration = LocalConfiguration.current
@@ -65,6 +66,16 @@ fun LoginScreen(
             )
 
             Spacer(modifier = Modifier.weight(1f))
+
+            Button( // 테스트를 위해 생성(로그인 구현 시 삭제 예정)
+                onClick = { onNavigateToSignUp() },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp)
+            ) {
+                Text("회원가입")
+            }
+            Spacer(modifier = Modifier.height(16.dp))
 
             val interactionSource = remember { MutableInteractionSource() }
             Surface(

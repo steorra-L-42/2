@@ -6,6 +6,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.kimnlee.auth.presentation.screen.LoginScreen
 import com.kimnlee.common.auth.AuthManager
+import com.kimnlee.auth.presentation.screen.SignUpScreen
 
 fun NavGraphBuilder.authNavGraph(
     navController: NavHostController,
@@ -19,7 +20,19 @@ fun NavGraphBuilder.authNavGraph(
                     navController.navigate("home") {
                         popUpTo("auth") { inclusive = true }
                     }
-                }
+                },
+                onNavigateToSignUp = { navController.navigate("signup") }
+            )
+        }
+        composable("signup") {
+            SignUpScreen(
+                authManager = authManager,
+                onNavigateToHome = {
+                    navController.navigate("home") {
+                        popUpTo("auth") { inclusive = true }
+                    }
+                },
+                onNavigateToBack = { navController.navigateUp() }
             )
         }
     }
