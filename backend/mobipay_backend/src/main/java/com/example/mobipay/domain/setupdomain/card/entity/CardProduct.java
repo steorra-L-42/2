@@ -38,7 +38,7 @@ public class CardProduct {
     private String cardDescription;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "card_issuer_no")
+    @JoinColumn(name = "card_issuer_code")
     private CardIssuer cardIssuer;
 
     @OneToMany(mappedBy = "cardProduct")
