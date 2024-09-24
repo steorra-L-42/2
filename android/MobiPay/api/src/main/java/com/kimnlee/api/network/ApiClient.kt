@@ -17,4 +17,15 @@ object ApiClient {
         .client(okHttpClient)
         .addConverterFactory(GsonConverterFactory.create())
         .build()
+
+
+    val ocrService: OCRService by lazy {
+        Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(OCRService::class.java)
+    }
+
+
 }
