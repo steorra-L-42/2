@@ -35,6 +35,11 @@ public class Parking {
     @Column(name = "paid", nullable = false)
     private Boolean paid = false;
 
+    public Parking goExit(LocalDateTime exit) {
+        this.exit = exit;
+        return this;
+    }
+
     @Builder
     public Parking(String number, LocalDateTime entry) {
         this.number = number;

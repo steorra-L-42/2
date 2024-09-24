@@ -2,6 +2,8 @@ package com.example.merchant.domain.parking.controller;
 
 import com.example.merchant.domain.parking.dto.ParkingEntryRequest;
 import com.example.merchant.domain.parking.dto.ParkingEntryResponse;
+import com.example.merchant.domain.parking.dto.ParkingExitRequest;
+import com.example.merchant.domain.parking.dto.ParkingExitResponse;
 import com.example.merchant.domain.parking.service.ParkingService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +32,11 @@ public class ParkingController {
     }
 
     @PatchMapping("/exit")
-    public ResponseEntity<Void> exit() {
-        return null;
+    public ResponseEntity<ParkingExitResponse> exit(@RequestBody @Valid ParkingExitRequest request,
+                                                    @RequestHeader("merApiKey") String merApiKey) {
+
+        ParkingExitResponse response = parkingService.exit(request, merApiKey);
+
+        return ResponseEntity.ok(response);
     }
 }
