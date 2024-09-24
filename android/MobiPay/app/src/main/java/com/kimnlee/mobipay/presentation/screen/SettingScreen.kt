@@ -24,7 +24,7 @@ fun SettingScreen(
         )
         Spacer(modifier = Modifier.padding(16.dp))
         Button(onClick = {
-//            navController.navigate("payment")
+            navController.navigate("payment")
         }) {
             Text(
                 text = "결제페이지",

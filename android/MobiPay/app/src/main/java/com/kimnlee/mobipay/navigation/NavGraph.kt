@@ -9,6 +9,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.kimnlee.auth.navigation.authNavGraph
+import com.kimnlee.auth.presentation.screen.PaymentScreen
 import com.kimnlee.auth.presentation.viewmodel.LoginViewModel
 import com.kimnlee.cardmanagement.navigation.cardManagementNavGraph
 import com.kimnlee.memberinvitation.navigation.memberInvitationNavGraph
@@ -53,6 +54,13 @@ fun AppNavGraph(
             ScreenWithBottomNav(navController) {
                 SettingScreen(
                     authManager = authManager,
+                    navController = navController
+                )
+            }
+        }
+        composable("payment") {
+            ScreenWithBottomNav(navController) {
+                PaymentScreen(
                     navController = navController
                 )
             }
