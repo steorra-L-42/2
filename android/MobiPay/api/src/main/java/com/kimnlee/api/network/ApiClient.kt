@@ -1,6 +1,6 @@
 package com.kimnlee.api.network
 
-import com.kimnlee.api.BuildConfig
+import com.kimnlee.common.BuildConfig
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory

@@ -20,7 +20,7 @@ fun BottomNavigation(
 ) {
     val bottomNavItems = listOf(
         BottomNavItem("home", R.string.home, R.drawable.home_24px),
-        BottomNavItem("payment", R.string.payment, R.drawable.receipt_long_24px),
+        BottomNavItem("payment_detail", R.string.payment, R.drawable.receipt_long_24px),
         BottomNavItem("cardmanagement", R.string.card_management, R.drawable.credit_card_24px),
         BottomNavItem("settings", R.string.settings, R.drawable.settings_24px)
     )

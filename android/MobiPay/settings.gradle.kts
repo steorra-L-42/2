@@ -22,6 +22,8 @@ dependencyResolutionManagement {
             credentials.password = providers.gradleProperty("MAPBOX_DOWNLOADS_TOKEN").get()
             authentication.create<BasicAuthentication>("basic")
         }
+        // 카카오 maven 저장소 선언
+        maven { url = java.net.URI("https://devrepo.kakao.com/nexus/content/groups/public/") }
     }
 }
 
@@ -36,3 +38,4 @@ include(":features:memberinvitation")
 include(":features:auth")
 include(":features:freedrive")
 include(":features:firebase")
+include(":features:notification")
