@@ -9,7 +9,7 @@ class BiometricApplication : Application() {
     fun setCurrentActivity(activity: ComponentActivity) {
         currentActivity = activity
     }
-ㅡ
+
     companion object {
         lateinit var instance: BiometricApplication
             private set

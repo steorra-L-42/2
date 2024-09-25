@@ -1,11 +1,11 @@
 package com.kimnlee.auth.presentation.screen
 
-import android.widget.Toast
+import android.app.KeyguardManager
+import android.content.Context
+import android.util.Log
 import androidx.activity.ComponentActivity
-import androidx.biometric.BiometricPrompt
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,33 +31,35 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
-import androidx.fragment.app.FragmentActivity
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.kimnlee.auth.presentation.viewmodel.AuthenticationState
 import com.kimnlee.auth.presentation.viewmodel.BiometricViewModel
 import com.kimnlee.common.R
-import java.util.concurrent.Executor
+
+private val TAG = "페이먼트 스크린"
 
 @Composable
 fun PaymentScreen(
     navController: NavController,
+    viewModel: BiometricViewModel = viewModel(),
 ) {
-    val viewModel: BiometricViewModel = viewModel()
     val context = LocalContext.current
-//    val activity = context as ComponentActivity // ComponentActivity 사용
-    val activity = context as FragmentActivity
+    val activity = context as ComponentActivity
+    val authState by viewModel.authenticationState.collectAsState()
+    val keyguardManager = context.getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
+
     println("11111" + context)
-    println("222" + activity)
+    println("22222" + activity)
+    println("33333" + authState)
+    println("44444" + keyguardManager)
 
     LaunchedEffect(Unit) {
-        viewModel.initializeBiometric(activity)
+        viewModel.navigateToPaymentDetail.collect {
+            navController.navigate("payment_detail")
+            viewModel.resetAuthState()
+        }
     }
-
-    val authState by viewModel.authenticationState.collectAsState()
-    println("333" + authState)
 
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -119,58 +121,47 @@ fun PaymentScreen(
                 .fillMaxSize()
                 .background(Color.Gray)
         ) {
-            Button(onClick = { viewModel.authenticate() }) {
+            Button(onClick = {
+                if (viewModel.checkBiometricAvailability()) {
+                    val intent = keyguardManager.createConfirmDeviceCredentialIntent(
+                        "생체 인증",
+                        "지문을 사용하여 인증해주세요"
+                    )
+                    if (intent != null) {
+//                        context.startActivity(intent)
+                        (context as ComponentActivity).startActivityForResult(
+                            intent,
+                            REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS
+                        )
+                        Log.e(TAG, "intent가 널이 아니다.")
+                    } else {
+                        viewModel.updateAuthenticationState(AuthenticationState.Error("생체 인증을 사용할 수 없습니다."))
+                    }
+                } else {
+                    viewModel.updateAuthenticationState(AuthenticationState.Error("생체 인증을 사용할 수 없습니다."))
+                }
+            }) {
                 Text("지문 인증 시작")
             }
-            when (authState) {
-                is AuthenticationState.Success -> Text("인증 성공!")
-                is AuthenticationState.Failure -> Text("인증 실패")
-                is AuthenticationState.Error -> Text("오류: ${(authState as AuthenticationState.Error).message}")
-                else -> {}
-            }
-//            when (biometricState) {
-//                is BiometricState.None -> {
-//                    Button(onClick = { viewModel.authenticateWithBiometric() }) {
-//                        Text("지문 인증 시작")
-//                    }
-//                }
-//
-//                is BiometricState.Success -> {
-//                    Text("인증 성공! 결제를 진행합니다.")
-//                }
-//
-//                is BiometricState.Failed -> {
-//                    Text("인증 실패. 다시 시도해주세요.")
-//                }
-//
-//                is BiometricState.Error -> {
-//                    Text("오류: ${(biometricState as BiometricState.Error).message}")
-//                }
-//            }
         }
-    }}
+        when (authState) {
+            is AuthenticationState.Idle -> Text("인증 대기 중")
+            is AuthenticationState.Success -> {
+                Text("인증 성공!")
+                Log.d(TAG, "AuthenticationState.Success 했음")
+            }
 
-//    private fun checkAvailableAuth(context: Context) {
-//        val biometricManager = BiometricManager.from(context)
-//        when (biometricManager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_WEAK)) {
-//            BiometricManager.BIOMETRIC_SUCCESS -> {
-//                //  생체 인증 가능
-//            }
-//
-//            BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE -> {
-//                //  기기에서 생체 인증을 지원하지 않는 경우
-//            }
-//
-//            BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE -> {
-//                Log.d("MainActivity", "Biometric facility is currently not available")
-//            }
-//
-//            BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED -> {
-//                //  생체 인식 정보가 등록되지 않은 경우
-//            }
-//
-//            else -> {
-//                //   기타 실패
-//            }
-//        }
-//    }
+            is AuthenticationState.Failure -> {
+                Text("인증 실패!")
+                Log.d(TAG, "AuthenticationState.fail 했음")
+            }
+
+            is AuthenticationState.Error -> {
+                Text("오류: ${(authState as AuthenticationState.Error).message}")
+                Log.d(TAG, "오류: ${(authState as AuthenticationState.Error).message}")
+            }
+}
+    }
+}
+
+private const val REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS = 1

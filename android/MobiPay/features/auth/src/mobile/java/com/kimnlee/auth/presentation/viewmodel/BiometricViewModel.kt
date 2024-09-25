@@ -1,50 +1,44 @@
 package com.kimnlee.auth.presentation.viewmodel
 
 import android.app.Application
-import androidx.activity.ComponentActivity
-import androidx.biometric.BiometricPrompt
-import androidx.core.content.ContextCompat
-import androidx.fragment.app.FragmentActivity
+import android.util.Log
+import androidx.biometric.BiometricManager
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 
 class BiometricViewModel(application: Application) : AndroidViewModel(application) {
-    private lateinit var biometricPrompt: BiometricPrompt
-    private lateinit var promptInfo: BiometricPrompt.PromptInfo
-
     private val _authenticationState = MutableStateFlow<AuthenticationState>(AuthenticationState.Idle)
     val authenticationState: StateFlow<AuthenticationState> = _authenticationState
 
-    fun initializeBiometric(activity: FragmentActivity) {
-        val executor = ContextCompat.getMainExecutor(activity)
-        biometricPrompt = BiometricPrompt(activity, executor,
-            object : BiometricPrompt.AuthenticationCallback() {
-                override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
-                    _authenticationState.value = AuthenticationState.Success
-                }
+    private val _navigateToPaymentDetail = MutableSharedFlow<Unit>()
+    val navigateToPaymentDetail: SharedFlow<Unit> = _navigateToPaymentDetail
 
-                override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
-                    _authenticationState.value = AuthenticationState.Error(errString.toString())
-                }
-
-                override fun onAuthenticationFailed() {
-                    _authenticationState.value = AuthenticationState.Failure
-                }
-            })
-
-        promptInfo = BiometricPrompt.PromptInfo.Builder()
-            .setTitle("생체인증")
-            .setSubtitle("지문을 사용하여 인증해주세요")
-            .setNegativeButtonText("취소")
-            .build()
+    fun updateAuthenticationState(state: AuthenticationState) {
+        _authenticationState.value = state
+        if (state is AuthenticationState.Success) {
+            viewModelScope.launch {
+                _navigateToPaymentDetail.emit(Unit)
+            }
+        }
+        // 디버깅을 위한 로그 추가
+        Log.d("바이오틱뷰모델", "Authentication state updated: $state")
     }
-
-    fun authenticate() {
-        biometricPrompt.authenticate(promptInfo)
+    fun resetAuthState() {
+        _authenticationState.value = AuthenticationState.Idle
+    }
+    fun checkBiometricAvailability(): Boolean {
+        val biometricManager = BiometricManager.from(getApplication())
+        return when (biometricManager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG)) {
+            BiometricManager.BIOMETRIC_SUCCESS -> true
+            else -> false
+        }
     }
 }
-
 sealed class AuthenticationState {
     object Idle : AuthenticationState()
     object Success : AuthenticationState()
