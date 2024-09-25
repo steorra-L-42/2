@@ -26,7 +26,7 @@ fun AppNavGraph(
     navController: NavHostController,
     authManager: AuthManager,
     context: Context,
-    biometricViewModel : BiometricViewModel
+    biometricViewModel: BiometricViewModel,
 ) {
     val loginViewModel = LoginViewModel(authManager)
     val isLoggedIn by loginViewModel.isLoggedIn.collectAsState()
@@ -80,7 +80,7 @@ fun AppNavGraph(
 @Composable
 fun ScreenWithBottomNav(
     navController: NavHostController,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     BottomNavigation(navController = navController) {
         content()
