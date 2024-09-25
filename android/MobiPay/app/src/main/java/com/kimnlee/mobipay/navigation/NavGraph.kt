@@ -9,6 +9,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.kimnlee.auth.navigation.authNavGraph
+import com.kimnlee.auth.presentation.screen.PaymentScreen
+import com.kimnlee.auth.presentation.viewmodel.BiometricViewModel
 import com.kimnlee.auth.presentation.viewmodel.LoginViewModel
 import com.kimnlee.cardmanagement.navigation.cardManagementNavGraph
 import com.kimnlee.memberinvitation.navigation.memberInvitationNavGraph
@@ -23,11 +25,11 @@ import com.kimnlee.vehiclemanagement.navigation.vehicleManagementNavGraph
 fun AppNavGraph(
     navController: NavHostController,
     authManager: AuthManager,
-    context: Context
+    context: Context,
+    biometricViewModel : BiometricViewModel
 ) {
     val loginViewModel = LoginViewModel(authManager)
     val isLoggedIn by loginViewModel.isLoggedIn.collectAsState()
-
     LaunchedEffect(isLoggedIn) {
         if (isLoggedIn) {
             navController.navigate("home") {
@@ -56,6 +58,14 @@ fun AppNavGraph(
                 SettingScreen(
                     authManager = authManager,
                     navController = navController
+                )
+            }
+        }
+        composable("payment") {
+            ScreenWithBottomNav(navController) {
+                PaymentScreen(
+                    navController = navController,
+                    viewModel = biometricViewModel
                 )
             }
         }

@@ -1,34 +1,24 @@
 package com.kimnlee.payment.presentation.screen
 
-import android.graphics.Paint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import com.kimnlee.common.R
-import com.kimnlee.payment.data.Merchant
-import com.kimnlee.payment.data.MerchantTransaction
-import com.kimnlee.payment.data.dummyTransactions
+import com.kimnlee.payment.data.model.Merchant
+import com.kimnlee.payment.data.model.MerchantTransaction
 
 @Composable
-fun PaymentScreen(
+fun PaymentDetailListScreen(
     transactions: List<MerchantTransaction>,
     merchants: List<Merchant>,
     onNavigateToDetail: (transaction : MerchantTransaction) -> Unit,
@@ -43,12 +33,9 @@ fun PaymentScreen(
         // 시작
         Text(
             text = "결제",
-            style = MaterialTheme.typography.headlineMedium
+            style = MaterialTheme.typography.headlineLarge,
         )
         Spacer(modifier = Modifier.height(16.dp))
-        Button(onClick = onNavigateBack) {
-            Text("뒤로 가기")
-        }
         // 더미 데이터를 사용
         LazyColumn(
 //            modifier = Modifier.fillMaxWidth(),
@@ -79,6 +66,13 @@ fun PaymentScreen(
                             Text(transaction.info)
                         }
                     }
+                    Text(
+                        text = "${transaction.payment_balance}원",
+                        modifier = Modifier
+                            .weight(0.2f)
+                            .padding(top=5.dp)
+                            .fillMaxHeight(),
+                    )
                     Box( // Box를 사용하여 이미지의 높이를 부모에 맞춤
                         modifier = Modifier
                             .fillMaxHeight()
@@ -94,13 +88,6 @@ fun PaymentScreen(
                                 .clickable {onNavigateToDetail(transaction)}
                         )
                     }
-                    Text(
-                        text = "${transaction.payment_balance}원",
-                        modifier = Modifier
-//                            .background(Color.Red)
-                            .weight(0.2f),
-                        textAlign = TextAlign.End
-                    )
                 }
             }
         }
