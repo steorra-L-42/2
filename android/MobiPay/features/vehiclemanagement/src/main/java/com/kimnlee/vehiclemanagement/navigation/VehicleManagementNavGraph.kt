@@ -1,5 +1,7 @@
 package com.kimnlee.vehiclemanagement.navigation
 
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
@@ -11,7 +13,10 @@ import com.kimnlee.vehiclemanagement.presentation.screen.VehicleRegistrationScre
 
 fun NavGraphBuilder.vehicleManagementNavGraph(navController: NavHostController) {
     navigation(startDestination = "vehiclemanagement_main", route = "vehiclemanagement") {
-        composable("vehiclemanagement_main") {
+        composable("vehiclemanagement_main",
+            enterTransition = { EnterTransition.None },
+            exitTransition = { ExitTransition.None }
+        ) {
             BottomNavigation(navController) {
                 VehicleManagementScreen(
                     onNavigateToDetail = { vehicleId ->
@@ -32,7 +37,8 @@ fun NavGraphBuilder.vehicleManagementNavGraph(navController: NavHostController) 
                 VehicleManagementDetailScreen(
                     vehicleId = vehicleId,
                     onNavigateBack = { navController.navigateUp() },
-                    onNavigateToMemberInvitation = { navController.navigate("member_main/$vehicleId") }
+                    onNavigateToMemberInvitation = { navController.navigate("member_main/$vehicleId") },
+                    onNavigateToNotification = { navController.navigate("notification_main") }
                 )
             }
         }

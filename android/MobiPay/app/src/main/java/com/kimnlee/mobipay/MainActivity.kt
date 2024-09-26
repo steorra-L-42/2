@@ -36,7 +36,7 @@ class MainActivity : ComponentActivity() {
     }
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS) {
+        if (requestCode == biometricViewModel.BIO_AUTH) {
             when (resultCode) {
                 RESULT_OK -> {
                     biometricViewModel.updateAuthenticationState(AuthenticationState.Success)
@@ -52,9 +52,5 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-    }
-
-    companion object {
-        const val REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS = 1
     }
 }

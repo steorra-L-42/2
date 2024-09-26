@@ -79,6 +79,7 @@ dependencies {
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.firebase.common.ktx)
     implementation(libs.play.services.location)
+    implementation(project(":features:notification"))
 
 
     testImplementation(libs.junit)

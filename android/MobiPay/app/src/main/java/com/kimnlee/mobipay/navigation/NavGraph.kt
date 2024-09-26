@@ -1,7 +1,10 @@
 package com.kimnlee.mobipay.navigation
 
 import android.app.Application
+import PaymentSuccessScreen
 import android.content.Context
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -22,6 +25,7 @@ import com.kimnlee.common.auth.AuthManager
 import com.kimnlee.common.components.BottomNavigation
 import com.kimnlee.mobipay.presentation.screen.HomeScreen
 import com.kimnlee.mobipay.presentation.screen.SettingScreen
+import com.kimnlee.notification.navigation.notificationNavGraph
 import com.kimnlee.payment.navigation.paymentNavGraph
 import com.kimnlee.vehiclemanagement.navigation.vehicleManagementNavGraph
 import com.kimnlee.vehiclemanagement.presentation.screen.VehicleManagementScreen
@@ -35,7 +39,6 @@ fun AppNavGraph(
     val application = context as Application
     val biometricViewModel = BiometricViewModel(application)
     val loginViewModel = LoginViewModel(authManager)
-    val cardManagementViewModel = CardManagementViewModel(authManager)
     val isLoggedIn by loginViewModel.isLoggedIn.collectAsState()
 
     LaunchedEffect(isLoggedIn) {
@@ -50,11 +53,13 @@ fun AppNavGraph(
         navController = navController,
         startDestination = "auth"
     ) {
-        authNavGraph(navController, authManager)
 
-        // 홈 화면
-        composable("home") {
-            BottomNavigation(navController = navController) {
+        composable(
+            "home",
+            enterTransition = { EnterTransition.None },
+            exitTransition = { ExitTransition.None }
+        ) {
+            BottomNavigation(navController) {
                 HomeScreen(
                     viewModel = loginViewModel,
                     navController = navController,
@@ -62,20 +67,34 @@ fun AppNavGraph(
                 )
             }
         }
-
-        // 설정 화면
-        composable("settings") {
-            BottomNavigation(navController = navController) {
+        composable("settings",
+            enterTransition = { EnterTransition.None },
+            exitTransition = { ExitTransition.None }
+        ) {
+            BottomNavigation(navController) {
                 SettingScreen(
                     authManager = authManager,
                     navController = navController
                 )
             }
         }
+        composable("payment",
+            enterTransition = { EnterTransition.None },
+            exitTransition = { ExitTransition.None }
+        ) {
+            BottomNavigation(navController) {
+                PaymentScreen(
+                    navController = navController,
+                    viewModel = biometricViewModel
+                )
+            }
+        }
 
+        authNavGraph(navController, authManager)
         paymentNavGraph(navController)
         cardManagementNavGraph(navController, authManager)
         vehicleManagementNavGraph(navController)
         memberInvitationNavGraph(navController)
+        notificationNavGraph(navController)
     }
 }

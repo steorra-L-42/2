@@ -1,5 +1,7 @@
 package com.kimnlee.cardmanagement.navigation
 
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
@@ -17,8 +19,12 @@ fun NavGraphBuilder.cardManagementNavGraph(
     authManager: AuthManager
 ) {
     navigation(startDestination = "cardmanagement_main", route = "cardmanagement") {
-        composable("cardmanagement_main") {
+        composable("cardmanagement_main",
+            enterTransition = { EnterTransition.None },
+            exitTransition = { ExitTransition.None }
+        ) {
             val viewModel = CardManagementViewModel(authManager)
+
             BottomNavigation(navController) {
                 CardManagementScreen(
                     viewModel = viewModel,

@@ -1,13 +1,17 @@
 package com.kimnlee.common.components
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -19,10 +23,10 @@ fun BottomNavigation(
     content: @Composable () -> Unit
 ) {
     val bottomNavItems = listOf(
-        BottomNavItem("home", R.string.home, R.drawable.home_24px),
-        BottomNavItem("payment", R.string.payment, R.drawable.receipt_long_24px),
-        BottomNavItem("cardmanagement", R.string.card_management, R.drawable.credit_card_24px),
-        BottomNavItem("settings", R.string.settings, R.drawable.settings_24px)
+        BottomNavItem("home", R.drawable.house, R.drawable.housef),
+        BottomNavItem("paymenthistory", R.drawable.car, R.drawable.carf),
+        BottomNavItem("cardmanagement", R.drawable.creditcard, R.drawable.creditcardf),
+        BottomNavItem("settings", R.drawable.person, R.drawable.personf)
     )
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -30,25 +34,34 @@ fun BottomNavigation(
 
     Scaffold(
         bottomBar = {
-            NavigationBar {
+            NavigationBar(
+                containerColor = colorResource(id = R.color.mobi_blue),
+                contentColor = Color.White,
+                modifier = Modifier.height(70.dp)
+            ) {
                 bottomNavItems.forEach { item ->
                     val isSelected = currentRoute?.startsWith(item.route) == true
+                    val iconResId = if (isSelected) item.filledIconResId else item.iconResId
 
                     NavigationBarItem(
-                        icon = { Icon(painterResource(id = item.iconResId), contentDescription = null) },
-                        label = { Text(stringResource(item.titleResId)) },
+                        icon = { Icon(painterResource(id = iconResId), contentDescription = null, tint = Color.White) },
                         selected = isSelected,
                         onClick = {
                             if (!isSelected) {  // Only navigate if it's not the current route
                                 navController.navigate(item.route) {
                                     popUpTo(navController.graph.findStartDestination().id) {
-                                        saveState = true
+                                        saveState = false
                                     }
                                     launchSingleTop = true
-                                    restoreState = true
+                                    restoreState = false
                                 }
                             }
-                        }
+                        },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = Color.White, // Keeps icon color same when selected
+                            unselectedIconColor = Color.White, // Keeps icon color same when unselected
+                            indicatorColor = Color.Transparent // Removes the background indicator
+                        )
                     )
                 }
             }
