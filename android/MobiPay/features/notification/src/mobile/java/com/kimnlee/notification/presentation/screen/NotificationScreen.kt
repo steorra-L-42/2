@@ -7,38 +7,67 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.foundation.clickable
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.ui.text.style.TextAlign
 
 @Composable
 fun NotificationScreen(
     onNavigateBack: () -> Unit
 ) {
     var selectedTab by remember { mutableStateOf(0) }
-    val tabs = listOf("전  체", "결제 요청", "멤버 초대", "기타")
+    val tabs = listOf("전체", "결제", "멤버", "기타")
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        Button(onClick = onNavigateBack) {
-            Text("뒤로 가기")
-        }
-
-        Text(
-            text = "알림",
-            style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
-
-        TabRow(selectedTabIndex = selectedTab) {
-            tabs.forEachIndexed { index, title ->
-                Tab(
-                    text = { Text(title) },
-                    selected = selectedTab == index,
-                    onClick = { selectedTab = index }
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp)
+        ) {
+            IconButton(
+                onClick = onNavigateBack,
+                modifier = Modifier.align(Alignment.CenterStart)
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.ArrowBack,
+                    contentDescription = "뒤로 가기",
+                    modifier = Modifier.size(32.dp),
+                    tint = Color.Black
                 )
             }
+            
+            Text(
+                text = "알림",
+                style = MaterialTheme.typography.headlineSmall,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.align(Alignment.Center)
+            )
         }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        CustomTabRow(
+            tabs = tabs,
+            selectedTabIndex = selectedTab,
+            onTabSelected = { selectedTab = it }
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
 
         when (selectedTab) {
             0 -> AllNotifications()
@@ -46,6 +75,58 @@ fun NotificationScreen(
             2 -> MemberInvitations()
             3 -> OtherNotifications()
         }
+    }
+}
+
+@Composable
+fun CustomTabRow(
+    tabs: List<String>,
+    selectedTabIndex: Int,
+    onTabSelected: (Int) -> Unit
+) {
+    Row(
+        modifier = Modifier
+//            .fillMaxWidth()
+            .width(320.dp)
+            .height(40.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        tabs.forEachIndexed { index, title ->
+            CustomTab(
+                title = title,
+                selected = selectedTabIndex == index,
+                onClick = { onTabSelected(index) },
+                modifier = Modifier.weight(1f)
+            )
+        }
+    }
+}
+
+@Composable
+fun CustomTab(
+    title: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .fillMaxHeight()
+            .clip(RoundedCornerShape(20.dp))
+            .background(if (selected) Color.Black else Color.White)
+            .border(
+                width = 1.dp,
+                color = if (selected) Color.Black else Color.LightGray,
+                shape = RoundedCornerShape(20.dp)
+            )
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = title,
+            color = if (selected) Color.White else Color.Black,
+            fontWeight = FontWeight.Medium
+        )
     }
 }
 
@@ -103,8 +184,8 @@ fun getOtherNotifications(): List<Notification> {
 
 @Composable
 fun NotificationList(notifications: List<Notification>) {
-    Column {
-        notifications.forEach { notification ->
+    LazyColumn {
+        items(notifications) { notification ->
             NotificationItem(notification)
         }
     }
@@ -116,10 +197,30 @@ fun NotificationItem(notification: Notification) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp)
+            .background(Color(0xFF222629), RoundedCornerShape(16.dp))
+            .padding(16.dp)
     ) {
-        Column {
-            Text(text = notification.message, style = MaterialTheme.typography.bodyLarge)
-            Text(text = formatTime(notification.timestamp), style = MaterialTheme.typography.bodySmall)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = notification.message,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = Color.White,
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = formatTime(notification.timestamp),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.Gray
+                )
+            }
         }
     }
 }
