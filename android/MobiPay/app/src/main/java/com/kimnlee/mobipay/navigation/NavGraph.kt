@@ -18,6 +18,7 @@ import com.kimnlee.common.auth.AuthManager
 import com.kimnlee.common.components.BottomNavigation
 import com.kimnlee.mobipay.presentation.screen.HomeScreen
 import com.kimnlee.mobipay.presentation.screen.SettingScreen
+import com.kimnlee.notification.navigation.notificationNavGraph
 import com.kimnlee.payment.navigation.paymentNavGraph
 import com.kimnlee.vehiclemanagement.navigation.vehicleManagementNavGraph
 
@@ -74,6 +75,7 @@ fun AppNavGraph(
         cardManagementNavGraph(navController)
         vehicleManagementNavGraph(navController)
         memberInvitationNavGraph(navController)
+        notificationNavGraph(navController)
     }
 }
 

@@ -11,14 +11,15 @@ import androidx.compose.foundation.Image
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.res.painterResource
 import androidx.lifecycle.viewmodel.compose.viewModel
-
-//여기가 메인입니다(파일 이름 수정해야함, 안 바꾸고 합의해도 됨)
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Notifications
 
 @Composable
 fun VehicleManagementDetailScreen(
     vehicleId: Int,
     onNavigateBack: () -> Unit,
     onNavigateToMemberInvitation: (Int) -> Unit,
+    onNavigateToNotification: () -> Unit,
     viewModel: VehicleManagementViewModel = viewModel()
 ) {
     val vehicle = viewModel.getVehicleById(vehicleId)
@@ -47,11 +48,6 @@ fun VehicleManagementDetailScreen(
             ) {
                 Text("차량 선택")
             }
-//            Text(
-//                text = "MobiPay",
-//                style = MaterialTheme.typography.headlineMedium,
-//                modifier = Modifier.padding(bottom = 8.dp)
-//            )
             Image(
                 painter = painterResource(id = it.imageResId),
                 contentDescription = "Vehicle Image",
@@ -63,10 +59,6 @@ fun VehicleManagementDetailScreen(
                 text = it.name,
                 style = MaterialTheme.typography.headlineSmall
             )
-//            Text( // 테스트용 실제 통신 구현시 확인 후 삭제 예정
-//                text = "차량 ID: ${it.id}",
-//                style = MaterialTheme.typography.bodyLarge
-//            )
         } ?: Text("차량을 찾을 수 없습니다.")
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -122,8 +114,12 @@ fun VehicleManagementDetailScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-//        Button(onClick = onNavigateBack) {
-//            Text("뒤로 가기")
-//        }
+        IconButton(onClick = onNavigateToNotification) {
+            Icon(
+                imageVector = Icons.Default.Notifications,
+                contentDescription = "알림",
+                modifier = Modifier.size(30.dp)
+            )
+        }
     }
 }

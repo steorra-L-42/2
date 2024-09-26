@@ -86,6 +86,7 @@ dependencies {
     implementation(libs.androidx.runtime)
     implementation(libs.firebase.common.ktx)
     implementation(libs.play.services.location)
+    implementation(project(":features:notification"))
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
