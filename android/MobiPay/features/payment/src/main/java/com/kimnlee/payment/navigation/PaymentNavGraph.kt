@@ -1,5 +1,6 @@
 package com.kimnlee.payment.navigation
 
+import PaymentSuccessScreen
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
@@ -44,6 +45,9 @@ fun NavGraphBuilder.paymentNavGraph(navController: NavHostController) {
                     onNavigateBack = { navController.navigateUp() }
                 )
             }
+        }
+        composable("payment_success") {
+            PaymentSuccessScreen()
         }
     }
 }
