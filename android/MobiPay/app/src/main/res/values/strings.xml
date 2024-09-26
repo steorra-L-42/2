@@ -1,3 +1,5 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">MobiPay</string>
+    <string name="BASE_URL">http://54.250.106.89:8080/</string>
+<!--    <string name="BASE_URL">https://ec2.mobipay.kr</string>-->
 </resources>

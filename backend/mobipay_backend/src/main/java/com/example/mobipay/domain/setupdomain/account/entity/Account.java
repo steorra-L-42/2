@@ -1,6 +1,6 @@
 package com.example.mobipay.domain.setupdomain.account.entity;
 
-import com.example.mobipay.domain.common.AuditableCreatedEntity;
+import com.example.mobipay.domain.common.entity.AuditableCreatedEntity;
 import com.example.mobipay.domain.mobiuser.entity.MobiUser;
 import com.example.mobipay.domain.ownedcard.entity.OwnedCard;
 import jakarta.persistence.Column;
@@ -13,6 +13,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -40,7 +41,7 @@ public class Account extends AuditableCreatedEntity {
     private MobiUser mobiUser;
 
     @OneToMany(mappedBy = "account")
-    private List<OwnedCard> ownedCards;
+    private List<OwnedCard> ownedCards = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "account_type_unique_no")

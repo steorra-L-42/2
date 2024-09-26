@@ -9,6 +9,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -41,8 +42,8 @@ public class Merchant {
     private String apiKey;
 
     @OneToMany(mappedBy = "merchant")
-    private List<MerchantTransaction> merchantTransactions;
+    private List<MerchantTransaction> merchantTransactions = new ArrayList<>();
 
     @OneToMany(mappedBy = "merchant")
-    private List<ApprovalWaiting> approvalWaitings;
+    private List<ApprovalWaiting> approvalWaitings = new ArrayList<>();
 }

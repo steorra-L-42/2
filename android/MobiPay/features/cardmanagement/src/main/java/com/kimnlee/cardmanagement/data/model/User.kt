@@ -10,7 +10,13 @@ data class User(
     val website: String,
     val company: Company
 )
-
+data class Photos(
+    val albumId: Int,
+    val id: Int,
+    val title : String,
+    val url : String,
+    val thumbnailUrl : String
+)
 data class Address(
     val street: String,
     val suite: String,

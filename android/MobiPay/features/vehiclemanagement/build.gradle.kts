@@ -47,6 +47,7 @@ android {
 dependencies {
 
     implementation(project(":common"))
+    implementation(project(":api"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.ui)
@@ -61,6 +62,8 @@ dependencies {
     implementation(libs.guava)
     implementation(libs.androidx.camera.core)
     implementation(libs.lifecycle.runtime.ktx)
+    implementation(libs.coil.compose)
+    implementation(libs.text.recognition)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

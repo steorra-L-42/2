@@ -9,6 +9,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -37,9 +38,9 @@ public class CardProduct {
     private String cardDescription;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "card_issuer_no")
+    @JoinColumn(name = "card_issuer_code")
     private CardIssuer cardIssuer;
 
     @OneToMany(mappedBy = "cardProduct")
-    private List<OwnedCard> ownedCards;
+    private List<OwnedCard> ownedCards = new ArrayList<>();
 }

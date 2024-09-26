@@ -5,6 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -17,12 +18,12 @@ import lombok.NoArgsConstructor;
 public class CardIssuer {
 
     @Id
-    @Column(name = "card_issuer_no", length = 4)
-    private String cardIssuerNo;
+    @Column(name = "card_issuer_code", length = 4)
+    private String cardIssuerCode;
 
     @Column(name = "card_issuer_name", nullable = false, length = 20)
     private String cardIssuerName;
 
     @OneToMany(mappedBy = "cardIssuer")
-    private List<CardProduct> cardProducts;
+    private List<CardProduct> cardProducts = new ArrayList<>();
 }

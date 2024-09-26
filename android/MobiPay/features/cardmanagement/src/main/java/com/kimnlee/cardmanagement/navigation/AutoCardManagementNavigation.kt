@@ -5,6 +5,7 @@ import androidx.car.app.Screen
 import com.kimnlee.cardmanagement.presentation.screen.AutoCardManagementScreen
 import com.kimnlee.cardmanagement.presentation.screen.AutoCardManagementDetailScreen
 
+
 class CardManagementAutoNavigation(private val carContext: CarContext) {
     fun mainScreen(): Screen = AutoCardManagementScreen(carContext)
 

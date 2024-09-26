@@ -1,8 +1,11 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    id("com.google.gms.google-services")
 }
-
 android {
     namespace = "com.kimnlee.mobipay"
     compileSdk = 34
@@ -19,6 +22,15 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+
+        val localProperties = Properties()
+        val localPropertiesFile = rootProject.file("local.properties")
+        if (localPropertiesFile.exists()) {
+            localProperties.load(FileInputStream(localPropertiesFile))
+        }
+        val kakaoApiKey = localProperties.getProperty("KAKAO_API_KEY")
+
+        manifestPlaceholders["KAKAO_API_KEY"] = kakaoApiKey
     }
 
     buildTypes {
@@ -57,6 +69,9 @@ dependencies {
     implementation(project(":features:cardmanagement"))
     implementation(project(":features:vehiclemanagement"))
     implementation(project(":features:memberinvitation"))
+    implementation(project(":features:freedrive"))
+    implementation(project(":features:firebase"))
+
     implementation ("com.squareup.okhttp3:okhttp:4.9.3")
 
     implementation(libs.androidx.core.ktx)
@@ -70,6 +85,8 @@ dependencies {
     implementation(libs.androidx.app)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.runtime)
+    implementation(libs.firebase.common.ktx)
+    implementation(libs.play.services.location)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
