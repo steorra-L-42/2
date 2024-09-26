@@ -1,4 +1,4 @@
-package com.kimnlee.data.model
+package com.kimnlee.common.auth.model
 
 import com.google.gson.annotations.SerializedName
 

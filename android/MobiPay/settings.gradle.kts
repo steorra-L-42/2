@@ -30,7 +30,6 @@ dependencyResolutionManagement {
 rootProject.name = "MobiPay"
 include(":app")
 include(":common")
-include(":api")
 include(":features:payment")
 include(":features:cardmanagement")
 include(":features:vehiclemanagement")

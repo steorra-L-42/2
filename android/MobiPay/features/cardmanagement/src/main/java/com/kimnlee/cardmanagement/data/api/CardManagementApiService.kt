@@ -1,8 +1,8 @@
 package com.kimnlee.cardmanagement.data.api
 
-import com.kimnlee.api.network.ApiClient
+import com.kimnlee.common.network.ApiClient
 import com.kimnlee.cardmanagement.data.model.Photos
-import com.kimnlee.cardmanagement.data.model.User
+import com.kimnlee.common.auth.AuthManager
 import retrofit2.http.GET
 
 interface CardManagementApiService {
@@ -10,8 +10,10 @@ interface CardManagementApiService {
     suspend fun getPhotos(): List<Photos>
 
     companion object {
-        val instance: CardManagementApiService by lazy {
-            ApiClient.retrofit.create(CardManagementApiService::class.java)
+        fun create(authManager: AuthManager): CardManagementApiService {
+            return ApiClient.getInstance(authManager)
+                .authenticatedApi
+                .create(CardManagementApiService::class.java)
         }
     }
 }
