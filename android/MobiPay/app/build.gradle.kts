@@ -78,6 +78,7 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.firebase.common.ktx)
+    implementation(libs.play.services.location)
 
 
     testImplementation(libs.junit)

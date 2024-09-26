@@ -13,6 +13,7 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
@@ -27,6 +28,13 @@ fun CardManagementRegistrationScreen(
             .fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Box(modifier = Modifier.fillMaxWidth().padding(start=10.dp, top=10.dp)) {
+            Button(
+                onClick = onNavigateBack,
+            ) {
+                Text("뒤로 가기")
+            }
+        }
         // 제목
          Column (
             modifier = Modifier.weight(0.2f),
@@ -84,7 +92,6 @@ fun CardManagementRegistrationScreen(
                         fontWeight = FontWeight(500),
                         color = Color.White,
                     )
-
                 )
             }
         }

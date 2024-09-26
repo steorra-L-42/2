@@ -1,5 +1,6 @@
 package com.kimnlee.mobipay.navigation
 
+import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -7,8 +8,9 @@ import androidx.compose.runtime.getValue
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.navigation
 import com.kimnlee.auth.navigation.authNavGraph
+import com.kimnlee.auth.presentation.screen.PaymentScreen
+import com.kimnlee.auth.presentation.viewmodel.BiometricViewModel
 import com.kimnlee.auth.presentation.viewmodel.LoginViewModel
 import com.kimnlee.cardmanagement.navigation.cardManagementNavGraph
 import com.kimnlee.memberinvitation.navigation.memberInvitationNavGraph
@@ -22,11 +24,12 @@ import com.kimnlee.vehiclemanagement.navigation.vehicleManagementNavGraph
 @Composable
 fun AppNavGraph(
     navController: NavHostController,
-    authManager: AuthManager
+    authManager: AuthManager,
+    context: Context,
+    biometricViewModel : BiometricViewModel
 ) {
     val loginViewModel = LoginViewModel(authManager)
     val isLoggedIn by loginViewModel.isLoggedIn.collectAsState()
-
     LaunchedEffect(isLoggedIn) {
         if (isLoggedIn) {
             navController.navigate("home") {
@@ -45,7 +48,8 @@ fun AppNavGraph(
             ScreenWithBottomNav(navController) {
                 HomeScreen(
                     viewModel = loginViewModel,
-                    navController = navController
+                    navController = navController,
+                    context = context
                 )
             }
         }
@@ -57,9 +61,17 @@ fun AppNavGraph(
                 )
             }
         }
+        composable("payment") {
+            ScreenWithBottomNav(navController) {
+                PaymentScreen(
+                    navController = navController,
+                    viewModel = biometricViewModel
+                )
+            }
+        }
 
         paymentNavGraph(navController)
-        cardManagementNavGraph(navController)
+        cardManagementNavGraph(navController, authManager)
         vehicleManagementNavGraph(navController)
         memberInvitationNavGraph(navController)
     }

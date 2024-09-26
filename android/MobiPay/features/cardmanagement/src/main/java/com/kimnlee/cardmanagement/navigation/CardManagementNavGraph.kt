@@ -8,13 +8,20 @@ import com.kimnlee.cardmanagement.presentation.screen.CardManagementDetailScreen
 import com.kimnlee.cardmanagement.presentation.screen.CardManagementDirectRegistrationScreen
 import com.kimnlee.cardmanagement.presentation.screen.CardManagementRegistrationScreen
 import com.kimnlee.cardmanagement.presentation.screen.CardManagementScreen
+import com.kimnlee.cardmanagement.presentation.viewmodel.CardManagementViewModel
+import com.kimnlee.common.auth.AuthManager
 import com.kimnlee.common.components.BottomNavigation
 
-fun NavGraphBuilder.cardManagementNavGraph(navController: NavHostController) {
+fun NavGraphBuilder.cardManagementNavGraph(
+    navController: NavHostController,
+    authManager: AuthManager
+) {
     navigation(startDestination = "cardmanagement_main", route = "cardmanagement") {
         composable("cardmanagement_main") {
+            val viewModel = CardManagementViewModel(authManager)
             BottomNavigation(navController) {
                 CardManagementScreen(
+                    viewModel = viewModel,
                     onNavigateToDetail = { navController.navigate("cardmanagement_detail") },
                     onNavigateToRegistration = { navController.navigate("cardmanagement_registration") },
 //                    onNavigateToHome = {

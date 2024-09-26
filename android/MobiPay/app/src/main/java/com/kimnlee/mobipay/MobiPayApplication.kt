@@ -8,6 +8,7 @@ import android.media.RingtoneManager
 import android.util.Log
 import com.google.firebase.FirebaseApp
 import com.kimnlee.common.auth.AuthManager
+import com.kimnlee.firebase.FCMService
 import com.kimnlee.common.auth.KakaoSdkInitializer
 import com.kimnlee.common.auth.api.UnAuthService
 import com.kimnlee.common.network.ApiClient
@@ -38,6 +39,12 @@ class MobiPayApplication : Application() {
 
         Log.d(TAG, "[모비페이] onCreate: FCM init")
         FirebaseApp.initializeApp(this)
+
+        val fcmService = FCMService()
+
+        fcmService.getToken { token ->
+            Log.d(TAG, "이 기기의 FCM 토큰: $token")
+        }
 
         createNotificationChannel()
         // Setup MapboxNavigation

@@ -76,7 +76,14 @@ fun LoginScreen(
             ) {
                 Text("회원가입")
             }
-            Spacer(modifier = Modifier.height(16.dp))
+            Button( // 테스트 로그인 버튼으로 나중에 백엔드랑 연결되면 삭제 예정
+                onClick = { viewModel.testLogin() },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp)
+            ) {
+                Text("테스트 로그인")
+            }
 
             Surface(
                 onClick = { viewModel.login() },
