@@ -37,7 +37,7 @@ import com.kimnlee.auth.presentation.viewmodel.AuthenticationState
 import com.kimnlee.auth.presentation.viewmodel.BiometricViewModel
 import com.kimnlee.common.R
 
-private val TAG = "페이먼트 스크린"
+private val TAG = "Payment Screen"
 
 @Composable
 fun PaymentScreen(
@@ -45,14 +45,13 @@ fun PaymentScreen(
     viewModel: BiometricViewModel = viewModel(),
 ) {
     val context = LocalContext.current
-    val activity = context as ComponentActivity
     val authState by viewModel.authenticationState.collectAsState()
     val keyguardManager = context.getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
+    val bioAuth = viewModel.BIO_AUTH
 
-    println("11111" + context)
-    println("22222" + activity)
-    println("33333" + authState)
-    println("44444" + keyguardManager)
+    println("context?????? $context")
+    println("authState????? $authState")
+    println("keyguardManager?????? $keyguardManager")
 
     LaunchedEffect(Unit) {
         viewModel.navigateToPaymentDetail.collect {
@@ -128,10 +127,8 @@ fun PaymentScreen(
                         "지문을 사용하여 인증해주세요"
                     )
                     if (intent != null) {
-//                        context.startActivity(intent)
                         (context as ComponentActivity).startActivityForResult(
-                            intent,
-                            REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS
+                            intent, bioAuth
                         )
                         Log.e(TAG, "intent가 널이 아니다.")
                     } else {
@@ -160,8 +157,7 @@ fun PaymentScreen(
                 Text("오류: ${(authState as AuthenticationState.Error).message}")
                 Log.d(TAG, "오류: ${(authState as AuthenticationState.Error).message}")
             }
-}
+        }
     }
 }
 
-private const val REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS = 1
