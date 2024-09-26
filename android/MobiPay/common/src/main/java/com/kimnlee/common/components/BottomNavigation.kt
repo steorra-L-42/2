@@ -20,7 +20,7 @@ fun BottomNavigation(
 ) {
     val bottomNavItems = listOf(
         BottomNavItem("home", R.string.home, R.drawable.home_24px),
-        BottomNavItem("payment_detail", R.string.payment, R.drawable.receipt_long_24px),
+        BottomNavItem("payment", R.string.payment, R.drawable.receipt_long_24px),
         BottomNavItem("cardmanagement", R.string.card_management, R.drawable.credit_card_24px),
         BottomNavItem("settings", R.string.settings, R.drawable.settings_24px)
     )
@@ -32,17 +32,21 @@ fun BottomNavigation(
         bottomBar = {
             NavigationBar {
                 bottomNavItems.forEach { item ->
+                    val isSelected = currentRoute?.startsWith(item.route) == true
+
                     NavigationBarItem(
                         icon = { Icon(painterResource(id = item.iconResId), contentDescription = null) },
                         label = { Text(stringResource(item.titleResId)) },
-                        selected = currentRoute?.startsWith(item.route) == true,
+                        selected = isSelected,
                         onClick = {
-                            navController.navigate(item.route) {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
+                            if (!isSelected) {  // Only navigate if it's not the current route
+                                navController.navigate(item.route) {
+                                    popUpTo(navController.graph.findStartDestination().id) {
+                                        saveState = true
+                                    }
+                                    launchSingleTop = true
+                                    restoreState = true
                                 }
-                                launchSingleTop = true
-                                restoreState = false
                             }
                         }
                     )

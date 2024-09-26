@@ -13,7 +13,7 @@ import com.kimnlee.payment.presentation.screen.PaymentDetailScreen
 
 
 fun NavGraphBuilder.paymentNavGraph(navController: NavHostController) {
-    navigation(startDestination = "payment_main", route = "payment_detail") {
+    navigation(startDestination = "payment_main", route = "payment") {
         composable("payment_main") {
             BottomNavigation(navController) {
                 PaymentDetailListScreen(
