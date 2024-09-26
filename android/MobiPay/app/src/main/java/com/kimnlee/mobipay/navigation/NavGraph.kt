@@ -1,6 +1,9 @@
 package com.kimnlee.mobipay.navigation
 
+import PaymentSuccessScreen
 import android.content.Context
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -45,7 +48,10 @@ fun AppNavGraph(
     ) {
         authNavGraph(navController, authManager)
 
-        composable("home") {
+        composable("home",
+            enterTransition = { EnterTransition.None },
+            exitTransition = { ExitTransition.None }
+        ) {
             ScreenWithBottomNav(navController) {
                 HomeScreen(
                     viewModel = loginViewModel,
@@ -54,7 +60,10 @@ fun AppNavGraph(
                 )
             }
         }
-        composable("settings") {
+        composable("settings",
+            enterTransition = { EnterTransition.None },
+            exitTransition = { ExitTransition.None }
+        ) {
             ScreenWithBottomNav(navController) {
                 SettingScreen(
                     authManager = authManager,
@@ -62,7 +71,10 @@ fun AppNavGraph(
                 )
             }
         }
-        composable("payment") {
+        composable("payment",
+            enterTransition = { EnterTransition.None },
+            exitTransition = { ExitTransition.None }
+        ) {
             ScreenWithBottomNav(navController) {
                 PaymentScreen(
                     navController = navController,
