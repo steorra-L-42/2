@@ -1,6 +1,6 @@
-package com.kimnlee.api.network
+package com.kimnlee.common.network
 
-import com.kimnlee.data.model.OCRResponse
+import com.kimnlee.common.auth.model.OCRResponse
 import okhttp3.MultipartBody
 import retrofit2.Call
 import retrofit2.http.Multipart

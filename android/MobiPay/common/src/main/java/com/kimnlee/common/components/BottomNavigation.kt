@@ -47,12 +47,14 @@ fun BottomNavigation(
                         icon = { Icon(painterResource(id = iconResId), contentDescription = null, tint = Color.White) },
                         selected = isSelected,
                         onClick = {
-                            navController.navigate(item.route) {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = false // Remove state saving to avoid animation lag
+                            if (!isSelected) {  // Only navigate if it's not the current route
+                                navController.navigate(item.route) {
+                                    popUpTo(navController.graph.findStartDestination().id) {
+                                        saveState = false
+                                    }
+                                    launchSingleTop = true
+                                    restoreState = false
                                 }
-                                launchSingleTop = true // Prevents reloading the same screen
-                                restoreState = false  // Ensures no state restoration to minimize UI recomposition
                             }
                         },
                         colors = NavigationBarItemDefaults.colors(

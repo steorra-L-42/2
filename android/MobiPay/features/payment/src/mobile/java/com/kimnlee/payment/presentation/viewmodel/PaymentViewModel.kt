@@ -2,6 +2,7 @@ package com.kimnlee.payment.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kimnlee.common.auth.AuthManager
 import com.kimnlee.payment.data.model.Photos
 import com.kimnlee.payment.data.repository.PaymentRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -9,8 +10,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 // 내부 로직 뜯어 고쳐야 함!!!
-class PaymentViewModel : ViewModel() {
-    private val repository = PaymentRepository()
+class PaymentViewModel(private val authManager: AuthManager) : ViewModel() {
+    private val repository = PaymentRepository(authManager)
     private val _photoUiState = MutableStateFlow<PhotoUiState>(PhotoUiState.Loading)
     val photoUiState: StateFlow<PhotoUiState> = _photoUiState // 읽기 전용
 

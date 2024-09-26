@@ -65,12 +65,7 @@ fun HomeScreen(
         Spacer(modifier = Modifier.height(16.dp))
         Button(
             onClick = {
-                viewModel.logout()
-                navController.navigate("auth") {
-                    popUpTo(navController.graph.startDestinationId) {
-                        inclusive = true
-                    }
-                }
+                viewModel.testLogout() // 현재 테스트 로그아웃이라서 나중에 백이랑 연결되면 일반 logout 메서드로 바꾸면 됨
             }
         ) {
             Text("로그아웃")

@@ -1,4 +1,4 @@
-package com.kimnlee.api.network
+package com.kimnlee.common.network
 
 import retrofit2.Call
 import retrofit2.http.Body
