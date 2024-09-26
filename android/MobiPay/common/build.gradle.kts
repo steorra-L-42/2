@@ -56,33 +56,58 @@ android {
 
 dependencies {
 
-    api("com.kakao.sdk:v2-user:2.20.6") // 카카오 로그인 API 모듈
+    // AndroidX Core
+    api(libs.androidx.core.ktx)
+
+    // Compose UI
+    api(libs.androidx.ui)
+    api(libs.androidx.material3)
+    api(libs.androidx.ui.tooling.preview)
+    api(libs.androidx.ui.graphics)
+
+    // Compose Runtime
+    api(libs.androidx.runtime)
+    api(libs.androidx.runtime.android)
+
+    // Navigation
+    api(libs.androidx.navigation.common.ktx)
+    api(libs.androidx.navigation.compose)
+
+    // Lifecycle
+    api(libs.androidx.lifecycle.runtime.compose)
+    api(libs.lifecycle.runtime.ktx)
+    api(libs.androidx.lifecycle.viewmodel.compose)
+
+    // 카카오 로그인 API 모듈
+    api(libs.v2.user)
+
+    // Retrofit
     api(libs.retrofit)
+    api(libs.converter.gson)
 
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.ui)
-    implementation(libs.androidx.material3)
-    implementation(libs.androidx.navigation.common.ktx)
-    implementation(libs.androidx.camera.camera2)
-    implementation(libs.androidx.camera.core)
-    implementation(libs.androidx.camera.lifecycle)
-    implementation(libs.androidx.camera.view)
-    implementation(libs.androidx.camera.extensions)
-    implementation(libs.guava)
-    implementation(libs.androidx.lifecycle.runtime.compose)
-    implementation(libs.lifecycle.runtime.ktx)
-    implementation(libs.retrofit)
-    implementation(libs.converter.gson)
-    implementation(libs.gson)
+    // Camera
+    api(libs.androidx.camera.camera2)
+    api(libs.androidx.camera.lifecycle)
+    api(libs.androidx.camera.view)
+    api(libs.androidx.camera.extensions)
+    api(libs.androidx.camera.core)
+
+    // Gson
+    api(libs.gson)
+
+    // Android auto
+    api(libs.androidx.app)
+
+    // EncryptSharedPreferences
     implementation(libs.androidx.security.crypto)
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-    implementation(libs.androidx.datastore.preferences)
-    implementation(libs.androidx.navigation.compose)
 
+
+    implementation(libs.guava)
+    testImplementation(libs.junit)
+    implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.legacy.support.v4)
     implementation(libs.androidx.legacy.support.v13)
-    implementation(libs.androidx.runtime.android)
     implementation(libs.core)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
 }

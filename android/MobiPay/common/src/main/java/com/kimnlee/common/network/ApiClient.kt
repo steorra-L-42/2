@@ -1,6 +1,7 @@
 package com.kimnlee.api.network
 
 import com.kimnlee.common.BuildConfig
+import com.kimnlee.common.auth.api.unAuthService
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -27,5 +28,13 @@ object ApiClient {
             .create(OCRService::class.java)
     }
 
-
+    // 백엔드 로그인 테스트
+    val unAuthenticatedApi: unAuthService by lazy {
+        Retrofit.Builder()
+            .baseUrl("http://localhost:8080")
+            .client(okHttpClient)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(unAuthService::class.java)
+    }
 }

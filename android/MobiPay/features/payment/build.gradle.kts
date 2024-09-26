@@ -45,14 +45,9 @@ android {
 }
 
 dependencies {
-    implementation(project(":api"))
+
     implementation(project(":common"))
-    implementation(libs.retrofit)
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.ui)
-    implementation(libs.androidx.material3)
-    implementation(libs.androidx.navigation.compose)
-    implementation(libs.androidx.app)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
