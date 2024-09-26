@@ -3,6 +3,7 @@ package com.example.mobipay.domain.setupdomain.account.entity;
 import com.example.mobipay.domain.common.entity.AuditableCreatedEntity;
 import com.example.mobipay.domain.mobiuser.entity.MobiUser;
 import com.example.mobipay.domain.ownedcard.entity.OwnedCard;
+import com.example.mobipay.global.authentication.dto.AccountRec;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -46,4 +47,27 @@ public class Account extends AuditableCreatedEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "account_type_unique_no")
     private AccountProduct accountProduct;
+
+    private Account(String accountNo, String bankCode) {
+        this.accountNo = accountNo;
+        this.bankCode = bankCode;
+    }
+
+    public static Account of(AccountRec rec) {
+        return new Account(rec.getAccountNo(), rec.getBankCode());
+    }
+
+    public void addRelation(MobiUser mobiUser, AccountProduct accountProduct) {
+        if (this.mobiUser != null) {
+            this.mobiUser.getAccounts().remove(this);
+        }
+        this.mobiUser = mobiUser;
+        mobiUser.getAccounts().add(this);
+
+        if (this.accountProduct != null) {
+            this.accountProduct.getAccounts().remove(this);
+        }
+        this.accountProduct = accountProduct;
+        accountProduct.getAccounts().add(this);
+    }
 }
