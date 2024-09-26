@@ -95,7 +95,6 @@ public class MobiUser extends AuditableCreatedEntity {
         this.name = name;
         this.phoneNumber = phoneNumber;
         this.picture = picture;
-//        this.role = Role.valueOf(role);
     }
 
 

@@ -53,7 +53,7 @@ public class KakaoService {
 
     public KakaoUserInfoResponseDto getUserInfo(String accessToken) {
         RestTemplate restTemplate = new RestTemplate();
-
+        // 추후에 RestClient 라고 더 좋은게 있는데 리팩토링 고려 해볼 것
         // HTTP 요청 헤더 설정
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", "Bearer " + accessToken);

@@ -101,11 +101,9 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
                 .orElse(Role.USER.name());
 
         return UserDTO.builder()
-                .userId(mobiUser.getId())
                 .email(mobiUser.getEmail())
                 .name(mobiUser.getName())
                 .phonenumber(mobiUser.getPhoneNumber())
-                .role(role)
                 .build();
 
     }

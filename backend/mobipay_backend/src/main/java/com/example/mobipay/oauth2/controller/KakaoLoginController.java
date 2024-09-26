@@ -3,6 +3,7 @@ package com.example.mobipay.oauth2.controller;
 import com.example.mobipay.domain.mobiuser.entity.MobiUser;
 import com.example.mobipay.oauth2.dto.KakaoTokenResponseDto;
 import com.example.mobipay.oauth2.dto.KakaoUserInfoResponseDto;
+import com.example.mobipay.oauth2.dto.UserDTO;
 import com.example.mobipay.oauth2.service.KakaoService;
 import com.example.mobipay.oauth2.service.KakaoTokenService;
 import com.example.mobipay.oauth2.service.UserService;
@@ -34,12 +35,18 @@ public class KakaoLoginController {
             //카카오 사용자 정보 api
             KakaoUserInfoResponseDto kakaoUserInfoResponseDto = kakaoService.getUserInfo(accessToken);
             String email = kakaoUserInfoResponseDto.getKakaoAccount().getEmail();
-            String name = kakaoUserInfoResponseDto.getKakaoAccount().getName();
-            String phoneNumber = kakaoUserInfoResponseDto.getKakaoAccount().getPhoneNumber();
+//            String name = kakaoUserInfoResponseDto.getKakaoAccount().getName();
+            String name = "noname";
+//            String phoneNumber = kakaoUserInfoResponseDto.getKakaoAccount().getPhoneNumber();
+            String phoneNumber = "nophone";
             String picture = kakaoUserInfoResponseDto.getKakaoAccount().getProfile().getPicture();
 
             // 사용자의 이메일로 사용자 조회 또는 회원가입 처리
             MobiUser mobiUser = userService.findOrCreateUser(email, name, phoneNumber, picture);
+            System.out.println("이거정답" + mobiUser.getEmail());
+            System.out.println("이거정답" + mobiUser.getName());
+            System.out.println("이거정답" + mobiUser.getPhoneNumber());
+            System.out.println("이거정답" + mobiUser.getPicture());
 
             kakaoTokenService.saveOrUpdateKakaoToken(accessToken, refreshToken, mobiUser);
 
@@ -69,5 +76,24 @@ public class KakaoLoginController {
             return ResponseEntity.badRequest().body("Error during login process: " + e.getMessage());
         }
 
+    }
+
+
+    @PostMapping("/detail")
+    public ResponseEntity<String> requestUserDetails(@RequestBody UserDTO userDTO) {
+        String email = userDTO.getEmail();
+        String name = userDTO.getName();
+        String phoneNumber = userDTO.getPhonenumber();
+
+//        createUser(email, name, phoneNumber, picture);
+//
+//        // 이메일 존재 여부를 확인
+//        boolean emailExists = checkEmailWithExternalApi(email);
+//        if (!emailExists) {
+//            return ResponseEntity.ok("User details required: name, phoneNumber");
+//        }
+
+        // 이메일이 존재하는 경우 바로 유저 생성 로직으로 이동
+        return ResponseEntity.ok("Email exists.");
     }
 }
