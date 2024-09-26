@@ -1,5 +1,7 @@
 package com.kimnlee.cardmanagement.navigation
 
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
@@ -12,7 +14,10 @@ import com.kimnlee.common.components.BottomNavigation
 
 fun NavGraphBuilder.cardManagementNavGraph(navController: NavHostController) {
     navigation(startDestination = "cardmanagement_main", route = "cardmanagement") {
-        composable("cardmanagement_main") {
+        composable("cardmanagement_main",
+            enterTransition = { EnterTransition.None },
+            exitTransition = { ExitTransition.None }
+        ) {
             BottomNavigation(navController) {
                 CardManagementScreen(
                     onNavigateToDetail = { navController.navigate("cardmanagement_detail") },
