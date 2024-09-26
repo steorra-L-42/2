@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.kimnlee.vehiclemanagement"
+    namespace = "com.kimnlee.notification"
     compileSdk = 34
 
     defaultConfig {
@@ -50,10 +50,10 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     implementation(libs.androidx.app)
-    implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.ui)
     implementation(project(":common"))
+    implementation(libs.androidx.navigation.compose)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
