@@ -15,6 +15,8 @@ import androidx.compose.ui.Alignment
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.json.JSONObject
+import retrofit2.HttpException
 
 @Composable
 fun SignUpScreen(
@@ -142,9 +144,14 @@ fun SignUpScreen(
                     if (!emailError && !nameError && !phoneNumberError && name.isNotEmpty() && phoneNumber.isNotEmpty() && email.isNotEmpty()) {
                         isLoading = true
                         CoroutineScope(Dispatchers.Main).launch {
-                            signUp(email, name, phoneNumber, authManager, { signUpSuccess = true }, { errorMessage = it }) {
-                                isLoading = false
-                            }
+                            signUp(email, name, phoneNumber, authManager,
+                                onSuccess = {
+                                    signUpSuccess = true
+                                    errorMessage = ""
+                                },
+                                onError = { errorMessage = it },
+                                onFinally = { isLoading = false }
+                            )
                         }
                     } else {
                         errorMessage = "모든 필드를 올바르게 입력해주세요."
@@ -188,16 +195,35 @@ private suspend fun signUp(
     onFinally: () -> Unit
 ) {
     try {
-        Log.d("SignUp", "회원가입 응답: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-        val response = authManager.signUp(email, name, phoneNumber)
-        Log.d("SignUp", "회원가입 응답: $response")
-        if (response.success) {
-            onSuccess()
-        } else {
-            onError(response.message)
-        }
+        val result = authManager.signUp(email, name, phoneNumber)
+        result.fold(
+            onSuccess = { response ->
+                Log.d("SignUp", "회원가입 성공 서버 응답: ${response.message}")
+                if (response.message.contains("성공")) {
+                    onSuccess()
+                } else {
+                    onError(response.message ?: "알 수 없는 오류가 발생했습니다.")
+                }
+            },
+            onFailure = { exception ->
+                Log.e("SignUp", "회원가입 실패 서버 응답: ${exception.message}")
+                if (exception is HttpException) {
+                    val errorResponse = exception.response()?.errorBody()?.string()
+                    errorResponse?.let {
+                        val jsonObject = JSONObject(it)
+                        val errorMessage = jsonObject.getString("message")
+                        onError("회원 가입 중 오류가 발생했습니다: $errorMessage")
+                    } ?: run {
+                        onError("알 수 없는 오류")
+                    }
+                } else {
+                    onError("회원가입 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.")
+                }
+            }
+        )
     } catch (e: Exception) {
-        onError("회원가입 중 오류가 발생했습니다.")
+        Log.e("SignUp", "예상치 못한 오류: ${e.message}")
+        onError("알 수 없는 오류가 발생했습니다. 잠시 후 다시 시도해주세요.")
     } finally {
         onFinally()
     }
