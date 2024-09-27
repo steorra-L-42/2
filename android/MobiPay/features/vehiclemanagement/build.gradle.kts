@@ -47,23 +47,11 @@ android {
 dependencies {
 
     implementation(project(":common"))
-    implementation(project(":api"))
 
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.ui)
-    implementation(libs.androidx.material3)
-    implementation(libs.androidx.navigation.compose)
-    implementation(libs.androidx.app)
-    implementation(libs.androidx.camera.camera2)
-    implementation(libs.androidx.camera.lifecycle)
-    implementation(libs.androidx.camera.view)
-    implementation(libs.androidx.camera.extensions)
-    implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.guava)
-    implementation(libs.androidx.camera.core)
-    implementation(libs.lifecycle.runtime.ktx)
     implementation(libs.coil.compose)
     implementation(libs.text.recognition)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

@@ -1,5 +1,7 @@
 package com.kimnlee.auth.navigation
 
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
@@ -14,7 +16,11 @@ fun NavGraphBuilder.authNavGraph(
     authManager: AuthManager
 ) {
     navigation(startDestination = "auth_main", route = "auth") {
-        composable("auth_main") {
+        composable(
+            "auth_main",
+            enterTransition = { EnterTransition.None },
+            exitTransition = { ExitTransition.None }
+        ) {
             val viewModel = LoginViewModel(authManager)
             LoginScreen(
                 viewModel = viewModel,
@@ -26,7 +32,11 @@ fun NavGraphBuilder.authNavGraph(
                 onNavigateToSignUp = { navController.navigate("signup") }
             )
         }
-        composable("signup") {
+        composable(
+            "signup",
+            enterTransition = { EnterTransition.None },
+            exitTransition = { ExitTransition.None }
+        ) {
             SignUpScreen(
                 authManager = authManager,
                 onNavigateToHome = {

@@ -25,19 +25,15 @@ fun NavGraphBuilder.memberInvitationNavGraph(navController: NavHostController) {
             }
         }
         composable("member_detail") {
-            BottomNavigation(navController) {
-                MemberInvitationDetailScreen(
-                    onNavigateBack = { navController.navigateUp() },
-                    onNavigateToConfirmation = { navController.navigate("member_confirmation") }
-                )
-            }
+            MemberInvitationDetailScreen(
+                onNavigateBack = { navController.navigateUp() },
+                onNavigateToConfirmation = { navController.navigate("member_confirmation") }
+            )
         }
         composable("member_confirmation") {
-            BottomNavigation(navController) {
-                MemberInvitationConfirmationScreen(
-                    onNavigateBack = { navController.navigateUp() }
-                )
-            }
+            MemberInvitationConfirmationScreen(
+                onNavigateBack = { navController.navigateUp() }
+            )
         }
     }
 }
