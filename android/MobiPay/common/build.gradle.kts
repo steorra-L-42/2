@@ -107,7 +107,6 @@ dependencies {
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.legacy.support.v4)
     implementation(libs.androidx.legacy.support.v13)
-    implementation(libs.core)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 }
