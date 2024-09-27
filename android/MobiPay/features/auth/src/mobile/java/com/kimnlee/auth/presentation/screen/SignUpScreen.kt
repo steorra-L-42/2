@@ -1,5 +1,6 @@
 package com.kimnlee.auth.presentation.screen
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -38,7 +39,11 @@ fun SignUpScreen(
     }
 
     Column {
-        Spacer(modifier = Modifier.height(300.dp))
+        Spacer(modifier = Modifier.height(100.dp))
+
+        Text("개발용입니다")
+
+        Spacer(modifier = Modifier.height(200.dp))
 
         OutlinedTextField(
             value = email,
@@ -183,7 +188,9 @@ private suspend fun signUp(
     onFinally: () -> Unit
 ) {
     try {
+        Log.d("SignUp", "회원가입 응답: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
         val response = authManager.signUp(email, name, phoneNumber)
+        Log.d("SignUp", "회원가입 응답: $response")
         if (response.success) {
             onSuccess()
         } else {

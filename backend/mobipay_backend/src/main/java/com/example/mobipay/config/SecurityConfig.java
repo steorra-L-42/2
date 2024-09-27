@@ -28,6 +28,17 @@ import org.springframework.web.cors.CorsConfiguration;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
+            @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+
+        http
+                .csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests((requests) -> requests.anyRequest().permitAll())
+                .sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+        
+        return http.build();
+    }
+
     private final AuthenticationConfiguration authenticationConfiguration;
     //    private final CustomOauth2UserService customOauth2UserService;
 //    private final CustomSuccessHandler customSuccessHandler;

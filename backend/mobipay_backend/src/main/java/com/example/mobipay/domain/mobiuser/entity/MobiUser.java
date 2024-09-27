@@ -111,5 +111,11 @@ public class MobiUser extends AuditableCreatedEntity {
         this.refreshToken = null;
     }
 
-
+    public void setSsafyUser(SsafyUser ssafyUser) {
+        if (this.ssafyUser != null) {
+            this.ssafyUser.changeMobiUser(null);
+        }
+        this.ssafyUser = ssafyUser;
+        ssafyUser.changeMobiUser(this);
+    }
 }

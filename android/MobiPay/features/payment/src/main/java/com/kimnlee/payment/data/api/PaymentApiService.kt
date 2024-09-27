@@ -1,9 +1,7 @@
 package com.kimnlee.payment.data.api
 
-import android.app.Service
-import android.content.Intent
-import android.os.IBinder
-import com.kimnlee.api.network.ApiClient
+import com.kimnlee.common.auth.AuthManager
+import com.kimnlee.common.network.ApiClient
 import com.kimnlee.payment.data.model.Photos
 import retrofit2.http.GET
 
@@ -12,8 +10,10 @@ interface PaymentApiService {
     suspend fun getPhotos(): List<Photos>
 
     companion object {
-        val instance: PaymentApiService by lazy {
-            ApiClient.retrofit.create(PaymentApiService::class.java)
+        fun create(authManager: AuthManager): PaymentApiService {
+            return ApiClient.getInstance(authManager)
+                .authenticatedApi
+                .create(PaymentApiService::class.java)
         }
     }
 }

@@ -1,21 +1,16 @@
 package com.kimnlee.firebase
 
-import android.Manifest
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
-import android.graphics.Color
 import android.media.RingtoneManager
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.app.Person
-import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.CATEGORY_MESSAGE
-import androidx.core.app.NotificationCompat.CarExtender
 import androidx.core.app.NotificationCompat.VISIBILITY_PUBLIC
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.RemoteInput
@@ -23,8 +18,8 @@ import androidx.core.graphics.drawable.IconCompat
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
-import com.kimnlee.api.network.ApiClient
-import com.kimnlee.api.network.BackendService
+import com.kimnlee.common.network.ApiClient
+import com.kimnlee.common.network.BackendService
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -35,6 +30,9 @@ private const val TAG = "FCMService"
 class FCMService : FirebaseMessagingService() {
 
     private lateinit var mNotificationManager: NotificationManagerCompat
+
+    private val fcmApi = ApiClient.getInstance().fcmApi
+    private val backendService = fcmApi.create(BackendService::class.java)
 
     fun getToken(callback: (String) -> Unit) {
         FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
@@ -64,14 +62,10 @@ class FCMService : FirebaseMessagingService() {
             }
         }
 
-        Log.d(TAG, "onCreate: BASE URL = ${retrofit.baseUrl()}")
+        Log.d(TAG, "onCreate: BASE URL = ${fcmApi.baseUrl()}")
 
         mNotificationManager = NotificationManagerCompat.from(applicationContext)
     }
-
-    private val retrofit = ApiClient.retrofit
-
-    private val backendService = retrofit.create(BackendService::class.java)
 
     fun createReplyRemoteInput(context: Context): RemoteInput {
         return RemoteInput.Builder(REMOTE_INPUT_RESULT_KEY).build()
