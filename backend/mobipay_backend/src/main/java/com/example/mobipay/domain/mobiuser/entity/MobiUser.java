@@ -96,4 +96,12 @@ public class MobiUser extends AuditableCreatedEntity {
     public static MobiUser of(String email, String name, String phoneNumber, String picture) {
         return new MobiUser(email, name, phoneNumber, picture);
     }
+
+    public void setSsafyUser(SsafyUser ssafyUser) {
+        if (this.ssafyUser != null) {
+            this.ssafyUser.changeMobiUser(null);
+        }
+        this.ssafyUser = ssafyUser;
+        ssafyUser.changeMobiUser(this);
+    }
 }

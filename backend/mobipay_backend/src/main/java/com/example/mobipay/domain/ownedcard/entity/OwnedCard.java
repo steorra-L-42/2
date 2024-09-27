@@ -5,6 +5,7 @@ import com.example.mobipay.domain.mobiuser.entity.MobiUser;
 import com.example.mobipay.domain.registeredcard.entity.RegisteredCard;
 import com.example.mobipay.domain.setupdomain.account.entity.Account;
 import com.example.mobipay.domain.setupdomain.card.entity.CardProduct;
+import com.example.mobipay.global.authentication.dto.CardRec;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -59,4 +60,36 @@ public class OwnedCard extends AuditableCreatedEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "card_unique_no")
     private CardProduct cardProduct;
+
+
+    private OwnedCard(String cardNo, String cvc, String withdrawalDate, String cardExpiryDate) {
+        this.cardNo = cardNo;
+        this.cvc = cvc;
+        this.withdrawalDate = withdrawalDate;
+        this.cardExpiryDate = cardExpiryDate;
+    }
+
+    public static OwnedCard of(CardRec rec) {
+        return new OwnedCard(rec.getCardNo(), rec.getCvc(), rec.getWithdrawalDate(), rec.getCardExpiryDate());
+    }
+
+    public void addRelation(MobiUser mobiUser, Account account, CardProduct cardProduct) {
+        if (this.mobiUser != null) {
+            this.mobiUser.getOwnedCards().remove(this);
+        }
+        this.mobiUser = mobiUser;
+        mobiUser.getOwnedCards().add(this);
+
+        if (this.account != null) {
+            this.account.getOwnedCards().remove(this);
+        }
+        this.account = account;
+        account.getOwnedCards().add(this);
+
+        if (this.cardProduct != null) {
+            this.cardProduct.getOwnedCards().remove(this);
+        }
+        this.cardProduct = cardProduct;
+        cardProduct.getOwnedCards().add(this);
+    }
 }
