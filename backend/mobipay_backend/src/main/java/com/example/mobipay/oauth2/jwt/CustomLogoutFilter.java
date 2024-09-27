@@ -3,7 +3,7 @@ package com.example.mobipay.oauth2.jwt;
 import static com.example.mobipay.oauth2.enums.TokenType.REFRESH;
 
 import com.example.mobipay.domain.mobiuser.entity.MobiUser;
-import com.example.mobipay.oauth2.repository.MobiUserRepository;
+import com.example.mobipay.domain.mobiuser.repository.MobiUserRepository;
 import com.example.mobipay.oauth2.repository.RefreshTokenRepository;
 import com.example.mobipay.oauth2.util.CookieMethods;
 import io.jsonwebtoken.ExpiredJwtException;

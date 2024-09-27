@@ -38,19 +38,24 @@ public class CustomOAuth2User implements OAuth2User {
         return userDTO.getName();
     }
 
-    public Long getUserId() {
-        return userDTO.getUserId();
+    public Long getMobiUserId() { // mobiUserId
+        return null;
     }
+
 
     public String getEmail() {
         return userDTO.getEmail();
+    }
+
+    public String getPhonenumber() {
+        return userDTO.getPhonenumber();
     }
 
     public String getPicture() {
         return userDTO.getPicture();
     }
 
-    public String getPhonenumber() {
-        return userDTO.getPhonenumber();
+    public String getRole() { // role
+        return null;
     }
 }

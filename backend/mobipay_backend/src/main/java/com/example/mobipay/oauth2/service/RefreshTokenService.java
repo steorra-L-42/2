@@ -1,9 +1,9 @@
 package com.example.mobipay.oauth2.service;
 
 import com.example.mobipay.domain.mobiuser.entity.MobiUser;
+import com.example.mobipay.domain.mobiuser.repository.MobiUserRepository;
 import com.example.mobipay.domain.refreshtoken.entity.RefreshToken;
 import com.example.mobipay.oauth2.jwt.JWTUtil;
-import com.example.mobipay.oauth2.repository.MobiUserRepository;
 import com.example.mobipay.oauth2.repository.RefreshTokenRepository;
 import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
@@ -22,6 +22,7 @@ public class RefreshTokenService {
     public void addRefreshToken(MobiUser mobiUser, String value) {
         RefreshToken refreshToken = getRefreshToken(value);
 
+        System.out.println("getRefreshTOken" + mobiUser.getRefreshToken());
         if (mobiUser.getRefreshToken() != null) {
             revokeExistingRefreshToken(mobiUser);
         }
@@ -30,7 +31,7 @@ public class RefreshTokenService {
             refreshToken = createRefreshToken(value);
             mobiUser.addRefreshToken(refreshToken);
         }
-        System.out.println(refreshToken);
+        System.out.println("리프레시토큰서비스" + refreshToken.getValue());
 
         saveRefreshTokenAndUser(mobiUser, refreshToken);
     }

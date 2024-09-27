@@ -1,12 +1,10 @@
 package com.example.mobipay.config;
 
-import com.example.mobipay.oauth2.handler.CustomSuccessHandler;
+import com.example.mobipay.domain.mobiuser.repository.MobiUserRepository;
 import com.example.mobipay.oauth2.jwt.CustomLogoutFilter;
 import com.example.mobipay.oauth2.jwt.JWTFilter;
 import com.example.mobipay.oauth2.jwt.JWTUtil;
-import com.example.mobipay.oauth2.repository.MobiUserRepository;
 import com.example.mobipay.oauth2.repository.RefreshTokenRepository;
-import com.example.mobipay.oauth2.service.CustomOauth2UserService;
 import com.example.mobipay.oauth2.util.CookieMethods;
 import java.util.Arrays;
 import java.util.Collections;
@@ -31,8 +29,8 @@ import org.springframework.web.cors.CorsConfiguration;
 public class SecurityConfig {
 
     private final AuthenticationConfiguration authenticationConfiguration;
-    private final CustomOauth2UserService customOauth2UserService;
-    private final CustomSuccessHandler customSuccessHandler;
+    //    private final CustomOauth2UserService customOauth2UserService;
+//    private final CustomSuccessHandler customSuccessHandler;
     private final JWTUtil jwtUtil;
     private final RefreshTokenRepository refreshTokenRepository;
     private final CookieMethods cookieMethods;
@@ -41,9 +39,10 @@ public class SecurityConfig {
     String[] whitelist_post = {
             "/api/v1/users/reissue",
             "http://localhost:8080/api/v1/login",
-            "http://localhost:8080/api/v1/zz",
+            "http://localhost:8080/api/v1/detail",
             "/api/v1/login",
-            "/api/v1/zz"
+            "/api/v1/zz",
+            "/api/v1/detail"
     };
     String[] whitelist_get = {
             "/",

@@ -3,9 +3,9 @@ package com.example.mobipay.oauth2.handler;
 import static com.example.mobipay.oauth2.enums.TokenType.REFRESH;
 
 import com.example.mobipay.domain.mobiuser.entity.MobiUser;
+import com.example.mobipay.domain.mobiuser.repository.MobiUserRepository;
 import com.example.mobipay.oauth2.dto.CustomOAuth2User;
 import com.example.mobipay.oauth2.jwt.JWTUtil;
-import com.example.mobipay.oauth2.repository.MobiUserRepository;
 import com.example.mobipay.oauth2.service.RefreshTokenService;
 import com.example.mobipay.oauth2.util.CookieMethods;
 import jakarta.servlet.http.Cookie;
@@ -49,7 +49,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         CustomOAuth2User customUserDetails = (CustomOAuth2User) authentication.getPrincipal();
         String email = customUserDetails.getEmail();
-        Long userId = customUserDetails.getUserId();
+        Long userId = customUserDetails.getMobiUserId();
         String name = customUserDetails.getName();
         String phoneNumber = customUserDetails.getPhonenumber();
         String picture = customUserDetails.getPicture();

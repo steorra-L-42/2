@@ -113,7 +113,7 @@ public class JWTUtil {
                 .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact();
 
-        System.out.println(jwt);
+        System.out.println("jwt" + jwt);
         return jwt;
     }
 }

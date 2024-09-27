@@ -1,13 +1,17 @@
 package com.example.mobipay.oauth2.service;
 
+import static com.example.mobipay.oauth2.enums.TokenType.REFRESH;
+
 import com.example.mobipay.domain.mobiuser.entity.MobiUser;
-import com.example.mobipay.domain.refreshtoken.entity.RefreshToken;
-import com.example.mobipay.oauth2.error.MissingUserDetailsException;
+import com.example.mobipay.domain.mobiuser.repository.MobiUserRepository;
 import com.example.mobipay.oauth2.jwt.JWTUtil;
-import com.example.mobipay.oauth2.repository.MobiUserRepository;
 import com.example.mobipay.oauth2.repository.RefreshTokenRepository;
-import java.time.LocalDateTime;
+import com.example.mobipay.oauth2.util.CookieMethods;
+import jakarta.servlet.http.Cookie;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -17,75 +21,36 @@ public class UserService {
     private final MobiUserRepository mobiUserRepository;
     private final RefreshTokenRepository refreshTokenRepository;
     private final JWTUtil jwtUtil;
+    private final RefreshTokenService refreshTokenService;
+    private final CookieMethods cookieMethods;
 
     // 1. 이메일로 사용자 조회(중복 유무 확인 후, 중복이 되지 않는다면 SSAFY API에서 이메일 검증 수행)
 
     public MobiUser findOrCreateUser(String email, String name, String phoneNumber, String picture) {
+        Optional<MobiUser> optionalMobiUser = mobiUserRepository.findByEmail(email);
 
-//        MobiUser mobiUser = mobiUserRepository.findByEmail(email)
-//                .orElseGet(() -> SSAFYAPI(email, name, phoneNumber, picture));
-//        System.out.println(mobiUser.getEmail());
         return mobiUserRepository.findByEmail(email)
                 .orElseGet(() -> SSAFYAPI(email, name, phoneNumber, picture));
-
-//        if (phoneNumber == null || phoneNumber.isEmpty()) {
-//            throw new IllegalArgumentException("PhoneNumber cannot be null or empty:findOrCreateUser");
-//        }
-//        return mobiUserRepository.findByEmail(email)
-//                .orElseGet(() -> createUser(email, name, phoneNumber, picture));
-
     }
 
+    public boolean checkEmailInMobipay(String email) {
+        return mobiUserRepository.existsByEmail(email);
+    }
 
     // 2. 사용자 생성 (카카오 API에서 받아온 정보 기반)
     public MobiUser createUser(String email, String name, String phoneNumber, String picture) {
 
-        MobiUser user = MobiUser.builder()
+        MobiUser mobiUser = MobiUser.builder()
                 .email(email)
                 .name(name)
                 .phoneNumber(phoneNumber)
                 .picture(picture)
                 .build();
-        return mobiUserRepository.save(user);
-    }
-
-    // 3. 사용자 정보 업데이트
-    public MobiUser updateUser(Long userId, String name, String phoneNumber, String picture) {
-        MobiUser mobiUser = mobiUserRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + userId));
-        mobiUser.updatePicture(picture);
-        // 추가로 이름, 전화번호 등 업데이트할 수 있는 로직 작성
+//        return mobiUserRepository.save(mobiUser);
         return mobiUser;
     }
 
-    // 4. 리프레시 토큰 추가
-    public void addRefreshToken(Long userId, String refreshTokenValue, LocalDateTime issuedAt,
-                                LocalDateTime expiresAt) {
-        MobiUser mobiUser = mobiUserRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + userId));
-        RefreshToken refreshToken = RefreshToken.builder()
-                .value(refreshTokenValue)
-                .issuedAt(issuedAt)
-                .expiredAt(expiresAt)
-                .build();
 
-        // 리프레시 토큰 저장
-        refreshTokenRepository.save(refreshToken);
-        // MobiUser와 연관 설정
-        mobiUser.addRefreshToken(refreshToken);
-        // MobiUser 업데이트
-        mobiUserRepository.save(mobiUser);
-    }
-
-    //    public String generateJwtToken(MobiUser mobiUser) {}
-    // 사용자 정보를 기반으로 JWT 생성
-//        return jwtTokenProvider.createToken(
-//                mobiUser.getEmail(),
-//                mobiUser.getName(),
-//                mobiUser.getPicture(),
-//                mobiUser.getPhoneNumber()
-////                mobiUser.getRole().name()
-//        );
     public String generateJwtAccessToken(MobiUser mobiUser) {
         return jwtUtil.createAccessToken(
                 mobiUser.getEmail(),
@@ -95,13 +60,17 @@ public class UserService {
         );
     }
 
-    public String generateJwtRefreshToken(MobiUser mobiUser) {
-        return jwtUtil.createRefreshToken(
-                mobiUser.getEmail(),
-                mobiUser.getName(),
-                mobiUser.getPicture(),
-                mobiUser.getPhoneNumber()
-        );
+
+    public Cookie generateJwtRefreshToken(MobiUser mobiUser) {
+        String email = mobiUser.getEmail();
+        String name = mobiUser.getName();
+        String picture = mobiUser.getPicture();
+        String phoneNumber = mobiUser.getPhoneNumber();
+
+        String refreshToken = jwtUtil.createRefreshToken(email, name, phoneNumber, picture);
+        refreshTokenService.addRefreshToken(mobiUser, refreshToken);
+
+        return cookieMethods.createCookie(REFRESH.getType(), refreshToken);
     }
 
     // 5. 리프레시 토큰 삭제
@@ -117,7 +86,7 @@ public class UserService {
         System.out.println(emailExists);
 
         if (!emailExists) {
-            return sendUserDetailRequest(email);
+//            return sendUserDetailRequest(email);
 //            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("name and phoneNumber is null");
 //             만약 이메일이 없다면, 안드로이드에서 name, phoneNumber를 입력받기 슈발 헷갈려
         }
@@ -136,10 +105,10 @@ public class UserService {
         return mobiUserRepository.save(user);
     }
 
-    public MobiUser sendUserDetailRequest(String email) {
+    public ResponseEntity<String> sendUserDetailRequest(String email, String picture) {
         // 안드로이드에 name과 phoneNumber를 요청하는 HTTP 404 응답을 반환
-        // throw 사용으로
-        throw new MissingUserDetailsException("Please provide name, phone number.");
+        String responseMessage = "Please provide name, phone number. Email: " + email + ", Picture: " + picture;
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(responseMessage);
     }
 
     private boolean checkEmail(String email) {
