@@ -11,12 +11,16 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
+private val TAG = "BiometricViewModel"
 class BiometricViewModel(application: Application) : AndroidViewModel(application) {
-    private val _authenticationState = MutableStateFlow<AuthenticationState>(AuthenticationState.Idle)
+    private val _authenticationState =
+        MutableStateFlow<AuthenticationState>(AuthenticationState.Idle)
     val authenticationState: StateFlow<AuthenticationState> = _authenticationState
 
     private val _navigateToPaymentDetail = MutableSharedFlow<Unit>()
     val navigateToPaymentDetail: SharedFlow<Unit> = _navigateToPaymentDetail
+
+    val BIO_AUTH = 1
 
     fun updateAuthenticationState(state: AuthenticationState) {
         _authenticationState.value = state
@@ -26,11 +30,13 @@ class BiometricViewModel(application: Application) : AndroidViewModel(applicatio
             }
         }
         // 디버깅을 위한 로그 추가
-        Log.d("바이오틱뷰모델", "Authentication state updated: $state")
+        Log.d(TAG, "Authentication state updated: $state")
     }
+
     fun resetAuthState() {
         _authenticationState.value = AuthenticationState.Idle
     }
+
     fun checkBiometricAvailability(): Boolean {
         val biometricManager = BiometricManager.from(getApplication())
         return when (biometricManager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG)) {
@@ -39,6 +45,7 @@ class BiometricViewModel(application: Application) : AndroidViewModel(applicatio
         }
     }
 }
+
 sealed class AuthenticationState {
     object Idle : AuthenticationState()
     object Success : AuthenticationState()

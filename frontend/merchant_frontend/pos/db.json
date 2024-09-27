@@ -1,0 +1,67 @@
+{
+    "products": [
+        {
+            "id": 9,
+            "name": "아이스 카페라떼",
+            "price": 5100,
+            "image": "img/coffee-latte.png",
+            "options": null
+        },
+        {
+            "id": 10,
+            "name": "아이스 초코라떼",
+            "price": 5100,
+            "image": "img/ice-chocolate.png",
+            "options": null
+        },
+        {
+            "id": 11,
+            "name": "허니 자몽 블랙티",
+            "price": 6300,
+            "image": "img/ice-tea.png",
+            "options": null
+        },
+        {
+            "id": 12,
+            "name": "아이스 말차 라떼",
+            "price": 5600,
+            "image": "img/matcha-latte.png",
+            "options": null
+        },
+        {
+            "id": 4,
+            "name": "크로와상",
+            "price": 1800,
+            "image": "img/croissant.png",
+            "options": null
+        },
+        {
+            "id": 5,
+            "name": "시나몬 롤",
+            "price": 3000,
+            "image": "img/cinnamon-roll.png",
+            "options": null
+        },
+        {
+            "id": 6,
+            "name": "땅콩 초코 도넛",
+            "price": 2600,
+            "image": "img/choco-glaze-donut-peanut.png",
+            "options": null
+        },
+        {
+            "id": 7,
+            "name": "초코 도넛",
+            "price": 2100,
+            "image": "img/choco-glaze-donut.png",
+            "options": null
+        },
+        {
+            "id": 8,
+            "name": "딸기 도넛",
+            "price": 2200,
+            "image": "img/red-glaze-donut.png",
+            "options": null
+        }
+    ]
+}

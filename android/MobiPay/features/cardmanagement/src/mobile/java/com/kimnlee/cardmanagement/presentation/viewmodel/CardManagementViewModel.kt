@@ -5,12 +5,13 @@ import androidx.lifecycle.viewModelScope
 import com.kimnlee.cardmanagement.data.model.Photos
 import com.kimnlee.cardmanagement.data.model.User
 import com.kimnlee.cardmanagement.data.repository.CardManagementRepository
+import com.kimnlee.common.auth.AuthManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class CardManagementViewModel : ViewModel() {
-    private val repository = CardManagementRepository()
+class CardManagementViewModel(private val authManager: AuthManager) : ViewModel() {
+    private val repository = CardManagementRepository(authManager)
     private val _photoUiState = MutableStateFlow<PhotoUiState>(PhotoUiState.Loading)
     val photoUiState: StateFlow<PhotoUiState> = _photoUiState
 

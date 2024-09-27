@@ -11,6 +11,7 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" />
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
 
+    <!-- Conflict 해결 -->
     <application
         android:name=".MobiPayApplication"
         android:allowBackup="true"
@@ -21,7 +22,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.MobiPay"
-        tools:targetApi="31">
+        android:networkSecurityConfig="@xml/network_security_config"
+        tools:targetApi="34">
 
         <activity
             android:name=".MainActivity"
@@ -66,6 +68,10 @@
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"
             android:value="payment_request" />
+
+        <meta-data
+            android:name="com.naver.maps.map.CLIENT_ID"
+            android:value="81dn8nvzim" />
 
     </application>
 

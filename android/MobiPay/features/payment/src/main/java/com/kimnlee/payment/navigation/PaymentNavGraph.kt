@@ -1,5 +1,8 @@
 package com.kimnlee.payment.navigation
 
+import PaymentSucceedScreen
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
@@ -13,20 +16,23 @@ import com.kimnlee.payment.presentation.screen.PaymentDetailScreen
 
 
 fun NavGraphBuilder.paymentNavGraph(navController: NavHostController) {
-    navigation(startDestination = "payment_main", route = "payment_detail") {
-        composable("payment_main") {
+    navigation(startDestination = "payment_main", route = "paymenthistory") {
+        composable("payment_main",
+            enterTransition = { EnterTransition.None },
+            exitTransition = { ExitTransition.None }
+        ) {
             BottomNavigation(navController) {
                 PaymentDetailListScreen(
                     transactions = dummyTransactions,
                     merchants = dummyMerchants,
                     onNavigateToDetail = { transaction ->
-                        navController.navigate("payment_detail/${transaction.transaction_unique_no}")
+                        navController.navigate("paymenthistory/${transaction.transaction_unique_no}")
                     },
                     onNavigateBack = { navController.navigateUp() }
                 )
             }
         }
-        composable("payment_detail/{transactionUniqueNo}") {
+        composable("paymenthistory/{transactionUniqueNo}") {
             val transactionUniqueNo = it.arguments?.getString("transactionUniqueNo")?.toLongOrNull() ?: 0L
             BottomNavigation(navController) {
                 PaymentDetailScreen(
@@ -44,6 +50,12 @@ fun NavGraphBuilder.paymentNavGraph(navController: NavHostController) {
                     onNavigateBack = { navController.navigateUp() }
                 )
             }
+        }
+        composable("paymentsucceed",
+            enterTransition = { EnterTransition.None },
+            exitTransition = { ExitTransition.None }
+        ) {
+            PaymentSucceedScreen()
         }
     }
 }

@@ -1,5 +1,7 @@
 package com.kimnlee.cardmanagement.navigation
 
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
@@ -8,13 +10,24 @@ import com.kimnlee.cardmanagement.presentation.screen.CardManagementDetailScreen
 import com.kimnlee.cardmanagement.presentation.screen.CardManagementDirectRegistrationScreen
 import com.kimnlee.cardmanagement.presentation.screen.CardManagementRegistrationScreen
 import com.kimnlee.cardmanagement.presentation.screen.CardManagementScreen
+import com.kimnlee.cardmanagement.presentation.viewmodel.CardManagementViewModel
+import com.kimnlee.common.auth.AuthManager
 import com.kimnlee.common.components.BottomNavigation
 
-fun NavGraphBuilder.cardManagementNavGraph(navController: NavHostController) {
+fun NavGraphBuilder.cardManagementNavGraph(
+    navController: NavHostController,
+    authManager: AuthManager
+) {
     navigation(startDestination = "cardmanagement_main", route = "cardmanagement") {
-        composable("cardmanagement_main") {
+        composable("cardmanagement_main",
+            enterTransition = { EnterTransition.None },
+            exitTransition = { ExitTransition.None }
+        ) {
+            val viewModel = CardManagementViewModel(authManager)
+
             BottomNavigation(navController) {
                 CardManagementScreen(
+                    viewModel = viewModel,
                     onNavigateToDetail = { navController.navigate("cardmanagement_detail") },
                     onNavigateToRegistration = { navController.navigate("cardmanagement_registration") },
 //                    onNavigateToHome = {
@@ -25,14 +38,20 @@ fun NavGraphBuilder.cardManagementNavGraph(navController: NavHostController) {
                 )
             }
         }
-        composable("cardmanagement_detail") {
+        composable("cardmanagement_detail",
+            enterTransition = { EnterTransition.None },
+            exitTransition = { ExitTransition.None }
+        ) {
             BottomNavigation(navController) {
                 CardManagementDetailScreen(
                     onNavigateBack = { navController.navigateUp() }
                 )
             }
         }
-        composable("cardmanagement_registration") {
+        composable("cardmanagement_registration",
+            enterTransition = { EnterTransition.None },
+            exitTransition = { ExitTransition.None }
+        ) {
             BottomNavigation(navController) {
                 CardManagementRegistrationScreen(
                     onNavigateBack = { navController.navigateUp() },
@@ -40,7 +59,10 @@ fun NavGraphBuilder.cardManagementNavGraph(navController: NavHostController) {
                 )
             }
         }
-        composable("cardmanagement_direct_registration") {
+        composable("cardmanagement_direct_registration",
+            enterTransition = { EnterTransition.None },
+            exitTransition = { ExitTransition.None }
+        ) {
             BottomNavigation(navController) {
                 CardManagementDirectRegistrationScreen(
                     onNavigateBack = { navController.navigateUp() }

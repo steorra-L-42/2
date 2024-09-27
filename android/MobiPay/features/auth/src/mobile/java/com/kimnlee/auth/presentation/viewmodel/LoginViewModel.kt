@@ -52,4 +52,27 @@ class LoginViewModel(private val authManager: AuthManager) : ViewModel() {
             }
         }
     }
+
+    // 임시 로그인
+    fun testLogin() {
+        viewModelScope.launch {
+            authManager.setLoggedIn(true)
+            _isLoggedIn.value = true
+            val testToken = "test_auth_token_${System.currentTimeMillis()}"
+            authManager.saveAuthToken(testToken)
+            _authToken.value = testToken
+            Log.i("TestLogin", "Test login successful. Auth Token: $testToken")
+        }
+    }
+
+    // 임시 로그아웃
+    fun testLogout() {
+        viewModelScope.launch {
+            authManager.setLoggedIn(false)
+            _isLoggedIn.value = false
+            authManager.clearAuthToken()
+            _authToken.value = null
+            Log.i("TestLogout", "Test logout successful. Auth Token cleared.")
+        }
+    }
 }

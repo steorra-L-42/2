@@ -1,5 +1,7 @@
 package com.kimnlee.memberinvitation.navigation
 
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
@@ -11,7 +13,10 @@ import com.kimnlee.memberinvitation.presentation.screen.MemberInvitationConfirma
 
 fun NavGraphBuilder.memberInvitationNavGraph(navController: NavHostController) {
     navigation(startDestination = "member_main/{vehicleId}", route = "memberinvitation") {
-        composable("member_main/{vehicleId}") { backStackEntry ->
+        composable("member_main/{vehicleId}",
+            enterTransition = { EnterTransition.None },
+            exitTransition = { ExitTransition.None }
+        ) { backStackEntry ->
             val vehicleId = backStackEntry.arguments?.getString("vehicleId")?.toIntOrNull() ?: -1
             BottomNavigation(navController) {
                 MemberInvitationScreen(
@@ -24,20 +29,22 @@ fun NavGraphBuilder.memberInvitationNavGraph(navController: NavHostController) {
                 )
             }
         }
-        composable("member_detail") {
-            BottomNavigation(navController) {
-                MemberInvitationDetailScreen(
-                    onNavigateBack = { navController.navigateUp() },
-                    onNavigateToConfirmation = { navController.navigate("member_confirmation") }
-                )
-            }
+        composable("member_detail",
+            enterTransition = { EnterTransition.None },
+            exitTransition = { ExitTransition.None }
+        ) {
+            MemberInvitationDetailScreen(
+                onNavigateBack = { navController.navigateUp() },
+                onNavigateToConfirmation = { navController.navigate("member_confirmation") }
+            )
         }
-        composable("member_confirmation") {
-            BottomNavigation(navController) {
-                MemberInvitationConfirmationScreen(
-                    onNavigateBack = { navController.navigateUp() }
-                )
-            }
+        composable("member_confirmation",
+            enterTransition = { EnterTransition.None },
+            exitTransition = { ExitTransition.None }
+        ) {
+            MemberInvitationConfirmationScreen(
+                onNavigateBack = { navController.navigateUp() }
+            )
         }
     }
 }

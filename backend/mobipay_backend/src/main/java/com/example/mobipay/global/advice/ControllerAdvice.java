@@ -9,6 +9,8 @@ import com.example.mobipay.domain.invitation.error.InvitationNoFoundException;
 import com.example.mobipay.domain.invitation.error.NotInvitedException;
 import com.example.mobipay.domain.invitation.error.NotApprovedOrRejectedException;
 import com.example.mobipay.domain.mobiuser.error.MobiUserNotFoundException;
+import com.example.mobipay.global.authentication.error.AccountProductNotFoundException;
+import com.example.mobipay.global.authentication.error.CardProductNotFoundException;
 import com.example.mobipay.global.error.ErrorCode;
 import com.example.mobipay.global.error.ErrorResponseDto;
 import lombok.extern.slf4j.Slf4j;
@@ -42,6 +44,25 @@ public class ControllerAdvice {
     public ResponseEntity<ErrorResponseDto> handleNotOwnerException(NotOwnerException e) {
         log.info(e.getMessage());
         return getResponse(ErrorCode.NOT_OWNER);
+    }
+
+    @ExceptionHandler(AccountProductNotFoundException.class)
+    public ResponseEntity<ErrorResponseDto> handleAccountProductNotFoundException(AccountProductNotFoundException e) {
+        log.info(e.getMessage());
+        return getResponse(ErrorCode.ACCOUNT_PRODUCT_NOT_FOUND);
+    }
+
+    @ExceptionHandler(CardProductNotFoundException.class)
+    public ResponseEntity<ErrorResponseDto> handleCardProductNotFoundException(CardProductNotFoundException e) {
+        log.info(e.getMessage());
+        return getResponse(ErrorCode.CARD_PRODUCT_NOT_FOUND);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponseDto> handleException(Exception e) {
+//        log.info(e.getMessage());
+        e.printStackTrace();
+        return getResponse(ErrorCode.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(AlreadyInvitedException.class)
