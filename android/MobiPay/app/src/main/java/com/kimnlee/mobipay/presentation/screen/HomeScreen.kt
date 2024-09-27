@@ -3,6 +3,7 @@ package com.kimnlee.mobipay.presentation.screen
 import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.Color
+import android.view.Gravity
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -147,6 +148,14 @@ fun NaverMapView(lastLocation: Pair<Double, Double>) {
                 marker.width = 130
                 marker.height = 130
                 marker.map = naverMap
+
+                naverMap.uiSettings.apply {
+                    isZoomControlEnabled = false
+                    logoGravity = Gravity.END or Gravity.BOTTOM
+                    setLogoMargin(0,0,30,30)
+                    isScaleBarEnabled = false
+                }
+
             }
         }
     )
