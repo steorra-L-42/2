@@ -1,13 +1,15 @@
 package com.kimnlee.mobipay.presentation.screen
 
 import android.content.Context
-import android.content.Intent
 import android.content.SharedPreferences
+import android.graphics.Color
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -19,10 +21,18 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavController
 import com.kimnlee.auth.presentation.viewmodel.LoginViewModel
+import com.kimnlee.common.R
+import com.naver.maps.geometry.LatLng
+import com.naver.maps.map.CameraUpdate
+import com.naver.maps.map.MapView
+import com.naver.maps.map.overlay.Marker
+import com.naver.maps.map.overlay.OverlayImage
 
 @Composable
 fun HomeScreen(
@@ -31,7 +41,8 @@ fun HomeScreen(
     context: Context
 ) {
     val isLoggedIn by viewModel.isLoggedIn.collectAsState()
-    var lastLocationText by remember { mutableStateOf("마지막 위치: 불러오는 중...") }
+    var lastLocation by remember { mutableStateOf<Pair<Double, Double>?>(null) }
+//    var lastLocationText by remember { mutableStateOf("마지막 위치: 불러오는 중...") }
 
 
     LaunchedEffect(isLoggedIn) {
@@ -45,12 +56,12 @@ fun HomeScreen(
     }
 
     LaunchedEffect(Unit) {
-        val lastLocation = getLastLocation(context)
-        lastLocationText = if (lastLocation != null) {
-            "주차 위치: 위도 ${lastLocation.first}, 경도 ${lastLocation.second}"
-        } else {
-            "주차 위치: 위치 정보가 없습니다"
-        }
+        lastLocation = getLastLocation(context)
+//        lastLocationText = if (lastLocation != null) {
+//            "주차 위치: 위도 ${lastLocation.first}, 경도 ${lastLocation.second}"
+//        } else {
+//            "주차 위치: 위치 정보가 없습니다"
+//        }
     }
 
     Column(
@@ -84,7 +95,13 @@ fun HomeScreen(
         }
         Spacer(modifier = Modifier.height(16.dp))
         // Display the last known location
-        Text(text = lastLocationText)
+//        Text(text = lastLocationText)
+
+        if (lastLocation != null) {
+            NaverMapView(lastLocation!!)
+        } else {
+            Text(text = "위치 정보를 불러오는 중...")
+        }
 
         Button(
             onClick = {
@@ -97,7 +114,42 @@ fun HomeScreen(
         ) {
             Text("Payment Succeed")
         }
+
+
+
     }
+}
+
+@Composable
+fun NaverMapView(lastLocation: Pair<Double, Double>) {
+    val context = LocalContext.current
+    var mapView = remember { MapView(context) }
+
+    val lastLocationLatLng = LatLng(lastLocation.first, lastLocation.second)
+
+    AndroidView(
+        factory = { mapView },
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(200.dp)
+            .clip(RoundedCornerShape(20.dp)),
+        update = { view ->
+            view.getMapAsync { naverMap ->
+                // Move the camera to the last known location
+                val cameraUpdate = CameraUpdate.scrollTo(lastLocationLatLng)
+                naverMap.moveCamera(cameraUpdate)
+
+                // Optionally add more map customizations like markers
+                val marker = Marker()
+                marker.icon = OverlayImage.fromResource(R.drawable.park)
+//                marker.iconTintColor = Color.argb(255,0,0,255)
+                marker.position = lastLocationLatLng
+                marker.width = 130
+                marker.height = 130
+                marker.map = naverMap
+            }
+        }
+    )
 }
 
 

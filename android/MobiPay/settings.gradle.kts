@@ -24,6 +24,7 @@ dependencyResolutionManagement {
         }
         // 카카오 maven 저장소 선언
         maven { url = java.net.URI("https://devrepo.kakao.com/nexus/content/groups/public/") }
+        maven("https://repository.map.naver.com/archive/maven")
     }
 }
 
