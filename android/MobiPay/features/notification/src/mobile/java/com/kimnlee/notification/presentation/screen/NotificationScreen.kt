@@ -225,7 +225,7 @@ fun NotificationItem(notification: Notification) {
                 .align(Alignment.TopStart)
                 .size(20.dp)
                 .padding(end = 4.dp)
-                .offset(y = (-1).dp)
+                .offset(y = (-2).dp)
         )
 
         Row(
@@ -237,6 +237,7 @@ fun NotificationItem(notification: Notification) {
                     text = type,
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color.LightGray,
+                    maxLines = 1,
                     fontWeight = FontWeight.SemiBold,
                 )
                 Spacer(modifier = Modifier.height(8.dp))
