@@ -12,8 +12,8 @@ import androidx.annotation.OptIn
 import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
-import com.kimnlee.api.network.ApiClient
-import com.kimnlee.data.model.OCRResponse
+import com.kimnlee.common.network.ApiClient
+import com.kimnlee.common.auth.model.OCRResponse
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
@@ -128,7 +128,7 @@ class LicensePlateAnalyzer(
         val requestFile = RequestBody.create("image/jpeg".toMediaTypeOrNull(), file)
         val body = MultipartBody.Part.createFormData("file", file.name, requestFile)
 
-        val call = ApiClient.ocrService.uploadImage(body)
+        val call = ApiClient.getInstance().ocrService.uploadImage(body)
         call.enqueue(object : Callback<OCRResponse> {
             override fun onResponse(call: Call<OCRResponse>, response: Response<OCRResponse>) {
                 if (response.isSuccessful) {

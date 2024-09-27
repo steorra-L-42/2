@@ -97,12 +97,14 @@ fun BottomNavigation(
                         },
                         selected = isSelected,
                         onClick = {
-                            navController.navigate(item.route) {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = false
+                            if (!isSelected) {  // Only navigate if it's not the current route
+                                navController.navigate(item.route) {
+                                    popUpTo(navController.graph.findStartDestination().id) {
+                                        saveState = false
+                                    }
+                                    launchSingleTop = true
+                                    restoreState = false
                                 }
-                                launchSingleTop = true
-                                restoreState = false
                             }
                         },
                         colors = NavigationBarItemDefaults.colors(

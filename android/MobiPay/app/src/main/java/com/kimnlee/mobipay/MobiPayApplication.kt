@@ -7,16 +7,32 @@ import android.media.AudioAttributes
 import android.media.RingtoneManager
 import android.util.Log
 import com.google.firebase.FirebaseApp
+import com.kimnlee.common.auth.AuthManager
 import com.kimnlee.firebase.FCMService
 import com.kimnlee.common.auth.KakaoSdkInitializer
+import com.kimnlee.common.auth.api.UnAuthService
+import com.kimnlee.common.network.ApiClient
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 
 private const val TAG = "MobiPayApplication"
 class MobiPayApplication : Application() {
 
+    lateinit var authManager: AuthManager
+    lateinit var apiClient: ApiClient
+
     override fun onCreate() {
         super.onCreate()
+
+        // ApiClient 초기화
+        apiClient = ApiClient.getInstance()
+
+        // UnAuthService 생성
+        val unAuthService = apiClient.unAuthenticatedApi.create(UnAuthService::class.java)
+
+        // AuthManager 초기화
+        authManager = AuthManager(this, unAuthService)
+        apiClient = ApiClient.getInstance(authManager)
 
         // 카카오 SDK 초기화
         KakaoSdkInitializer.initialize(this)

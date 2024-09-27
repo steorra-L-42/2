@@ -37,7 +37,8 @@ fun NavGraphBuilder.vehicleManagementNavGraph(navController: NavHostController) 
                 VehicleManagementDetailScreen(
                     vehicleId = vehicleId,
                     onNavigateBack = { navController.navigateUp() },
-                    onNavigateToMemberInvitation = { navController.navigate("member_main/$vehicleId") }
+                    onNavigateToMemberInvitation = { navController.navigate("member_main/$vehicleId") },
+                    onNavigateToNotification = { navController.navigate("notification_main") }
                 )
             }
         }
