@@ -32,7 +32,7 @@ fun NavGraphBuilder.memberInvitationNavGraph(navController: NavHostController) {
         composable("member_phone/{vehicleId}",
             enterTransition = { EnterTransition.None },
             exitTransition = { ExitTransition.None }
-        ) {backStackEntry ->
+        ) { backStackEntry ->
             val vehicleId = backStackEntry.arguments?.getString("vehicleId")?.toIntOrNull() ?: -1
             MemberInvitationViaPhoneScreen(
                 onNavigateBack = { navController.navigateUp() },
@@ -40,16 +40,15 @@ fun NavGraphBuilder.memberInvitationNavGraph(navController: NavHostController) {
                 onNavigateToConfirmation = { navController.navigate("member_confirmation/$vehicleId") }
             )
         }
-        composable("member_confirmation",
+        composable("member_confirmation/{vehicleId}",
             enterTransition = { EnterTransition.None },
             exitTransition = { ExitTransition.None }
-        ) {
-        composable("member_confirmation/{vehicleId}") {backStackEntry ->
+        ) { backStackEntry ->
             val vehicleId = backStackEntry.arguments?.getString("vehicleId")?.toIntOrNull() ?: -1
             MemberInvitationConfirmationScreen(
                 onNavigateBack = { navController.navigateUp() },
-                        vehicleId = vehicleId,
+                vehicleId = vehicleId,
             )
         }
     }
-}}
+}

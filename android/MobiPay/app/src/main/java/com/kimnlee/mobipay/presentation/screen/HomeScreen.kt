@@ -77,11 +77,11 @@ fun HomeScreen(
             Text("나의 차 관리")
         }
         Spacer(modifier = Modifier.height(8.dp))
-        Button(
-            onClick = { navController.navigate("memberinvitation") }
-        ) {
-            Text("멤버 초대")
-        }
+//        Button(
+//            onClick = { navController.navigate("memberinvitation") }
+//        ) {
+//            Text("멤버 초대")
+//        }
         Spacer(modifier = Modifier.height(16.dp))
         // Display the last known location
         Text(text = lastLocationText)

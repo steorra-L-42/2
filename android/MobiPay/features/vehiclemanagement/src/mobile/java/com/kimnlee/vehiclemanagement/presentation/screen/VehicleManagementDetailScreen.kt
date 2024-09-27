@@ -13,18 +13,27 @@ import androidx.compose.ui.res.painterResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Notifications
+import androidx.navigation.NavController
+import com.kimnlee.memberinvitation.presentation.components.MemberInvitationBottomSheet
+import com.kimnlee.memberinvitation.presentation.viewmodel.MemberInvitationViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VehicleManagementDetailScreen(
     vehicleId: Int,
     onNavigateBack: () -> Unit,
-    onNavigateToMemberInvitation: (Int) -> Unit,
+    onNavigateToInvitePhone: (Int) -> Unit,
     onNavigateToNotification: () -> Unit,
-    viewModel: VehicleManagementViewModel = viewModel()
+    viewModel: VehicleManagementViewModel = viewModel(),
+    navController: NavController
 ) {
     val vehicle = viewModel.getVehicleById(vehicleId)
     var isCardEnabled by remember { mutableStateOf(false) }
 
+    val memberViewModel : MemberInvitationViewModel = viewModel()
+    val showBottomSheet by memberViewModel.showBottomSheet.collectAsState()
+    val scope = rememberCoroutineScope()
+    val sheetState = rememberModalBottomSheetState()
     Box(
         modifier = Modifier.fillMaxSize().padding(16.dp)
     ) {
@@ -77,7 +86,10 @@ fun VehicleManagementDetailScreen(
             }
 
             Button(
-                onClick = { onNavigateToMemberInvitation(vehicleId) },
+                onClick = {
+//                    onNavigateToMemberInvitation(vehicleId)
+                    memberViewModel.openBottomSheet()
+                          },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(8.dp)
@@ -116,7 +128,16 @@ fun VehicleManagementDetailScreen(
                 }
             }
         }
-
+        if (showBottomSheet) {
+            MemberInvitationBottomSheet(
+                vehicleId = vehicleId,
+                sheetState = sheetState,
+                scope = scope,
+                viewModel = memberViewModel,
+                onNavigateToInvitePhone = {onNavigateToInvitePhone(vehicleId)},
+                onNavigateToConfirmation = {navController.navigate("member_confirmation/$vehicleId")}
+            )
+        }
         Spacer(modifier = Modifier.height(16.dp))
 
         IconButton(
