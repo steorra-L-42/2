@@ -27,7 +27,7 @@ val pBoldFontFamily = FontFamily(Font(R.font.pbold))
 val pMediumFontFamily = FontFamily(Font(R.font.pmedium))
 
 @Composable
-fun PaymentSuccessScreen() {
+fun PaymentSucceedScreen() {
     MobiTheme {
         Column(
             modifier = Modifier

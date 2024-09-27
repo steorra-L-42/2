@@ -14,8 +14,8 @@ android {
         applicationId = "com.kimnlee.mobipay"
         minSdk = 28
         maxSdk = 34
-        targetSdk = 33
-        versionCode = 1
+        targetSdk = 34
+        versionCode = 2
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"

@@ -11,14 +11,17 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.Alignment
+import com.kimnlee.auth.presentation.viewmodel.LoginViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.json.JSONObject
+import retrofit2.HttpException
 
 @Composable
 fun SignUpScreen(
     authManager: AuthManager,
-    onNavigateToHome: () -> Unit,
+    viewModel: LoginViewModel,
     onNavigateToBack: () -> Unit
 ) {
     var email by remember { mutableStateOf("") }
@@ -33,12 +36,16 @@ fun SignUpScreen(
 
     LaunchedEffect(signUpSuccess) {
         if (signUpSuccess) {
-            onNavigateToHome()
+            viewModel.testLogin()
         }
     }
 
     Column {
-        Spacer(modifier = Modifier.height(300.dp))
+        Spacer(modifier = Modifier.height(100.dp))
+
+        Text("개발용입니다")
+
+        Spacer(modifier = Modifier.height(200.dp))
 
         OutlinedTextField(
             value = email,
@@ -137,9 +144,14 @@ fun SignUpScreen(
                     if (!emailError && !nameError && !phoneNumberError && name.isNotEmpty() && phoneNumber.isNotEmpty() && email.isNotEmpty()) {
                         isLoading = true
                         CoroutineScope(Dispatchers.Main).launch {
-                            signUp(email, name, phoneNumber, authManager, { signUpSuccess = true }, { errorMessage = it }) {
-                                isLoading = false
-                            }
+                            signUp(email, name, phoneNumber, authManager,
+                                onSuccess = {
+                                    signUpSuccess = true
+                                    errorMessage = ""
+                                },
+                                onError = { errorMessage = it },
+                                onFinally = { isLoading = false }
+                            )
                         }
                     } else {
                         errorMessage = "모든 필드를 올바르게 입력해주세요."
@@ -183,14 +195,32 @@ private suspend fun signUp(
     onFinally: () -> Unit
 ) {
     try {
-        val response = authManager.signUp(email, name, phoneNumber)
-        if (response.success) {
-            onSuccess()
-        } else {
-            onError(response.message)
-        }
+        val result = authManager.signUp(email, name, phoneNumber)
+        result.fold(
+            onSuccess = { response ->
+                if (response.message.contains("성공")) {
+                    onSuccess()
+                } else {
+                    onError(response.message)
+                }
+            },
+            onFailure = { exception ->
+                if (exception is HttpException) {
+                    val errorResponse = exception.response()?.errorBody()?.string()
+                    errorResponse?.let {
+                        val jsonObject = JSONObject(it)
+                        val errorMessage = jsonObject.getString("message")
+                        onError(errorMessage)
+                    } ?: run {
+                        onError("알 수 없는 오류")
+                    }
+                } else {
+                    onError("회원가입 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.")
+                }
+            }
+        )
     } catch (e: Exception) {
-        onError("회원가입 중 오류가 발생했습니다.")
+        onError("알 수 없는 오류가 발생했습니다. 잠시 후 다시 시도해주세요.")
     } finally {
         onFinally()
     }
