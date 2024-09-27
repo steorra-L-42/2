@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
+import retrofit2.HttpException
 
 //테스트를 위한 회원가입용 임포트문 삭제예정(api 통신에 필요할 경우 남길 수 있음)
 import retrofit2.converter.gson.GsonConverterFactory
@@ -167,15 +168,12 @@ class AuthManager(private val context: Context, private val unAuthService: UnAut
 
     // 테스트 로직 끝 ----------------------------
 
-    suspend fun signUp(email: String, name: String, phoneNumber: String): SignUpResponse {
-        Log.d("SignUp", "회원가입 요청: $email, $name, $phoneNumber !!!!!!!!!!!!!!")
+    suspend fun signUp(email: String, name: String, phoneNumber: String): Result<SignUpResponse> {
         return try {
             val response = authService.signUp(SignUpRequest(email, name, phoneNumber))
-            Log.d("SignUp", "회원가입 응답: ${response} !!!!!!!!!!!!!!!!!!")
-            response
+            Result.success(response)
         } catch (e: Exception) {
-            Log.e("SignUp", "회원가입 오류: ${e.message} !!!!!!!!!!!!!!!!!!")
-            throw e
+            Result.failure(e)
         }
     }
 
@@ -189,9 +187,9 @@ class AuthManager(private val context: Context, private val unAuthService: UnAut
 }
 
 interface AuthService {
-    @POST("api/v1/account-test")
+    @POST("api/v1/form-signup")
     suspend fun signUp(@Body request: SignUpRequest): SignUpResponse
 }
 
 data class SignUpRequest(val email: String, val name: String, val phoneNumber: String)
-data class SignUpResponse(val success: Boolean, val message: String)
+data class SignUpResponse(val message: String)
