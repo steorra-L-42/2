@@ -20,6 +20,7 @@ import com.example.mobipay.domain.mobiuser.repository.MobiUserRepository;
 import com.example.mobipay.oauth2.dto.CustomOAuth2User;
 import com.example.mobipay.util.SecurityTestUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -65,6 +66,13 @@ public class InvitationDecideTest {
 
     @BeforeEach
     void setUp() {
+        invitationRepository.deleteAll();
+        carRepository.deleteAll();
+        mobiUserRepository.deleteAll();
+    }
+
+    @AfterEach
+    void tearDown() {
         invitationRepository.deleteAll();
         carRepository.deleteAll();
         mobiUserRepository.deleteAll();
@@ -176,7 +184,7 @@ public class InvitationDecideTest {
 
         SecurityTestUtil.setUpMockUser(customOAuth2User, invitee.getId());
         final String url = "/api/v1/invitations/" + invitation.getId() + "/response";
-        final String requestBody = objectMapper.writeValueAsString(new InvitationDecisionRequest(null));
+        final String requestBody = "{ \"approved\": null }";
 
         // when
         ResultActions result = mockMvc.perform(post(url).with(csrf())

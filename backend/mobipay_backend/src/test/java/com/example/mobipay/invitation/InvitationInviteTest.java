@@ -158,7 +158,8 @@ public class InvitationInviteTest {
         // given
         SecurityTestUtil.setUpMockUser(customOAuth2User, OWNER_ID);
         final String url = "/api/v1/invitations";
-        final String requestBody = objectMapper.writeValueAsString(new InvitationRequest(phoneNumber, carId));
+//        final String requestBody = objectMapper.writeValueAsString(new InvitationRequest(phoneNumber, carId));
+        final String requestBody = "{\"phoneNumber\":\"" + phoneNumber + "\",\"carId\":" + carId + "}";
         // when
         ResultActions result = mockMvc.perform(post(url).with(csrf())
                 .accept(MediaType.APPLICATION_JSON)
