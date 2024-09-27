@@ -213,7 +213,7 @@ private suspend fun signUp(
                     errorResponse?.let {
                         val jsonObject = JSONObject(it)
                         val errorMessage = jsonObject.getString("message")
-                        onError("회원 가입 중 오류가 발생했습니다: $errorMessage")
+                        onError(errorMessage)
                     } ?: run {
                         onError("알 수 없는 오류")
                     }
