@@ -3,6 +3,11 @@ package com.example.mobipay.global.advice;
 import com.example.mobipay.domain.car.error.CarNotFoundException;
 import com.example.mobipay.domain.car.error.DuplicatedCarNumberException;
 import com.example.mobipay.domain.car.error.NotOwnerException;
+import com.example.mobipay.domain.invitation.error.AlreadyDecidedException;
+import com.example.mobipay.domain.invitation.error.AlreadyInvitedException;
+import com.example.mobipay.domain.invitation.error.InvitationNoFoundException;
+import com.example.mobipay.domain.invitation.error.NotInvitedException;
+import com.example.mobipay.domain.invitation.error.NotApprovedOrRejectedException;
 import com.example.mobipay.domain.mobiuser.error.MobiUserNotFoundException;
 import com.example.mobipay.global.error.ErrorCode;
 import com.example.mobipay.global.error.ErrorResponseDto;
@@ -37,6 +42,36 @@ public class ControllerAdvice {
     public ResponseEntity<ErrorResponseDto> handleNotOwnerException(NotOwnerException e) {
         log.info(e.getMessage());
         return getResponse(ErrorCode.NOT_OWNER);
+    }
+
+    @ExceptionHandler(AlreadyInvitedException.class)
+    public ResponseEntity<ErrorResponseDto> handleAlreadyInvitedException(AlreadyInvitedException e) {
+        log.info(e.getMessage());
+        return getResponse(ErrorCode.ALREADY_INVITED);
+    }
+
+    @ExceptionHandler(InvitationNoFoundException.class)
+    public ResponseEntity<ErrorResponseDto> handleInvitationNotFoundException(InvitationNoFoundException e) {
+        log.info(e.getMessage());
+        return getResponse(ErrorCode.INVITATION_NOT_FOUND);
+    }
+
+    @ExceptionHandler(AlreadyDecidedException.class)
+    public ResponseEntity<ErrorResponseDto> handleAlreadyDecidedException(AlreadyDecidedException e) {
+        log.info(e.getMessage());
+        return getResponse(ErrorCode.INVITATION_ALREADY_DECIDED);
+    }
+
+    @ExceptionHandler(NotApprovedOrRejectedException.class)
+    public ResponseEntity<ErrorResponseDto> handleWaitingNotAllowedException(NotApprovedOrRejectedException e) {
+        log.info(e.getMessage());
+        return getResponse(ErrorCode.NOT_APPROVED_OR_REJECTED);
+    }
+
+    @ExceptionHandler(NotInvitedException.class)
+    public ResponseEntity<ErrorResponseDto> handleNotInvitedException(NotInvitedException e) {
+        log.info(e.getMessage());
+        return getResponse(ErrorCode.NOT_INVITED);
     }
 
     private ResponseEntity<ErrorResponseDto> getResponse(ErrorCode errorCode) {
