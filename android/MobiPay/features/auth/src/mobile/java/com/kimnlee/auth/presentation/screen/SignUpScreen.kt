@@ -1,6 +1,5 @@
 package com.kimnlee.auth.presentation.screen
 
-import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -199,7 +198,6 @@ private suspend fun signUp(
         val result = authManager.signUp(email, name, phoneNumber)
         result.fold(
             onSuccess = { response ->
-                Log.d("SignUp", "회원가입 성공 서버 응답: ${response.message}")
                 if (response.message.contains("성공")) {
                     onSuccess()
                 } else {
@@ -207,7 +205,6 @@ private suspend fun signUp(
                 }
             },
             onFailure = { exception ->
-                Log.e("SignUp", "회원가입 실패 서버 응답: ${exception.message}")
                 if (exception is HttpException) {
                     val errorResponse = exception.response()?.errorBody()?.string()
                     errorResponse?.let {
@@ -223,7 +220,6 @@ private suspend fun signUp(
             }
         )
     } catch (e: Exception) {
-        Log.e("SignUp", "예상치 못한 오류: ${e.message}")
         onError("알 수 없는 오류가 발생했습니다. 잠시 후 다시 시도해주세요.")
     } finally {
         onFinally()

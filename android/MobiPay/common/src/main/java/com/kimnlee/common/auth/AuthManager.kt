@@ -169,13 +169,10 @@ class AuthManager(private val context: Context, private val unAuthService: UnAut
     // 테스트 로직 끝 ----------------------------
 
     suspend fun signUp(email: String, name: String, phoneNumber: String): Result<SignUpResponse> {
-        Log.d("SignUp", "회원가입 요청, signUp 함수 넘어온 인자: $email, $name, $phoneNumber !!!!!!!!!!!!!!")
         return try {
             val response = authService.signUp(SignUpRequest(email, name, phoneNumber))
-            Log.d("SignUp", "회원가입 성공 응답: ${response.message} !!!!!!!!!!!!!!!!!!")
             Result.success(response)
         } catch (e: Exception) {
-            Log.e("SignUp", "회원가입 오류: ${e.message} !!!!!!!!!!!!!!!!!!")
             Result.failure(e)
         }
     }
