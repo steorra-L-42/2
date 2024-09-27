@@ -12,6 +12,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.Alignment
+import com.kimnlee.auth.presentation.viewmodel.LoginViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -21,7 +22,7 @@ import retrofit2.HttpException
 @Composable
 fun SignUpScreen(
     authManager: AuthManager,
-    onNavigateToHome: () -> Unit,
+    viewModel: LoginViewModel,
     onNavigateToBack: () -> Unit
 ) {
     var email by remember { mutableStateOf("") }
@@ -36,7 +37,7 @@ fun SignUpScreen(
 
     LaunchedEffect(signUpSuccess) {
         if (signUpSuccess) {
-            onNavigateToHome()
+            viewModel.testLogin()
         }
     }
 
@@ -202,7 +203,7 @@ private suspend fun signUp(
                 if (response.message.contains("성공")) {
                     onSuccess()
                 } else {
-                    onError(response.message ?: "알 수 없는 오류가 발생했습니다.")
+                    onError(response.message)
                 }
             },
             onFailure = { exception ->

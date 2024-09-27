@@ -39,11 +39,7 @@ fun NavGraphBuilder.authNavGraph(
         ) {
             SignUpScreen(
                 authManager = authManager,
-                onNavigateToHome = {
-                    navController.navigate("home") {
-                        popUpTo("auth") { inclusive = true }
-                    }
-                },
+                viewModel = LoginViewModel(authManager),
                 onNavigateToBack = { navController.navigateUp() }
             )
         }
