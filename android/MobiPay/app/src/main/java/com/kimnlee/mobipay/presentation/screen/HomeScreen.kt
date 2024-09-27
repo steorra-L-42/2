@@ -92,7 +92,7 @@ fun HomeScreen(
 //                val intent = Intent(context, PaymentSucceed::class.java)
 //                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK // Add this line
 //                ContextCompat.startActivity(context, intent, null)
-                navController.navigate("payment_success")
+                navController.navigate("paymentsucceed")
             }
         ) {
             Text("Payment Succeed")

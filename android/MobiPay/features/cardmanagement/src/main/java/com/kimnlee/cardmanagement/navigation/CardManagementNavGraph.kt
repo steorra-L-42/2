@@ -38,14 +38,20 @@ fun NavGraphBuilder.cardManagementNavGraph(
                 )
             }
         }
-        composable("cardmanagement_detail") {
+        composable("cardmanagement_detail",
+            enterTransition = { EnterTransition.None },
+            exitTransition = { ExitTransition.None }
+        ) {
             BottomNavigation(navController) {
                 CardManagementDetailScreen(
                     onNavigateBack = { navController.navigateUp() }
                 )
             }
         }
-        composable("cardmanagement_registration") {
+        composable("cardmanagement_registration",
+            enterTransition = { EnterTransition.None },
+            exitTransition = { ExitTransition.None }
+        ) {
             BottomNavigation(navController) {
                 CardManagementRegistrationScreen(
                     onNavigateBack = { navController.navigateUp() },
@@ -53,7 +59,10 @@ fun NavGraphBuilder.cardManagementNavGraph(
                 )
             }
         }
-        composable("cardmanagement_direct_registration") {
+        composable("cardmanagement_direct_registration",
+            enterTransition = { EnterTransition.None },
+            exitTransition = { ExitTransition.None }
+        ) {
             BottomNavigation(navController) {
                 CardManagementDirectRegistrationScreen(
                     onNavigateBack = { navController.navigateUp() }

@@ -1,6 +1,6 @@
 package com.kimnlee.payment.navigation
 
-import PaymentSuccessScreen
+import PaymentSucceedScreen
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.navigation.NavGraphBuilder
@@ -51,8 +51,11 @@ fun NavGraphBuilder.paymentNavGraph(navController: NavHostController) {
                 )
             }
         }
-        composable("payment_success") {
-            PaymentSuccessScreen()
+        composable("paymentsucceed",
+            enterTransition = { EnterTransition.None },
+            exitTransition = { ExitTransition.None }
+        ) {
+            PaymentSucceedScreen()
         }
     }
 }
