@@ -9,6 +9,8 @@ import lombok.ToString;
 @ToString
 public class CardRegisterRequest {
 
+    private static final String MONDAY = "1";
+
     @JsonProperty("Header")
     private final Header header;
     private final String cardUniqueNo;
@@ -20,6 +22,6 @@ public class CardRegisterRequest {
         this.header = Header.of(apiName, apiKey, userKey);
         this.cardUniqueNo = cardUniqueNo;
         this.withdrawalAccountNo = withdrawalAccountNo;
-        this.withdrawalDate = "1";
+        this.withdrawalDate = MONDAY;
     }
 }

@@ -55,8 +55,8 @@ public class Header {
 
     private String generateUniqueNo() {
         String dateTimePart = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
-        String uuidPart = generateRandomSixDigitNumber();
-        return dateTimePart + uuidPart;
+        String sixDigitNumber = generateRandomSixDigitNumber();
+        return dateTimePart + sixDigitNumber;
     }
 
     private String generateRandomSixDigitNumber() {
