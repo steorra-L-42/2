@@ -72,6 +72,7 @@ dependencies {
     implementation(project(":features:memberinvitation"))
     implementation(project(":features:freedrive"))
     implementation(project(":features:firebase"))
+    implementation(project(":features:notification"))
 
 
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -79,7 +80,7 @@ dependencies {
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.firebase.common.ktx)
     implementation(libs.play.services.location)
-    implementation(project(":features:notification"))
+    implementation(libs.androidx.core.splashscreen)
 
 
     testImplementation(libs.junit)
