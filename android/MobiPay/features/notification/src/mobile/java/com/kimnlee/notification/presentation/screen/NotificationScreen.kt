@@ -168,7 +168,7 @@ fun getPaymentRequests(): List<Notification> {
 
 fun getMemberInvitations(): List<Notification> {
     return listOf(
-        Notification("누군가의 차에 초대됐어요누군가의 차에 초대됐어요누군가의 차에 초대됐어요누군가의 차에 초대됐어요누군가의 차에 초대됐어요누군가의 차에 초대됐어요누군가의 차에 초대됐어요누군가의 차에 초대됐어요누군가의 차에 초대됐어요누군가의 차에 초대됐어요", LocalDateTime.now().minusMinutes(10), NotificationType.MEMBER),
+        Notification("누군가의 차에 초대됐어요누군가의 차에 초대됐어요누군가의 차에 초대됐어요누군가의 차에 초대됐어요누군가의 차에 초대됐어요누군가의 차에 초대됐어요누군가의 차에 초대됐어요누군가의 차에 초대됐어요누군가의 차에 초대됐어요누군가의 차에 초대됐어요", LocalDateTime.now().minusMinutes(10), NotificationType.MEMBER), // 장문 메시지 테스트용입니다.
         Notification("누군가의 차에 초대됐어요", LocalDateTime.now().minusDays(10), NotificationType.MEMBER)
     )
 }
