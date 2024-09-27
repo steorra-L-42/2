@@ -19,7 +19,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.ui.text.style.TextAlign
 
 @Composable
@@ -158,27 +159,27 @@ fun OtherNotifications() {
 
 fun getPaymentRequests(): List<Notification> {
     return listOf(
-        Notification("결제 요청", LocalDateTime.now().minusMinutes(20)),
-        Notification("결제 요청", LocalDateTime.now().minusHours(2)),
-        Notification("결제 요청", LocalDateTime.now().minusDays(1)),
-        Notification("결제 요청", LocalDateTime.now().minusDays(2))
+        Notification("결제 요청", LocalDateTime.now().minusMinutes(20), NotificationType.PAYMENT),
+        Notification("결제 요청", LocalDateTime.now().minusHours(2), NotificationType.PAYMENT),
+        Notification("결제 요청", LocalDateTime.now().minusDays(1), NotificationType.PAYMENT),
+        Notification("결제 요청", LocalDateTime.now().minusDays(2), NotificationType.PAYMENT)
     )
 }
 
 fun getMemberInvitations(): List<Notification> {
     return listOf(
-        Notification("누군가의 차에 초대됐어요", LocalDateTime.now().minusMinutes(10)),
-        Notification("누군가의 차에 초대됐어요", LocalDateTime.now().minusDays(10))
+        Notification("누군가의 차에 초대됐어요누군가의 차에 초대됐어요누군가의 차에 초대됐어요누군가의 차에 초대됐어요누군가의 차에 초대됐어요누군가의 차에 초대됐어요누군가의 차에 초대됐어요누군가의 차에 초대됐어요누군가의 차에 초대됐어요누군가의 차에 초대됐어요", LocalDateTime.now().minusMinutes(10), NotificationType.MEMBER),
+        Notification("누군가의 차에 초대됐어요", LocalDateTime.now().minusDays(10), NotificationType.MEMBER)
     )
 }
 
 fun getOtherNotifications(): List<Notification> {
     return listOf(
-        Notification("공지사항 1", LocalDateTime.now().minusDays(1)),
-        Notification("공지사항 2", LocalDateTime.now().minusDays(2)),
-        Notification("공지사항 3", LocalDateTime.now().minusDays(3)),
-        Notification("공지사항 4", LocalDateTime.now().minusDays(4)),
-        Notification("공지사항 5", LocalDateTime.now().minusDays(5))
+        Notification("공지사항 1", LocalDateTime.now().minusDays(1), NotificationType.OTHER),
+        Notification("공지사항 2", LocalDateTime.now().minusDays(2), NotificationType.OTHER),
+        Notification("공지사항 3", LocalDateTime.now().minusDays(3), NotificationType.OTHER),
+        Notification("공지사항 4", LocalDateTime.now().minusDays(4), NotificationType.OTHER),
+        Notification("공지사항 5", LocalDateTime.now().minusDays(5), NotificationType.OTHER)
     )
 }
 
@@ -193,20 +194,52 @@ fun NotificationList(notifications: List<Notification>) {
 
 @Composable
 fun NotificationItem(notification: Notification) {
-    Row(
+    Box(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp)
             .background(Color(0xFF222629), RoundedCornerShape(16.dp))
             .padding(16.dp)
     ) {
+        Text(
+            text = formatTime(notification.timestamp),
+            style = MaterialTheme.typography.bodySmall,
+            color = Color.Gray,
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(end = 8.dp)
+                .offset(y = 1.dp)
+        )
+
+        val (icon, type) = when (notification.type) {
+            NotificationType.PAYMENT -> Pair(Icons.Outlined.CreditCard, "결제")
+            NotificationType.MEMBER -> Pair(Icons.Outlined.Group, "멤버")
+            NotificationType.OTHER -> Pair(Icons.Default.Notifications, "기타")
+        }
+
+        Icon(
+            imageVector = icon,
+            contentDescription = "아이콘",
+            tint = Color.White,
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .size(20.dp)
+                .padding(end = 4.dp)
+                .offset(y = (-1).dp)
+        )
+
         Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.align(Alignment.CenterStart).padding(start = 32.dp)
         ) {
-            Column(
-                modifier = Modifier.weight(1f)
-            ) {
+            Column {
+                Text(
+                    text = type,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.LightGray,
+                    fontWeight = FontWeight.SemiBold,
+                )
+                Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = notification.message,
                     style = MaterialTheme.typography.bodyLarge,
@@ -214,18 +247,16 @@ fun NotificationItem(notification: Notification) {
                     maxLines = 3,
                     overflow = TextOverflow.Ellipsis
                 )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = formatTime(notification.timestamp),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color.Gray
-                )
             }
         }
     }
 }
 
-data class Notification(val message: String, val timestamp: LocalDateTime)
+data class Notification(val message: String, val timestamp: LocalDateTime, val type: NotificationType)
+
+enum class NotificationType {
+    PAYMENT, MEMBER, OTHER
+}
 
 fun formatTime(timestamp: LocalDateTime): String {
     val now = LocalDateTime.now()
