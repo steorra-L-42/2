@@ -35,9 +35,9 @@ fun BottomNavigation(
 ) {
     val bottomNavItems = listOf(
         BottomNavItem("home", R.string.home, R.drawable.house, R.drawable.housef),
-        BottomNavItem("paymenthistory", R.string.vehicle_management , R.drawable.car, R.drawable.carf3),
+        BottomNavItem("vehiclemanagement", R.string.vehicle_management , R.drawable.car, R.drawable.carf3),
         BottomNavItem("cardmanagement", R.string.card_management , R.drawable.creditcard, R.drawable.creditcardf),
-        BottomNavItem("settings", R.string.show_more , R.drawable.more, R.drawable.moref)
+        BottomNavItem("showmore", R.string.show_more , R.drawable.more, R.drawable.moref)
     )
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
