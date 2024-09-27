@@ -168,12 +168,20 @@ class AuthManager(private val context: Context, private val unAuthService: UnAut
     // 테스트 로직 끝 ----------------------------
 
     suspend fun signUp(email: String, name: String, phoneNumber: String): SignUpResponse {
-        return authService.signUp(SignUpRequest(email, name, phoneNumber))
+        Log.d("SignUp", "회원가입 요청: $email, $name, $phoneNumber !!!!!!!!!!!!!!")
+        return try {
+            val response = authService.signUp(SignUpRequest(email, name, phoneNumber))
+            Log.d("SignUp", "회원가입 응답: ${response} !!!!!!!!!!!!!!!!!!")
+            response
+        } catch (e: Exception) {
+            Log.e("SignUp", "회원가입 오류: ${e.message} !!!!!!!!!!!!!!!!!!")
+            throw e
+        }
     }
 
     private fun createAuthService(): AuthService {
         val retrofit = Retrofit.Builder()
-            .baseUrl("http://localhost:8080") // baseUrl 수정해야함
+            .baseUrl("http://192.168.100.126:8080/") // baseUrl 수정해야함
             .addConverterFactory(GsonConverterFactory.create())
             .build()
         return retrofit.create(AuthService::class.java)

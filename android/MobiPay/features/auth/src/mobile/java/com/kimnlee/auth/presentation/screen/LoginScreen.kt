@@ -74,7 +74,7 @@ fun LoginScreen(
                     .fillMaxWidth()
                     .height(50.dp)
             ) {
-                Text("회원가입")
+                Text("회원가입(개발용)")
             }
             Button( // 테스트 로그인 버튼으로 나중에 백엔드랑 연결되면 삭제 예정
                 onClick = { viewModel.testLogin() },
