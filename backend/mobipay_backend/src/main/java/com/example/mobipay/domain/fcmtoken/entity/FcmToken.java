@@ -1,4 +1,4 @@
-package com.example.mobipay.domain.kakaotoken.entity;
+package com.example.mobipay.domain.fcmtoken.entity;
 
 import com.example.mobipay.domain.mobiuser.entity.MobiUser;
 import jakarta.persistence.Column;
@@ -10,26 +10,37 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "kakao_token")
-public class KakaoToken {
+@EqualsAndHashCode
+@Table(name = "fcm_token")
+public class FcmToken {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "refresh_value", nullable = false, columnDefinition = "TEXT")
-    private String refreshValue;
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private String value;
 
-    @Column(name = "access_value", nullable = false, columnDefinition = "TEXT")
-    private String accessValue;
-
-    @OneToOne(mappedBy = "kakaoToken", fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "fcmToken", fetch = FetchType.LAZY)
     private MobiUser mobiUser;
+
+    private FcmToken(String value) {
+        this.value = value;
+    }
+
+    public static FcmToken from(String value) {
+        return new FcmToken(value);
+    }
+
+    public void changeMobiUser(MobiUser mobiUser) {
+        this.mobiUser = mobiUser;
+    }
 }
