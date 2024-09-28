@@ -9,7 +9,9 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 class ApiClient private constructor(private val authManager: AuthManager?) {
+
     private val baseUrl = BuildConfig.BASE_URL
+    private val baseServer = BuildConfig.BASE_SERVER
 
     private val authInterceptor = Interceptor { chain ->
         val originalRequest = chain.request()
@@ -43,7 +45,7 @@ class ApiClient private constructor(private val authManager: AuthManager?) {
     // AuthToken을 사용하지 않는 Api (로그인 때 사용)
     val unAuthenticatedApi: Retrofit = Retrofit.Builder()
 //            .baseUrl("http://localhost:8080/")
-            .baseUrl("https://mobipay.kr/")
+            .baseUrl(baseServer)
             .client(unauthenticatedOkHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
