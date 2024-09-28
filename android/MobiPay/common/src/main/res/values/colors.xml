@@ -8,4 +8,6 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="mobi_blue">#2e58ff</color>
+    <color name="mobi_bg_gray">#F2F4F6</color>
+    <color name="mobi_splash_bg_blue">#4A6EFF</color>
 </resources>
