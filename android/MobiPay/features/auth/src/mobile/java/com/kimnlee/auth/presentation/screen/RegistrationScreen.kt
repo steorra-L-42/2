@@ -27,9 +27,10 @@ fun RegistrationScreen(
 
     val registrationResult by viewModel.registrationResult.collectAsState()
 
+    // 단말기의 뒤로가기 버튼을 눌렀을 때 동작
     BackHandler {
         onBackPressed()
-        viewModel.resetStatus()
+        viewModel.resetStatus() // 로그인 중의 상태 초기화
     }
 
     LaunchedEffect(registrationResult) {
@@ -50,7 +51,7 @@ fun RegistrationScreen(
         Spacer(modifier = Modifier.height(40.dp))
 
         Text(
-            "처음이시군요!\n가입을 위해 아래에 정보를 입력해주세요",
+            "처음이시군요!\n가입을 위해 아래에 정보를 입력해주세요.",
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
             lineHeight = 32.sp
@@ -69,6 +70,7 @@ fun RegistrationScreen(
             modifier = Modifier.fillMaxWidth(),
             placeholder = { Text("010-0000-0000") }
         )
+        // 나중에 여기에 올바른 전화번호인지 검증 로직 추가예정
 
         Spacer(modifier = Modifier.height(24.dp))
 

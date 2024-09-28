@@ -43,8 +43,7 @@ fun LoginScreen(
     val isLoggedIn by viewModel.isLoggedIn.collectAsState()
     val context = LocalContext.current
 
-    val tossBlue = Color(0xFF3182F6)
-    val tossGray = Color(0xFFF2F3F5)
+    val registrationButtonColor = Color(0xFF3182F6)
 
     LaunchedEffect(isLoggedIn) {
         if (isLoggedIn) {
@@ -69,11 +68,11 @@ fun LoginScreen(
                     text = "MobiPay",
                     fontSize = 36.sp,
                     fontWeight = FontWeight.Bold,
-                    color = tossBlue
+                    color = registrationButtonColor
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "차량 결제의 혁신",
+                    text = "간편 결제의 혁신",
                     fontSize = 18.sp,
                     color = Color.Gray
                 )
@@ -104,13 +103,13 @@ fun LoginScreen(
                         .clickable { viewModel.login(context as Activity) }
                 )
 
-                // 회원가입 버튼 (토스 스타일)
+                // 회원가입 버튼
                 Button(
                     onClick = { onNavigateToSignUp() },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(48.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = tossBlue),
+                    colors = ButtonDefaults.buttonColors(containerColor = registrationButtonColor),
                     shape = RoundedCornerShape(8.dp)
                 ) {
                     Text("회원가입", fontSize = 16.sp, color = Color.White)
@@ -121,7 +120,7 @@ fun LoginScreen(
                     onClick = { viewModel.testLogin() },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("테스트 로그인", fontSize = 14.sp, color = tossBlue)
+                    Text("테스트 로그인", fontSize = 14.sp, color = registrationButtonColor)
                 }
             }
 
