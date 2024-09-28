@@ -2,6 +2,7 @@ package com.example.mobipay.oauth2.controller;
 
 import com.example.mobipay.domain.mobiuser.entity.MobiUser;
 import com.example.mobipay.domain.mobiuser.repository.MobiUserRepository;
+import com.example.mobipay.global.authentication.service.SignUpServiceImpl;
 import com.example.mobipay.oauth2.dto.KakaoTokenResponseDto;
 import com.example.mobipay.oauth2.dto.KakaoUserInfoResponseDto;
 import com.example.mobipay.oauth2.dto.UserRequestDto;
@@ -28,6 +29,7 @@ public class KakaoLoginController {
     private final UserService userService;
     private final KakaoTokenService kakaoTokenService;
     private final MobiUserRepository mobiUserRepository;
+    private final SignUpServiceImpl signUpServiceImpl;
     private final RefreshTokenService refreshTokenService;
 
 
@@ -41,39 +43,25 @@ public class KakaoLoginController {
             //카카오 사용자 정보 api
             KakaoUserInfoResponseDto kakaoUserInfoResponseDto = kakaoService.getUserInfo(accessToken);
             String email = kakaoUserInfoResponseDto.getKakaoAccount().getEmail();
-//            String name = kakaoUserInfoResponseDto.getKakaoAccount().getName();
             String name = "noname";
-//            String phoneNumber = kakaoUserInfoResponseDto.getKakaoAccount().getPhoneNumber();
             String phoneNumber = "nophone";
             String picture = kakaoUserInfoResponseDto.getKakaoAccount().getProfile().getPicture();
-
-            // 사용자의 이메일로 사용자 조회 또는 회원가입 처리
-//            MobiUser mobiUser = userService.findOrCreateUser(email, name, phoneNumber, picture);
-//            System.out.println("이거정답" + mobiUser.getEmail());
-//            System.out.println("이거정답" + mobiUser.getName());
-//            System.out.println("이거정답" + mobiUser.getPhoneNumber());
-//            System.out.println("이거정답" + mobiUser.getPicture());
 
             Boolean existEmail = userService.checkEmailInMobipay(email);
 
             if (!existEmail) {
-                // ssafy api 추가
                 return userService.sendUserDetailRequest(email, picture);
             } else {
                 // existEmail이 true면 이미 가입된 유저이므로
                 MobiUser mobiUser = mobiUserRepository.findByEmail(email)
                         .orElseThrow(() -> new IllegalArgumentException("User not found with email: " + email));
-                System.out.println("이거정답" + mobiUser.getEmail());
-                System.out.println("이거정답" + mobiUser.getName());
-                System.out.println("이거정답" + mobiUser.getPhoneNumber());
-                System.out.println("이거정답" + mobiUser.getPicture());
 
                 kakaoTokenService.saveOrUpdateKakaoToken(accessToken, refreshToken, mobiUser);
 
                 String jwtaccessToken = userService.generateJwtAccessToken(mobiUser);
                 Cookie jwtrefreshToken = userService.generateJwtRefreshToken(mobiUser);
-                System.out.println("accessToken : " + accessToken);
-                System.out.println("refreshToken : " + refreshToken);
+
+                //
 
                 HttpHeaders headers = new HttpHeaders();
                 headers.add("Authorization", "Bearer " + jwtaccessToken);  // 헤더에 JWT 토큰 추가
@@ -94,20 +82,25 @@ public class KakaoLoginController {
         String name = userRequestDto.getName();
         String phoneNumber = userRequestDto.getPhoneNumber();
         String picture = userRequestDto.getPicture();
+        String accessToken = userRequestDto.getAccessToken();
+        String refreshToken = userRequestDto.getRefreshToken();
+        // 여기서 토큰은 유저의 카카오 Token, DB에 저장하기 위해 다시 값을 받음
 
-        MobiUser mobiUser = MobiUser.builder()
-                .email(email)
-                .name(name)
-                .phoneNumber(phoneNumber)
-                .picture(picture)
-                .build();
+        // ssafy api 조회
+        signUpServiceImpl.signUp(email, name, phoneNumber, picture);
 
-        userService.createUser(email, name, phoneNumber, picture);
+        MobiUser mobiUser = userService.createUser(email, name, phoneNumber, picture);
+
+        kakaoTokenService.saveOrUpdateKakaoToken(accessToken, refreshToken, mobiUser);
 
         String jwtaccessToken = userService.generateJwtAccessToken(mobiUser);
         Cookie jwtrefreshToken = userService.generateJwtRefreshToken(mobiUser);
 
         System.out.println("로그인 컨트롤러 jwt ref 토큰" + jwtrefreshToken);
+
+        // mobi db에 user 저장
+        // ssafy db에 user 저장
+
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", "Bearer " + jwtaccessToken);  // 헤더에 JWT 토큰 추가
 

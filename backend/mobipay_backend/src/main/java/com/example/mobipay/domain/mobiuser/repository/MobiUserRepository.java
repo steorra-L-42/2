@@ -11,6 +11,4 @@ public interface MobiUserRepository extends JpaRepository<MobiUser, Long> {
     Boolean existsByEmail(String email);
 
     Optional<MobiUser> findByEmail(String email);
-
-    boolean existsByEmail(String email);
 }

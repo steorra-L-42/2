@@ -1,10 +1,13 @@
 package com.example.mobipay.config;
 
 import com.example.mobipay.domain.mobiuser.repository.MobiUserRepository;
+import com.example.mobipay.oauth2.handler.CustomSuccessHandler;
 import com.example.mobipay.oauth2.jwt.CustomLogoutFilter;
 import com.example.mobipay.oauth2.jwt.JWTFilter;
 import com.example.mobipay.oauth2.jwt.JWTUtil;
 import com.example.mobipay.oauth2.repository.RefreshTokenRepository;
+import com.example.mobipay.oauth2.service.CustomOauth2UserService;
+import com.example.mobipay.oauth2.service.UserService;
 import com.example.mobipay.oauth2.util.CookieMethods;
 import java.util.Arrays;
 import java.util.Collections;
@@ -28,24 +31,15 @@ import org.springframework.web.cors.CorsConfiguration;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-            @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-
-        http
-                .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests((requests) -> requests.anyRequest().permitAll())
-                .sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-        
-        return http.build();
-    }
 
     private final AuthenticationConfiguration authenticationConfiguration;
-    //    private final CustomOauth2UserService customOauth2UserService;
-//    private final CustomSuccessHandler customSuccessHandler;
+    private final CustomOauth2UserService customOauth2UserService;
+    private final CustomSuccessHandler customSuccessHandler;
     private final JWTUtil jwtUtil;
     private final RefreshTokenRepository refreshTokenRepository;
     private final CookieMethods cookieMethods;
     private final MobiUserRepository mobiUserRepository;
+    private final UserService userService;
 
     String[] whitelist_post = {
             "/api/v1/users/reissue",

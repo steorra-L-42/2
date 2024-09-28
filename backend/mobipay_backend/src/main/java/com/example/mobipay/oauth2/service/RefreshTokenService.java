@@ -22,7 +22,6 @@ public class RefreshTokenService {
     public void addRefreshToken(MobiUser mobiUser, String value) {
         RefreshToken refreshToken = getRefreshToken(value);
 
-        System.out.println("getRefreshTOken" + mobiUser.getRefreshToken());
         if (mobiUser.getRefreshToken() != null) {
             revokeExistingRefreshToken(mobiUser);
         }

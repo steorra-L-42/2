@@ -5,6 +5,8 @@ public class UserRequestDto {
     private String name;
     private String phoneNumber;
     private String picture;
+    private String accessToken;
+    private String refreshToken;
 
     // Getters and Setters
     public String getEmail() {
@@ -37,5 +39,21 @@ public class UserRequestDto {
 
     public void setPicture(String picture) {
         this.picture = picture;
+    }
+
+    public String getAccessToken() {
+        return accessToken;
+    }
+
+    public void setAccessToken(String accessToken) {
+        this.accessToken = accessToken;
+    }
+
+    public String getRefreshToken() {
+        return refreshToken;
+    }
+
+    public void setRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
     }
 }

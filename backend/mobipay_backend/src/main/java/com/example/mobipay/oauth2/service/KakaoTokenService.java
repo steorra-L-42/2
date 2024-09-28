@@ -24,6 +24,7 @@ public class KakaoTokenService {
             kakaoToken.setRefreshValue(refreshToken);
         } else {
             kakaoToken = new KakaoToken(accessToken, refreshToken, mobiUser);
+            mobiUser.addKakaoToken(kakaoToken);
             kakaoTokenRepository.save(kakaoToken);
 
         }

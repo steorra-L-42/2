@@ -90,8 +90,7 @@ public class MobiUser extends AuditableCreatedEntity {
     private List<Account> accounts;
 
     @Builder
-    private MobiUser(Long userId, String email, String name, String phoneNumber, String picture) {
-        this.id = userId;
+    private MobiUser(String email, String name, String phoneNumber, String picture) {
         this.email = email;
         this.name = name;
         this.phoneNumber = phoneNumber;
@@ -107,8 +106,16 @@ public class MobiUser extends AuditableCreatedEntity {
         this.refreshToken = refreshToken;
     }
 
+    public void addKakaoToken(KakaoToken kakaoToken) {
+        this.kakaoToken = kakaoToken;
+    }
+
     public void deleteRefreshToken() {
         this.refreshToken = null;
+    }
+
+    public static MobiUser of(String email, String name, String phoneNumber, String picture) {
+        return new MobiUser(email, name, phoneNumber, picture);
     }
 
     public void setSsafyUser(SsafyUser ssafyUser) {
