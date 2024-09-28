@@ -13,7 +13,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 
 @Composable
 fun MemberInvitationConfirmationScreen(
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    vehicleId : Int,
 ) {
     var isChecked by remember { mutableStateOf(false) }
 
@@ -23,10 +24,9 @@ fun MemberInvitationConfirmationScreen(
             .padding(16.dp)
     ) {
         Text(
-            text = "초대확인용 테스트페이지",
+            text = "$vehicleId 번째 자동차의 초대확인용 테스트페이지",
             style = MaterialTheme.typography.headlineMedium
         )
-
         Spacer(modifier = Modifier.height(16.dp))
 
         // 차량 이미지와 차량 번호(vehicleId를 기준으로 api 통신)

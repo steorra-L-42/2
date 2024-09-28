@@ -12,15 +12,11 @@ import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Entity
 @Getter
-//@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "kakao_token")
-
-@Setter
-@NoArgsConstructor(access = AccessLevel.PUBLIC)
 public class KakaoToken {
 
     @Id

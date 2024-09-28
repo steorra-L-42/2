@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import com.kimnlee.vehiclemanagement.R // 이미지 리소스를 사용하기 위해 R을 가져옵니다.
+import kotlinx.coroutines.flow.asStateFlow
 
 data class Vehicle(val id: Int, val name: String, val imageResId: Int)
 
