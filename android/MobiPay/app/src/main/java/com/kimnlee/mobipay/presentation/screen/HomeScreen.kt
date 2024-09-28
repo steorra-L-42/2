@@ -3,7 +3,6 @@ package com.kimnlee.mobipay.presentation.screen
 import android.content.Context
 import android.content.SharedPreferences
 import android.view.Gravity
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,9 +22,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavController
@@ -45,7 +42,6 @@ fun HomeScreen(
 ) {
     val isLoggedIn by viewModel.isLoggedIn.collectAsState()
     var lastLocation by remember { mutableStateOf<Pair<Double, Double>?>(null) }
-//    var lastLocationText by remember { mutableStateOf("마지막 위치: 불러오는 중...") }
 
 
     LaunchedEffect(isLoggedIn) {
@@ -60,11 +56,6 @@ fun HomeScreen(
 
     LaunchedEffect(Unit) {
         lastLocation = getLastLocation(context)
-//        lastLocationText = if (lastLocation != null) {
-//            "주차 위치: 위도 ${lastLocation.first}, 경도 ${lastLocation.second}"
-//        } else {
-//            "주차 위치: 위치 정보가 없습니다"
-//        }
     }
 
     Column(
@@ -97,21 +88,11 @@ fun HomeScreen(
             Text("멤버 초대")
         }
         Spacer(modifier = Modifier.height(16.dp))
-        // Display the last known location
-//        Text(text = lastLocationText)
 
-        if (lastLocation != null) {
-            NaverMapView(lastLocation!!)
-        } else {
-            Text(text = "위치 정보를 불러오는 중...")
-        }
+        NaverMapView(lastLocation)
 
         Button(
             onClick = {
-                // Create an Intent to launch PaymentSucceed activity
-//                val intent = Intent(context, PaymentSucceed::class.java)
-//                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK // Add this line
-//                ContextCompat.startActivity(context, intent, null)
                 navController.navigate("paymentsucceed")
             }
         ) {
@@ -124,11 +105,14 @@ fun HomeScreen(
 }
 
 @Composable
-fun NaverMapView(lastLocation: Pair<Double, Double>) {
+fun NaverMapView(lastLocation: Pair<Double, Double>?) {
+
     val context = LocalContext.current
     var mapView = remember { MapView(context) }
 
-    val lastLocationLatLng = LatLng(lastLocation.first, lastLocation.second)
+    // 주차 정보가 없으면 기본 위치 표시
+    val lastLocationLatLng = lastLocation?.let { LatLng(it.first, it.second) } ?: LatLng(36.107143, 128.416248)
+
 
     AndroidView(
         factory = { mapView },
@@ -138,18 +122,18 @@ fun NaverMapView(lastLocation: Pair<Double, Double>) {
             .clip(RoundedCornerShape(20.dp)),
         update = { view ->
             view.getMapAsync { naverMap ->
-                // Move the camera to the last known location
+
                 val cameraUpdate = CameraUpdate.scrollTo(lastLocationLatLng)
                 naverMap.moveCamera(cameraUpdate)
 
-                // Optionally add more map customizations like markers
-                val marker = Marker()
-                marker.icon = OverlayImage.fromResource(R.drawable.park)
-//                marker.iconTintColor = Color.argb(255,0,0,255)
-                marker.position = lastLocationLatLng
-                marker.width = 130
-                marker.height = 130
-                marker.map = naverMap
+                if(lastLocation != null){
+                    val marker = Marker()
+                    marker.icon = OverlayImage.fromResource(R.drawable.park)
+                    marker.position = lastLocationLatLng
+                    marker.width = 130
+                    marker.height = 130
+                    marker.map = naverMap
+                }
 
                 naverMap.uiSettings.apply {
                     isZoomControlEnabled = false
