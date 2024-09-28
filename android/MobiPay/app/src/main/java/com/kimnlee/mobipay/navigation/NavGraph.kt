@@ -35,12 +35,15 @@ fun AppNavGraph(
     val biometricViewModel = BiometricViewModel(application)
     val loginViewModel = LoginViewModel(authManager)
     val isLoggedIn by loginViewModel.isLoggedIn.collectAsState()
+    val needsRegistration by loginViewModel.needsRegistration.collectAsState()
 
-    LaunchedEffect(isLoggedIn) {
-        if (isLoggedIn) {
-            navController.navigate("home") {
+    LaunchedEffect(isLoggedIn, needsRegistration) {
+        when {
+            isLoggedIn -> navController.navigate("home") {
                 popUpTo("auth") { inclusive = true }
             }
+            needsRegistration -> navController.navigate("registration")
+            else -> navController.navigate("auth")
         }
     }
 

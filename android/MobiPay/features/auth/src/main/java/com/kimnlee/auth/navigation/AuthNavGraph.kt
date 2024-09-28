@@ -7,6 +7,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.kimnlee.auth.presentation.screen.LoginScreen
+import com.kimnlee.auth.presentation.screen.RegistrationScreen
 import com.kimnlee.common.auth.AuthManager
 import com.kimnlee.auth.presentation.screen.SignUpScreen
 import com.kimnlee.auth.presentation.viewmodel.LoginViewModel
@@ -41,6 +42,17 @@ fun NavGraphBuilder.authNavGraph(
                 authManager = authManager,
                 viewModel = LoginViewModel(authManager),
                 onNavigateToBack = { navController.navigateUp() }
+            )
+        }
+        composable(
+            "registration",
+            enterTransition = { EnterTransition.None },
+            exitTransition = { ExitTransition.None }
+        ) {
+            RegistrationScreen(
+                viewModel = LoginViewModel(authManager),
+                onRegistrationSuccess = { navController.navigate("home") },
+                onRegistrationFailed = { navController.navigateUp() }
             )
         }
     }
