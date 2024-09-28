@@ -9,7 +9,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 public class SecurityTestUtil {
 
-    public static void setUpSecurityContext(CustomOAuth2User customOAuth2User) {
+    private static void setUpSecurityContext(CustomOAuth2User customOAuth2User) {
 
         Authentication authentication = new UsernamePasswordAuthenticationToken(
                 customOAuth2User, null, customOAuth2User.getAuthorities());
