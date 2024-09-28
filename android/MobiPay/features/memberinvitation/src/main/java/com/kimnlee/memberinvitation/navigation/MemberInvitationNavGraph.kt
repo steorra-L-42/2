@@ -24,12 +24,12 @@ fun NavGraphBuilder.memberInvitationNavGraph(navController: NavHostController) {
                 MemberInvitationScreen(
                     vehicleId = vehicleId,
                     onNavigateBack = { navController.navigateUp() },
-                    onNavigateToInvitePhone = { navController.navigate("member_phone/$vehicleId") },
+                    onNavigateToInvitePhone = { navController.navigate("memberinvitation_phone/$vehicleId") },
                     onNavigateToConfirmation = { navController.navigate("member_confirmation/$vehicleId") }
                 )
             }
         }
-        composable("member_phone/{vehicleId}",
+        composable("memberinvitation_phone/{vehicleId}",
             enterTransition = { EnterTransition.None },
             exitTransition = { ExitTransition.None }
         ) { backStackEntry ->

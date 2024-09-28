@@ -33,7 +33,7 @@ fun VehicleManagementDetailScreen(
     val memberViewModel : MemberInvitationViewModel = viewModel()
     val showBottomSheet by memberViewModel.showBottomSheet.collectAsState()
     val scope = rememberCoroutineScope()
-    val sheetState = rememberModalBottomSheetState()
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     Box(
         modifier = Modifier.fillMaxSize().padding(16.dp)
     ) {

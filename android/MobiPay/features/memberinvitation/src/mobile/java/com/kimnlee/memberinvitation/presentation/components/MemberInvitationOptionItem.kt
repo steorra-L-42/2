@@ -29,14 +29,14 @@ fun MemberInvitationOptionItem(icon: ImageVector, title: String, description: St
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp)
-            .background(Color(0xFF444444), shape = RoundedCornerShape(10.dp))
+            .background(Color.White, shape = RoundedCornerShape(10.dp))
             .padding(16.dp).clickable { onItemClick() },
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
             imageVector = icon,
             contentDescription = null,
-            tint = Color.White,
+            tint = Color.Blue,
             modifier = Modifier.size(36.dp),
         )
         Spacer(modifier = Modifier.width(16.dp))
@@ -44,12 +44,12 @@ fun MemberInvitationOptionItem(icon: ImageVector, title: String, description: St
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleLarge,
-                color = Color.White
+                color = Color(0xFF505967)
             )
             Text(
                 text = description,
                 style = MaterialTheme.typography.bodyMedium,
-                color = Color.Gray
+                color = Color(0xFF505967)
             )
         }
     }

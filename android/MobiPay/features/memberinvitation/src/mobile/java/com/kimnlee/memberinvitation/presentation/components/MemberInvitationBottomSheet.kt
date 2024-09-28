@@ -1,7 +1,10 @@
 package com.kimnlee.memberinvitation.presentation.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -16,11 +19,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.kimnlee.memberinvitation.presentation.screen.MemberInvitationConfirmationScreen
 import com.kimnlee.memberinvitation.presentation.viewmodel.MemberInvitationViewModel
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -40,9 +45,13 @@ fun MemberInvitationBottomSheet(
             viewModel.closeInvitationBLE()
         },
         sheetState = sheetState,
+        containerColor = Color(0xFFF2F4F6),
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            if (!showInvitationBLE) {
+        val onExpandClick = {
+            scope.launch { sheetState.expand() }
+        }
+        if (!showInvitationBLE) {
+            Column(modifier = Modifier.padding(16.dp)) {
                 Text(text = "$vehicleId 차량의 초대 화면")
                 MemberInvitationOptionItem(
                     icon = Icons.Default.Phone,
@@ -58,9 +67,12 @@ fun MemberInvitationBottomSheet(
                     icon = Icons.Default.Face,
                     title = "주변 기기로 초대하기",
                     description = "다른 회원과 폰은 겹쳐주세요.",
-                    onItemClick = { viewModel.openInvitationBLE() }
+                    onItemClick = { viewModel.openInvitationBLE()
+                        onExpandClick()}
                 )
-            } else {
+            }
+        } else {
+            Column(modifier = Modifier.padding(16.dp).fillMaxHeight()) {
                 MemberInvitationViaBLE(
                     viewModel = viewModel,
                     onNavigateToConfirmation = onNavigateToConfirmation
