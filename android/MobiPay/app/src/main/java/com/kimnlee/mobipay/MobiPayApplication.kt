@@ -29,11 +29,8 @@ class MobiPayApplication : Application() {
         // ApiClient 초기화
         apiClient = ApiClient.getInstance()
 
-        // UnAuthService 생성
-        val unAuthService = apiClient.unAuthenticatedApi.create(UnAuthService::class.java)
-
         // AuthManager 초기화
-        authManager = AuthManager(this, unAuthService)
+        authManager = AuthManager(this)
         apiClient = ApiClient.getInstance(authManager)
 
         // 카카오 SDK 초기화
