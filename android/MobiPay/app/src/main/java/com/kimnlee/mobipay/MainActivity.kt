@@ -24,6 +24,9 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Splash 스크린 가동 이후 Theme을 원래대로 되돌리는 코드
+        setTheme(R.style.Theme_MobiPay)
+
         val authManager = (application as MobiPayApplication).authManager
 
         biometricViewModel = ViewModelProvider(this).get(BiometricViewModel::class.java)
