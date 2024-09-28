@@ -2,8 +2,7 @@
 <resources>
     <style name="Theme.MobiPay" parent="android:Theme.Material.Light.NoActionBar"/>
     <style name="Theme.MobiPay.Splash" parent="Theme.SplashScreen">
-        <item name="windowSplashScreenBackground">#FFFFFF</item>
+        <item name="windowSplashScreenBackground">@color/mobi_blue</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/mobi_splash</item>
-        <item name="windowSplashScreenIconBackgroundColor">@android:color/transparent</item>
     </style>
 </resources>
