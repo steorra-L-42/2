@@ -41,4 +41,19 @@ public class Invitation extends AuditableEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "mobi_user_id")
     private MobiUser mobiUser;
+
+    public static Invitation of(Car car, MobiUser invitedMobiUser) {
+        Invitation invitation = new Invitation();
+        invitation.car = car;
+        invitation.mobiUser = invitedMobiUser;
+        return invitation;
+    }
+
+    public void approve() {
+        this.approved = ApproveStatus.APPROVED;
+    }
+
+    public void reject() {
+        this.approved = ApproveStatus.REJECTED;
+    }
 }
