@@ -8,8 +8,11 @@ import com.kakao.sdk.auth.model.OAuthToken
 import com.kimnlee.common.auth.AuthManager
 import com.kimnlee.common.auth.model.LoginRequest
 import com.kimnlee.common.auth.model.RegistrationRequest
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 
@@ -26,16 +29,22 @@ class LoginViewModel(private val authManager: AuthManager) : ViewModel() {
     private val _registrationResult = MutableStateFlow<Boolean?>(null)
     val registrationResult: StateFlow<Boolean?> = _registrationResult
 
+    private val _navigationEvent = MutableSharedFlow<String>()
+    val navigationEvent = _navigationEvent.asSharedFlow()
+
     var email: String = ""
     var picture: String = ""
 
     init {
         viewModelScope.launch {
-            authManager.isLoggedIn.collect {
-                _isLoggedIn.value = it
-                if (it) {
-                    _authToken.value = authManager.getAuthToken()
+            combine(isLoggedIn, needsRegistration) { isLoggedIn, needsRegistration ->
+                when {
+                    isLoggedIn -> "home"
+                    needsRegistration -> "registration"
+                    else -> "auth"
                 }
+            }.collect { route ->
+                _navigationEvent.emit(route)
             }
         }
     }
@@ -79,11 +88,16 @@ class LoginViewModel(private val authManager: AuthManager) : ViewModel() {
                 _needsRegistration.value = true
                 email = "" // 백엔드에서 받아온 이메일
                 picture = "" // 백엔드에서 받아온 프로필 사진 URL
+            } else if (e.code() == 500) {
+                // 임시 테스트
+                _needsRegistration.value = true
+                email = "test@email.com" // 백엔드에서 받아온 이메일
+                picture = "test_image" // 백엔드에서 받아온 프로필 사진 URL
+                Log.d("KakaoLogin", "500에러 sendLoginRequest에서 받음")
+                Log.d("KakaoLogin", "needsRegistration 값: ${needsRegistration.value}")
             } else {
                 Log.e("LoginViewModel", "Login failed", e)
             }
-        } catch (e: Exception) {
-            Log.e("LoginViewModel", "Login failed", e)
         }
     }
 
@@ -110,9 +124,25 @@ class LoginViewModel(private val authManager: AuthManager) : ViewModel() {
                     Log.e("LoginViewModel", "Registration failed: ${response.message}")
                     _registrationResult.value = false
                 }
-            } catch (e: Exception) {
-                Log.e("LoginViewModel", "Registration failed", e)
-                _registrationResult.value = false
+            } catch (e: HttpException) {
+                if (e.code() == 500) {
+                    Log.e("LoginViewModel", "Registration failed", e)
+                    _registrationResult.value = true
+                    // 임시로 로그인 된척 하기(테스트)
+                    _needsRegistration.value = false
+                    authManager.setLoggedIn(true)
+                    _isLoggedIn.value = true
+                    val testToken = "test_auth_token_${System.currentTimeMillis()}"
+                    authManager.saveAuthToken(testToken)
+                    _authToken.value = testToken
+                    Log.i("TestLogin", "Test login successful. Auth Token: $testToken")
+                }
+            }
+
+            // 네비게이션 이벤트는 모든 처리가 끝난 후 한 번만 발생시킴
+            if (_isLoggedIn.value) {
+                _navigationEvent.emit("home")
+                Log.d("LoginViewModel", "Emitted navigation event to home")
             }
         }
     }
@@ -148,7 +178,21 @@ class LoginViewModel(private val authManager: AuthManager) : ViewModel() {
             _isLoggedIn.value = false
             authManager.clearTokens()
             _authToken.value = null
+            _registrationResult.value = null
             Log.i("TestLogout", "Test logout successful. Auth Token cleared.")
+            _navigationEvent.emit("auth")
+        }
+    }
+
+    // 로그인 중에 뒤로가기 버튼을 누르면 초기화면으로 돌아오면서 상태들 초기화
+    fun resetStatus() {
+        viewModelScope.launch {
+            authManager.setLoggedIn(false)
+            _isLoggedIn.value = false
+            authManager.clearTokens()
+            _authToken.value = null
+            _registrationResult.value = null
+            _needsRegistration.value = false
         }
     }
 }

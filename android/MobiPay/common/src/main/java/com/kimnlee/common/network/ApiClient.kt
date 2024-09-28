@@ -35,14 +35,15 @@ class ApiClient private constructor(private val authManager: AuthManager?) {
 
     // AuthToken을 사용하는 Api (백엔드 통신할 때 사용)
     val authenticatedApi: Retrofit = Retrofit.Builder()
-        .baseUrl("http://localhost:8080") // 나중에 local.properties나 gradle.properties로 이동 예정
+        .baseUrl("http://localhost:8080/") // 나중에 local.properties나 gradle.properties로 이동 예정
         .client(authenticatedOkHttpClient)
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
     // AuthToken을 사용하지 않는 Api (로그인 때 사용)
     val unAuthenticatedApi: Retrofit = Retrofit.Builder()
-            .baseUrl("http://localhost:8080")
+//            .baseUrl("http://localhost:8080/")
+            .baseUrl("https://mobipay.kr/")
             .client(unauthenticatedOkHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
