@@ -19,6 +19,8 @@ import com.example.mobipay.oauth2.dto.CustomOAuth2User;
 import com.example.mobipay.util.SecurityTestUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -88,6 +90,13 @@ public class CarAutoPayChangeTest {
     void entitySetUp() {
         testUser = MobiUser.of("email", "name", "phoneNumber", "picture");
         mobiUserRepository.save(testUser);
+    }
+
+    @AfterEach
+    void tearDown() {
+        carGroupRepository.deleteAll();
+        carRepository.deleteAll();
+        mobiUserRepository.deleteAll();
     }
 
     @ParameterizedTest(name = "{index}: {0}")

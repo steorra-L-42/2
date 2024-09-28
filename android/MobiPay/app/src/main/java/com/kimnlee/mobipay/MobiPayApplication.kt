@@ -7,6 +7,7 @@ import android.media.AudioAttributes
 import android.media.RingtoneManager
 import android.util.Log
 import com.google.firebase.FirebaseApp
+import com.kimnlee.common.BuildConfig
 import com.kimnlee.common.auth.AuthManager
 import com.kimnlee.firebase.FCMService
 import com.kimnlee.common.auth.KakaoSdkInitializer
@@ -14,6 +15,7 @@ import com.kimnlee.common.auth.api.UnAuthService
 import com.kimnlee.common.network.ApiClient
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
+import com.naver.maps.map.NaverMapSdk
 
 private const val TAG = "MobiPayApplication"
 class MobiPayApplication : Application() {
@@ -46,6 +48,11 @@ class MobiPayApplication : Application() {
             Log.d(TAG, "이 기기의 FCM 토큰: $token")
         }
 
+//        val naverMapClientSecret = BuildConfig.NAVER_MAP_CLIENT_SECRET
+//        Log.d(TAG, "onCreate: 네이버 Client Secret ${naverMapClientSecret}")
+//        NaverMapSdk.getInstance(this).client = NaverMapSdk.NaverCloudPlatformClient(naverMapClientSecret)
+        NaverMapSdk.getInstance(this).client = NaverMapSdk.NaverCloudPlatformClient("81dn8nvzim")
+
         createNotificationChannel()
         // Setup MapboxNavigation
         MapboxNavigationApp.setup(
@@ -54,6 +61,7 @@ class MobiPayApplication : Application() {
                 .accessToken(getString(com.kimnlee.common.R.string.mapbox_access_token))
                 .build()
         ).attachAllActivities(this)
+
     }
 
     private fun createNotificationChannel() {
