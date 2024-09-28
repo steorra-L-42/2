@@ -9,7 +9,7 @@ import androidx.navigation.NavController
 import com.kimnlee.common.auth.AuthManager
 
 @Composable
-fun SettingScreen(
+fun ShowMoreScreen(
     authManager: AuthManager,
     navController: NavController
 ) {
@@ -19,7 +19,7 @@ fun SettingScreen(
             .padding(16.dp)
     ) {
         Text(
-            text = "설정",
+            text = "더 보기",
             style = MaterialTheme.typography.headlineMedium
         )
         Spacer(modifier = Modifier.padding(16.dp))
@@ -32,9 +32,9 @@ fun SettingScreen(
             )
         }
         Spacer(modifier = Modifier.padding(16.dp))
-            Button(onClick = { /*TODO*/ }) {
+            Button(onClick = { navController.navigate("paymenthistory")}) {
                 Text(
-                    text = "설정 2",
+                    text = "결제 내역",
                     style = MaterialTheme.typography.bodyLarge
                 )
             }

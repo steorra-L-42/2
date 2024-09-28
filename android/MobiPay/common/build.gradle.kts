@@ -24,9 +24,11 @@ android {
         }
         val baseUrl = localProperties.getProperty("BASE_URL") ?: "http://54.250.106.89:8080"
         val kakaoApiKey = localProperties.getProperty("KAKAO_API_KEY")
+        val naverMapClientSecret = localProperties.getProperty("NAVER_MAP_CLIENT_SECRET") ?: "NO_TOKEN_NO_LOCAL_PROPERTIES"
 
         buildConfigField("String", "BASE_URL", "\"$baseUrl\"")
         buildConfigField("String", "KAKAO_API_KEY", "\"$kakaoApiKey\"")
+        buildConfigField("String", "NAVER_MAP_CLIENT_SECRET", "\"$naverMapClientSecret\"")
     }
 
     buildTypes {
@@ -101,13 +103,14 @@ dependencies {
     // EncryptSharedPreferences
     implementation(libs.androidx.security.crypto)
 
+    // Naver Maps
+    api(libs.map.sdk)
 
     implementation(libs.guava)
     testImplementation(libs.junit)
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.legacy.support.v4)
     implementation(libs.androidx.legacy.support.v13)
-    implementation(libs.core)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 }

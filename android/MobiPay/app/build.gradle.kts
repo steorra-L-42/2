@@ -14,8 +14,8 @@ android {
         applicationId = "com.kimnlee.mobipay"
         minSdk = 28
         maxSdk = 34
-        targetSdk = 33
-        versionCode = 1
+        targetSdk = 34
+        versionCode = 2
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -72,6 +72,7 @@ dependencies {
     implementation(project(":features:memberinvitation"))
     implementation(project(":features:freedrive"))
     implementation(project(":features:firebase"))
+    implementation(project(":features:notification"))
 
     implementation ("com.squareup.okhttp3:okhttp:4.9.3")
 
@@ -80,7 +81,7 @@ dependencies {
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.firebase.common.ktx)
     implementation(libs.play.services.location)
-    implementation(project(":features:notification"))
+    implementation(libs.androidx.core.splashscreen)
 
 
     testImplementation(libs.junit)

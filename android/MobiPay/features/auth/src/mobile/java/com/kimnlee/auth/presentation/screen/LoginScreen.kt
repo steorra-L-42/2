@@ -1,5 +1,6 @@
 package com.kimnlee.auth.presentation.screen
 
+import android.app.Activity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -13,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -31,6 +33,7 @@ fun LoginScreen(
     val configuration = LocalConfiguration.current
     val screenHeight = configuration.screenHeightDp.dp
     val screenWidth = configuration.screenWidthDp.dp
+    val context = LocalContext.current
 
     LaunchedEffect(isLoggedIn) {
         if (isLoggedIn) {
@@ -86,7 +89,7 @@ fun LoginScreen(
             }
 
             Surface(
-                onClick = { viewModel.login() },
+                onClick = { viewModel.login(context as Activity) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(min(screenHeight * 0.08f, 56.dp))

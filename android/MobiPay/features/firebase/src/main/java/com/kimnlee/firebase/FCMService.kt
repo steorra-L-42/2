@@ -233,7 +233,7 @@ class FCMService : FirebaseMessagingService() {
             }
 
             override fun onFailure(call: Call<Void>, t: Throwable) {
-                Log.d(TAG, "onFailure: FCM 수신 컨펌 서버 통신 오류 \n${t.stackTrace}")
+                Log.d(TAG, "onFailure: FCM 수신 컨펌 서버 통신 오류 \n${Log.getStackTraceString(t)}")
             }
         })
     }
@@ -257,7 +257,7 @@ class FCMService : FirebaseMessagingService() {
             }
 
             override fun onFailure(call: Call<Void>, t: Throwable) {
-                Log.d(TAG, "onFailure: FCM 토큰 서버 통신 오류 \n${t.stackTrace}")
+                Log.d(TAG, "onFailure: FCM 토큰 서버 통신 오류 \n${Log.getStackTraceString(t)}")
             }
         })
     }

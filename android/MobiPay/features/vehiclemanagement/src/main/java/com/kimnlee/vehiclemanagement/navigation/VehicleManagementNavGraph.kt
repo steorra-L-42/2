@@ -31,7 +31,10 @@ fun NavGraphBuilder.vehicleManagementNavGraph(navController: NavHostController) 
                 )
             }
         }
-        composable("vehiclemanagement_detail/{vehicleId}") { backStackEntry ->
+        composable("vehiclemanagement_detail/{vehicleId}",
+            enterTransition = { EnterTransition.None },
+            exitTransition = { ExitTransition.None }
+        ) { backStackEntry ->
             val vehicleId = backStackEntry.arguments?.getString("vehicleId")?.toIntOrNull() ?: -1
             BottomNavigation(navController) {
                 VehicleManagementDetailScreen(
@@ -42,7 +45,10 @@ fun NavGraphBuilder.vehicleManagementNavGraph(navController: NavHostController) 
                 )
             }
         }
-        composable("vehiclemanagement_registration") {
+        composable("vehiclemanagement_registration",
+            enterTransition = { EnterTransition.None },
+            exitTransition = { ExitTransition.None }
+        ) {
             BottomNavigation(navController) {
                 VehicleRegistrationScreen(
                     onNavigateBack = { navController.navigateUp() }

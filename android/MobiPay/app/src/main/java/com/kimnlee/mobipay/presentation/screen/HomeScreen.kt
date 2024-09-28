@@ -1,13 +1,15 @@
 package com.kimnlee.mobipay.presentation.screen
 
 import android.content.Context
-import android.content.Intent
 import android.content.SharedPreferences
+import android.view.Gravity
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -19,10 +21,18 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavController
 import com.kimnlee.auth.presentation.viewmodel.LoginViewModel
+import com.kimnlee.common.R
+import com.naver.maps.geometry.LatLng
+import com.naver.maps.map.CameraUpdate
+import com.naver.maps.map.MapView
+import com.naver.maps.map.overlay.Marker
+import com.naver.maps.map.overlay.OverlayImage
 
 @Composable
 fun HomeScreen(
@@ -31,7 +41,7 @@ fun HomeScreen(
     context: Context
 ) {
     val isLoggedIn by viewModel.isLoggedIn.collectAsState()
-    var lastLocationText by remember { mutableStateOf("마지막 위치: 불러오는 중...") }
+    var lastLocation by remember { mutableStateOf<Pair<Double, Double>?>(null) }
 
 
     LaunchedEffect(isLoggedIn) {
@@ -45,12 +55,7 @@ fun HomeScreen(
     }
 
     LaunchedEffect(Unit) {
-        val lastLocation = getLastLocation(context)
-        lastLocationText = if (lastLocation != null) {
-            "주차 위치: 위도 ${lastLocation.first}, 경도 ${lastLocation.second}"
-        } else {
-            "주차 위치: 위치 정보가 없습니다"
-        }
+        lastLocation = getLastLocation(context)
     }
 
     Column(
@@ -59,7 +64,7 @@ fun HomeScreen(
             .padding(16.dp)
     ) {
         Text(
-            text = "Welcome to MobiPay (모바일 화면)",
+            text = "82가 8282",
             style = MaterialTheme.typography.headlineMedium
         )
         Spacer(modifier = Modifier.height(16.dp))
@@ -83,21 +88,63 @@ fun HomeScreen(
             Text("멤버 초대")
         }
         Spacer(modifier = Modifier.height(16.dp))
-        // Display the last known location
-        Text(text = lastLocationText)
+
+        NaverMapView(lastLocation)
 
         Button(
             onClick = {
-                // Create an Intent to launch PaymentSucceed activity
-//                val intent = Intent(context, PaymentSucceed::class.java)
-//                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK // Add this line
-//                ContextCompat.startActivity(context, intent, null)
-                navController.navigate("payment_success")
+                navController.navigate("paymentsucceed")
             }
         ) {
             Text("Payment Succeed")
         }
+
+
+
     }
+}
+
+@Composable
+fun NaverMapView(lastLocation: Pair<Double, Double>?) {
+
+    val context = LocalContext.current
+    var mapView = remember { MapView(context) }
+
+    // 주차 정보가 없으면 기본 위치 표시
+    val lastLocationLatLng = lastLocation?.let { LatLng(it.first, it.second) } ?: LatLng(36.107143, 128.416248)
+
+
+    AndroidView(
+        factory = { mapView },
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(200.dp)
+            .clip(RoundedCornerShape(20.dp)),
+        update = { view ->
+            view.getMapAsync { naverMap ->
+
+                val cameraUpdate = CameraUpdate.scrollTo(lastLocationLatLng)
+                naverMap.moveCamera(cameraUpdate)
+
+                if(lastLocation != null){
+                    val marker = Marker()
+                    marker.icon = OverlayImage.fromResource(R.drawable.park)
+                    marker.position = lastLocationLatLng
+                    marker.width = 130
+                    marker.height = 130
+                    marker.map = naverMap
+                }
+
+                naverMap.uiSettings.apply {
+                    isZoomControlEnabled = false
+                    logoGravity = Gravity.END or Gravity.BOTTOM
+                    setLogoMargin(0,0,30,30)
+                    isScaleBarEnabled = false
+                }
+
+            }
+        }
+    )
 }
 
 
