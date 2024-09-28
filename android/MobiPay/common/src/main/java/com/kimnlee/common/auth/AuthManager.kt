@@ -1,5 +1,6 @@
 package com.kimnlee.common.auth
 
+import android.app.Activity
 import android.content.Context
 import android.util.Log
 import androidx.datastore.core.DataStore
@@ -13,6 +14,7 @@ import com.kakao.sdk.auth.model.OAuthToken
 import com.kakao.sdk.user.UserApiClient
 import com.kimnlee.common.auth.api.UnAuthService
 import com.kimnlee.common.auth.model.LoginRequest
+import com.kimnlee.common.network.ApiClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -32,12 +34,12 @@ import kotlin.coroutines.suspendCoroutine
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "auth")
 
-class AuthManager(private val context: Context, private val unAuthService: UnAuthService) {
+class AuthManager(private val context: Context) {
     private val IS_LOGGED_IN = booleanPreferencesKey("is_logged_in")
+    private val unAuthService: UnAuthService = ApiClient.getInstance().unAuthenticatedApi.create(UnAuthService::class.java)
     private val authService: AuthService = createAuthService() // 삭제 예정
-
-    // 카카오 로그인 로직 -------------------------------------------------------------
     private val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
+
     private val encryptedSharedPreferences = EncryptedSharedPreferences.create(
         "secret_shared_prefs",
         masterKeyAlias,
@@ -69,27 +71,6 @@ class AuthManager(private val context: Context, private val unAuthService: UnAut
         encryptedSharedPreferences.edit().remove(KEY_AUTH_TOKEN).apply()
     }
 
-//    suspend fun loginWithKakao(): Result<Unit> = suspendCancellableCoroutine { continuation ->
-//        val callback: (OAuthToken?, Throwable?) -> Unit = { token, error ->
-//            if (error != null) {
-//                continuation.resume(Result.failure(error))
-//            } else if (token != null) {
-//                // 여기서 백엔드 서버에 로그인 요청을 보내고 응답을 처리해야 함
-//                // 지금은 임시로 카카오 액세스 토큰 암호화해서 저장, 동작확인용 (나중에 모든 값 저장해서 진송이형한테 보내줘야 됨)
-//                // 백엔드 응답오면 응답에서 온 authToken, refreshToken 저장해야 함
-//                Log.i("AuthManager", "카카오 로그인 token 확인용 : ${token}")
-//                saveAuthToken(token.accessToken)
-//                continuation.resume(Result.success(Unit))
-//            }
-//        }
-//
-//        if (UserApiClient.instance.isKakaoTalkLoginAvailable(context)) {
-//            UserApiClient.instance.loginWithKakaoTalk(context, callback = callback)
-//        } else {
-//            UserApiClient.instance.loginWithKakaoAccount(context, callback = callback)
-//        }
-//    }
-
     suspend fun logout(): Result<Unit> = suspendCancellableCoroutine { continuation ->
         UserApiClient.instance.logout { error ->
             if (error != null) {
@@ -100,11 +81,8 @@ class AuthManager(private val context: Context, private val unAuthService: UnAut
             }
         }
     }
-    // 카카오 로그인 로직 끝 -------------------------------------------------------------
 
-    // 테스트 로직 시작 ------------------------------
-
-    suspend fun loginWithKakao(): Result<Unit> = withContext(Dispatchers.IO) {
+    suspend fun loginWithKakao(activity: Activity): Result<Unit> = withContext(Dispatchers.IO) {
         try {
             val token = suspendCoroutine<OAuthToken> { continuation ->
                 val callback: (OAuthToken?, Throwable?) -> Unit = { token, error ->
@@ -117,10 +95,10 @@ class AuthManager(private val context: Context, private val unAuthService: UnAut
                     }
                 }
 
-                if (UserApiClient.instance.isKakaoTalkLoginAvailable(context)) {
-                    UserApiClient.instance.loginWithKakaoTalk(context, callback = callback)
+                if (UserApiClient.instance.isKakaoTalkLoginAvailable(activity)) {
+                    UserApiClient.instance.loginWithKakaoTalk(activity, callback = callback)
                 } else {
-                    UserApiClient.instance.loginWithKakaoAccount(context, callback = callback)
+                    UserApiClient.instance.loginWithKakaoAccount(activity, callback = callback)
                 }
             }
             Log.d("KakaoLogin", "카카오 로그인 전송됨 : $token")
@@ -130,7 +108,6 @@ class AuthManager(private val context: Context, private val unAuthService: UnAut
             Result.failure(e)
         }
     }
-
 
     private suspend fun sendTokenToBackend(token: OAuthToken): Result<Unit> {
         return try {
@@ -165,8 +142,6 @@ class AuthManager(private val context: Context, private val unAuthService: UnAut
         private const val KEY_AUTH_TOKEN = "auth_token"
         private const val KEY_REFRESH_TOKEN = "refresh_token"
     }
-
-    // 테스트 로직 끝 ----------------------------
 
     suspend fun signUp(email: String, name: String, phoneNumber: String): Result<SignUpResponse> {
         return try {

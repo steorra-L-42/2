@@ -1,5 +1,6 @@
 package com.kimnlee.auth.presentation.viewmodel
 
+import android.app.Activity
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -26,9 +27,9 @@ class LoginViewModel(private val authManager: AuthManager) : ViewModel() {
         }
     }
 
-    fun login() {
+    fun login(activity: Activity) {
         viewModelScope.launch {
-            authManager.loginWithKakao().onSuccess {
+            authManager.loginWithKakao(activity).onSuccess {
                 authManager.setLoggedIn(true)
                 _isLoggedIn.value = true
                 _authToken.value = authManager.getAuthToken()
