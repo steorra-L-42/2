@@ -79,14 +79,35 @@ public class InvitationDecideTest {
     }
 
     @Test
-    @DisplayName("실패: 400 Bad Request : 음수인 invitationId")
-    void fail400_negative_invitationId() throws Exception {
+    @DisplayName("실패: 400 Bad Request : null인 invitationId")
+    void fail400_null_invitationId() throws Exception {
         // given
         MobiUser invitee = mobiUserRepository.save(MobiUser.of(
                 "invitee@gmail.com", "invitee", "010-2222-2222", "inviteePicture"));
 
         SecurityTestUtil.setUpMockUser(customOAuth2User, invitee.getId());
-        final String url = "/api/v1/invitations/" + -1L + "/response";
+        final String url = "/api/v1/invitations/null/response";
+        final String requestBody = objectMapper.writeValueAsString(new InvitationDecisionRequest(APPROVED));
+
+        // when
+        ResultActions result = mockMvc.perform(post(url).with(csrf())
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody));
+
+        // then
+        result.andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("실패: 400 Bad Request : 숫자가 아닌 invitationId")
+    void fail400_NotNumber_invitationId() throws Exception {
+        // given
+        MobiUser invitee = mobiUserRepository.save(MobiUser.of(
+                "invitee@gmail.com", "invitee", "010-2222-2222", "inviteePicture"));
+
+        SecurityTestUtil.setUpMockUser(customOAuth2User, invitee.getId());
+        final String url = "/api/v1/invitations/one/response";
         final String requestBody = objectMapper.writeValueAsString(new InvitationDecisionRequest(APPROVED));
 
         // when
@@ -296,7 +317,7 @@ public class InvitationDecideTest {
 
     @Test
     @DisplayName("실패: 404 Bad Request : 비어있는 invitationId")
-    void fail400_empty_invitationId() throws Exception {
+    void fail404_empty_invitationId() throws Exception {
         // given
         MobiUser invitee = mobiUserRepository.save(MobiUser.of(
                 "invitee@gmail.com", "invitee", "010-2222-2222", "inviteePicture"));
@@ -314,6 +335,28 @@ public class InvitationDecideTest {
         // then
         result.andExpect(status().isNotFound());
     }
+
+    @Test
+    @DisplayName("실패: 404 Not Found : 존재하지 않는 음수인 invitationId")
+    void fail404_negative_invitationId() throws Exception {
+        // given
+        MobiUser invitee = mobiUserRepository.save(MobiUser.of(
+                "invitee@gmail.com", "invitee", "010-2222-2222", "inviteePicture"));
+
+        SecurityTestUtil.setUpMockUser(customOAuth2User, invitee.getId());
+        final String url = "/api/v1/invitations/" + -1L + "/response";
+        final String requestBody = objectMapper.writeValueAsString(new InvitationDecisionRequest(APPROVED));
+
+        // when
+        ResultActions result = mockMvc.perform(post(url).with(csrf())
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody));
+
+        // then
+        result.andExpect(status().isNotFound());
+    }
+
 
     @Test
     @DisplayName("실패: 404 존재하지 않는 invitationId")
