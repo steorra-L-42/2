@@ -5,16 +5,16 @@ import com.kimnlee.payment.data.model.MerchantTransaction
 
 
 val dummyMerchants = listOf(
-        Merchant(1L,"CAT001", "Starbucks", 37.5665, 126.9780, "APIKEY001"),
-        Merchant(2L,"CAT002", "McDonald's", 37.5700, 126.9768, "APIKEY002"),
-        Merchant(3L,"CAT003", "Burger King", 37.5650, 126.9820, "APIKEY003"),
-        Merchant(4L,"CAT004", "KFC", 37.5711, 126.9774, "APIKEY004"),
-        Merchant(5L,"CAT005", "Subway", 37.5688, 126.9815, "APIKEY005"),
-        Merchant(6L,"CAT006", "Domino's Pizza", 37.5628, 126.9762, "APIKEY006"),
-        Merchant(7L,"CAT007", "Dunkin' Donuts", 37.5647, 126.9786, "APIKEY007"),
-        Merchant(8L,"CAT008", "Baskin Robbins", 37.5671, 126.9795, "APIKEY008"),
-        Merchant(9L,"CAT009", "7-Eleven", 37.5638, 126.9831, "APIKEY009"),
-        Merchant(10L,"CAT010", "Pizza Hut", 37.5695, 126.9779, "APIKEY010")
+        Merchant(1L,"CAT001", "스타벅스 안양역점", 37.5665, 126.9780, "APIKEY001"),
+        Merchant(2L,"CAT002", "맥도날드 평택뉴코아점", 37.5700, 126.9768, "APIKEY002"),
+        Merchant(3L,"CAT003", "SK엔크린 팔달셀프주유소", 37.5650, 126.9820, "APIKEY003"),
+        Merchant(4L,"CAT004", "KFC 강남역점", 37.5711, 126.9774, "APIKEY004"),
+        Merchant(5L,"CAT005", "GS칼텍스 아주주유소", 37.5688, 126.9815, "APIKEY005"),
+        Merchant(6L,"CAT006", "도미노피자 여천점", 37.5628, 126.9762, "APIKEY006"),
+        Merchant(7L,"CAT007", "던킨도너츠 구미옥계점", 37.5647, 126.9786, "APIKEY007"),
+        Merchant(8L,"CAT008", "배스킨라빈스 동수원사거리점", 37.5671, 126.9795, "APIKEY008"),
+        Merchant(9L,"CAT009", "인계공영주차장", 37.5638, 126.9831, "APIKEY009"),
+        Merchant(10L,"CAT010", "피자헛 수원지동점", 37.5695, 126.9779, "APIKEY010")
     )
 
 

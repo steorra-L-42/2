@@ -9,9 +9,9 @@ import retrofit2.http.Body
 import retrofit2.http.POST
 
 interface UnAuthService {
-    @POST("api/v1/login")
+    @POST("api/v1/users/login")
     suspend fun login(@Body loginRequest: LoginRequest): LoginResponse
 
-    @POST("api/v1/detail")
+    @POST("api/v1/users/detail")
     suspend fun register(@Body registrationRequest: RegistrationRequest): RegistrationResponse
 }
