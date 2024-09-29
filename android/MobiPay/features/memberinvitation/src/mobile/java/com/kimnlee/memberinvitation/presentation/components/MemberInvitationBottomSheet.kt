@@ -1,16 +1,12 @@
 package com.kimnlee.memberinvitation.presentation.components
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Phone
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
@@ -20,9 +16,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import com.kimnlee.memberinvitation.presentation.screen.MemberInvitationConfirmationScreen
+import com.kimnlee.memberinvitation.R
 import com.kimnlee.memberinvitation.presentation.viewmodel.MemberInvitationViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -64,7 +61,7 @@ fun MemberInvitationBottomSheet(
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 MemberInvitationOptionItem(
-                    icon = Icons.Default.Face,
+                    icon = ImageVector.vectorResource(id = R.drawable.baseline_radar_24),
                     title = "주변 기기로 초대하기",
                     description = "다른 회원과 폰은 겹쳐주세요.",
                     onItemClick = { viewModel.openInvitationBLE()
@@ -72,7 +69,9 @@ fun MemberInvitationBottomSheet(
                 )
             }
         } else {
-            Column(modifier = Modifier.padding(16.dp).fillMaxHeight()) {
+            Column(modifier = Modifier
+                .padding(16.dp)
+                .fillMaxHeight()) {
                 MemberInvitationViaBLE(
                     viewModel = viewModel,
                     onNavigateToConfirmation = onNavigateToConfirmation

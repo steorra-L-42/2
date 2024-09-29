@@ -39,7 +39,7 @@ fun ShowMoreScreen(
                 )
             }
         Spacer(modifier = Modifier.padding(16.dp))
-            Button(onClick = { /*TODO*/ }) {
+            Button(onClick = { navController.navigate("notification") }) {
                 Text(
                     text = "설정 3",
                     style = MaterialTheme.typography.bodyLarge
