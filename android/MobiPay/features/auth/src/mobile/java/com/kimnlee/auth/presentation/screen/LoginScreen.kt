@@ -2,23 +2,34 @@ package com.kimnlee.auth.presentation.screen
 
 import android.app.Activity
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.min
 import androidx.compose.ui.unit.sp
 import com.kimnlee.auth.R
 import com.kimnlee.auth.presentation.viewmodel.LoginViewModel
@@ -30,10 +41,9 @@ fun LoginScreen(
     onNavigateToSignUp: () -> Unit
 ) {
     val isLoggedIn by viewModel.isLoggedIn.collectAsState()
-    val configuration = LocalConfiguration.current
-    val screenHeight = configuration.screenHeightDp.dp
-    val screenWidth = configuration.screenWidthDp.dp
     val context = LocalContext.current
+
+    val registrationButtonColor = Color(0xFF3182F6)
 
     LaunchedEffect(isLoggedIn) {
         if (isLoggedIn) {
@@ -41,68 +51,80 @@ fun LoginScreen(
         }
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = Color.White
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .padding(horizontal = 24.dp)
                 .verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(32.dp)
+            verticalArrangement = Arrangement.SpaceBetween
         ) {
-            Spacer(modifier = Modifier.height(screenHeight * 0.05f))
+            Column {
+                Spacer(modifier = Modifier.height(48.dp))
+                Text(
+                    text = "MobiPay",
+                    fontSize = 36.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = registrationButtonColor
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "간편 결제의 혁신",
+                    fontSize = 18.sp,
+                    color = Color.Gray
+                )
+            }
 
-            Text(
-                text = "MobiPay",
-                fontSize = min(screenWidth * 0.08f, 32.dp).value.sp,
-                fontWeight = FontWeight.Bold
-            )
-
-            // 자동차 이미지 크기 증가
+            // 자동차 이미지
             Image(
                 painter = painterResource(id = R.drawable.genesis_g90),
                 contentDescription = "Car Image",
-                modifier = Modifier.size(min(screenWidth * 0.8f, 400.dp)),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(16f / 9f)
+                    .padding(vertical = 24.dp),
                 contentScale = ContentScale.Fit
             )
 
-            Spacer(modifier = Modifier.weight(1f))
-
-            Button( // 테스트를 위해 생성(로그인 구현 시 삭제 예정)
-                onClick = { onNavigateToSignUp() },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp)
+            Column(
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Text("회원가입(개발용)")
-            }
-            Button( // 테스트 로그인 버튼으로 나중에 백엔드랑 연결되면 삭제 예정
-                onClick = { viewModel.testLogin() },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp)
-            ) {
-                Text("테스트 로그인")
-            }
-
-            Surface(
-                onClick = { viewModel.login(context as Activity) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(min(screenHeight * 0.08f, 56.dp))
-            ) {
+                // 카카오 로그인 버튼 (기존 이미지 사용, 비율 조정)
                 Image(
                     painter = painterResource(id = R.drawable.kakao_login_large_wide),
                     contentDescription = "카카오 로그인",
                     contentScale = ContentScale.FillBounds,
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp)
+                        .clickable { viewModel.login(context as Activity) }
                 )
+
+                // 회원가입 버튼
+                Button(
+                    onClick = { onNavigateToSignUp() },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = registrationButtonColor),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text("회원가입", fontSize = 16.sp, color = Color.White)
+                }
+
+                // 테스트 로그인 버튼
+                TextButton(
+                    onClick = { viewModel.testLogin() },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("테스트 로그인", fontSize = 14.sp, color = registrationButtonColor)
+                }
             }
 
-            Spacer(modifier = Modifier.height(screenHeight * 0.05f))
+            Spacer(modifier = Modifier.height(48.dp))
         }
     }
 }

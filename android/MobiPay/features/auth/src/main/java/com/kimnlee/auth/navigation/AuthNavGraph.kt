@@ -7,23 +7,24 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.kimnlee.auth.presentation.screen.LoginScreen
+import com.kimnlee.auth.presentation.screen.RegistrationScreen
 import com.kimnlee.common.auth.AuthManager
 import com.kimnlee.auth.presentation.screen.SignUpScreen
 import com.kimnlee.auth.presentation.viewmodel.LoginViewModel
 
 fun NavGraphBuilder.authNavGraph(
     navController: NavHostController,
-    authManager: AuthManager
+    authManager: AuthManager,
+    loginViewModel: LoginViewModel
 ) {
-    navigation(startDestination = "auth_main", route = "auth") {
+    navigation(startDestination = "login", route = "auth") {
         composable(
-            "auth_main",
+            "login",
             enterTransition = { EnterTransition.None },
             exitTransition = { ExitTransition.None }
         ) {
-            val viewModel = LoginViewModel(authManager)
             LoginScreen(
-                viewModel = viewModel,
+                viewModel = loginViewModel,
                 onNavigateToHome = {
                     navController.navigate("home") {
                         popUpTo("auth") { inclusive = true }
@@ -39,8 +40,22 @@ fun NavGraphBuilder.authNavGraph(
         ) {
             SignUpScreen(
                 authManager = authManager,
-                viewModel = LoginViewModel(authManager),
+                viewModel = loginViewModel,
                 onNavigateToBack = { navController.navigateUp() }
+            )
+        }
+        composable(
+            "registration",
+            enterTransition = { EnterTransition.None },
+            exitTransition = { ExitTransition.None }
+        ) {
+            RegistrationScreen(
+                viewModel = loginViewModel,
+                onRegistrationSuccess = { navController.navigate("home") },
+                onRegistrationFailed = { navController.navigateUp() },
+                onBackPressed = { navController.navigate("login") {
+                    popUpTo("auth") { inclusive = true }
+                }}
             )
         }
     }
