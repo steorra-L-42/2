@@ -1,4 +1,4 @@
-package com.example.mobipay.domain.kakaotoken.entity;
+package com.example.mobipay.domain.kakaotoken.entity.entity;
 
 import com.example.mobipay.domain.mobiuser.entity.MobiUser;
 import jakarta.persistence.Column;
@@ -10,13 +10,15 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "kakao_token")
+
+@NoArgsConstructor(access = AccessLevel.PUBLIC)
 public class KakaoToken {
 
     @Id
@@ -32,4 +34,26 @@ public class KakaoToken {
 
     @OneToOne(mappedBy = "kakaoToken", fetch = FetchType.LAZY)
     private MobiUser mobiUser;
+
+    @Builder
+    private KakaoToken(String accessValue, String refreshValue) {
+        this.accessValue = accessValue;
+        this.refreshValue = refreshValue;
+    }
+
+    public static KakaoToken of(String accessValue, String refreshValue) {
+        return new KakaoToken(accessValue, refreshValue);
+    }
+
+    public void setAccessValue(String accessValue) {
+        this.accessValue = accessValue;
+    }
+
+    public void setRefreshValue(String refreshValue) {
+        this.refreshValue = refreshValue;
+    }
+
+    public void setMobiUser(MobiUser mobiUser) {
+        this.mobiUser = mobiUser;
+    }
 }

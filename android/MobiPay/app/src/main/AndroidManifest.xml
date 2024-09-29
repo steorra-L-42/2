@@ -75,5 +75,5 @@
             android:value="81dn8nvzim" />
 
     </application>
-
+    <uses-permission android:name="android.permission.INTERNET" />
 </manifest>

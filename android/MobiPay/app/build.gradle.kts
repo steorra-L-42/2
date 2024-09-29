@@ -74,6 +74,7 @@ dependencies {
     implementation(project(":features:firebase"))
     implementation(project(":features:notification"))
 
+    implementation ("com.squareup.okhttp3:okhttp:4.9.3")
 
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

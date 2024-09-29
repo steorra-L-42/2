@@ -1,13 +1,18 @@
 package com.example.mobipay.oauth2.dto;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
-import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
-@RequiredArgsConstructor
 public class CustomOAuth2User implements OAuth2User {
+
+    private final UserDTO userDTO;
+
+    public CustomOAuth2User(UserDTO userDTO) {
+        this.userDTO = userDTO;
+    }
 
     @Override
     public Map<String, Object> getAttributes() {
@@ -16,28 +21,37 @@ public class CustomOAuth2User implements OAuth2User {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
+
+        Collection<GrantedAuthority> collection = new ArrayList<>();
+
+        collection.add(new GrantedAuthority() {
+            @Override
+            public String getAuthority() {
+                return userDTO.getRole();
+            }
+        });
+        return collection;
     }
 
     @Override
     public String getName() {
-        return null;
+        return userDTO.getName();
     }
 
     public Long getMobiUserId() { // mobiUserId
         return null;
     }
 
-    public String getEmail() { // email
-        return null;
+    public String getEmail() {
+        return userDTO.getEmail();
     }
 
-    public String getPhoneNumber() { // phoneNumber
-        return null;
+    public String getPhonenumber() {
+        return userDTO.getPhonenumber();
     }
 
-    public String getPicture() { // picture
-        return null;
+    public String getPicture() {
+        return userDTO.getPicture();
     }
 
     public String getRole() { // role

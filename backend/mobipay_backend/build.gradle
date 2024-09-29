@@ -19,9 +19,9 @@ repositories {
 
 dependencies {
     // jwt
-//    implementation 'io.jsonwebtoken:jjwt-api:0.12.3'
-//    implementation 'io.jsonwebtoken:jjwt-impl:0.12.3'
-//    implementation 'io.jsonwebtoken:jjwt-jackson:0.12.3'
+    implementation 'io.jsonwebtoken:jjwt-api:0.12.3'
+    implementation 'io.jsonwebtoken:jjwt-impl:0.12.3'
+    implementation 'io.jsonwebtoken:jjwt-jackson:0.12.3'
 
     // P6SPY
     implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.8.1'
@@ -36,6 +36,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
+
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'com.mysql:mysql-connector-j'
     annotationProcessor 'org.projectlombok:lombok'

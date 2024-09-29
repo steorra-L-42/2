@@ -22,6 +22,7 @@ public enum ErrorCode {
     NOT_FOUND(HttpStatus.NOT_FOUND, "찾을 수 없습니다."),
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 에러입니다.");
 
+
     private final HttpStatus status;
     private final String message;
 }
