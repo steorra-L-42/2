@@ -6,10 +6,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.kimnlee.auth.presentation.viewmodel.LoginViewModel
 import com.kimnlee.common.auth.AuthManager
 
 @Composable
 fun ShowMoreScreen(
+    viewModel: LoginViewModel,
     authManager: AuthManager,
     navController: NavController
 ) {
@@ -58,6 +60,14 @@ fun ShowMoreScreen(
                     text = "설정 5",
                     style = MaterialTheme.typography.bodyLarge
                 )
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+        Button(
+            onClick = {
+                viewModel.testLogout() // 현재 테스트 로그아웃이라서 나중에 백이랑 연결되면 일반 logout 메서드로 바꾸면 됨
+            }
+        ) {
+            Text("로그아웃")
         }
     }
 }
