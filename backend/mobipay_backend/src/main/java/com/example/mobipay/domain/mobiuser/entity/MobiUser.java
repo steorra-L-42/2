@@ -6,10 +6,10 @@ import com.example.mobipay.domain.car.entity.Car;
 import com.example.mobipay.domain.cargroup.entity.CarGroup;
 import com.example.mobipay.domain.common.entity.AuditableCreatedEntity;
 import com.example.mobipay.domain.invitation.entity.Invitation;
-import com.example.mobipay.domain.kakaotoken.entity.KakaoToken;
+import com.example.mobipay.domain.kakaotoken.entity.entity.KakaoToken;
 import com.example.mobipay.domain.mobiuser.enums.Role;
 import com.example.mobipay.domain.ownedcard.entity.OwnedCard;
-import com.example.mobipay.domain.refreshtoken.entity.RefreshToken;
+import com.example.mobipay.domain.refreshtoken.entity.entity.RefreshToken;
 import com.example.mobipay.domain.registeredcard.entity.RegisteredCard;
 import com.example.mobipay.domain.setupdomain.account.entity.Account;
 import com.example.mobipay.domain.ssafyuser.entity.SsafyUser;
@@ -87,7 +87,7 @@ public class MobiUser extends AuditableCreatedEntity {
     private List<OwnedCard> ownedCards = new ArrayList<>();
 
     @OneToMany(mappedBy = "mobiUser")
-    private List<Account> accounts;
+    private List<Account> accounts = new ArrayList<>();
 
     @Builder
     private MobiUser(String email, String name, String phoneNumber, String picture) {

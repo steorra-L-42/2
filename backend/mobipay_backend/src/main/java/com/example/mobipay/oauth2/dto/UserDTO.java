@@ -8,8 +8,6 @@ import lombok.Getter;
 @Getter
 @Builder
 public class UserDTO {
-
-    //    private String username;
     private Long userId;
 
     @Email
@@ -27,5 +25,4 @@ public class UserDTO {
 
     @NotEmpty
     private String role;
-
 }

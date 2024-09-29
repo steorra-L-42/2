@@ -5,8 +5,10 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.Date;
 import java.util.List;
 import lombok.Getter;
+import org.springframework.stereotype.Repository;
 
 @Getter
+@Repository
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class KakaoTokenResponseDto {
 

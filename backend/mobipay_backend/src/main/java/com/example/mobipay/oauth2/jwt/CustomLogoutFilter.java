@@ -4,7 +4,7 @@ import static com.example.mobipay.oauth2.enums.TokenType.REFRESH;
 
 import com.example.mobipay.domain.mobiuser.entity.MobiUser;
 import com.example.mobipay.domain.mobiuser.repository.MobiUserRepository;
-import com.example.mobipay.oauth2.repository.RefreshTokenRepository;
+import com.example.mobipay.domain.refreshtoken.entity.repository.RefreshTokenRepository;
 import com.example.mobipay.oauth2.util.CookieMethods;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;

@@ -7,14 +7,12 @@ public class KakaoResponse implements OAuth2Response {
     private final Map<String, Object> attributes;
     private final Map<String, Object> kakaoAccount;
     private final Map<String, Object> properties;
-//    private final String refreshToken;
 
     // 생성자에서 카카오 응답을 처리하는 방식 수정
     public KakaoResponse(Map<String, Object> attributes) {
         this.attributes = attributes;
         this.kakaoAccount = (Map<String, Object>) attributes.get("kakao_account");
         this.properties = (Map<String, Object>) attributes.get("properties");
-//        this.refreshToken = (Map<String, Object>) attributes.get("properties");
     }
 
     @Override

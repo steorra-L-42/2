@@ -1,6 +1,6 @@
-package com.example.mobipay.oauth2.repository;
+package com.example.mobipay.domain.refreshtoken.entity.repository;
 
-import com.example.mobipay.domain.refreshtoken.entity.RefreshToken;
+import com.example.mobipay.domain.refreshtoken.entity.entity.RefreshToken;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

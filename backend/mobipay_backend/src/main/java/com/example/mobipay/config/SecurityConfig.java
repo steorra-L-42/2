@@ -1,12 +1,10 @@
 package com.example.mobipay.config;
 
 import com.example.mobipay.domain.mobiuser.repository.MobiUserRepository;
-import com.example.mobipay.oauth2.handler.CustomSuccessHandler;
+import com.example.mobipay.domain.refreshtoken.entity.repository.RefreshTokenRepository;
 import com.example.mobipay.oauth2.jwt.CustomLogoutFilter;
 import com.example.mobipay.oauth2.jwt.JWTFilter;
 import com.example.mobipay.oauth2.jwt.JWTUtil;
-import com.example.mobipay.oauth2.repository.RefreshTokenRepository;
-import com.example.mobipay.oauth2.service.CustomOauth2UserService;
 import com.example.mobipay.oauth2.service.UserService;
 import com.example.mobipay.oauth2.util.CookieMethods;
 import java.util.Arrays;
@@ -17,7 +15,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -30,11 +27,6 @@ import org.springframework.web.cors.CorsConfiguration;
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
-
-
-    private final AuthenticationConfiguration authenticationConfiguration;
-    private final CustomOauth2UserService customOauth2UserService;
-    private final CustomSuccessHandler customSuccessHandler;
     private final JWTUtil jwtUtil;
     private final RefreshTokenRepository refreshTokenRepository;
     private final CookieMethods cookieMethods;
@@ -42,39 +34,14 @@ public class SecurityConfig {
     private final UserService userService;
 
     String[] whitelist_post = {
-            "/api/v1/users/reissue",
-            "http://localhost:8080/api/v1/login",
-            "http://localhost:8080/api/v1/detail",
-            "/api/v1/login",
-            "/api/v1/zz",
-            "/api/v1/detail"
+            // 논의 후 추가 필요
     };
     String[] whitelist_get = {
-            "/",
-            "/login",
-            "/login/**",
-//            "/api/v1/login/oauth2/code/kakao",
-            "/login/oauth2/**",
-            "/api/v1/login"
+            // 논의 후 추가 필요
     };
 
     @Value("${cors.url}")
     private String corsURL;
-
-//    @Bean
-//    public HttpFirewall allowUrlEncodedDoubleSlashHttpFirewall() {
-//        StrictHttpFirewall firewall = new StrictHttpFirewall();
-//        firewall.setAllowUrlEncodedDoubleSlash(true);
-//        return firewall;
-//    }
-//    // 인코딩된 URL 이중 슬래시 ㅎ용
-//
-//    @Bean
-//    public WebSecurityCustomizer webSecurityCustomizer() {
-//        return (web) -> web.httpFirewall(allowUrlEncodedDoubleSlashHttpFirewall())
-//                .ignoring()
-//                .requestMatchers(PathRequest.toStaticResources().atCommonLocations());
-//    }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -118,9 +85,6 @@ public class SecurityConfig {
                 .oauth2Login((oauth2) -> oauth2
                         .authorizationEndpoint(authorizationEndpointConfig ->
                                 authorizationEndpointConfig.baseUri("/api/v1/oauth2/authorization"))
-                        .userInfoEndpoint((userInfoEndpointConfig ->
-                                userInfoEndpointConfig.userService(customOauth2UserService)))
-                        .successHandler(customSuccessHandler)
                         .redirectionEndpoint(redirectionEndpointConfig ->
                                 redirectionEndpointConfig.baseUri("/api/v1/login/oauth2/code/*"))
                 );
@@ -132,15 +96,15 @@ public class SecurityConfig {
 
         http
                 .logout((oauth2) -> oauth2
-                        .logoutUrl("/api/v1/oauth2/logout")
+                        .logoutUrl("/api/v1/users/logout")
                         .logoutSuccessUrl("/")
                         .permitAll());
 
         //경로별 인가 작업
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers(HttpMethod.POST, whitelist_post).permitAll()
-                        .requestMatchers(HttpMethod.GET, whitelist_get).permitAll()
+                        .requestMatchers(HttpMethod.POST).permitAll()
+                        .requestMatchers(HttpMethod.GET).permitAll()
                         .anyRequest().authenticated());
 
         //세션 설정 : STATELESS

@@ -21,11 +21,8 @@ public class JWTUtil {
     private SecretKey secretKey;
 
     public JWTUtil(@Value("${spring.jwt.secret}") String secret) {
-//        this.secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
         secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8),
                 Jwts.SIG.HS256.key().build().getAlgorithm());
-
-
     }
 
     // Category 값 얻기
@@ -38,11 +35,6 @@ public class JWTUtil {
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload()
                 .get("email", String.class);
     }
-
-//    public Long getUserId(String token) {
-//        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload()
-//                .get("userId", Long.class);
-//    }
 
     public String getName(String token) {
 
@@ -63,12 +55,6 @@ public class JWTUtil {
                 .get("picture", String.class);
     }
 
-//    public String getRole(String token) {
-//
-//        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload()
-//                .get("role", String.class);
-//    }
-
     // 만료 유무
     public LocalDateTime getIssuedAt(String token) {
         return LocalDateTime.ofInstant(Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload()
@@ -88,19 +74,15 @@ public class JWTUtil {
     }
 
     public String createAccessToken(String email, String name, String phoneNumber, String picture) {
-        System.out.println("Creating refresh token for user: " + email);
         return createJwt(ACCESS.getType(), email, name, phoneNumber, picture, ACCESS.getExpiration() * MS_TO_S);
     }
 
     public String createRefreshToken(String email, String name, String phoneNumber, String picture) {
-        System.out.println("Creating refresh token for user: " + email);
         return createJwt(REFRESH.getType(), email, name, phoneNumber, picture, REFRESH.getExpiration() * MS_TO_S);
     }
 
     public String createJwt(String category, String email, String name, String phoneNumber, String picture,
                             Long expiredMs) {
-        System.out.println("Creating JWT with category: " + category);
-        System.out.println("User info: " + email + ", " + name + ", " + phoneNumber + ", " + picture);
 
         String jwt = Jwts.builder()
                 .claim("category", category) // access, refresh 판단
@@ -113,7 +95,6 @@ public class JWTUtil {
                 .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact();
 
-        System.out.println("jwt" + jwt);
         return jwt;
     }
 }
