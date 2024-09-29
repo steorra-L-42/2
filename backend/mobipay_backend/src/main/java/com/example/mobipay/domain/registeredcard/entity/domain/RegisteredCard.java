@@ -1,4 +1,4 @@
-package com.example.mobipay.domain.registeredcard.entity;
+package com.example.mobipay.domain.registeredcard.entity.domain;
 
 import com.example.mobipay.domain.merchanttransaction.entity.MerchantTransaction;
 import com.example.mobipay.domain.mobiuser.entity.MobiUser;
