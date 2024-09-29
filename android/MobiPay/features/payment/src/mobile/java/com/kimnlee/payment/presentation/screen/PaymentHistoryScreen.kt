@@ -6,91 +6,155 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.kimnlee.common.R
+import com.kimnlee.common.ui.theme.MobiBgGray
+import com.kimnlee.common.ui.theme.MobiBgWhite
+import com.kimnlee.common.ui.theme.MobiTextAlmostBlack
+import com.kimnlee.common.ui.theme.MobiTextDarkGray
 import com.kimnlee.payment.data.model.Merchant
 import com.kimnlee.payment.data.model.MerchantTransaction
 
+private val ReceiptBgColor = Color(0xFF3182F6)
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PaymentDetailListScreen(
     transactions: List<MerchantTransaction>,
     merchants: List<Merchant>,
-    onNavigateToDetail: (transaction : MerchantTransaction) -> Unit,
+    onNavigateToDetail: (transaction: MerchantTransaction) -> Unit,
     onNavigateBack: () -> Unit
 ) {
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        // 시작
-        Text(
-            text = "결제",
-            style = MaterialTheme.typography.headlineLarge,
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        // 더미 데이터를 사용
-        LazyColumn(
-//            modifier = Modifier.fillMaxWidth(),
-        ){
-            items(transactions) { transaction ->
-                Row(
-                    modifier = Modifier
-                        .padding(8.dp) // 카드 간의 간격 설정
-                        .fillMaxWidth()
-                        .height(IntrinsicSize.Min),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                ) {
-                    Column (modifier = Modifier
-                        .weight(0.5f)
-                    ){
-                        // 가게이름
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
-                            text = merchants.find { it.merchant_id == transaction.merchant_id }?.merchant_name ?: "Unknown Merchant",
-                            style = MaterialTheme.typography.headlineSmall
+                            text = "💳",
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontFamily = FontFamily(Font(R.font.emoji)),
+                            fontSize = 24.sp,
+                            modifier = Modifier
+                                .padding(top = 10.dp)
+                                .padding(end = 8.dp)
                         )
-                        //시간 + 일시불
-                        Row (
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceAround
-                        ){
-                            Text(transaction.transaction_date)
-                            Text(transaction.transaction_time)
-                            Text(transaction.info)
-                        }
-                    }
-                    Text(
-                        text = "${transaction.payment_balance}원",
-                        modifier = Modifier
-                            .weight(0.2f)
-                            .padding(top=5.dp)
-                            .fillMaxHeight(),
-                    )
-                    Box( // Box를 사용하여 이미지의 높이를 부모에 맞춤
-                        modifier = Modifier
-                            .fillMaxHeight()
-                            .weight(0.1f)
-                            .aspectRatio(1f) // 이미지의 종횡비를 유지하기 위해 aspectRatio를 사용
-                    ) {
-                        Image(
-                            painter = painterResource(id = R.drawable.receipt_long_24px),
-                            contentDescription = "영수증 사진",
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier.fillMaxSize()
-                                .background(Color.Gray)
-                                .clickable {onNavigateToDetail(transaction)}
+                        Text(
+                            text = "결제 내역",
+                            style = MaterialTheme.typography.headlineMedium,
+                            color = MobiTextAlmostBlack,
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Bold
                         )
                     }
-                }
+                },
+                navigationIcon = {
+                    IconButton(onClick = onNavigateBack) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Back",
+                            tint = MobiTextAlmostBlack
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MobiBgGray,
+                    titleContentColor = MobiTextAlmostBlack
+                )
+            )
+        },
+        containerColor = MobiBgGray
+    ) { innerPadding ->
+        LazyColumn(
+            contentPadding = innerPadding,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            items(transactions) { transaction ->
+                TransactionCard(
+                    transaction = transaction,
+                    merchant = merchants.find { it.merchant_id == transaction.merchant_id },
+                    onNavigateToDetail = onNavigateToDetail
+                )
             }
         }
-        // 끝
+    }
+}
+
+@Composable
+fun TransactionCard(
+    transaction: MerchantTransaction,
+    merchant: Merchant?,
+    onNavigateToDetail: (transaction: MerchantTransaction) -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onNavigateToDetail(transaction) },
+        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        colors = CardDefaults.cardColors(containerColor = MobiBgWhite)
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = merchant?.merchant_name ?: "Unknown Merchant",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MobiTextAlmostBlack,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "${transaction.transaction_date} ${transaction.transaction_time}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MobiTextDarkGray
+                )
+                Text(
+                    text = transaction.info,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MobiTextDarkGray
+                )
+            }
+            Column(
+                horizontalAlignment = Alignment.End
+            ) {
+                Text(
+                    text = "${transaction.payment_balance}원",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MobiTextAlmostBlack,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Image(
+                    painter = painterResource(id = R.drawable.receipt_long_24px),
+                    contentDescription = "영수증",
+                    modifier = Modifier
+                        .size(24.dp)
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(ReceiptBgColor)
+                )
+            }
+        }
     }
 }

@@ -3,7 +3,6 @@ package com.kimnlee.memberinvitation.presentation.screen
 import androidx.car.app.CarContext
 import androidx.car.app.Screen
 import androidx.car.app.model.Action
-import androidx.car.app.model.MessageTemplate
 import androidx.car.app.model.Pane
 import androidx.car.app.model.PaneTemplate
 import androidx.car.app.model.Row
