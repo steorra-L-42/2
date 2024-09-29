@@ -70,6 +70,7 @@ fun AppNavGraph(
         ) {
             BottomNavigation(navController) {
                 ShowMoreScreen(
+                    viewModel = loginViewModel,
                     authManager = authManager,
                     navController = navController
                 )

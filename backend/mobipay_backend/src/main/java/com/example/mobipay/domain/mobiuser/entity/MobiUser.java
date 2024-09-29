@@ -1,14 +1,16 @@
 package com.example.mobipay.domain.mobiuser.entity;
 
+import static com.example.mobipay.domain.mobiuser.enums.Role.USER;
+
 import com.example.mobipay.domain.car.entity.Car;
 import com.example.mobipay.domain.cargroup.entity.CarGroup;
 import com.example.mobipay.domain.common.entity.AuditableCreatedEntity;
 import com.example.mobipay.domain.fcmtoken.entity.FcmToken;
 import com.example.mobipay.domain.invitation.entity.Invitation;
-import com.example.mobipay.domain.kakaotoken.entity.KakaoToken;
+import com.example.mobipay.domain.kakaotoken.entity.entity.KakaoToken;
 import com.example.mobipay.domain.mobiuser.enums.Role;
 import com.example.mobipay.domain.ownedcard.entity.OwnedCard;
-import com.example.mobipay.domain.refreshtoken.entity.RefreshToken;
+import com.example.mobipay.domain.refreshtoken.entity.entity.RefreshToken;
 import com.example.mobipay.domain.registeredcard.entity.RegisteredCard;
 import com.example.mobipay.domain.setupdomain.account.entity.Account;
 import com.example.mobipay.domain.ssafyuser.entity.SsafyUser;
@@ -27,6 +29,7 @@ import jakarta.persistence.Table;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -55,7 +58,7 @@ public class MobiUser extends AuditableCreatedEntity {
 
     @Enumerated(value = EnumType.STRING)
     @Column(name = "role", nullable = false)
-    private Role role = Role.USER;
+    private Role role = USER;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "refresh_token_id")
@@ -91,11 +94,29 @@ public class MobiUser extends AuditableCreatedEntity {
     @OneToMany(mappedBy = "mobiUser")
     private List<Account> accounts = new ArrayList<>();
 
+    @Builder
     private MobiUser(String email, String name, String phoneNumber, String picture) {
         this.email = email;
         this.name = name;
         this.phoneNumber = phoneNumber;
         this.picture = picture;
+    }
+
+
+    public void updatePicture(String picture) {
+        this.picture = picture;
+    }
+
+    public void addRefreshToken(RefreshToken refreshToken) {
+        this.refreshToken = refreshToken;
+    }
+
+    public void addKakaoToken(KakaoToken kakaoToken) {
+        this.kakaoToken = kakaoToken;
+    }
+
+    public void deleteRefreshToken() {
+        this.refreshToken = null;
     }
 
     public static MobiUser of(String email, String name, String phoneNumber, String picture) {

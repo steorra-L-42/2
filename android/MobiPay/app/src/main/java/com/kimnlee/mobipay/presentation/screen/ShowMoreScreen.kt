@@ -17,6 +17,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.kimnlee.auth.presentation.viewmodel.LoginViewModel
 import com.kimnlee.common.auth.AuthManager
 
 val BackgroundColor = Color(0xFFF2F4F6)
@@ -27,6 +28,7 @@ val SettingsIconColor = Color(0xFFB1B8C0)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ShowMoreScreen(
+    viewModel: LoginViewModel,
     authManager: AuthManager,
     navController: NavController
 ) {

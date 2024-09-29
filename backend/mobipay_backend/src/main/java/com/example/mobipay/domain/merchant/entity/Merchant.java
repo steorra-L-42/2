@@ -4,8 +4,6 @@ import com.example.mobipay.domain.approvalwaiting.entity.ApprovalWaiting;
 import com.example.mobipay.domain.merchanttransaction.entity.MerchantTransaction;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
@@ -22,8 +20,7 @@ import lombok.NoArgsConstructor;
 public class Merchant {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
+    @Column(name = "merchant_id")
     private Long id;
 
     @Column(name = "category_id", nullable = false, length = 20)

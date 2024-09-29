@@ -10,4 +10,5 @@
     <color name="mobi_blue">#2e58ff</color>
     <color name="mobi_bg_gray">#F2F4F6</color>
     <color name="mobi_splash_bg_blue">#4A6EFF</color>
+    <color name="mobi_text_dark_gray">#505967</color>
 </resources>
