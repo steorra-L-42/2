@@ -38,12 +38,17 @@ public class FcmServiceImpl implements FcmService {
                     .setBody(fcmSendDto.getBody())
                     .build();
 
-            Message message = Message.builder()
+            Message.Builder messageBuilder = Message.builder()
                     .setToken(fcmSendDto.getToken())
-                    .setNotification(notification)
-                    .build();
+                    .setNotification(notification);
 
+            if (fcmSendDto.getData() != null && !fcmSendDto.getData().isEmpty()) {
+                messageBuilder.putAllData(fcmSendDto.getData());
+            }
+
+            Message message = messageBuilder.build();
             String response = FirebaseMessaging.getInstance().send(message);
+            
             log.debug("FCM 전송 성공: " + response);
             return true;
         } catch (Exception e) {
