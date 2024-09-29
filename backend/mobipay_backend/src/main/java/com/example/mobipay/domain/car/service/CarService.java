@@ -3,11 +3,13 @@ package com.example.mobipay.domain.car.service;
 import com.example.mobipay.domain.car.dto.CarAutoPayChangeRequest;
 import com.example.mobipay.domain.car.dto.CarAutoPayChangeResponse;
 import com.example.mobipay.domain.car.dto.CarListResponse;
+import com.example.mobipay.domain.car.dto.CarMemberListResponse;
 import com.example.mobipay.domain.car.dto.CarRegisterRequest;
 import com.example.mobipay.domain.car.dto.CarRegisterResponse;
 import com.example.mobipay.domain.car.entity.Car;
 import com.example.mobipay.domain.car.error.CarNotFoundException;
 import com.example.mobipay.domain.car.error.DuplicatedCarNumberException;
+import com.example.mobipay.domain.car.error.NotMemberException;
 import com.example.mobipay.domain.car.error.NotOwnerException;
 import com.example.mobipay.domain.car.repository.CarRepository;
 import com.example.mobipay.domain.cargroup.entity.CarGroup;
@@ -154,4 +156,26 @@ public class CarService {
         return !car.getOwner().getId().equals(mobiUserId);
     }
 
+    /**
+     * 차량의 멤버 목록을 조회한다.
+     *
+     * @param carId      차량 ID
+     * @param oauth2User 인증된 사용자 정보
+     * @return 차량 멤버 목록
+     */
+    public CarMemberListResponse getCarMemberList(Long carId, CustomOAuth2User oauth2User) {
+        MobiUser mobiUser = mobiUserRepository.findById(oauth2User.getMobiUserId())
+                .orElseThrow(MobiUserNotFoundException::new);
+
+        Car car = carRepository.findById(carId)
+                .orElseThrow(CarNotFoundException::new);
+
+        boolean notMember = car.getCarGroups().stream()
+                .noneMatch(carGroup -> carGroup.getMobiUser().equals(mobiUser));
+        if(notMember) {
+            throw new NotMemberException();
+        }
+
+        return CarMemberListResponse.from(car);
+    }
 }
