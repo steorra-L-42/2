@@ -111,12 +111,14 @@ public class JWTFilter extends OncePerRequestFilter {
     }
 
     private void setUpAuthentication(String accessToken) {
+        Long mobiUserId = jwtUtil.getMobiUserId(accessToken);
         String email = jwtUtil.getEmail(accessToken);
         String name = jwtUtil.getName(accessToken);
         String picture = jwtUtil.getPicture(accessToken);
         String phonenumber = jwtUtil.getPhoneNumber(accessToken);
 
         UserDTO userDTO = UserDTO.builder()
+                .mobiuserId(mobiUserId)
                 .email(email)
                 .name(name)
                 .picture(picture)

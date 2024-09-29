@@ -66,12 +66,13 @@ public class ReissueService {
 
     // 새로운 AccessToken 발급
     public String createNewAccessToken(String refresh) {
+        Long mobiUserId = jwtUtil.getMobiUserId(refresh);
         String email = jwtUtil.getEmail(refresh);
         String name = jwtUtil.getName(refresh);
         String phoneNumber = jwtUtil.getPhoneNumber(refresh);
         String picture = jwtUtil.getPicture(refresh);
 
-        return BEARER.getType() + jwtUtil.createAccessToken(email, name, phoneNumber, picture);
+        return BEARER.getType() + jwtUtil.createAccessToken(mobiUserId, email, name, phoneNumber, picture);
     }
 
     // RefreshToken이 존재하는지 확인
