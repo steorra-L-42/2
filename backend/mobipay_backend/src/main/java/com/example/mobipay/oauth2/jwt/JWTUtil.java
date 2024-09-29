@@ -27,7 +27,7 @@ public class JWTUtil {
 
     public Long getMobiUserId(String token) {
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload()
-                .get("mobiuserid", Long.class);
+                .get("mobiUserId", Long.class);
     }
 
     // Category 값 얻기
