@@ -1,5 +1,6 @@
 package com.kimnlee.common.auth
 
+//테스트를 위한 회원가입용 임포트문 삭제예정(api 통신에 필요할 경우 남길 수 있음)
 import android.app.Activity
 import android.content.Context
 import android.util.Log
@@ -14,7 +15,6 @@ import com.kakao.sdk.auth.model.OAuthToken
 import com.kakao.sdk.user.UserApiClient
 import com.kimnlee.common.auth.api.UnAuthService
 import com.kimnlee.common.auth.model.LoginRequest
-import com.kimnlee.common.auth.model.LoginResponse
 import com.kimnlee.common.auth.model.RegistrationRequest
 import com.kimnlee.common.auth.model.RegistrationResponse
 import com.kimnlee.common.network.ApiClient
@@ -24,19 +24,15 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import retrofit2.HttpException
-
-//테스트를 위한 회원가입용 임포트문 삭제예정(api 통신에 필요할 경우 남길 수 있음)
-import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.Response
 import retrofit2.Retrofit
-import java.text.SimpleDateFormat
-import java.util.Locale
+import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.http.Body
+import retrofit2.http.POST
 import kotlin.coroutines.resume
-import retrofit2.http.*
-import kotlin.coroutines.resumeWithException
-import kotlin.coroutines.suspendCoroutine
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "auth")
-
+private const val TAG = "AuthManager"
 class AuthManager(private val context: Context) {
 
     private val IS_LOGGED_IN = booleanPreferencesKey("is_logged_in")
@@ -104,17 +100,19 @@ class AuthManager(private val context: Context) {
         }
     }
 
-    suspend fun login(loginRequest: LoginRequest): LoginResponse = withContext(Dispatchers.IO) {
+    suspend fun login(loginRequest: LoginRequest): Response<Void> = withContext(Dispatchers.IO) {
         try {
             unAuthService.login(loginRequest)
         } catch (e: HttpException) {
-            // HTTP 예외를 그대로 던집니다.
+            Log.d(TAG, "${e.response()}")
+            Log.d(TAG, "${e.code()}")
+            Log.d(TAG, "Login failed: ${e.message()}")
             throw e
         } catch (e: Exception) {
-            // 다른 예외들은 CustomException으로 감싸서 던집니다.
             throw Exception("Network error or other exception", e)
         }
     }
+
 
     suspend fun logout(): Result<Unit> = suspendCancellableCoroutine { continuation ->
         UserApiClient.instance.logout { error ->
@@ -147,7 +145,7 @@ class AuthManager(private val context: Context) {
 
     private fun createAuthService(): AuthService {
         val retrofit = Retrofit.Builder()
-            .baseUrl("http://192.168.100.126:8080/") // baseUrl 수정해야함
+            .baseUrl("https://mobipay.kr/") // baseUrl 수정해야함
             .addConverterFactory(GsonConverterFactory.create())
             .build()
         return retrofit.create(AuthService::class.java)

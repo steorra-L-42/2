@@ -203,6 +203,10 @@ class FCMService : FirebaseMessagingService() {
             Log.d(TAG, "Notification Title: ${notification.title}")
             Log.d(TAG, "Notification Body: ${notification.body}")
 
+            if (remoteMessage.data.isNotEmpty()) {
+                Log.d(TAG, "페이로드: ${remoteMessage.data}")
+            }
+
             confirmFCMReceived(remoteMessage.messageId ?: "No Message ID")
 
             val user2 = MobiUser(15, "MobiUserTMP", IconCompat.createWithResource(applicationContext, R.drawable.ic_mobipay))

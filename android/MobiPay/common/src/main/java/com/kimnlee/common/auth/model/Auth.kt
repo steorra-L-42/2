@@ -13,14 +13,17 @@ data class LoginResponse(
     val success: Boolean,
     val message: String,
     val authToken: String?,
-    val refreshToken: String?
+    val refreshToken: String?,
+    val headers: Map<String, String>?
 )
 
 data class RegistrationRequest(
     val email: String,
     val name: String,
     val phoneNumber: String,
-    val picture: String
+    val picture: String,
+    val accessToken: String,
+    val refreshToken: String,
 )
 
 data class RegistrationResponse(

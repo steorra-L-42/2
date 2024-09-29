@@ -8,14 +8,11 @@ import com.kakao.sdk.auth.model.OAuthToken
 import com.kimnlee.common.auth.AuthManager
 import com.kimnlee.common.auth.model.LoginRequest
 import com.kimnlee.common.auth.model.RegistrationRequest
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 
+private const val TAG = "LoginViewModel"
 class LoginViewModel(private val authManager: AuthManager) : ViewModel() {
     private val _isLoggedIn = MutableStateFlow(false)
     val isLoggedIn: StateFlow<Boolean> = _isLoggedIn
@@ -34,6 +31,8 @@ class LoginViewModel(private val authManager: AuthManager) : ViewModel() {
 
     var email: String = ""
     var picture: String = ""
+    var kakaoAccessToken: String = ""
+    var kakaoRefreshToken: String = ""
 
     init {
         viewModelScope.launch {
@@ -71,35 +70,45 @@ class LoginViewModel(private val authManager: AuthManager) : ViewModel() {
         )
 
         try {
+            Log.d(TAG, "sendLoginRequest: ${token.accessToken} // ${token.refreshToken}")
             val response = authManager.login(loginRequest)
-            if (response.success) {
-                response.authToken?.let { authManager.saveAuthToken(it) }
-                response.refreshToken?.let { authManager.saveRefreshToken(it) }
+
+            if (response.isSuccessful) {
+                val authTokenFromHeaders = response.headers()["Authorization"]?.split(" ")?.getOrNull(1)
+                Log.d(TAG, "sendLoginRequest: Auth token: $authTokenFromHeaders")
+
+                authTokenFromHeaders?.let {
+                    authManager.saveAuthToken(it)
+                    _authToken.value = it
+                }
+
+                authManager.saveRefreshToken(token.refreshToken)
                 authManager.setLoggedIn(true)
                 _isLoggedIn.value = true
-                _authToken.value = response.authToken
             } else {
-                _needsRegistration.value = true
-                email = "" // 백엔드에서 받아온 이메일
-                picture = "" // 백엔드에서 받아온 프로필 사진 URL
+                Log.e("LoginViewModel", "Login failed: ${response.code()}")
             }
         } catch (e: HttpException) {
             if (e.code() == 404) {
+                val errorBody = e.response()?.errorBody()?.string()
+                errorBody?.let {
+                    val parts = it.split("Email:", "Picture:")
+                    if (parts.size >= 3) {
+                        email = parts[1].trim().split(",")[0]
+                        picture = parts[2].trim()
+                    }
+                }
                 _needsRegistration.value = true
-                email = "" // 백엔드에서 받아온 이메일
-                picture = "" // 백엔드에서 받아온 프로필 사진 URL
-            } else if (e.code() == 500) {
-                // 임시 테스트
-                _needsRegistration.value = true
-                email = "test@email.com" // 백엔드에서 받아온 이메일
-                picture = "test_image" // 백엔드에서 받아온 프로필 사진 URL
-                Log.d("KakaoLogin", "500에러 sendLoginRequest에서 받음")
-                Log.d("KakaoLogin", "needsRegistration 값: ${needsRegistration.value}")
+                kakaoAccessToken = token.accessToken
+                kakaoRefreshToken = token.refreshToken
             } else {
                 Log.e("LoginViewModel", "Login failed", e)
             }
         }
     }
+
+
+
 
     fun register(name: String, phoneNumber: String) {
         viewModelScope.launch {
@@ -107,7 +116,9 @@ class LoginViewModel(private val authManager: AuthManager) : ViewModel() {
                 email = email,
                 name = name,
                 phoneNumber = phoneNumber,
-                picture = picture
+                picture = picture,
+                accessToken = kakaoAccessToken,
+                refreshToken = kakaoRefreshToken
             )
 
             try {
@@ -159,7 +170,6 @@ class LoginViewModel(private val authManager: AuthManager) : ViewModel() {
         }
     }
 
-    // 임시 로그인
     fun testLogin() {
         viewModelScope.launch {
             authManager.setLoggedIn(true)
@@ -171,7 +181,6 @@ class LoginViewModel(private val authManager: AuthManager) : ViewModel() {
         }
     }
 
-    // 임시 로그아웃
     fun testLogout() {
         viewModelScope.launch {
             authManager.setLoggedIn(false)
@@ -184,7 +193,6 @@ class LoginViewModel(private val authManager: AuthManager) : ViewModel() {
         }
     }
 
-    // 로그인 중에 뒤로가기 버튼을 누르면 초기화면으로 돌아오면서 상태들 초기화
     fun resetStatus() {
         viewModelScope.launch {
             authManager.setLoggedIn(false)
