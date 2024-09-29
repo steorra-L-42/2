@@ -9,7 +9,6 @@ import androidx.navigation.navigation
 import com.kimnlee.auth.presentation.screen.LoginScreen
 import com.kimnlee.auth.presentation.screen.RegistrationScreen
 import com.kimnlee.common.auth.AuthManager
-import com.kimnlee.auth.presentation.screen.SignUpScreen
 import com.kimnlee.auth.presentation.viewmodel.LoginViewModel
 
 fun NavGraphBuilder.authNavGraph(
@@ -31,17 +30,6 @@ fun NavGraphBuilder.authNavGraph(
                     }
                 },
                 onNavigateToSignUp = { navController.navigate("signup") }
-            )
-        }
-        composable(
-            "signup",
-            enterTransition = { EnterTransition.None },
-            exitTransition = { ExitTransition.None }
-        ) {
-            SignUpScreen(
-                authManager = authManager,
-                viewModel = loginViewModel,
-                onNavigateToBack = { navController.navigateUp() }
             )
         }
         composable(

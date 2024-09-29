@@ -4,7 +4,6 @@ import com.kimnlee.common.auth.AuthManager
 import com.kimnlee.common.auth.api.UnAuthService
 import com.kimnlee.common.auth.model.LoginRequest
 import com.kimnlee.common.auth.model.RegistrationRequest
-import com.kimnlee.common.auth.model.RegistrationResponse
 import com.kimnlee.common.network.ApiClient
 import retrofit2.Response
 
@@ -18,7 +17,7 @@ class ApiUnAuthService(authManager: AuthManager) : UnAuthService {
         return unAuthenticatedApi.login(loginRequest)
     }
 
-    override suspend fun register(registrationRequest: RegistrationRequest): RegistrationResponse {
+    override suspend fun register(registrationRequest: RegistrationRequest): Response<Void> {
         return unAuthenticatedApi.register(registrationRequest)
     }
 }

@@ -16,7 +16,6 @@ import com.kakao.sdk.user.UserApiClient
 import com.kimnlee.common.auth.api.UnAuthService
 import com.kimnlee.common.auth.model.LoginRequest
 import com.kimnlee.common.auth.model.RegistrationRequest
-import com.kimnlee.common.auth.model.RegistrationResponse
 import com.kimnlee.common.network.ApiClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -37,7 +36,6 @@ class AuthManager(private val context: Context) {
 
     private val IS_LOGGED_IN = booleanPreferencesKey("is_logged_in")
     private val unAuthService: UnAuthService = ApiClient.getInstance().unAuthenticatedApi.create(UnAuthService::class.java)
-    private val authService: AuthService = createAuthService() // 삭제 예정
     private val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
 
     private val encryptedSharedPreferences = EncryptedSharedPreferences.create(
@@ -113,7 +111,6 @@ class AuthManager(private val context: Context) {
         }
     }
 
-
     suspend fun logout(): Result<Unit> = suspendCancellableCoroutine { continuation ->
         UserApiClient.instance.logout { error ->
             if (error != null) {
@@ -125,7 +122,7 @@ class AuthManager(private val context: Context) {
         }
     }
 
-    suspend fun register(registrationRequest: RegistrationRequest): RegistrationResponse = withContext(Dispatchers.IO) {
+    suspend fun register(registrationRequest: RegistrationRequest): Response<Void> = withContext(Dispatchers.IO) {
         unAuthService.register(registrationRequest)
     }
 
@@ -133,29 +130,4 @@ class AuthManager(private val context: Context) {
         private const val KEY_AUTH_TOKEN = "auth_token"
         private const val KEY_REFRESH_TOKEN = "refresh_token"
     }
-
-    suspend fun signUp(email: String, name: String, phoneNumber: String): Result<SignUpResponse> {
-        return try {
-            val response = authService.signUp(SignUpRequest(email, name, phoneNumber))
-            Result.success(response)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-    private fun createAuthService(): AuthService {
-        val retrofit = Retrofit.Builder()
-            .baseUrl("https://mobipay.kr/") // baseUrl 수정해야함
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-        return retrofit.create(AuthService::class.java)
-    }
 }
-
-interface AuthService {
-    @POST("api/v1/form-signup")
-    suspend fun signUp(@Body request: SignUpRequest): SignUpResponse
-}
-
-data class SignUpRequest(val email: String, val name: String, val phoneNumber: String)
-data class SignUpResponse(val message: String)
