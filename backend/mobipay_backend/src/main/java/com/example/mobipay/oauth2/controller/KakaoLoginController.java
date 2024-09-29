@@ -51,7 +51,6 @@ public class KakaoLoginController {
             KakaoUserInfoResponseDto kakaoUserInfoResponseDto = getUserInfo(accessToken);
             String email = kakaoUserInfoResponseDto.getKakaoAccount().getEmail();
             String picture = kakaoUserInfoResponseDto.getKakaoAccount().getProfile().getPicture();
-            System.out.println(email + picture);
 
             Boolean existEmail = userService.checkEmailInMobipay(email);
 

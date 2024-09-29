@@ -34,12 +34,16 @@ fun AppNavGraph(
     val application = context as Application
     val biometricViewModel = BiometricViewModel(application)
     val loginViewModel = LoginViewModel(authManager)
-    val isLoggedIn by loginViewModel.isLoggedIn.collectAsState()
 
-    LaunchedEffect(isLoggedIn) {
-        if (isLoggedIn) {
-            navController.navigate("home") {
-                popUpTo("auth") { inclusive = true }
+    LaunchedEffect(loginViewModel) {
+        loginViewModel.navigationEvent.collect { route ->
+            navController.navigate(route) {
+                popUpTo(navController.graph.startDestinationId) {
+//                    saveState = true
+                    inclusive = true
+                }
+                launchSingleTop = true
+                restoreState = false
             }
         }
     }
@@ -85,7 +89,7 @@ fun AppNavGraph(
             }
         }
 
-        authNavGraph(navController, authManager)
+        authNavGraph(navController, authManager, loginViewModel)
         paymentNavGraph(navController)
         cardManagementNavGraph(navController, authManager)
         vehicleManagementNavGraph(navController)

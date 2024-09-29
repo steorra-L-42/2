@@ -1,5 +1,5 @@
 -- bank
-INSERT INTO bank (bank_code, bank_name)
+INSERT ignore INTO bank (bank_code, bank_name)
 VALUES ('001', '한국은행'),
        ('002', '산업은행'),
        ('003', '기업은행'),
@@ -19,12 +19,12 @@ VALUES ('001', '한국은행'),
        ('090', '카카오뱅크'),
        ('999', '싸피은행');
 -- account product
-INSERT INTO account_product (account_type_unique_no, account_name, bank_code)
+INSERT ignore INTO account_product (account_type_unique_no, account_name, bank_code)
 VALUES ('001-1-5574949722ff43', '한국은행 수시입출금 상품', '001'),
        ('004-1-c880da59551a4e', '국민은행 수시입출금 상품', '004'),
        ('090-1-68131944bcc749', '카카오뱅크 수시입출금 상품', '090');
 -- card issuer
-INSERT INTO card_issuer (card_issuer_code, card_issuer_name)
+INSERT ignore INTO card_issuer (card_issuer_code, card_issuer_name)
 VALUES ('1001', 'KB국민카드'),
        ('1002', '삼성카드'),
        ('1003', '롯데카드'),
@@ -36,20 +36,19 @@ VALUES ('1001', 'KB국민카드'),
        ('1009', '하나카드'),
        ('1010', 'IBK기업은행');
 -- card product
-INSERT INTO card_product (card_unique_no, card_name, baseline_performance, max_benefit_limit, card_description, card_issuer_code)
-VALUES
-    ('1001-664f125022bf433', '슬기로운 국민카드', '700000', '130000', '생활20%할인, 교통10% 할인, 대형마트5% 할인', '1001'),
-    ('1002-218c5933582e430', '삼성카드 taptap O', '700000', '130000', '통신10%할인, 교통10% 할인, 대형마트5% 할인', '1002'),
-    ('1005-6d3da5e1ab334fc', '신한카드 SOL트래블', '700000', '130000', '주유7%할인, 교통10% 할인, 대형마트5% 할인', '1005');
+INSERT ignore INTO card_product (card_unique_no, card_name, baseline_performance, max_benefit_limit, card_description,
+                          card_issuer_code)
+VALUES ('1001-664f125022bf433', '슬기로운 국민카드', '700000', '130000', '생활20%할인, 교통10% 할인, 대형마트5% 할인', '1001'),
+       ('1002-218c5933582e430', '삼성카드 taptap O', '700000', '130000', '통신10%할인, 교통10% 할인, 대형마트5% 할인', '1002'),
+       ('1005-6d3da5e1ab334fc', '신한카드 SOL트래블', '700000', '130000', '주유7%할인, 교통10% 할인, 대형마트5% 할인', '1005');
 -- merchant
-INSERT INTO merchant (category_id, merchant_name, lat, lng, mobi_api_key)
-VALUES
-    ('CG-9ca85f66311a23d', '스타벅스 구미인의DT점', '36.095567', '128.431260', 'K1qT4xM9jW2bF5vYcN7'),
-    ('CG-9ca85f66311a23d', '진평주차장', '36.108690', '128.419555', '9dX2hN4jLwT7vK8pYmQ5'),
-    ('CG-3fa85f6425e811e', '인동주유소', '36.110484', '128.419550', 'zF7R3jN1pV8aG6tLxB0'),
-    ('CG-9ca85f66311a23d', '구미셀프세차장', '36.110290', '128.422617', 'G3kP9tX5hJ8nL4mQ7aV'),
-    ('CG-9ca85f66311a23d', '노상주차장', '36.107011', '128.421024', 'R2pX8vN7gL4qJ5yK1wT'),
-    ('CG-9ca85f66311a23d', '투스데이', '36.108661', '128.419280', 'D4wZ6nT2vK3xR9yP8jM');
+INSERT ignore INTO merchant (merchant_id, category_id, merchant_name, lat, lng, mobi_api_key)
+VALUES (1906, 'CG-9ca85f66311a23d', '진평주차장', '36.108690', '128.419555', '9dX2hN4jLwT7vK8pYmQ5'),
+       (1907, 'CG-3fa85f6425e811e', '인동주유소', '36.110484', '128.419550', 'zF7R3jN1pV8aG6tLxB0'),
+       (1908, 'CG-9ca85f66311a23d', '구미셀프세차장', '36.110290', '128.422617', 'G3kP9tX5hJ8nL4mQ7aV'),
+       (1909, 'CG-9ca85f66311a23d', '노상주차장', '36.107011', '128.421024', 'R2pX8vN7gL4qJ5yK1wT'),
+       (1910, 'CG-9ca85f66311a23d', '투스데이', '36.108661', '128.419280', 'D4wZ6nT2vK3xR9yP8jM'),
+       (1911, 'CG-9ca85f66311a23d', '스타벅스 구미인의DT점', '36.095567', '128.431260', 'K1qT4xM9jW2bF5vYcN7');
 --     ('CG-9ca85f66311a23d', '스타벅스', 'lat', 'lng', 'K1qT4xM9jW2bF5vYcN7'),
 --     ('CG-3fa85f6425e811e', '현대오일뱅크', 'lat', 'lng', 'mobi_api_key'),
 --     ('CG-3fa85f6425e811e', 'SK엔크린', 'lat', 'lng', 'mobi_api_key'),

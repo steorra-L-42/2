@@ -1,21 +1,15 @@
 package com.kimnlee.mobipay
 
 import android.content.Intent
-import android.location.Geocoder
 import android.os.Bundle
-import android.util.Log
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.compose.rememberNavController
-import com.kimnlee.auth.presentation.viewmodel.BiometricViewModel
 import com.kimnlee.auth.presentation.viewmodel.AuthenticationState
-import com.kimnlee.common.auth.repository.ApiUnAuthService
+import com.kimnlee.auth.presentation.viewmodel.BiometricViewModel
 import com.kimnlee.common.ui.theme.MobiPayTheme
-import com.kimnlee.common.auth.AuthManager
 import com.kimnlee.mobipay.navigation.AppNavGraph
-import java.util.Locale
 
 class MainActivity : ComponentActivity() {
 

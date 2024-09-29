@@ -51,7 +51,7 @@ fun NotificationScreen(
                     tint = Color.Black
                 )
             }
-            
+
             Text(
                 text = "알림",
                 style = MaterialTheme.typography.headlineSmall,
@@ -168,7 +168,11 @@ fun getPaymentRequests(): List<Notification> {
 
 fun getMemberInvitations(): List<Notification> {
     return listOf(
-        Notification("누군가의 차에 초대됐어요누군가의 차에 초대됐어요누군가의 차에 초대됐어요누군가의 차에 초대됐어요누군가의 차에 초대됐어요누군가의 차에 초대됐어요누군가의 차에 초대됐어요누군가의 차에 초대됐어요누군가의 차에 초대됐어요누군가의 차에 초대됐어요", LocalDateTime.now().minusMinutes(10), NotificationType.MEMBER), // 장문 메시지 테스트용입니다.
+        Notification(
+            "누군가의 차에 초대됐어요누군가의 차에 초대됐어요누군가의 차에 초대됐어요누군가의 차에 초대됐어요누군가의 차에 초대됐어요누군가의 차에 초대됐어요누군가의 차에 초대됐어요누군가의 차에 초대됐어요누군가의 차에 초대됐어요누군가의 차에 초대됐어요",
+            LocalDateTime.now().minusMinutes(10),
+            NotificationType.MEMBER
+        ), // 장문 메시지 테스트용입니다.
         Notification("누군가의 차에 초대됐어요", LocalDateTime.now().minusDays(10), NotificationType.MEMBER)
     )
 }
@@ -230,7 +234,9 @@ fun NotificationItem(notification: Notification) {
 
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.align(Alignment.CenterStart).padding(start = 32.dp)
+            modifier = Modifier
+                .align(Alignment.CenterStart)
+                .padding(start = 32.dp)
         ) {
             Column {
                 Text(
@@ -253,7 +259,11 @@ fun NotificationItem(notification: Notification) {
     }
 }
 
-data class Notification(val message: String, val timestamp: LocalDateTime, val type: NotificationType)
+data class Notification(
+    val message: String,
+    val timestamp: LocalDateTime,
+    val type: NotificationType
+)
 
 enum class NotificationType {
     PAYMENT, MEMBER, OTHER

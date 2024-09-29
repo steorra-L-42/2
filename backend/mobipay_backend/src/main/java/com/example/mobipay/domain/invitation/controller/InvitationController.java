@@ -12,6 +12,7 @@ import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -36,7 +37,7 @@ public class InvitationController {
     @PostMapping("/{invitationId}/response")
     public ResponseEntity<InvitationDecisionResponse> decide (
             @AuthenticationPrincipal CustomOAuth2User oauth2User,
-            @PathVariable @NotNull(message = "Invitation ID is null") @Positive(message = "Invitation ID is not positive") Long invitationId,
+            @PathVariable("invitationId") Long invitationId,
             @RequestBody @Valid InvitationDecisionRequest request) {
         InvitationDecisionResponse reponse = invitationService.decide(oauth2User, invitationId, request.getApproved());
         return ResponseEntity.ok(reponse);

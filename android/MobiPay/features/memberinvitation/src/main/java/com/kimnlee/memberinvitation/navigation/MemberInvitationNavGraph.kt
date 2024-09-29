@@ -7,9 +7,10 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.kimnlee.common.components.BottomNavigation
-import com.kimnlee.memberinvitation.presentation.screen.MemberInvitationDetailScreen
 import com.kimnlee.memberinvitation.presentation.screen.MemberInvitationScreen
 import com.kimnlee.memberinvitation.presentation.screen.MemberInvitationConfirmationScreen
+import com.kimnlee.memberinvitation.presentation.screen.MemberInvitationViaPhoneScreen
+
 
 fun NavGraphBuilder.memberInvitationNavGraph(navController: NavHostController) {
     navigation(startDestination = "member_main/{vehicleId}", route = "memberinvitation") {
@@ -17,33 +18,36 @@ fun NavGraphBuilder.memberInvitationNavGraph(navController: NavHostController) {
             enterTransition = { EnterTransition.None },
             exitTransition = { ExitTransition.None }
         ) { backStackEntry ->
-            val vehicleId = backStackEntry.arguments?.getString("vehicleId")?.toIntOrNull() ?: -1
+//            val vehicleId = backStackEntry.arguments?.getString("vehicleId")?.toIntOrNull() ?: -1
+            val vehicleId = 5 //임시로 넣어둔 것
             BottomNavigation(navController) {
                 MemberInvitationScreen(
                     vehicleId = vehicleId,
                     onNavigateBack = { navController.navigateUp() },
-                    onNavigateToDetail = { navController.navigate("member_detail") },
-                    onNavigateToHome = { navController.navigate("home") {
-                        popUpTo("home") { inclusive = true }
-                    }}
+                    onNavigateToInvitePhone = { navController.navigate("memberinvitation_phone/$vehicleId") },
+                    onNavigateToConfirmation = { navController.navigate("member_confirmation/$vehicleId") }
                 )
             }
         }
-        composable("member_detail",
+        composable("memberinvitation_phone/{vehicleId}",
             enterTransition = { EnterTransition.None },
             exitTransition = { ExitTransition.None }
-        ) {
-            MemberInvitationDetailScreen(
+        ) { backStackEntry ->
+            val vehicleId = backStackEntry.arguments?.getString("vehicleId")?.toIntOrNull() ?: -1
+            MemberInvitationViaPhoneScreen(
                 onNavigateBack = { navController.navigateUp() },
-                onNavigateToConfirmation = { navController.navigate("member_confirmation") }
+                vehicleId = vehicleId,
+                onNavigateToConfirmation = { navController.navigate("member_confirmation/$vehicleId") }
             )
         }
-        composable("member_confirmation",
+        composable("member_confirmation/{vehicleId}",
             enterTransition = { EnterTransition.None },
             exitTransition = { ExitTransition.None }
-        ) {
+        ) { backStackEntry ->
+            val vehicleId = backStackEntry.arguments?.getString("vehicleId")?.toIntOrNull() ?: -1
             MemberInvitationConfirmationScreen(
-                onNavigateBack = { navController.navigateUp() }
+                onNavigateBack = { navController.navigateUp() },
+                vehicleId = vehicleId,
             )
         }
     }

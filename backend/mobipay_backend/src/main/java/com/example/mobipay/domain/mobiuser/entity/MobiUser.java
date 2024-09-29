@@ -5,6 +5,7 @@ import static com.example.mobipay.domain.mobiuser.enums.Role.USER;
 import com.example.mobipay.domain.car.entity.Car;
 import com.example.mobipay.domain.cargroup.entity.CarGroup;
 import com.example.mobipay.domain.common.entity.AuditableCreatedEntity;
+import com.example.mobipay.domain.fcmtoken.entity.FcmToken;
 import com.example.mobipay.domain.invitation.entity.Invitation;
 import com.example.mobipay.domain.kakaotoken.entity.entity.KakaoToken;
 import com.example.mobipay.domain.mobiuser.enums.Role;
@@ -68,6 +69,10 @@ public class MobiUser extends AuditableCreatedEntity {
     private KakaoToken kakaoToken;
 
     @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "fcm_token_id")
+    private FcmToken fcmToken;
+
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ssafy_user_id")
     private SsafyUser ssafyUser;
 
@@ -124,5 +129,13 @@ public class MobiUser extends AuditableCreatedEntity {
         }
         this.ssafyUser = ssafyUser;
         ssafyUser.changeMobiUser(this);
+    }
+
+    public void setFcmToken(FcmToken fcmToken) {
+        if (this.fcmToken != null) {
+            this.fcmToken.changeMobiUser(null);
+        }
+        this.fcmToken = fcmToken;
+        fcmToken.changeMobiUser(this);
     }
 }

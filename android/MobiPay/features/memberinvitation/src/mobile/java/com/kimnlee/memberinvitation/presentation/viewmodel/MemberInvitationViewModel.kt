@@ -14,10 +14,30 @@ class MemberInvitationViewModel : ViewModel() {
     private val _phoneNumber = MutableStateFlow("")
     val phoneNumber: StateFlow<String> = _phoneNumber.asStateFlow()
 
+    private val _showInvitationBLE = MutableStateFlow(false)
+    val showInvitationBLE: StateFlow<Boolean> = _showInvitationBLE.asStateFlow()
+
+    private val _showBottomSheet = MutableStateFlow(false)
+    val showBottomSheet: StateFlow<Boolean> = _showBottomSheet.asStateFlow()
+
+
     fun updatePhoneNumber(newPhoneNumber: String) {
         _phoneNumber.value = newPhoneNumber
     }
+    fun openBottomSheet() {
+        _showBottomSheet.value = true
+    }
 
+    fun closeBottomSheet() {
+        _showBottomSheet.value = false
+    }
+
+    fun openInvitationBLE(){
+        _showInvitationBLE.value = true
+    }
+    fun closeInvitationBLE(){
+        _showInvitationBLE.value = false
+    }
     fun inviteMember() {
         viewModelScope.launch {
             _uiState.value = UiState.Loading
