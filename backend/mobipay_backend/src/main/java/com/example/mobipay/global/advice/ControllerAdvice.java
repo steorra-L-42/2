@@ -2,6 +2,7 @@ package com.example.mobipay.global.advice;
 
 import com.example.mobipay.domain.car.error.CarNotFoundException;
 import com.example.mobipay.domain.car.error.DuplicatedCarNumberException;
+import com.example.mobipay.domain.car.error.NotMemberException;
 import com.example.mobipay.domain.car.error.NotOwnerException;
 import com.example.mobipay.domain.invitation.error.AlreadyDecidedException;
 import com.example.mobipay.domain.invitation.error.AlreadyInvitedException;
@@ -45,6 +46,12 @@ public class ControllerAdvice {
     public ResponseEntity<ErrorResponseDto> handleNotOwnerException(NotOwnerException e) {
         log.info(e.getMessage());
         return getResponse(ErrorCode.NOT_OWNER);
+    }
+
+    @ExceptionHandler(NotMemberException.class)
+    public ResponseEntity<ErrorResponseDto> handleNotMemberException(NotMemberException e) {
+        log.info(e.getMessage());
+        return getResponse(ErrorCode.NOT_MEMBER);
     }
 
     @ExceptionHandler(AccountProductNotFoundException.class)

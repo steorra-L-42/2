@@ -13,6 +13,7 @@ public enum ErrorCode {
     ACCOUNT_PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "수시입출금계좌 상품이 없습니다."),
     CARD_PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "카드 상품이 없습니다."),
     NOT_OWNER(HttpStatus.FORBIDDEN, "차주가 아닙니다."),
+    NOT_MEMBER(HttpStatus.FORBIDDEN, "멤버가 아닙니다."),
     ALREADY_INVITED(HttpStatus.CONFLICT, "이미 초대된 유저입니다."),
     INVITATION_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 초대입니다."),
     INVITATION_ALREADY_DECIDED(HttpStatus.BAD_REQUEST, "이미 처리된 초대입니다."),
