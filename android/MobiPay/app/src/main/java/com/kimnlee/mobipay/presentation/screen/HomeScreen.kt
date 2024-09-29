@@ -5,7 +5,6 @@ import android.content.SharedPreferences
 import android.view.Gravity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,7 +21,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -37,12 +35,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -150,7 +145,6 @@ fun HomeScreen(
                         contentDescription = "차량 이미지",
                         modifier = Modifier
                             .fillMaxWidth()
-//                            .height(170.dp)
                             .clip(RoundedCornerShape(6.dp)),
                         contentScale = ContentScale.FillWidth
                     )
@@ -167,7 +161,6 @@ fun HomeScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(20.dp))
-//                    .height(260.dp)
                     .background(MobiCardBgGray)
                     .padding(24.dp, 18.dp, 24.dp, 18.dp),
             ) {
@@ -209,7 +202,6 @@ fun HomeScreen(
                             text = "입차: 2024년 9월 29일 오전 10시 11분",
                             style = MaterialTheme.typography.bodyLarge,
                             color = MobiTextAlmostBlack,
-//                            fontSize = 16.sp,
                         )
                         Spacer(modifier = Modifier.height(21.dp))
                         Text(
@@ -392,7 +384,7 @@ fun TextOnLP() {
                 modifier = Modifier
                     .width(160.dp)
                     .aspectRatio(aspectRatio)
-                    .padding(start = 20.dp, top = 4.dp, end = 2.dp, bottom = 2.dp)
+                    .padding(start = 22.dp, top = 4.dp, end = 2.dp, bottom = 2.dp)
             ){
                 Text(
                     text = "383모 3838",
