@@ -195,12 +195,12 @@ fun LoginScreen(
 //                    }
 //
 //                    // 테스트 로그인 버튼
-//                    TextButton(
-//                        onClick = { viewModel.testLogin() },
-//                        modifier = Modifier.fillMaxWidth()
-//                    ) {
-//                        Text("테스트 로그인", fontSize = 14.sp, color = registrationButtonColor)
-//                    }
+                    TextButton(
+                        onClick = { viewModel.testLogin() },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("테스트 로그인", fontSize = 14.sp, color = registrationButtonColor)
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(10.dp))
