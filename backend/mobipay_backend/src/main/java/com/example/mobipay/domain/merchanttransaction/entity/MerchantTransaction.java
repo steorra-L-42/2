@@ -1,7 +1,7 @@
 package com.example.mobipay.domain.merchanttransaction.entity;
 
 import com.example.mobipay.domain.merchant.entity.Merchant;
-import com.example.mobipay.domain.registeredcard.entity.domain.RegisteredCard;
+import com.example.mobipay.domain.registeredcard.entity.RegisteredCard;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;

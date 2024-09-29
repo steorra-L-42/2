@@ -1,4 +1,4 @@
-package com.example.mobipay.domain.registeredcard.entity.domain;
+package com.example.mobipay.domain.registeredcard.entity;
 
 import java.io.Serializable;
 import lombok.EqualsAndHashCode;
