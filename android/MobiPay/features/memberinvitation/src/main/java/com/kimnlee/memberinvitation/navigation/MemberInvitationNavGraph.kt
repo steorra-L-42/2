@@ -7,6 +7,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.kimnlee.common.components.BottomNavigation
+import com.kimnlee.memberinvitation.presentation.screen.InvitationWaitingScreen
 import com.kimnlee.memberinvitation.presentation.screen.MemberInvitationScreen
 import com.kimnlee.memberinvitation.presentation.screen.MemberInvitationConfirmationScreen
 import com.kimnlee.memberinvitation.presentation.screen.MemberInvitationViaPhoneScreen
@@ -48,6 +49,15 @@ fun NavGraphBuilder.memberInvitationNavGraph(navController: NavHostController) {
             MemberInvitationConfirmationScreen(
                 onNavigateBack = { navController.navigateUp() },
                 vehicleId = vehicleId,
+            )
+        }
+        composable(
+        "memberinvitation_invitationwaiting",
+            enterTransition = { EnterTransition.None },
+            exitTransition = { ExitTransition.None }
+        ) {
+            InvitationWaitingScreen(
+                navController = navController
             )
         }
     }
