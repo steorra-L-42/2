@@ -22,25 +22,29 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.kimnlee.auth.presentation.viewmodel.LoginViewModel
-import com.kimnlee.common.auth.AuthManager
 import com.kimnlee.common.R
+import com.kimnlee.common.ui.theme.MobiBgGray
+import com.kimnlee.common.ui.theme.MobiTextAlmostBlack
+import com.kimnlee.common.ui.theme.MobiTextDarkGray
 
-val BackgroundColor = Color(0xFFF2F4F6)
 val ButtonColor = Color(0xFFF2F3F5)
-val ButtonTextColor = Color(0xFF505967)
 val SettingsIconColor = Color(0xFFB1B8C0)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ShowMoreScreen(
     viewModel: LoginViewModel,
-    authManager: AuthManager,
     navController: NavController
 ) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("더보기") },
+                title = { Text(
+                    text = "더보기",
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = MobiTextAlmostBlack,
+                    fontSize = 24.sp
+                ) },
                 actions = {
                     IconButton(onClick = { }) {
                         Icon(
@@ -51,12 +55,12 @@ fun ShowMoreScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = BackgroundColor,
-                    titleContentColor = ButtonTextColor
+                    containerColor = MobiBgGray,
+                    titleContentColor = MobiTextDarkGray
                 )
             )
         },
-        containerColor = BackgroundColor
+        containerColor = MobiBgGray
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier
@@ -66,12 +70,11 @@ fun ShowMoreScreen(
         ) {
             item { Spacer(modifier = Modifier.height(16.dp)) }
 
-            // Profile Section
+            // 프로필 영역
             item {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
                     colors = CardDefaults.cardColors(containerColor = Color.White)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
@@ -92,7 +95,13 @@ fun ShowMoreScreen(
                                 )
                             }
                             Spacer(modifier = Modifier.width(16.dp))
-                            Text("김싸피", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = ButtonTextColor)
+                            Text(
+                                text = "김싸피",
+                                style = MaterialTheme.typography.headlineMedium,
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = MobiTextAlmostBlack,
+                            )
                         }
                         Spacer(modifier = Modifier.height(16.dp))
                         Row(
@@ -138,7 +147,7 @@ fun ProfileMenuButton(text: String, onClick: () -> Unit, modifier: Modifier = Mo
         onClick = onClick,
         colors = ButtonDefaults.buttonColors(
             containerColor = ButtonColor,
-            contentColor = ButtonTextColor
+            contentColor = MobiTextDarkGray
         ),
         shape = RoundedCornerShape(8.dp),
         modifier = modifier.height(40.dp)
@@ -149,7 +158,7 @@ fun ProfileMenuButton(text: String, onClick: () -> Unit, modifier: Modifier = Mo
 
 @Composable
 fun MenuSection(title: String, items: List<MenuItem>) {
-    Text(title, fontWeight = FontWeight.Bold, fontSize = 16.sp, color = ButtonTextColor)
+    Text(title, fontWeight = FontWeight.Bold, fontSize = 16.sp, color = MobiTextDarkGray)
     Spacer(modifier = Modifier.height(8.dp))
     items.forEach { item ->
         MenuItemCard(item = item)
@@ -161,7 +170,7 @@ fun MenuSection(title: String, items: List<MenuItem>) {
 fun MenuItemCard(item: MenuItem) {
     val isLogout = item.text == "로그아웃"
     val cardColor = if (isLogout) Color.Transparent else Color.White
-    val textColor = if (isLogout) Color.Red else ButtonTextColor
+    val textColor = if (isLogout) Color.Red else MobiTextDarkGray
     val borderColor = if (isLogout) Color.LightGray else Color.Transparent
 
     Card(
@@ -184,7 +193,9 @@ fun MenuItemCard(item: MenuItem) {
                     text = item.emoji,
                     fontFamily = FontFamily(Font(R.font.emoji)),
                     fontSize = 18.sp,
-                    modifier = Modifier.padding(end = 8.dp)
+                    modifier = Modifier
+                        .padding(top = 6.dp)
+                        .padding(end = 8.dp)
                 )
             }
             Text(

@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -14,19 +16,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.kimnlee.common.R
+import com.kimnlee.common.ui.theme.MobiBgGray
+import com.kimnlee.common.ui.theme.MobiBgWhite
+import com.kimnlee.common.ui.theme.MobiTextAlmostBlack
+import com.kimnlee.common.ui.theme.MobiTextDarkGray
 import com.kimnlee.payment.data.model.Merchant
 import com.kimnlee.payment.data.model.MerchantTransaction
 
-// 토스 스타일 색상 정의(임시)
-private val TossBackgroundColor = Color(0xFFF9FAFB)
-private val TossPrimaryColor = Color(0xFF3182F6)
-private val TossTextColor = Color(0xFF191F28)
-private val TossSecondaryTextColor = Color(0xFF8B95A1)
-private val TossCardBackgroundColor = Color.White
+private val ReceiptBgColor = Color(0xFF3182F6)
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PaymentDetailListScreen(
     transactions: List<MerchantTransaction>,
@@ -34,32 +39,59 @@ fun PaymentDetailListScreen(
     onNavigateToDetail: (transaction: MerchantTransaction) -> Unit,
     onNavigateBack: () -> Unit
 ) {
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = TossBackgroundColor
-    ) {
-        Column(
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "💳",
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontFamily = FontFamily(Font(R.font.emoji)),
+                            fontSize = 24.sp,
+                            modifier = Modifier
+                                .padding(top = 10.dp)
+                                .padding(end = 8.dp)
+                        )
+                        Text(
+                            text = "결제 내역",
+                            style = MaterialTheme.typography.headlineMedium,
+                            color = MobiTextAlmostBlack,
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                },
+                navigationIcon = {
+                    IconButton(onClick = onNavigateBack) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Back",
+                            tint = MobiTextAlmostBlack
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MobiBgGray,
+                    titleContentColor = MobiTextAlmostBlack
+                )
+            )
+        },
+        containerColor = MobiBgGray
+    ) { innerPadding ->
+        LazyColumn(
+            contentPadding = innerPadding,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp)
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text(
-                text = "결제 내역",
-                style = MaterialTheme.typography.headlineMedium,
-                color = TossTextColor,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(modifier = Modifier.height(24.dp))
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                items(transactions) { transaction ->
-                    TransactionCard(
-                        transaction = transaction,
-                        merchant = merchants.find { it.merchant_id == transaction.merchant_id },
-                        onNavigateToDetail = onNavigateToDetail
-                    )
-                }
+            items(transactions) { transaction ->
+                TransactionCard(
+                    transaction = transaction,
+                    merchant = merchants.find { it.merchant_id == transaction.merchant_id },
+                    onNavigateToDetail = onNavigateToDetail
+                )
             }
         }
     }
@@ -77,7 +109,7 @@ fun TransactionCard(
             .clickable { onNavigateToDetail(transaction) },
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-        colors = CardDefaults.cardColors(containerColor = TossCardBackgroundColor)
+        colors = CardDefaults.cardColors(containerColor = MobiBgWhite)
     ) {
         Row(
             modifier = Modifier
@@ -89,19 +121,19 @@ fun TransactionCard(
                 Text(
                     text = merchant?.merchant_name ?: "Unknown Merchant",
                     style = MaterialTheme.typography.titleMedium,
-                    color = TossTextColor,
+                    color = MobiTextAlmostBlack,
                     fontWeight = FontWeight.Bold
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = "${transaction.transaction_date} ${transaction.transaction_time}",
                     style = MaterialTheme.typography.bodySmall,
-                    color = TossSecondaryTextColor
+                    color = MobiTextDarkGray
                 )
                 Text(
                     text = transaction.info,
                     style = MaterialTheme.typography.bodySmall,
-                    color = TossSecondaryTextColor
+                    color = MobiTextDarkGray
                 )
             }
             Column(
@@ -110,7 +142,7 @@ fun TransactionCard(
                 Text(
                     text = "${transaction.payment_balance}원",
                     style = MaterialTheme.typography.titleMedium,
-                    color = TossTextColor,
+                    color = MobiTextAlmostBlack,
                     fontWeight = FontWeight.Bold
                 )
                 Spacer(modifier = Modifier.height(4.dp))
@@ -120,7 +152,7 @@ fun TransactionCard(
                     modifier = Modifier
                         .size(24.dp)
                         .clip(RoundedCornerShape(4.dp))
-                        .background(TossPrimaryColor)
+                        .background(ReceiptBgColor)
                 )
             }
         }

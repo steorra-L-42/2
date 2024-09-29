@@ -18,19 +18,21 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.kimnlee.common.R
+import com.kimnlee.common.ui.theme.MobiBgGray
+import com.kimnlee.common.ui.theme.MobiTextAlmostBlack
+import com.kimnlee.common.ui.theme.MobiTextDarkGray
 import com.kimnlee.payment.data.dummyMerchants
 import com.kimnlee.payment.data.model.MerchantTransaction
 import java.util.Locale
 
-// 토스 스타일 색상 정의(임시)
-private val TossBackgroundColor = Color(0xFFF9FAFB)
-private val TossPrimaryColor = Color(0xFF3182F6)
-private val TossTextColor = Color(0xFF191F28)
-private val TossSecondaryTextColor = Color(0xFF8B95A1)
-private val TossDividerColor = Color(0xFFE5E8EB)
+private val CardBgColor = Color(0xFF3182F6)
+private val DividerColor = Color(0xFFE5E8EB)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -44,19 +46,38 @@ fun PaymentDetailScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("전자 영수증") },
+                title = {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "🧾",
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontFamily = FontFamily(Font(R.font.emoji)),
+                            fontSize = 24.sp,
+                            modifier = Modifier
+                                .padding(top = 10.dp)
+                                .padding(end = 8.dp)
+                        )
+                        Text(
+                            text = "전자 영수증",
+                            style = MaterialTheme.typography.headlineMedium,
+                            color = MobiTextAlmostBlack,
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = TossBackgroundColor,
-                    titleContentColor = TossTextColor
+                    containerColor = MobiBgGray,
+                    titleContentColor = MobiTextAlmostBlack
                 )
             )
         },
-        containerColor = TossBackgroundColor
+        containerColor = MobiBgGray
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -69,14 +90,14 @@ fun PaymentDetailScreen(
             Text(
                 text = merchant?.merchant_name ?: "",
                 style = MaterialTheme.typography.headlineSmall,
-                color = TossTextColor,
+                color = MobiTextAlmostBlack,
                 fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = "${transaction.payment_balance}원",
                 style = MaterialTheme.typography.headlineLarge,
-                color = TossTextColor,
+                color = MobiTextAlmostBlack,
                 fontWeight = FontWeight.Bold
             )
 
@@ -91,7 +112,7 @@ fun PaymentDetailScreen(
                 Text(
                     text = "싸피 카드 (5612)",
                     style = MaterialTheme.typography.bodyLarge,
-                    color = TossTextColor
+                    color = MobiTextAlmostBlack
                 )
                 Image(
                     painter = painterResource(id = R.drawable.credit_card_24px),
@@ -99,12 +120,12 @@ fun PaymentDetailScreen(
                     modifier = Modifier
                         .size(32.dp)
                         .clip(RoundedCornerShape(4.dp))
-                        .background(TossPrimaryColor)
+                        .background(CardBgColor)
                 )
             }
 
             Spacer(modifier = Modifier.height(24.dp))
-            Divider(color = TossDividerColor)
+            HorizontalDivider(color = DividerColor)
             Spacer(modifier = Modifier.height(24.dp))
 
             // 결제 상세 정보
@@ -117,7 +138,7 @@ fun PaymentDetailScreen(
             )
 
             Spacer(modifier = Modifier.height(16.dp))
-            Divider(color = TossDividerColor, thickness = 1.dp, modifier = Modifier.padding(vertical = 16.dp))
+            Divider(color = DividerColor, thickness = 1.dp, modifier = Modifier.padding(vertical = 16.dp))
 
             DetailItem("결제금액", "${transaction.payment_balance}원", isTotal = true)
 
@@ -171,12 +192,12 @@ fun DetailItem(
         Text(
             text = title,
             style = MaterialTheme.typography.bodyMedium,
-            color = if (isTotal) TossTextColor else TossSecondaryTextColor
+            color = if (isTotal) MobiTextAlmostBlack else MobiTextDarkGray
         )
         Text(
             text = content,
             style = MaterialTheme.typography.bodyMedium,
-            color = TossTextColor,
+            color = MobiTextAlmostBlack,
             fontWeight = if (isTotal) FontWeight.Bold else FontWeight.Normal
         )
     }
@@ -188,7 +209,7 @@ private fun getCurrentAddress(context: Context, latitude: Double, longitude: Dou
         val geocoder = Geocoder(context, Locale.KOREA)
         val addresses = geocoder.getFromLocation(latitude, longitude, 1)
 
-        if (addresses != null && addresses.isNotEmpty()) {
+        if (!addresses.isNullOrEmpty()) {
             val address = addresses[0]
             return address.getAddressLine(0)
         }
