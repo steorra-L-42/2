@@ -17,9 +17,6 @@ class LoginViewModel(private val authManager: AuthManager) : ViewModel() {
     private val _isLoggedIn = MutableStateFlow(false)
     val isLoggedIn: StateFlow<Boolean> = _isLoggedIn
 
-    private val _authToken = MutableStateFlow<String?>(null)
-    val authToken: StateFlow<String?> = _authToken
-
     private val _needsRegistration = MutableStateFlow(false)
     val needsRegistration: StateFlow<Boolean> = _needsRegistration
 
@@ -29,10 +26,10 @@ class LoginViewModel(private val authManager: AuthManager) : ViewModel() {
     private val _navigationEvent = MutableSharedFlow<String>()
     val navigationEvent = _navigationEvent.asSharedFlow()
 
-    var email: String = ""
-    var picture: String = ""
-    var kakaoAccessToken: String = ""
-    var kakaoRefreshToken: String = ""
+    private var email: String = ""
+    private var picture: String = ""
+    private var kakaoAccessToken: String = ""
+    private var kakaoRefreshToken: String = ""
 
     init {
         viewModelScope.launch {
@@ -68,21 +65,23 @@ class LoginViewModel(private val authManager: AuthManager) : ViewModel() {
             idToken = token.idToken,
             scopes = listOf("account_email", "profile_image", "talk_message")
         )
-
         try {
-            Log.d(TAG, "sendLoginRequest: ${token.accessToken} // ${token.refreshToken}")
             val response = authManager.login(loginRequest)
 
             if (response.isSuccessful) {
                 val authTokenFromHeaders = response.headers()["Authorization"]?.split(" ")?.getOrNull(1)
-                Log.d(TAG, "sendLoginRequest: Auth token: $authTokenFromHeaders")
-
                 authTokenFromHeaders?.let {
                     authManager.saveAuthToken(it)
-                    _authToken.value = it
                 }
+                val refreshToken = response.headers()["Set-Cookie"]?.let { setCookie ->
+                    setCookie.split(";").firstOrNull { it.trimStart().startsWith("refreshToken=") }
+                        ?.substringAfter("refreshToken=")
+                        ?.trim()
+                }
+                refreshToken?.let { authManager.saveRefreshToken(it) }
+                Log.d(TAG, "sendLoginRequest: Auth token: $authTokenFromHeaders")
+                Log.d(TAG, "sendLoginRequest: Refresh token: ${authManager.getAuthToken()}")
 
-                authManager.saveRefreshToken(token.refreshToken)
                 authManager.setLoggedIn(true)
                 _isLoggedIn.value = true
             } else {
@@ -107,9 +106,6 @@ class LoginViewModel(private val authManager: AuthManager) : ViewModel() {
         }
     }
 
-
-
-
     fun register(name: String, phoneNumber: String) {
         viewModelScope.launch {
             val registrationRequest = RegistrationRequest(
@@ -123,31 +119,27 @@ class LoginViewModel(private val authManager: AuthManager) : ViewModel() {
 
             try {
                 val response = authManager.register(registrationRequest)
-                if (response.success) {
-                    response.authToken?.let { authManager.saveAuthToken(it) }
-                    response.refreshToken?.let { authManager.saveRefreshToken(it) }
+
+                if (response.isSuccessful) {
+                    val authTokenFromHeaders = response.headers()["Authorization"]?.split(" ")?.getOrNull(1)
+                    authTokenFromHeaders?.let {
+                        authManager.saveAuthToken(it)
+                    }
+                    val refreshToken = response.headers()["Set-Cookie"]?.let { setCookie ->
+                        setCookie.split(";").firstOrNull { it.trimStart().startsWith("refreshToken=") }
+                            ?.substringAfter("refreshToken=")
+                            ?.trim()
+                    }
+                    refreshToken?.let { authManager.saveRefreshToken(it) }
                     authManager.setLoggedIn(true)
                     _isLoggedIn.value = true
-                    _authToken.value = response.authToken
                     _needsRegistration.value = false
                     _registrationResult.value = true
-                } else {
-                    Log.e("LoginViewModel", "Registration failed: ${response.message}")
-                    _registrationResult.value = false
+                    Log.d("KakaoLogin", "로그인 성공 AuthToken: ${authManager.getAuthToken()}, RefreshToken: ${authManager.getRefreshToken()}")
                 }
             } catch (e: HttpException) {
-                if (e.code() == 500) {
-                    Log.e("LoginViewModel", "Registration failed", e)
-                    _registrationResult.value = true
-                    // 임시로 로그인 된척 하기(테스트)
-                    _needsRegistration.value = false
-                    authManager.setLoggedIn(true)
-                    _isLoggedIn.value = true
-                    val testToken = "test_auth_token_${System.currentTimeMillis()}"
-                    authManager.saveAuthToken(testToken)
-                    _authToken.value = testToken
-                    Log.i("TestLogin", "Test login successful. Auth Token: $testToken")
-                }
+                _registrationResult.value = false
+                Log.e("LoginViewModel", "Registration failed", e)
             }
 
             // 네비게이션 이벤트는 모든 처리가 끝난 후 한 번만 발생시킴
@@ -163,7 +155,6 @@ class LoginViewModel(private val authManager: AuthManager) : ViewModel() {
             authManager.logout().onSuccess {
                 authManager.setLoggedIn(false)
                 _isLoggedIn.value = false
-                _authToken.value = null
             }.onFailure { error ->
                 // 에러 처리 로직
             }
@@ -176,7 +167,6 @@ class LoginViewModel(private val authManager: AuthManager) : ViewModel() {
             _isLoggedIn.value = true
             val testToken = "test_auth_token_${System.currentTimeMillis()}"
             authManager.saveAuthToken(testToken)
-            _authToken.value = testToken
             Log.i("TestLogin", "Test login successful. Auth Token: $testToken")
         }
     }
@@ -186,7 +176,6 @@ class LoginViewModel(private val authManager: AuthManager) : ViewModel() {
             authManager.setLoggedIn(false)
             _isLoggedIn.value = false
             authManager.clearTokens()
-            _authToken.value = null
             _registrationResult.value = null
             Log.i("TestLogout", "Test logout successful. Auth Token cleared.")
             _navigationEvent.emit("auth")
@@ -198,7 +187,6 @@ class LoginViewModel(private val authManager: AuthManager) : ViewModel() {
             authManager.setLoggedIn(false)
             _isLoggedIn.value = false
             authManager.clearTokens()
-            _authToken.value = null
             _registrationResult.value = null
             _needsRegistration.value = false
         }

@@ -9,14 +9,6 @@ data class LoginRequest(
     val scopes: List<String>
 )
 
-data class LoginResponse(
-    val success: Boolean,
-    val message: String,
-    val authToken: String?,
-    val refreshToken: String?,
-    val headers: Map<String, String>?
-)
-
 data class RegistrationRequest(
     val email: String,
     val name: String,
@@ -24,11 +16,4 @@ data class RegistrationRequest(
     val picture: String,
     val accessToken: String,
     val refreshToken: String,
-)
-
-data class RegistrationResponse(
-    val success: Boolean,
-    val message: String,
-    val authToken: String?,
-    val refreshToken: String?
 )
