@@ -25,6 +25,11 @@ public class JWTUtil {
                 Jwts.SIG.HS256.key().build().getAlgorithm());
     }
 
+    public Long getMobiUserId(String token) {
+        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload()
+                .get("mobiuserid", Long.class);
+    }
+
     // Category 값 얻기
     public String getCategory(String token) {
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload()
@@ -73,19 +78,23 @@ public class JWTUtil {
                 .before(new Date());
     }
 
-    public String createAccessToken(String email, String name, String phoneNumber, String picture) {
-        return createJwt(ACCESS.getType(), email, name, phoneNumber, picture, ACCESS.getExpiration() * MS_TO_S);
+    public String createAccessToken(Long mobiUserId, String email, String name, String phoneNumber, String picture) {
+        return createJwt(ACCESS.getType(), mobiUserId, email, name, phoneNumber, picture,
+                ACCESS.getExpiration() * MS_TO_S);
     }
 
-    public String createRefreshToken(String email, String name, String phoneNumber, String picture) {
-        return createJwt(REFRESH.getType(), email, name, phoneNumber, picture, REFRESH.getExpiration() * MS_TO_S);
+    public String createRefreshToken(Long mobiUserId, String email, String name, String phoneNumber, String picture) {
+        return createJwt(REFRESH.getType(), mobiUserId, email, name, phoneNumber, picture,
+                REFRESH.getExpiration() * MS_TO_S);
     }
 
-    public String createJwt(String category, String email, String name, String phoneNumber, String picture,
+    public String createJwt(String category, Long mobiUserId, String email, String name, String phoneNumber,
+                            String picture,
                             Long expiredMs) {
 
         String jwt = Jwts.builder()
                 .claim("category", category) // access, refresh 판단
+                .claim("mobiUserId", mobiUserId)
                 .claim("email", email)
                 .claim("name", name)
                 .claim("phoneNumber", phoneNumber)

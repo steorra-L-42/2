@@ -13,7 +13,7 @@ public class CookieMethods {
 
         jakarta.servlet.http.Cookie cookie = new jakarta.servlet.http.Cookie(key, value);
         cookie.setMaxAge(REFRESH.getExpiration());
-//        cookie.setSecure(true);
+        cookie.setSecure(true);
         cookie.setHttpOnly(true);
         cookie.setPath("/");
 

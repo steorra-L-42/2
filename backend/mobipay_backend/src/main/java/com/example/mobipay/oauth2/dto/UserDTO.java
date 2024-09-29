@@ -8,7 +8,7 @@ import lombok.Getter;
 @Getter
 @Builder
 public class UserDTO {
-    private Long userId;
+    private Long mobiuserId;
 
     @Email
     @NotEmpty

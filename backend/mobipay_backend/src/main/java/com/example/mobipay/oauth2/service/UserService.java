@@ -39,6 +39,7 @@ public class UserService {
 
     public String generateJwtAccessToken(MobiUser mobiUser) {
         return jwtUtil.createAccessToken(
+                mobiUser.getId(),
                 mobiUser.getEmail(),
                 mobiUser.getName(),
                 mobiUser.getPicture(),
@@ -47,12 +48,13 @@ public class UserService {
     }
 
     public Cookie generateJwtRefreshToken(MobiUser mobiUser) {
+        Long mobiUserId = mobiUser.getId();
         String email = mobiUser.getEmail();
         String name = mobiUser.getName();
         String picture = mobiUser.getPicture();
         String phoneNumber = mobiUser.getPhoneNumber();
 
-        String refreshToken = jwtUtil.createRefreshToken(email, name, phoneNumber, picture);
+        String refreshToken = jwtUtil.createRefreshToken(mobiUserId, email, name, phoneNumber, picture);
         refreshTokenService.addRefreshToken(mobiUser, refreshToken);
 
         return cookieMethods.createCookie(REFRESH.getType(), refreshToken);
