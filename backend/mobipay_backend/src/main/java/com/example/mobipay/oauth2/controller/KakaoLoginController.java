@@ -70,9 +70,7 @@ public class KakaoLoginController {
             HttpHeaders headers = new HttpHeaders();
             headers.add(ACCESS.getType(), BEARER.getType() + jwtaccessToken);
 
-            String responseBody = "Login OK" + jwtaccessToken;
-
-            return ResponseEntity.ok().headers(headers).body(responseBody);
+            return ResponseEntity.ok().headers(headers).build();
 
 
         } catch (Exception e) {
@@ -102,9 +100,7 @@ public class KakaoLoginController {
         HttpHeaders headers = new HttpHeaders();
         headers.add(ACCESS.getType(), BEARER.getType() + jwtaccessToken);  // 헤더에 JWT 토큰 추가
 
-        String responseBody = "Login OK" + jwtaccessToken;
-
-        return ResponseEntity.ok().headers(headers).body(responseBody);
+        return ResponseEntity.ok().headers(headers).build();
     }
 
     public ResponseEntity<String> sendUserDetailRequest(String email, String picture) {
