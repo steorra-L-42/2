@@ -18,8 +18,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -44,6 +46,7 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -84,15 +87,17 @@ fun HomeScreen(
     }
 
     MobiPayTheme {
+        val scrollState = rememberScrollState()
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp)
+                .verticalScroll(scrollState)
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
-                    .padding(top = 1.dp)
+                    .padding(top = 2.dp)
             ){
                 Text(
                     text = " ☀ ",
@@ -100,7 +105,7 @@ fun HomeScreen(
                     fontFamily = FontFamily(Font(R.font.emoji)),
                     fontSize = 24.sp,
                     modifier = Modifier
-                        .padding(top = 9.dp)
+                        .padding(top = 3.dp)
                 )
                 Text(
                     text = " 원영님, 반가워요!",
@@ -114,15 +119,20 @@ fun HomeScreen(
                         .fillMaxWidth()
                         .height(25.dp)
                 ){
-                    Image(
-                        painter = painterResource(id = R.drawable.bell_new),
-                        contentDescription = "알림 아이콘",
-                        contentScale = ContentScale.Fit
-                    )
+                    Row(
+                        modifier = Modifier
+                            .padding(end = 8.dp)
+                    ){
+                        Image(
+                            painter = painterResource(id = R.drawable.bell_new),
+                            contentDescription = "알림 아이콘",
+                            contentScale = ContentScale.Fit
+                        )
+                    }
                 }
 
             }
-            Spacer(modifier = Modifier.height(14.dp))
+            Spacer(modifier = Modifier.height(16.dp))
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(20.dp),
@@ -130,44 +140,42 @@ fun HomeScreen(
             ) {
                 Column(
                     modifier = Modifier
-                        .padding(20.dp)
+                        .padding(40.dp, 20.dp)
                         .align(Alignment.CenterHorizontally)
                 ) {
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(20.dp))
                     Image(
-                        painter = painterResource(id = com.kimnlee.vehiclemanagement.R.drawable.genesis_g90),
-//                        painter = painterResource(id = R.drawable.rav4),
+//                        painter = painterResource(id = com.kimnlee.vehiclemanagement.R.drawable.genesis_g90),
+                        painter = painterResource(id = com.kimnlee.mobipay.R.drawable.gv80),
                         contentDescription = "차량 이미지",
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(180.dp)
-                            .clip(RoundedCornerShape(20.dp)),
-                        contentScale = ContentScale.Crop
+//                            .height(170.dp)
+                            .clip(RoundedCornerShape(6.dp)),
+                        contentScale = ContentScale.FillWidth
                     )
-                    Spacer(modifier = Modifier.height(10.dp))
+                    Spacer(modifier = Modifier.height(18.dp))
                     TextOnLP()
 
-                    Spacer(modifier = Modifier.height(26.dp))
+                    Spacer(modifier = Modifier.height(28.dp))
                     CarUserIconsRow()
                 }
             }
-            Spacer(modifier = Modifier.height(8.dp))
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(20.dp))
-                    .height(300.dp)
+//                    .height(260.dp)
                     .background(MobiCardBgGray)
-                    .padding(24.dp, 16.dp, 24.dp, 24.dp),
+                    .padding(24.dp, 18.dp, 24.dp, 18.dp),
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
                 ) {
                     Row(
-
                     ){
                         Text(
                             text = "\uD83C\uDD7F",
@@ -175,16 +183,88 @@ fun HomeScreen(
                             fontFamily = FontFamily(Font(R.font.emoji)),
                             fontSize = 22.sp,
                             modifier = Modifier
-                                .padding(top = 4.dp)
+                                .padding(top = 0.dp)
                         )
                         Text(
-                            text = " 여기에 주차했어요!",
+                            text = "  유료주차장 이용중",
                             style = MaterialTheme.typography.headlineMedium,
                             color = MobiTextAlmostBlack,
                             fontSize = 21.sp,
                         )
                     }
-                    Spacer(modifier = Modifier.height(9.dp))
+                    Spacer(modifier = Modifier.height(17.dp))
+                    Column(
+                        modifier = Modifier
+                            .padding(start = 5.dp, end = 5.dp)
+                            .clip(RoundedCornerShape(6.dp))
+                    ){
+                        Text(
+                            text = "여의도 더현대 지하주차장",
+                            style = MaterialTheme.typography.headlineMedium,
+                            color = MobiTextAlmostBlack,
+                            fontSize = 22.5.sp,
+                        )
+                        Spacer(modifier = Modifier.height(7.dp))
+                        Text(
+                            text = "입차: 2024년 9월 29일 오전 10시 11분",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MobiTextAlmostBlack,
+//                            fontSize = 16.sp,
+                        )
+                        Spacer(modifier = Modifier.height(21.dp))
+                        Text(
+                            text = "2시간 14분 경과",
+                            style = MaterialTheme.typography.headlineMedium,
+                            color = MobiTextAlmostBlack,
+                            fontSize = 19.sp,
+                            textAlign = TextAlign.End,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Text(
+                            text = "예상 요금  8,000원",
+                            style = MaterialTheme.typography.headlineMedium,
+                            color = MobiTextAlmostBlack,
+                            fontSize = 19.sp,
+                            textAlign = TextAlign.End,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(20.dp))
+                    .height(260.dp)
+                    .background(MobiCardBgGray)
+                    .padding(24.dp, 18.dp, 24.dp, 24.dp),
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                ) {
+                    Row(
+                    ){
+                        Text(
+                            text = "\uD83D\uDCCD",
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontFamily = FontFamily(Font(R.font.emoji)),
+                            fontSize = 22.sp,
+                            modifier = Modifier
+                                .padding(top = 0.dp)
+                        )
+                        Text(
+                            text = "  여기에 주차했어요!",
+                            style = MaterialTheme.typography.headlineMedium,
+                            color = MobiTextAlmostBlack,
+                            fontSize = 21.sp,
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(12.dp))
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(6.dp))
