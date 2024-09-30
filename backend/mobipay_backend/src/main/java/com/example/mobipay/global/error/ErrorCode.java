@@ -21,6 +21,8 @@ public enum ErrorCode {
     NOT_INVITED(HttpStatus.FORBIDDEN, "초대되지 않은 유저입니다."),
     BAD_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 요청입니다."),
     NOT_FOUND(HttpStatus.NOT_FOUND, "찾을 수 없습니다."),
+    MERCHANT_NOT_FOUND(HttpStatus.NOT_FOUND, "가맹점을 찾을 수 없습니다."),
+    INVALID_MOBI_API_KEY(HttpStatus.BAD_REQUEST, "올바르지 않은 MobiApiKey 입니다."),
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 에러입니다.");
 
 

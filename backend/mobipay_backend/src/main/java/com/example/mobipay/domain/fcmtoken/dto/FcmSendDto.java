@@ -14,9 +14,7 @@ public class FcmSendDto {
 
     @NotNull(message = "token 값이 null 입니다.")
     private String token;
-    @NotNull(message = "title 값이 null 입니다.")
     private String title;
-    @NotNull(message = "body 값이 null 입니다.")
     private String body;
     private Map<String, String> data;
 
@@ -25,5 +23,12 @@ public class FcmSendDto {
         this.title = title;
         this.body = body;
         this.data = null;
+    }
+
+    public FcmSendDto(String token, Map<String, String> data) {
+        this.token = token;
+        this.data = data;
+        this.title = null;
+        this.body = null;
     }
 }

@@ -1,6 +1,5 @@
 package com.kimnlee.common.auth
 
-//테스트를 위한 회원가입용 임포트문 삭제예정(api 통신에 필요할 경우 남길 수 있음)
 import android.app.Activity
 import android.content.Context
 import android.util.Log
@@ -30,7 +29,8 @@ import kotlin.coroutines.resume
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "auth")
 private const val TAG = "AuthManager"
-class AuthManager(private val context: Context) {
+
+class AuthManager private constructor(private val applicationContext: Context) {
 
     private val IS_LOGGED_IN = booleanPreferencesKey("is_logged_in")
     private val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
@@ -38,18 +38,18 @@ class AuthManager(private val context: Context) {
     private val encryptedSharedPreferences = EncryptedSharedPreferences.create(
         "secret_shared_prefs",
         masterKeyAlias,
-        context,
+        applicationContext,
         EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
         EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
     )
 
-    val isLoggedIn: Flow<Boolean> = context.dataStore.data
+    val isLoggedIn: Flow<Boolean> = applicationContext.dataStore.data
         .map { preferences ->
             preferences[IS_LOGGED_IN] ?: false
         }
 
     suspend fun setLoggedIn(isLoggedIn: Boolean) {
-        context.dataStore.edit { preferences ->
+        applicationContext.dataStore.edit { preferences ->
             preferences[IS_LOGGED_IN] = isLoggedIn
         }
     }
@@ -100,5 +100,14 @@ class AuthManager(private val context: Context) {
     companion object {
         private const val KEY_AUTH_TOKEN = "auth_token"
         private const val KEY_REFRESH_TOKEN = "refresh_token"
+
+        @Volatile
+        private var INSTANCE: AuthManager? = null
+
+        fun getInstance(context: Context): AuthManager {
+            return INSTANCE ?: synchronized(this) {
+                INSTANCE ?: AuthManager(context.applicationContext).also { INSTANCE = it }
+            }
+        }
     }
 }

@@ -39,14 +39,14 @@ public class CustomOAuth2User implements OAuth2User {
     }
 
     public Long getMobiUserId() { // mobiUserId
-        return null;
+        return userDTO.getMobiuserId();
     }
 
     public String getEmail() {
         return userDTO.getEmail();
     }
 
-    public String getPhonenumber() {
+    public String getPhoneNumber() {
         return userDTO.getPhonenumber();
     }
 

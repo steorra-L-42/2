@@ -1,13 +1,16 @@
 package com.kimnlee.firebase
 
+import android.Manifest
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
 import android.media.RingtoneManager
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
+import androidx.core.app.ActivityCompat
 import androidx.core.app.Person
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.CATEGORY_MESSAGE
@@ -20,16 +23,19 @@ import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.kimnlee.common.network.ApiClient
 import com.kimnlee.common.network.BackendService
+import com.kimnlee.common.auth.AuthManager
+import com.kimnlee.payment.data.repository.PaymentRepository
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-
 
 private const val TAG = "FCMService"
 
 class FCMService(private val apiClient: ApiClient) : FirebaseMessagingService() {
 
     private lateinit var mNotificationManager: NotificationManagerCompat
+    private lateinit var paymentRepository: PaymentRepository
+    private lateinit var authManager: AuthManager
 
     private val fcmApi = apiClient.fcmApi
     private val backendService = fcmApi.create(BackendService::class.java)
@@ -50,6 +56,9 @@ class FCMService(private val apiClient: ApiClient) : FirebaseMessagingService() 
     override fun onCreate() {
         Log.d(TAG, "onCreate: FCM onCreate")
 
+//        authManager = AuthManager(applicationContext)
+        authManager = AuthManager.getInstance(applicationContext)
+        paymentRepository = PaymentRepository(this.authManager)
 
         // FCM 토큰 확인
         FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
@@ -93,11 +102,8 @@ class FCMService(private val apiClient: ApiClient) : FirebaseMessagingService() 
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE)
 
         val replyAction = NotificationCompat.Action.Builder(R.drawable.ic_mobipay, "Reply", replyPendingIntent)
-
             .setSemanticAction(NotificationCompat.Action.SEMANTIC_ACTION_REPLY)
-
             .setShowsUserInterface(false)
-
             .addRemoteInput(createReplyRemoteInput(context))
             .build()
 
@@ -135,18 +141,14 @@ class FCMService(private val apiClient: ApiClient) : FirebaseMessagingService() 
         val appDeviceUser: MobiUser = MobiUser(1, "Kim", IconCompat.createWithResource(applicationContext, R.drawable.ic_mobipay))
 
         val devicePerson = Person.Builder()
-
             .setName(appDeviceUser.name)
-
             .setIcon(IconCompat.createWithResource(applicationContext, R.drawable.ic_mobipay))
-
             .setKey(appDeviceUser.id.toString())
             .build()
 
         val messagingStyle = NotificationCompat.MessagingStyle(devicePerson)
 
         messagingStyle.setConversationTitle(appConversation.title)
-
         messagingStyle.setGroupConversation(appConversation.recipients.size > 1)
 
         for (appMessage in appConversation.getUnreadMessages(IconCompat.createWithResource(applicationContext, R.drawable.ic_mobipay))) {
@@ -166,60 +168,122 @@ class FCMService(private val apiClient: ApiClient) : FirebaseMessagingService() 
 
 
 
-    @RequiresApi(Build.VERSION_CODES.R)
     fun notify(context: Context, appConversation: MobiConversation) {
 
         val replyAction = createReplyAction(context, appConversation)
         val markAsReadAction = createMarkAsReadAction(context, appConversation)
-        val messagingStyle = createMessagingStyle(context, appConversation)
 
-        val notification = NotificationCompat.Builder(context, "payment_request")
+        var messagingStyle: NotificationCompat.MessagingStyle? = null
+
+        if (Build.VERSION.SDK_INT > 30) {
+            messagingStyle = createMessagingStyle(context, appConversation)
+        }
+
+        val notificationBuilder = NotificationCompat.Builder(context, "payment_request")
             .setSmallIcon(R.drawable.ic_mobipay)
             .setCategory(CATEGORY_MESSAGE)
             .setLargeIcon(appConversation.icon)
             .setSilent(false)
             .setVisibility(VISIBILITY_PUBLIC)
             .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
-            .setStyle(messagingStyle)
             .setPriority(NotificationCompat.PRIORITY_MAX)
 
             .addAction(replyAction)
+            .addAction(markAsReadAction)
 
-            .build()
+        messagingStyle?.let {
+            notificationBuilder.setStyle(it)
+        }
 
+        val notification = notificationBuilder.build()
 
         val notificationManagerCompat = NotificationManagerCompat.from(context)
-        notificationManagerCompat.notify(appConversation.id, notification)
 
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
+            notificationManagerCompat.notify(appConversation.id, notification)
+        }
     }
 
-    @RequiresApi(Build.VERSION_CODES.R)
-    override fun onMessageReceived(remoteMessage: RemoteMessage) {
-        super.onMessageReceived(remoteMessage)
-        Log.d(TAG, "From: ${remoteMessage.from}")
 
-        remoteMessage.notification?.let { notification ->
+//    @RequiresApi(Build.VERSION_CODES.R)
+//    override fun onMessageReceived(remoteMessage: RemoteMessage) {
+//        super.onMessageReceived(remoteMessage)
+//        Log.d(TAG, "From: ${remoteMessage.from}")
+//
+//        remoteMessage.notification?.let { notification ->
+//
+//            Log.d(TAG, "Notification Title: ${notification.title}")
+//            Log.d(TAG, "Notification Body: ${notification.body}")
+//
+//            if (remoteMessage.data.isNotEmpty()) {
+//                Log.d(TAG, "페이로드: ${remoteMessage.data}")
+//            }
+//
+//            confirmFCMReceived(remoteMessage.messageId ?: "No Message ID")
+//
+//            val user2 = MobiUser(15, "MobiUserTMP", IconCompat.createWithResource(applicationContext, R.drawable.ic_mobipay))
+//            val list2 = mutableListOf<MobiUser>()
+//            list2.add(user2)
+//            notify(applicationContext, MobiConversation(77, "Title1", "body", list2, BitmapFactory.decodeResource(resources, R.drawable.ic_mobipay)))
+//
+//            // 네비게이션에 Alert 창을 띄우기 위한 코드
+//            val intent2 = Intent("com.kimnlee.mobipay.SHOW_ALERT")
+//            intent2.putExtra("title", "모비페이 결제요청")
+//            intent2.putExtra("content", notification.body)
+//            sendBroadcast(intent2)
+//            Log.d(TAG, "onMessageReceived: sent Broadcast")
+//        }
+//    }
 
-            Log.d(TAG, "Notification Title: ${notification.title}")
-            Log.d(TAG, "Notification Body: ${notification.body}")
 
-            if (remoteMessage.data.isNotEmpty()) {
-                Log.d(TAG, "페이로드: ${remoteMessage.data}")
+    fun processMessage(remoteMessage: RemoteMessage){
+        if (remoteMessage.data.isNotEmpty()) {
+            Log.d(TAG, "페이로드: ${remoteMessage.data}")
+
+            val responseJson = remoteMessage.data
+
+            val lat = responseJson["lat"]
+            val lng = responseJson["lng"]
+
+            if (lat != null && lng != null) {
+                paymentRepository.processFCM(lat, lng)
             }
+
+            val title = responseJson["title"] ?: "No Title"
+            val body = responseJson["body"] ?: "No Body"
 
             confirmFCMReceived(remoteMessage.messageId ?: "No Message ID")
 
             val user2 = MobiUser(15, "MobiUserTMP", IconCompat.createWithResource(applicationContext, R.drawable.ic_mobipay))
             val list2 = mutableListOf<MobiUser>()
             list2.add(user2)
-            notify(applicationContext, MobiConversation(77, "Title1", list2, BitmapFactory.decodeResource(resources, R.drawable.ic_mobipay)))
+            // 사용자 화면에 Notification 송출하는 코드
+            notify(applicationContext, MobiConversation(77, title, body, list2, BitmapFactory.decodeResource(resources, R.drawable.ic_mobipay)))
 
-            val intent2 = Intent("com.kimnlee.mobipay.SHOW_ALERT")
-            intent2.putExtra("title", "모비페이 결제요청")
-            intent2.putExtra("content", notification.body)
-            sendBroadcast(intent2)
-            Log.d(TAG, "onMessageReceived: sent Broadcast")
+            val type = "결제알림"
+            broadcastForAlert(type, title, body)
         }
+    }
+
+    override fun onMessageReceived(remoteMessage: RemoteMessage) {
+        super.onMessageReceived(remoteMessage)
+//        Log.d(TAG, "From: ${remoteMessage.from}"){
+        if (remoteMessage.data.isNotEmpty()) {
+            processMessage(remoteMessage)
+        }
+
+    }
+
+    /**
+     * Android Auto 네비게이션 화면에 ALERT를 띄우는 화면
+     */
+    private fun broadcastForAlert(type: String, title : String, body : String){
+        val intent = Intent("com.kimnlee.mobipay.SHOW_ALERT")
+        intent.putExtra("type", type)
+        intent.putExtra("title", title)
+        intent.putExtra("content", body)
+        sendBroadcast(intent)
+        Log.d(TAG, "onMessageReceived: sent Broadcast")
     }
 
     /**

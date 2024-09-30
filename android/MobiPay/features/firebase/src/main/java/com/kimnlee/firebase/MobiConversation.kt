@@ -6,12 +6,13 @@ import androidx.core.graphics.drawable.IconCompat
 data class MobiConversation(
     val id: Int,
     val title: String,
+    val body: String,
     val recipients: MutableList<MobiUser>,
     val icon: Bitmap
 ) {
     
     fun getUnreadMessages(icon: IconCompat): List<MobiMessage> {
-        val tmp = MobiMessage(1, MobiUser(55, "모비페이",  icon), "메세지 내용", System.currentTimeMillis())
+        val tmp = MobiMessage(1, MobiUser(55, "모비페이",  icon), body, System.currentTimeMillis())
         val list1 = mutableListOf<MobiMessage>()
         list1.add(tmp)
         return list1
