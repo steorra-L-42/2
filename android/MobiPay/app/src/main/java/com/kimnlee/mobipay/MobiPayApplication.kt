@@ -28,7 +28,7 @@ class MobiPayApplication : Application() {
         apiClient = ApiClient.getInstance()
 
         // AuthManager 초기화
-        authManager = AuthManager(this)
+        authManager = AuthManager.getInstance(this)
         apiClient = ApiClient.getInstance(authManager)
 
         // 카카오 SDK 초기화
