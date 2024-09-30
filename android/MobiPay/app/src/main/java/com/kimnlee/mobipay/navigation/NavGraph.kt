@@ -14,8 +14,11 @@ import com.kimnlee.auth.presentation.screen.PaymentScreen
 import com.kimnlee.auth.presentation.viewmodel.BiometricViewModel
 import com.kimnlee.auth.presentation.viewmodel.LoginViewModel
 import com.kimnlee.cardmanagement.navigation.cardManagementNavGraph
+import com.kimnlee.cardmanagement.presentation.viewmodel.CardManagementViewModel
 import com.kimnlee.common.auth.AuthManager
 import com.kimnlee.common.components.BottomNavigation
+import com.kimnlee.common.network.ApiClient
+import com.kimnlee.firebase.FCMService
 import com.kimnlee.memberinvitation.navigation.memberInvitationNavGraph
 import com.kimnlee.mobipay.presentation.screen.HomeScreen
 import com.kimnlee.mobipay.presentation.screen.ShowMoreScreen
@@ -27,11 +30,14 @@ import com.kimnlee.vehiclemanagement.navigation.vehicleManagementNavGraph
 fun AppNavGraph(
     navController: NavHostController,
     authManager: AuthManager,
-    context: Context
+    context: Context,
+    apiClient: ApiClient,
+    fcmService: FCMService
 ) {
     val application = context as Application
     val biometricViewModel = BiometricViewModel(application)
-    val loginViewModel = LoginViewModel(authManager)
+    val loginViewModel = LoginViewModel(authManager, apiClient, fcmService)
+    val cardManagementViewModel = CardManagementViewModel(authManager, apiClient)
 
     LaunchedEffect(loginViewModel) {
         loginViewModel.navigationEvent.collect { route ->
@@ -89,8 +95,8 @@ fun AppNavGraph(
 
         authNavGraph(navController, authManager, loginViewModel)
         paymentNavGraph(navController)
-        cardManagementNavGraph(navController, authManager)
-        vehicleManagementNavGraph(navController)
+        cardManagementNavGraph(navController, authManager, cardManagementViewModel)
+        vehicleManagementNavGraph(navController, apiClient)
         memberInvitationNavGraph(navController)
         notificationNavGraph(navController)
     }

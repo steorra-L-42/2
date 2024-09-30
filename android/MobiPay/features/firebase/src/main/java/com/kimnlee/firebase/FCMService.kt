@@ -27,11 +27,11 @@ import retrofit2.Response
 
 private const val TAG = "FCMService"
 
-class FCMService : FirebaseMessagingService() {
+class FCMService(private val apiClient: ApiClient) : FirebaseMessagingService() {
 
     private lateinit var mNotificationManager: NotificationManagerCompat
 
-    private val fcmApi = ApiClient.getInstance().fcmApi
+    private val fcmApi = apiClient.fcmApi
     private val backendService = fcmApi.create(BackendService::class.java)
 
     fun getToken(callback: (String) -> Unit) {

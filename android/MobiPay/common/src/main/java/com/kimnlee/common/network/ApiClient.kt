@@ -10,7 +10,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-class ApiClient private constructor(private val authManager: AuthManager?) {
+class ApiClient private constructor(private val tokenProvider: () -> String?) {
 
     private val baseUrl = BuildConfig.BASE_URL
     private val fcmBaseUrl = BuildConfig.FCM_BASE_URL
@@ -18,10 +18,7 @@ class ApiClient private constructor(private val authManager: AuthManager?) {
 
     private val authInterceptor = Interceptor { chain ->
         val originalRequest = chain.request()
-        val authToken = authManager?.getAuthToken()
-
-        Log.d("ApiClient", "authInterceptor: AuthManager is ${if (authManager == null) "null" else "not null"}")
-        Log.d("ApiClient", "authInterceptor: Auth token is ${if (authToken.isNullOrEmpty()) "null or empty" else "present"}")
+        val authToken = tokenProvider()
 
         val newRequest = if (!authToken.isNullOrEmpty()) {
             originalRequest.newBuilder()
@@ -30,7 +27,6 @@ class ApiClient private constructor(private val authManager: AuthManager?) {
         } else {
             originalRequest
         }
-
         chain.proceed(newRequest)
     }
 
@@ -74,9 +70,9 @@ class ApiClient private constructor(private val authManager: AuthManager?) {
         @Volatile
         private var instance: ApiClient? = null
 
-        fun getInstance(authManager: AuthManager? = null): ApiClient {
+        fun getInstance(tokenProvider: () -> String?): ApiClient {
             return instance ?: synchronized(this) {
-                instance ?: ApiClient(authManager).also { instance = it }
+                instance ?: ApiClient(tokenProvider).also { instance = it }
             }
         }
     }

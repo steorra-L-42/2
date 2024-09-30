@@ -6,9 +6,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kakao.sdk.auth.model.OAuthToken
 import com.kimnlee.common.auth.AuthManager
+import com.kimnlee.common.auth.api.AuthService
 import com.kimnlee.common.auth.model.LoginRequest
 import com.kimnlee.common.auth.model.RegistrationRequest
 import com.kimnlee.common.auth.model.SendTokenRequest
+import com.kimnlee.common.network.ApiClient
 import com.kimnlee.firebase.FCMService
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
@@ -18,7 +20,15 @@ import retrofit2.HttpException
 import kotlin.coroutines.resume
 
 private const val TAG = "LoginViewModel"
-class LoginViewModel(private val authManager: AuthManager) : ViewModel() {
+class LoginViewModel(
+    private val authManager: AuthManager,
+    private val apiClient: ApiClient,
+    private val fcmService: FCMService
+) : ViewModel() {
+
+    private val unAuthService: AuthService = apiClient.unAuthenticatedApi.create(AuthService::class.java)
+    private val authService: AuthService = apiClient.authenticatedApi.create(AuthService::class.java)
+
     private val _isLoggedIn = MutableStateFlow(false)
     val isLoggedIn: StateFlow<Boolean> = _isLoggedIn
 
@@ -30,8 +40,6 @@ class LoginViewModel(private val authManager: AuthManager) : ViewModel() {
 
     private val _navigationEvent = MutableSharedFlow<String>()
     val navigationEvent = _navigationEvent.asSharedFlow()
-
-    private val fcmService = FCMService()
 
     private var email: String = ""
     private var picture: String = ""
@@ -73,7 +81,7 @@ class LoginViewModel(private val authManager: AuthManager) : ViewModel() {
             scopes = listOf("account_email", "profile_image", "talk_message")
         )
         try {
-            val response = authManager.login(loginRequest)
+            val response = unAuthService.login(loginRequest)
 
             if (response.isSuccessful) {
                 val authTokenFromHeaders = response.headers()["Authorization"]?.split(" ")?.getOrNull(1)
@@ -120,7 +128,7 @@ class LoginViewModel(private val authManager: AuthManager) : ViewModel() {
             )
 
             try {
-                val response = authManager.register(registrationRequest)
+                val response = unAuthService.register(registrationRequest)
 
                 if (response.isSuccessful) {
                     val authTokenFromHeaders = response.headers()["Authorization"]?.split(" ")?.getOrNull(1)
@@ -171,7 +179,7 @@ class LoginViewModel(private val authManager: AuthManager) : ViewModel() {
 
             try {
                 Log.d(TAG, "About to call authManager.sendTokens")
-                val response = authManager.sendTokens(sendTokensRequest)
+                val response = authService.sendTokens(sendTokensRequest)
 
                 if (response.isSuccessful) {
                     Log.d(TAG, "FCM token sent successfully")
@@ -192,12 +200,19 @@ class LoginViewModel(private val authManager: AuthManager) : ViewModel() {
     // 테스트 필요함
     fun logout() {
         viewModelScope.launch {
-            authManager.logout().onSuccess {
-                _isLoggedIn.value = false
-                _navigationEvent.emit("auth")
-            }.onFailure { error ->
-                // 에러 처리 로직
-                Log.e(TAG, "Logout failed", error)
+            try {
+                val response = authService.logout()
+                if (response.isSuccessful) {
+                    authManager.clearTokens()
+                    authManager.setLoggedIn(false)
+                    _isLoggedIn.value = false
+                    _navigationEvent.emit("auth")
+                } else {
+                    // 로그아웃 실패 처리
+                    Log.e(TAG, "Logout failed: ${response.code()}")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Logout failed", e)
             }
         }
     }

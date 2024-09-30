@@ -12,6 +12,7 @@ import androidx.annotation.OptIn
 import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
+import com.kimnlee.common.auth.AuthManager
 import com.kimnlee.common.network.ApiClient
 import com.kimnlee.common.auth.model.OCRResponse
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -30,7 +31,8 @@ private const val INFERENCE_INTERVAL = 1000
 class LicensePlateAnalyzer(
     private val context: Context,
     private val isAnalyzing: () -> Boolean,
-    private val onLicensePlateRecognized: (String) -> Unit
+    private val onLicensePlateRecognized: (String) -> Unit,
+    private val apiClient: ApiClient
 ) : ImageAnalysis.Analyzer {
 
     private var lastAnalyzedTime = 0L
@@ -128,7 +130,7 @@ class LicensePlateAnalyzer(
         val requestFile = RequestBody.create("image/jpeg".toMediaTypeOrNull(), file)
         val body = MultipartBody.Part.createFormData("file", file.name, requestFile)
 
-        val call = ApiClient.getInstance().ocrService.uploadImage(body)
+        val call = apiClient.ocrService.uploadImage(body)
         call.enqueue(object : Callback<OCRResponse> {
             override fun onResponse(call: Call<OCRResponse>, response: Response<OCRResponse>) {
                 if (response.isSuccessful) {

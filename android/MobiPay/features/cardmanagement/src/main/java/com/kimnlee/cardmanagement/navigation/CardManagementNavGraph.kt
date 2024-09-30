@@ -16,14 +16,14 @@ import com.kimnlee.common.components.BottomNavigation
 
 fun NavGraphBuilder.cardManagementNavGraph(
     navController: NavHostController,
-    authManager: AuthManager
+    authManager: AuthManager,
+    viewModel: CardManagementViewModel
 ) {
     navigation(startDestination = "cardmanagement_main", route = "cardmanagement") {
         composable("cardmanagement_main",
             enterTransition = { EnterTransition.None },
             exitTransition = { ExitTransition.None }
         ) {
-            val viewModel = CardManagementViewModel(authManager)
 
             BottomNavigation(navController) {
                 CardManagementScreen(

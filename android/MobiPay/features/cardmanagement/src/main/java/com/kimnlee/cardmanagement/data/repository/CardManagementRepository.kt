@@ -5,10 +5,9 @@ import com.kimnlee.cardmanagement.data.api.CardManagementApiService
 import com.kimnlee.cardmanagement.data.model.Photos
 import com.kimnlee.common.auth.AuthManager
 
-class CardManagementRepository(private val authManager: AuthManager) {
-    private val cardManagementService = CardManagementApiService.create(authManager)
+class CardManagementRepository(private val authenticatedApi: CardManagementApiService) {
 
     suspend fun getPhotos(): List<Photos> {
-        return cardManagementService.getPhotos().filter { photo -> photo.id <= 5 }
+        return authenticatedApi.getPhotos().filter { photo -> photo.id <= 5 }
     }
 }

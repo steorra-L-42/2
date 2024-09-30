@@ -33,8 +33,6 @@ private const val TAG = "AuthManager"
 class AuthManager(private val context: Context) {
 
     private val IS_LOGGED_IN = booleanPreferencesKey("is_logged_in")
-    private val unAuthService: AuthService = ApiClient.getInstance().unAuthenticatedApi.create(AuthService::class.java)
-    private val authService: AuthService = ApiClient.getInstance().authenticatedApi.create(AuthService::class.java)
     private val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
 
     private val encryptedSharedPreferences = EncryptedSharedPreferences.create(
@@ -99,60 +97,60 @@ class AuthManager(private val context: Context) {
         }
     }
 
-    suspend fun login(loginRequest: LoginRequest): Response<Void> = withContext(Dispatchers.IO) {
-        try {
-            unAuthService.login(loginRequest)
-        } catch (e: HttpException) {
-            Log.d(TAG, "${e.response()}")
-            Log.d(TAG, "${e.code()}")
-            Log.d(TAG, "Login failed: ${e.message()}")
-            throw e
-        } catch (e: Exception) {
-            throw Exception("Network error or other exception", e)
-        }
-    }
+//    suspend fun login(loginRequest: LoginRequest): Response<Void> = withContext(Dispatchers.IO) {
+//        try {
+//            unAuthService.login(loginRequest)
+//        } catch (e: HttpException) {
+//            Log.d(TAG, "${e.response()}")
+//            Log.d(TAG, "${e.code()}")
+//            Log.d(TAG, "Login failed: ${e.message()}")
+//            throw e
+//        } catch (e: Exception) {
+//            throw Exception("Network error or other exception", e)
+//        }
+//    }
 
-    suspend fun logout(): Result<Unit> = withContext(Dispatchers.IO) {
-        try {
-            // 1. 카카오 로그아웃
-            val kakaoLogoutResult = suspendCancellableCoroutine<Result<Unit>> { continuation ->
-                UserApiClient.instance.logout { error ->
-                    if (error != null) {
-                        continuation.resume(Result.failure(error))
-                    } else {
-                        continuation.resume(Result.success(Unit))
-                    }
-                }
-            }
-
-            // 카카오 로그아웃 실패 시 즉시 실패 결과 반환
-            if (kakaoLogoutResult.isFailure) {
-                return@withContext kakaoLogoutResult
-            }
-
-            // 2. 서버에 로그아웃 요청
-            val response = authService.logout()
-
-            if (response.isSuccessful) {
-                // 3. 로그아웃 성공 시 토큰 삭제
-                clearTokens()
-                setLoggedIn(false)
-                Result.success(Unit)
-            } else {
-                Result.failure(Exception("Server logout failed: ${response.code()}"))
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-    suspend fun register(registrationRequest: RegistrationRequest): Response<Void> = withContext(Dispatchers.IO) {
-        unAuthService.register(registrationRequest)
-    }
-
-    suspend fun sendTokens(sendTokenRequest: SendTokenRequest): Response<SendTokenResponse> = withContext(Dispatchers.IO) {
-        authService.sendTokens(sendTokenRequest)
-    }
+//    suspend fun logout(): Result<Unit> = withContext(Dispatchers.IO) {
+//        try {
+//            // 1. 카카오 로그아웃
+//            val kakaoLogoutResult = suspendCancellableCoroutine<Result<Unit>> { continuation ->
+//                UserApiClient.instance.logout { error ->
+//                    if (error != null) {
+//                        continuation.resume(Result.failure(error))
+//                    } else {
+//                        continuation.resume(Result.success(Unit))
+//                    }
+//                }
+//            }
+//
+//            // 카카오 로그아웃 실패 시 즉시 실패 결과 반환
+//            if (kakaoLogoutResult.isFailure) {
+//                return@withContext kakaoLogoutResult
+//            }
+//
+//            // 2. 서버에 로그아웃 요청
+//            val response = authService.logout()
+//
+//            if (response.isSuccessful) {
+//                // 3. 로그아웃 성공 시 토큰 삭제
+//                clearTokens()
+//                setLoggedIn(false)
+//                Result.success(Unit)
+//            } else {
+//                Result.failure(Exception("Server logout failed: ${response.code()}"))
+//            }
+//        } catch (e: Exception) {
+//            Result.failure(e)
+//        }
+//    }
+//
+//    suspend fun register(registrationRequest: RegistrationRequest): Response<Void> = withContext(Dispatchers.IO) {
+//        unAuthService.register(registrationRequest)
+//    }
+//
+//    suspend fun sendTokens(sendTokenRequest: SendTokenRequest): Response<SendTokenResponse> = withContext(Dispatchers.IO) {
+//        authService.sendTokens(sendTokenRequest)
+//    }
 
     companion object {
         private const val KEY_AUTH_TOKEN = "auth_token"
