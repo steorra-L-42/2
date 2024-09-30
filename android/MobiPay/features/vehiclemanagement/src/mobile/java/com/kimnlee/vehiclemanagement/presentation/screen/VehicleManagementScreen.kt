@@ -4,9 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -15,18 +13,27 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
 import com.kimnlee.vehiclemanagement.presentation.viewmodel.Vehicle
-
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.focus.focusModifier
+import androidx.compose.ui.graphics.Color
+import com.kimnlee.vehiclemanagement.R
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.unit.sp
+import com.kimnlee.common.ui.theme.MobiCardBgGray
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddCircle
 
 @Composable
 fun VehicleManagementScreen(
     onNavigateToDetail: (Int) -> Unit,
-    onNavigateToHome: () -> Unit,
     onNavigateToRegistration: () -> Unit,
     viewModel: VehicleManagementViewModel = viewModel()
 ) {
     val vehicles by viewModel.vehicles.collectAsState()
-    println("Vehicle list size: ${vehicles.size}")
 
     Column(
         modifier = Modifier
@@ -39,29 +46,39 @@ fun VehicleManagementScreen(
         )
         Spacer(modifier = Modifier.height(16.dp))
 
-        // 누르면 각 차량의 상세 페이지로 이동하도록 추후 추가
         LazyColumn {
             items(vehicles) { vehicle ->
-                VehicleItem(vehicle, onClick = { onNavigateToDetail(vehicle.id) })
+                VehicleItem(vehicle, onClick = { onNavigateToDetail(vehicle.carId) })
+                Spacer(modifier = Modifier.height(16.dp))
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Button(onClick = onNavigateToRegistration) {
-            Text("차량 등록")
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-//        Button(onClick = onNavigateToDetail) {
-//            Text("상세 화면으로 이동")
-//        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Button(onClick = onNavigateToHome) {
-            Text("홈으로 돌아가기")
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp)
+                .clickable(onClick = onNavigateToRegistration),
+            shape = RoundedCornerShape(8.dp),
+            colors = CardDefaults.cardColors(containerColor = MobiCardBgGray),
+            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.AddCircle,
+                    contentDescription = "차량 등록하러 가기",
+                    modifier = Modifier.size(48.dp),
+                    tint = Color.Black
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text("차량 등록하러 가기", style = MaterialTheme.typography.bodyLarge)
+            }
         }
     }
 }
@@ -72,28 +89,70 @@ fun VehicleItem(vehicle: Vehicle, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp)
             .clickable(onClick = onClick),
+        shape = RoundedCornerShape(8.dp),
+        colors = CardDefaults.cardColors(containerColor = MobiCardBgGray),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(4.dp),
-            horizontalAlignment = Alignment.CenterHorizontally // 콘텐츠를 수평으로 중앙 정렬
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
-            // 이미지
             Image(
-                painter = painterResource(id = vehicle.imageResId),
-                contentDescription = "Vehicle Image",
+                painter = painterResource(id = R.drawable.genesis_g90),
+                contentDescription = "차량 이미지",
                 modifier = Modifier
-                    .size(100.dp)
+                    .fillMaxWidth()
+                    .size(160.dp)
+                    .clip(RoundedCornerShape(8.dp)),
+                contentScale = ContentScale.Crop
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+
+            TextOnLP(vehicle.number)
+        }
+    }
+}
+
+@Composable
+fun TextOnLP(vehicleNumber: String) {
+    val aspectRatio = 949f / 190f
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .fillMaxWidth()
+    ){
+        Box(
+            modifier = Modifier
+                .width(162.dp)
+                .aspectRatio(aspectRatio)
+        ) {
+            Image(
+                painter = painterResource(id = com.kimnlee.common.R.drawable.mobi_lp),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.matchParentSize()
             )
 
-            // 차량 이름
-            Text(
-                text = vehicle.name,
-                style = MaterialTheme.typography.titleLarge
-            )
+            Box(
+                modifier = Modifier
+                    .width(160.dp)
+                    .aspectRatio(aspectRatio)
+                    .padding(start = 20.dp, top = 4.dp, end = 2.dp, bottom = 2.dp)
+            ){
+                Text(
+                    text = vehicleNumber,
+                    color = Color.Black,
+                    fontSize = 23.sp,
+                    fontFamily = FontFamily(Font(com.kimnlee.common.R.font.nsrextrabold)),
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                )
+            }
+
         }
     }
 }

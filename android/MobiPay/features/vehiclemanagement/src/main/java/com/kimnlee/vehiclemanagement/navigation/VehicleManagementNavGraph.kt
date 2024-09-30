@@ -23,11 +23,6 @@ fun NavGraphBuilder.vehicleManagementNavGraph(navController: NavHostController, 
                     onNavigateToDetail = { vehicleId ->
                         navController.navigate("vehiclemanagement_detail/$vehicleId")
                     },
-                    onNavigateToHome = {
-                        navController.navigate("home") {
-                            popUpTo("home") { inclusive = true }
-                        }
-                    },
                     onNavigateToRegistration = { navController.navigate("vehiclemanagement_registration") }
                 )
             }
