@@ -10,6 +10,7 @@ import com.example.merchant.domain.parking.dto.ParkingExitRequest;
 import com.example.merchant.domain.parking.entity.Parking;
 import com.example.merchant.domain.parking.repository.ParkingRepository;
 import com.example.merchant.util.TimeUtil;
+import com.example.merchant.util.credential.CredentialUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -42,33 +43,26 @@ class ParkingExitTest {
 
     private static final Logger log = LoggerFactory.getLogger(ParkingExitTest.class);
 
-    @Value("${merchant.api.key}")
-    private String validMerApiKey;
-
     private final WebApplicationContext context;
     private final ParkingRepository parkingRepository;
-    protected MockMvc mockMvc;
-    protected ObjectMapper objectMapper;
+    private final CredentialUtil credentialUtil;
+    protected final ObjectMapper objectMapper;
+    protected final MockMvc mockMvc;
 
     @Autowired
-    public ParkingExitTest(WebApplicationContext context, MockMvc mockMvc,
-                           ObjectMapper objectMapper, ParkingRepository parkingRepository) {
+    public ParkingExitTest(WebApplicationContext context, ParkingRepository parkingRepository, MockMvc mockMvc, ObjectMapper objectMapper, CredentialUtil credentialUtil) {
         this.context = context;
         this.parkingRepository = parkingRepository;
         this.mockMvc = mockMvc;
         this.objectMapper = objectMapper;
+        this.credentialUtil = credentialUtil;
     }
 
-    @BeforeEach
-    void setUp() {
-        mockMvc = MockMvcBuilders.webAppContextSetup(context)
-                .addFilter(new CharacterEncodingFilter("UTF-8", true))
-                .alwaysDo(print())
-                .build();
-    }
+    private String POS_MER_API_KEY;
 
     @BeforeEach
     void setup() {
+        POS_MER_API_KEY = credentialUtil.getPOS_MER_API_KEY();
         parkingRepository.deleteAll();
         parkingRepository.save(Parking.builder()
                 .number("123가4567")
@@ -116,7 +110,7 @@ class ParkingExitTest {
 
         // when
         ResultActions result = mockMvc.perform(patch(url)
-                        .header("merApiKey", validMerApiKey)
+                        .header("merApiKey", POS_MER_API_KEY)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody));
 
@@ -157,7 +151,7 @@ class ParkingExitTest {
 
         // when
         ResultActions result = mockMvc.perform(patch(url)
-                        .header("merApiKey", validMerApiKey)
+                        .header("merApiKey", POS_MER_API_KEY)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody));
 
@@ -181,7 +175,7 @@ class ParkingExitTest {
 
         // when
         ResultActions result = mockMvc.perform(patch(url)
-                        .header("merApiKey", validMerApiKey)
+                        .header("merApiKey", POS_MER_API_KEY)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody));
 
@@ -202,7 +196,7 @@ class ParkingExitTest {
 
         // when
         ResultActions result = mockMvc.perform(patch(url)
-                        .header("merApiKey", validMerApiKey)
+                        .header("merApiKey", POS_MER_API_KEY)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody));
 

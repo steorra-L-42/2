@@ -10,6 +10,7 @@ import com.example.merchant.domain.parking.dto.ParkingEntryRequest;
 import com.example.merchant.domain.parking.entity.Parking;
 import com.example.merchant.domain.parking.repository.ParkingRepository;
 import com.example.merchant.util.TimeUtil;
+import com.example.merchant.util.credential.CredentialUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -42,19 +43,20 @@ class ParkingEntryTest {
 
     private static final Logger log = LoggerFactory.getLogger(ParkingEntryTest.class);
 
-    @Value("${merchant.api.key}")
-    private String validMerApiKey;
-
     private final WebApplicationContext context;
     private final ParkingRepository parkingRepository;
+    private final CredentialUtil credentialUtil;
     protected MockMvc mockMvc;
     protected ObjectMapper objectMapper;
 
+    private String POS_MER_API_KEY;
+
     @Autowired
-    public ParkingEntryTest(WebApplicationContext context, MockMvc mockMvc,
-                            ObjectMapper objectMapper, ParkingRepository parkingRepository) {
+    public ParkingEntryTest(WebApplicationContext context, ParkingRepository parkingRepository,
+                            CredentialUtil credentialUtil, MockMvc mockMvc, ObjectMapper objectMapper) {
         this.context = context;
         this.parkingRepository = parkingRepository;
+        this.credentialUtil = credentialUtil;
         this.mockMvc = mockMvc;
         this.objectMapper = objectMapper;
     }
@@ -65,7 +67,8 @@ class ParkingEntryTest {
                 Arguments.of("실패: carNumber가 빈 문자열일 경우 400 Bad Request", "", LocalDateTime.now().toString()),
                 Arguments.of("실패: carNumber가 8자를 초과할 경우 400", "123456789", LocalDateTime.now().toString()),
                 Arguments.of("실패: entry가 null인 경우 400 Bad Request", "123가4567", "null"),
-                Arguments.of("실패: entry가 미래인 경우 400 Bad Request", "123가4567", LocalDateTime.now().plusDays(1).toString())
+                Arguments.of("실패: entry가 미래인 경우 400 Bad Request", "123가4567",
+                        LocalDateTime.now().plusDays(1).toString())
         );
     }
 
@@ -92,6 +95,7 @@ class ParkingEntryTest {
 
     @BeforeEach
     public void setUp() {
+        POS_MER_API_KEY = credentialUtil.getPOS_MER_API_KEY();
         parkingRepository.deleteAll();
     }
 
@@ -107,14 +111,15 @@ class ParkingEntryTest {
             throws Exception {
         // given
         final String url = "/api/v1/merchants/parking/entry";
-        final ParkingEntryRequest parkingEntryRequest = new ParkingEntryRequest(carNumber, TimeUtil.parseDateTime(entry));
+        final ParkingEntryRequest parkingEntryRequest = new ParkingEntryRequest(carNumber,
+                TimeUtil.parseDateTime(entry));
         final String requestBody = objectMapper.writeValueAsString(parkingEntryRequest);
 
         // when
         ResultActions result = mockMvc.perform(post(url)
-                        .header("merApiKey", validMerApiKey)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestBody));
+                .header("merApiKey", POS_MER_API_KEY)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody));
 
         // then
         result.andExpect(status().isBadRequest());
@@ -133,9 +138,9 @@ class ParkingEntryTest {
 
         // when
         ResultActions result = mockMvc.perform(post(url)
-                        .header("merApiKey", validMerApiKey)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestBody));
+                .header("merApiKey", POS_MER_API_KEY)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody));
 
         // then
         result.andExpect(status().isBadRequest());
@@ -157,9 +162,9 @@ class ParkingEntryTest {
 
         // when
         ResultActions result = mockMvc.perform(post(url)
-                        .header("merApiKey", invalidMerApiKey)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestBody));
+                .header("merApiKey", invalidMerApiKey)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody));
 
         // then
         result.andExpect(status().isUnauthorized());
@@ -175,14 +180,15 @@ class ParkingEntryTest {
             throws Exception {
         // given
         final String url = "/api/v1/merchants/parking/entry";
-        final ParkingEntryRequest parkingEntryRequest = new ParkingEntryRequest(carNumber, TimeUtil.parseDateTime(entry));
+        final ParkingEntryRequest parkingEntryRequest = new ParkingEntryRequest(carNumber,
+                TimeUtil.parseDateTime(entry));
         final String requestBody = objectMapper.writeValueAsString(parkingEntryRequest);
 
         // when
         ResultActions result = mockMvc.perform(post(url)
-                        .header("merApiKey", validMerApiKey)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestBody));
+                .header("merApiKey", POS_MER_API_KEY)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody));
 
         // then
         result.andExpect(status().isOk());
