@@ -5,10 +5,9 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import com.kimnlee.vehiclemanagement.R // 이미지 리소스를 사용하기 위해 R을 가져옵니다.
-import kotlinx.coroutines.flow.asStateFlow
+import com.kimnlee.vehiclemanagement.R
 
-data class Vehicle(val id: Int, val name: String, val imageResId: Int)
+data class Vehicle(val carId: Int, val number: String, val imageResId: Int)
 
 class VehicleManagementViewModel : ViewModel() {
     private val _vehicles = MutableStateFlow<List<Vehicle>>(emptyList())
@@ -18,19 +17,18 @@ class VehicleManagementViewModel : ViewModel() {
         // 더미 데이터로 초기화(실제로는 데이터베이스에서 가져와야 합니다)
         viewModelScope.launch {
             _vehicles.value = listOf(
-                Vehicle(1, "123 가 4567", R.drawable.genesis_g90),
-                Vehicle(2, "258 하 1302", R.drawable.genesis_g90),
-                Vehicle(3, "182 아 1021", R.drawable.genesis_g90)
+                Vehicle(1, "123가 4567", R.drawable.genesis_g90),
+                Vehicle(2, "258하 1302", R.drawable.genesis_g90)
             )
         }
     }
 
-    fun addVehicle(name: String) {
+    fun addVehicle(number: String) {
         viewModelScope.launch {
             val updatedList = _vehicles.value.toMutableList()
             val newVehicle = Vehicle(
-                id = updatedList.size + 1,
-                name = name,
+                carId = updatedList.size + 1,
+                number = number,
                 imageResId = R.drawable.genesis_g90 // 기본 이미지 설정
             )
             updatedList.add(newVehicle)
@@ -40,6 +38,6 @@ class VehicleManagementViewModel : ViewModel() {
     }
 
     fun getVehicleById(id: Int): Vehicle? {
-        return _vehicles.value.find { it.id == id }
+        return _vehicles.value.find { it.carId == id }
     }
 }

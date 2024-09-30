@@ -9,11 +9,4 @@ interface PaymentApiService {
     @GET("photos")
     suspend fun getPhotos(): List<Photos>
 
-    companion object {
-        fun create(authManager: AuthManager): PaymentApiService {
-            return ApiClient.getInstance(authManager)
-                .authenticatedApi
-                .create(PaymentApiService::class.java)
-        }
-    }
 }

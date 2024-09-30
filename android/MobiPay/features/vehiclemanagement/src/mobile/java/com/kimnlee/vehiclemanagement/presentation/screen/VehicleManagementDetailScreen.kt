@@ -68,7 +68,7 @@ fun VehicleManagementDetailScreen(
                         .padding(bottom = 16.dp)
                 )
                 Text(
-                    text = it.name,
+                    text = it.number,
                     style = MaterialTheme.typography.headlineSmall
                 )
             } ?: Text("차량을 찾을 수 없습니다.")

@@ -43,6 +43,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.kimnlee.common.network.ApiClient
 import com.kimnlee.vehiclemanagement.data.model.LicensePlateAnalyzer
 import com.kimnlee.vehiclemanagement.presentation.viewmodel.VehicleManagementViewModel
 import java.util.concurrent.Executors
@@ -52,7 +53,8 @@ private const val TAG = "VehicleRegistrationScreen"
 @Composable
 fun VehicleRegistrationScreen(
     onNavigateBack: () -> Unit,
-    viewModel: VehicleManagementViewModel = viewModel()
+    viewModel: VehicleManagementViewModel = viewModel(),
+    apiClient: ApiClient
 ) {
     var licensePlate by remember { mutableStateOf("") }
     val context = LocalContext.current
@@ -164,7 +166,8 @@ fun VehicleRegistrationScreen(
                                         isAnalyzing = { isAnalyzing },
                                         onLicensePlateRecognized = { plateNumber ->
                                             recognizedLicensePlate = plateNumber
-                                        }
+                                        },
+                                        apiClient = apiClient
                                     )
                                 )
 
