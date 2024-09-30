@@ -22,12 +22,14 @@ class MainActivity : ComponentActivity() {
         setTheme(R.style.Theme_MobiPay)
 
         val authManager = (application as MobiPayApplication).authManager
+        val apiClient = (application as MobiPayApplication).apiClient
+        val fcmService = (application as MobiPayApplication).fcmService
 
         biometricViewModel = ViewModelProvider(this).get(BiometricViewModel::class.java)
         setContent {
             MobiPayTheme {
                 val navController = rememberNavController()
-                AppNavGraph(navController, authManager, applicationContext)
+                AppNavGraph(navController, authManager, applicationContext, apiClient, fcmService)
             }
         }
     }

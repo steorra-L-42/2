@@ -39,4 +39,26 @@ public class ApprovalWaiting {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "merchant_id")
     private Merchant merchant;
+
+    private ApprovalWaiting(Long paymentBalance) {
+        this.paymentBalance = paymentBalance;
+    }
+
+    public static ApprovalWaiting of(Long paymentBalance) {
+        return new ApprovalWaiting(paymentBalance);
+    }
+
+    public void addRelations(Car car, Merchant merchant) {
+        if (this.car != null) {
+            this.car.getApprovalWaitings().remove(this);
+        }
+        this.car = car;
+        car.getApprovalWaitings().add(this);
+
+        if (this.merchant != null) {
+            this.merchant.getApprovalWaitings().remove(this);
+        }
+        this.merchant = merchant;
+        merchant.getApprovalWaitings().add(this);
+    }
 }
