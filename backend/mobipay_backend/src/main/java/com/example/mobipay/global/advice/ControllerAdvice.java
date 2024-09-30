@@ -9,7 +9,9 @@ import com.example.mobipay.domain.invitation.error.AlreadyInvitedException;
 import com.example.mobipay.domain.invitation.error.InvitationNoFoundException;
 import com.example.mobipay.domain.invitation.error.NotApprovedOrRejectedException;
 import com.example.mobipay.domain.invitation.error.NotInvitedException;
+import com.example.mobipay.domain.merchant.error.MerchantNotFoundException;
 import com.example.mobipay.domain.mobiuser.error.MobiUserNotFoundException;
+import com.example.mobipay.domain.postpayments.error.InvalidMobiApiKeyException;
 import com.example.mobipay.global.authentication.error.AccountProductNotFoundException;
 import com.example.mobipay.global.authentication.error.CardProductNotFoundException;
 import com.example.mobipay.global.error.ErrorCode;
@@ -94,6 +96,18 @@ public class ControllerAdvice {
     public ResponseEntity<ErrorResponseDto> handleNotInvitedException(NotInvitedException e) {
         log.info(e.getMessage());
         return getResponse(ErrorCode.NOT_INVITED);
+    }
+
+    @ExceptionHandler(MerchantNotFoundException.class)
+    public ResponseEntity<ErrorResponseDto> handleMerchantNotFoundException(MerchantNotFoundException e) {
+        log.info(e.getMessage());
+        return getResponse(ErrorCode.MERCHANT_NOT_FOUND);
+    }
+
+    @ExceptionHandler(InvalidMobiApiKeyException.class)
+    public ResponseEntity<ErrorResponseDto> handleInvalidMobiApiKeyException(InvalidMobiApiKeyException e) {
+        log.info(e.getMessage());
+        return getResponse(ErrorCode.INVALID_MOBI_API_KEY);
     }
 
     private ResponseEntity<ErrorResponseDto> getResponse(ErrorCode errorCode) {
