@@ -13,7 +13,7 @@ import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys
 import com.kakao.sdk.auth.model.OAuthToken
 import com.kakao.sdk.user.UserApiClient
-import com.kimnlee.common.auth.api.UnAuthService
+import com.kimnlee.common.auth.api.AuthService
 import com.kimnlee.common.auth.model.LoginRequest
 import com.kimnlee.common.auth.model.RegistrationRequest
 import com.kimnlee.common.network.ApiClient
@@ -24,10 +24,6 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import retrofit2.HttpException
 import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.http.Body
-import retrofit2.http.POST
 import kotlin.coroutines.resume
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "auth")
@@ -35,7 +31,7 @@ private const val TAG = "AuthManager"
 class AuthManager(private val context: Context) {
 
     private val IS_LOGGED_IN = booleanPreferencesKey("is_logged_in")
-    private val unAuthService: UnAuthService = ApiClient.getInstance().unAuthenticatedApi.create(UnAuthService::class.java)
+    private val authService: AuthService = ApiClient.getInstance().unAuthenticatedApi.create(AuthService::class.java)
     private val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
 
     private val encryptedSharedPreferences = EncryptedSharedPreferences.create(
@@ -100,7 +96,7 @@ class AuthManager(private val context: Context) {
 
     suspend fun login(loginRequest: LoginRequest): Response<Void> = withContext(Dispatchers.IO) {
         try {
-            unAuthService.login(loginRequest)
+            authService.login(loginRequest)
         } catch (e: HttpException) {
             Log.d(TAG, "${e.response()}")
             Log.d(TAG, "${e.code()}")
@@ -123,7 +119,7 @@ class AuthManager(private val context: Context) {
     }
 
     suspend fun register(registrationRequest: RegistrationRequest): Response<Void> = withContext(Dispatchers.IO) {
-        unAuthService.register(registrationRequest)
+        authService.register(registrationRequest)
     }
 
     companion object {
