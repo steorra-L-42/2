@@ -1,9 +1,12 @@
 package com.kimnlee.common.network
 
+import android.content.ContentValues.TAG
+import android.util.Log
 import com.kimnlee.common.BuildConfig
 import com.kimnlee.common.auth.AuthManager
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
@@ -16,6 +19,9 @@ class ApiClient private constructor(private val authManager: AuthManager?) {
     private val authInterceptor = Interceptor { chain ->
         val originalRequest = chain.request()
         val authToken = authManager?.getAuthToken()
+
+        Log.d("ApiClient", "authInterceptor: AuthManager is ${if (authManager == null) "null" else "not null"}")
+        Log.d("ApiClient", "authInterceptor: Auth token is ${if (authToken.isNullOrEmpty()) "null or empty" else "present"}")
 
         val newRequest = if (!authToken.isNullOrEmpty()) {
             originalRequest.newBuilder()

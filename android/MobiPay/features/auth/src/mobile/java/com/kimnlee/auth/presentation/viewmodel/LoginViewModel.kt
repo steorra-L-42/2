@@ -8,9 +8,14 @@ import com.kakao.sdk.auth.model.OAuthToken
 import com.kimnlee.common.auth.AuthManager
 import com.kimnlee.common.auth.model.LoginRequest
 import com.kimnlee.common.auth.model.RegistrationRequest
+import com.kimnlee.common.auth.model.SendTokenRequest
+import com.kimnlee.firebase.FCMService
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import retrofit2.HttpException
+import kotlin.coroutines.resume
 
 private const val TAG = "LoginViewModel"
 class LoginViewModel(private val authManager: AuthManager) : ViewModel() {
@@ -25,6 +30,8 @@ class LoginViewModel(private val authManager: AuthManager) : ViewModel() {
 
     private val _navigationEvent = MutableSharedFlow<String>()
     val navigationEvent = _navigationEvent.asSharedFlow()
+
+    private val fcmService = FCMService()
 
     private var email: String = ""
     private var picture: String = ""
@@ -71,7 +78,9 @@ class LoginViewModel(private val authManager: AuthManager) : ViewModel() {
             if (response.isSuccessful) {
                 val authTokenFromHeaders = response.headers()["Authorization"]?.split(" ")?.getOrNull(1)
                 authTokenFromHeaders?.let {
+                    Log.d(TAG, "Calling saveAuthToken from sendLoginRequest")
                     authManager.saveAuthToken(it)
+                    Log.d(TAG, "Auth token saved in sendLoginRequest")
                 }
                 val refreshToken = response.headers()["Set-Cookie"]?.let { setCookie ->
                     setCookie.split(";").firstOrNull { it.trimStart().startsWith("refreshToken=") }
@@ -79,11 +88,8 @@ class LoginViewModel(private val authManager: AuthManager) : ViewModel() {
                         ?.trim()
                 }
                 refreshToken?.let { authManager.saveRefreshToken(it) }
-                Log.d(TAG, "sendLoginRequest: Auth token: $authTokenFromHeaders")
-                Log.d(TAG, "sendLoginRequest: Refresh token: ${authManager.getAuthToken()}")
-
-                authManager.setLoggedIn(true)
-                _isLoggedIn.value = true
+                Log.d(TAG, "About to call sendTokens from sendLoginRequest")
+                sendTokens()
             } else if (response.code() == 404) {
                 val errorBody = response.errorBody()?.string()
                 errorBody?.let {
@@ -119,7 +125,9 @@ class LoginViewModel(private val authManager: AuthManager) : ViewModel() {
                 if (response.isSuccessful) {
                     val authTokenFromHeaders = response.headers()["Authorization"]?.split(" ")?.getOrNull(1)
                     authTokenFromHeaders?.let {
+                        Log.d(TAG, "Calling saveAuthToken from register")
                         authManager.saveAuthToken(it)
+                        Log.d(TAG, "Auth token saved in register")
                     }
                     val refreshToken = response.headers()["Set-Cookie"]?.let { setCookie ->
                         setCookie.split(";").firstOrNull { it.trimStart().startsWith("refreshToken=") }
@@ -127,10 +135,10 @@ class LoginViewModel(private val authManager: AuthManager) : ViewModel() {
                             ?.trim()
                     }
                     refreshToken?.let { authManager.saveRefreshToken(it) }
-                    authManager.setLoggedIn(true)
-                    _isLoggedIn.value = true
                     _needsRegistration.value = false
                     _registrationResult.value = true
+                    Log.d(TAG, "About to call sendTokens from register")
+                    sendTokens()
                     Log.d("KakaoLogin", "로그인 성공 AuthToken: ${authManager.getAuthToken()}, RefreshToken: ${authManager.getRefreshToken()}")
                 }
             } catch (e: HttpException) {
@@ -146,16 +154,54 @@ class LoginViewModel(private val authManager: AuthManager) : ViewModel() {
         }
     }
 
+    // 200ok 오면 fcm token 바디에 넣어서 보내주기
+    suspend fun sendTokens() {
+        Log.d(TAG, "sendTokens called")
+        val currentAuthToken = authManager.getAuthToken()
+        Log.d(TAG, "Current auth token in sendTokens: ${currentAuthToken?.take(10) ?: "null"}...")
+
+        val fcmToken = suspendCancellableCoroutine<String?> { continuation ->
+            fcmService.getToken { token ->
+                continuation.resume(token)
+            }
+        }
+
+        fcmToken?.let { token ->
+            val sendTokensRequest = SendTokenRequest(token = fcmToken)
+
+            try {
+                Log.d(TAG, "About to call authManager.sendTokens")
+                val response = authManager.sendTokens(sendTokensRequest)
+
+                if (response.isSuccessful) {
+                    Log.d(TAG, "FCM token sent successfully")
+                    // isLoggedIn true로 만들고 나머지 상태 원상복구
+                    authManager.setLoggedIn(true)
+                    _isLoggedIn.value = true
+                } else {
+                    Log.e(TAG, "FCM 토큰 전송 실패: ${response.code()}")
+                }
+            } catch (e: Exception) {
+                Log.d(TAG, "fcm토큰 서버로 전송 실패")
+            }
+        }
+
+
+    }
+
+    // 테스트 필요함
     fun logout() {
         viewModelScope.launch {
             authManager.logout().onSuccess {
-                authManager.setLoggedIn(false)
                 _isLoggedIn.value = false
+                _navigationEvent.emit("auth")
             }.onFailure { error ->
                 // 에러 처리 로직
+                Log.e(TAG, "Logout failed", error)
             }
         }
     }
+
 
     fun testLogin() {
         viewModelScope.launch {
