@@ -20,16 +20,18 @@ class MobiPayApplication : Application() {
 
     lateinit var authManager: AuthManager
     lateinit var apiClient: ApiClient
+    lateinit var fcmService: FCMService
 
     override fun onCreate() {
         super.onCreate()
 
         // ApiClient 초기화
-        apiClient = ApiClient.getInstance()
+//        apiClient = ApiClient.getInstance()
 
         // AuthManager 초기화
-        authManager = AuthManager.getInstance(this)
-        apiClient = ApiClient.getInstance(authManager)
+        authManager = AuthManager(this)
+//        apiClient = ApiClient.getInstance(authManager)
+        apiClient = ApiClient.getInstance { authManager.getAuthToken() }
 
         // 카카오 SDK 초기화
         KakaoSdkInitializer.initialize(this)
@@ -37,7 +39,7 @@ class MobiPayApplication : Application() {
         Log.d(TAG, "[모비페이] onCreate: FCM init")
         FirebaseApp.initializeApp(this)
 
-        val fcmService = FCMService()
+        fcmService = FCMService(apiClient)
 
         fcmService.getToken { token ->
             Log.d(TAG, "이 기기의 FCM 토큰: $token")

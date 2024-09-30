@@ -15,6 +15,8 @@ import com.kakao.sdk.user.UserApiClient
 import com.kimnlee.common.auth.api.AuthService
 import com.kimnlee.common.auth.model.LoginRequest
 import com.kimnlee.common.auth.model.RegistrationRequest
+import com.kimnlee.common.auth.model.SendTokenRequest
+import com.kimnlee.common.auth.model.SendTokenResponse
 import com.kimnlee.common.network.ApiClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -31,7 +33,6 @@ private const val TAG = "AuthManager"
 class AuthManager private constructor(private val applicationContext: Context) {
 
     private val IS_LOGGED_IN = booleanPreferencesKey("is_logged_in")
-    private val authService: AuthService = ApiClient.getInstance().unAuthenticatedApi.create(AuthService::class.java)
     private val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
 
     private val encryptedSharedPreferences = EncryptedSharedPreferences.create(
@@ -54,10 +55,12 @@ class AuthManager private constructor(private val applicationContext: Context) {
     }
 
     fun saveAuthToken(token: String) {
+        Log.d(TAG, "authToken 저장 호출: $token")
         encryptedSharedPreferences.edit().putString(KEY_AUTH_TOKEN, token).apply()
     }
 
     fun getAuthToken(): String? {
+        Log.d(TAG, "authToken 반환 호출: ${encryptedSharedPreferences.getString(KEY_AUTH_TOKEN, null)}")
         return encryptedSharedPreferences.getString(KEY_AUTH_TOKEN, null)
     }
 
@@ -92,34 +95,6 @@ class AuthManager private constructor(private val applicationContext: Context) {
         } else {
             UserApiClient.instance.loginWithKakaoAccount(activity, callback = callback)
         }
-    }
-
-    suspend fun login(loginRequest: LoginRequest): Response<Void> = withContext(Dispatchers.IO) {
-        try {
-            authService.login(loginRequest)
-        } catch (e: HttpException) {
-            Log.d(TAG, "${e.response()}")
-            Log.d(TAG, "${e.code()}")
-            Log.d(TAG, "Login failed: ${e.message()}")
-            throw e
-        } catch (e: Exception) {
-            throw Exception("Network error or other exception", e)
-        }
-    }
-
-    suspend fun logout(): Result<Unit> = suspendCancellableCoroutine { continuation ->
-        UserApiClient.instance.logout { error ->
-            if (error != null) {
-                continuation.resume(Result.failure(error))
-            } else {
-                clearTokens()
-                continuation.resume(Result.success(Unit))
-            }
-        }
-    }
-
-    suspend fun register(registrationRequest: RegistrationRequest): Response<Void> = withContext(Dispatchers.IO) {
-        authService.register(registrationRequest)
     }
 
     companion object {
