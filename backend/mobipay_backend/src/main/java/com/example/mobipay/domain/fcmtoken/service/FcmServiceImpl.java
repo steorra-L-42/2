@@ -8,6 +8,8 @@ import com.example.mobipay.domain.mobiuser.entity.MobiUser;
 import com.example.mobipay.domain.mobiuser.error.MobiUserNotFoundException;
 import com.example.mobipay.domain.mobiuser.repository.MobiUserRepository;
 import com.example.mobipay.oauth2.dto.CustomOAuth2User;
+import com.google.firebase.messaging.AndroidConfig;
+import com.google.firebase.messaging.AndroidConfig.Priority;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.Notification;
@@ -44,11 +46,14 @@ public class FcmServiceImpl implements FcmService {
 
             if (fcmSendDto.getData() != null && !fcmSendDto.getData().isEmpty()) {
                 messageBuilder.putAllData(fcmSendDto.getData());
+                messageBuilder.setAndroidConfig(AndroidConfig.builder()
+                        .setPriority(Priority.HIGH)
+                        .build());
             }
 
             Message message = messageBuilder.build();
             String response = FirebaseMessaging.getInstance().send(message);
-            
+
             log.debug("FCM 전송 성공: " + response);
             return true;
         } catch (Exception e) {
