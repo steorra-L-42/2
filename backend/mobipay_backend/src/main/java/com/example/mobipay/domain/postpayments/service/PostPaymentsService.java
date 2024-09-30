@@ -1,5 +1,8 @@
 package com.example.mobipay.domain.postpayments.service;
 
+import static com.example.mobipay.domain.fcmtoken.enums.FcmTokenType.AUTO_PAY_FAILED;
+import static com.example.mobipay.domain.fcmtoken.enums.FcmTokenType.TRANSACTION_REQUEST;
+
 import com.example.mobipay.domain.approvalwaiting.entity.ApprovalWaiting;
 import com.example.mobipay.domain.approvalwaiting.repository.ApprovalWaitingRepository;
 import com.example.mobipay.domain.car.entity.Car;
@@ -54,7 +57,7 @@ public class PostPaymentsService {
 
     // Approval_Waiting 생성 및 관계 추가
     private ApprovalWaiting createApprovalWaiting(Long paymentBalance, String carNumber, Merchant merchant) {
-        ApprovalWaiting approvalWaiting = ApprovalWaiting.of(paymentBalance);
+        ApprovalWaiting approvalWaiting = ApprovalWaiting.from(paymentBalance);
         Car car = getCarByNumber(carNumber);
         approvalWaiting.addRelations(car, merchant);
 
@@ -92,7 +95,7 @@ public class PostPaymentsService {
                 return;
             }
             // 차주가 아닌 경우
-            sendFcmToGroupMember(request, approvalWaiting, merchant, owner);
+            sendFcmForManualPay(request, approvalWaiting, merchant, carGroup.getMobiUser());
         });
     }
 
@@ -105,35 +108,53 @@ public class PostPaymentsService {
     private void sendFcmToOwner(PaymentRequest request, ApprovalWaiting approvalWaiting,
                                 Merchant merchant, MobiUser owner) {
 
-        RegisteredCard registeredCard = getRegisteredCard(owner);
-        // 자동결제 등록 카드가 없다면 실패 FCM 푸시
-        if (registeredCard == null) {
-            sendNoRegisteredCard(owner);
+        Optional<RegisteredCard> optionalRegisteredCard = getRegisteredCard(owner.getId());
+        // 자동결제 등록 카드가 없다면 실패 FCM 푸시 -> 수동결제 요청 FCM 푸시
+        if (optionalRegisteredCard.isEmpty()) {
+            sendFcmNoRegisteredCard(owner);
+            sendFcmForManualPay(request, approvalWaiting, merchant, owner);
             return;
         }
+        // 자동결제 등록 카드가 있다면 자동결제 요청 FCM 푸시
+        RegisteredCard registeredCard = optionalRegisteredCard.get();
+        sendFcmForAutoPay(request, approvalWaiting, merchant, owner, registeredCard);
+    }
 
-        Map<String, String> data = buildFcmData(request, approvalWaiting, merchant,
+    // OwnerId로 RegisteredCard 가져오기
+    private Optional<RegisteredCard> getRegisteredCard(Long ownerId) {
+        return registeredCardRepository.findByMobiUserIdAndAutoPayStatus(ownerId, true);
+    }
+
+    // 자동결제 등록 카드가 없다는 FCM 푸시
+    private void sendFcmNoRegisteredCard(MobiUser owner) {
+        Map<String, String> data = Map.of(
+                "title", "자동결제 실패",
+                "body", "자동결제를 위한 카드가 등록되지 않았습니다.",
+                "type", AUTO_PAY_FAILED.getValue());
+
+        FcmSendDto fcmSendDto = new FcmSendDto(owner.getFcmToken().getValue(), data);
+        sendFcmMessageWithErrorHandling(fcmSendDto);
+    }
+
+    // 수동결제 FCM 푸시
+    private void sendFcmForManualPay(PaymentRequest request, ApprovalWaiting approvalWaiting,
+                                     Merchant merchant, MobiUser mobiUser) {
+        Map<String, String> data = buildFcmDataForTransaction(request, approvalWaiting, merchant,
+                null, false);
+        sendFcmMessage(mobiUser, data);
+    }
+
+    // 자동결제 FCM 푸시
+    private void sendFcmForAutoPay(PaymentRequest request, ApprovalWaiting approvalWaiting, Merchant merchant,
+                                   MobiUser owner, RegisteredCard registeredCard) {
+        Map<String, String> data = buildFcmDataForTransaction(request, approvalWaiting, merchant,
                 registeredCard.getOwnedCard().getCardNo(), true);
         sendFcmMessage(owner, data);
     }
 
-    private void sendNoRegisteredCard(MobiUser owner) {
-        FcmSendDto fcmSendDto = new FcmSendDto(owner.getFcmToken().getValue(), "자동결제 실패",
-                "자동결제를 위한 카드가 등록되지 않았습니다.");
-        sendFcmMessageWithErrorHandling(fcmSendDto);
-    }
-
-    // 그룹 멤버에게 FCM 푸시
-    private void sendFcmToGroupMember(PaymentRequest request, ApprovalWaiting approvalWaiting,
-                                      Merchant merchant, MobiUser owner) {
-        Map<String, String> data = buildFcmData(request, approvalWaiting, merchant,
-                null, false);
-        sendFcmMessage(owner, data);
-    }
-
     // FCM 메시지 데이터 생성
-    private Map<String, String> buildFcmData(PaymentRequest request, ApprovalWaiting approvalWaiting,
-                                             Merchant merchant, String cardNo, boolean autoPay) {
+    private Map<String, String> buildFcmDataForTransaction(PaymentRequest request, ApprovalWaiting approvalWaiting,
+                                                           Merchant merchant, String cardNo, boolean autoPay) {
         return Map.of(
                 "autoPay", String.valueOf(autoPay),
                 "cardNo", cardNo,
@@ -143,34 +164,14 @@ public class PostPaymentsService {
                 "merchantName", merchant.getMerchantName(),
                 "info", request.getInfo(),
                 "lat", merchant.getLat().toString(),
-                "lng", merchant.getLng().toString()
+                "lng", merchant.getLng().toString(),
+                "type", TRANSACTION_REQUEST.getValue()
         );
     }
 
-    // OwnerId로 RegisteredCard 가져오기
-    private Optional<RegisteredCard> getRegisteredCard(Long ownerId) {
-        return registeredCardRepository.findByMobiUserIdAndAutoPayStatus(ownerId, true);
-    }
-
-    // 등록된 카드 조회 및 처리
-    private RegisteredCard getRegisteredCard(MobiUser owner) {
-        Optional<RegisteredCard> optionalRegisteredCard = getRegisteredCard(owner.getId());
-        if (optionalRegisteredCard.isEmpty()) {
-            sendFailureNotification(owner);
-            return null;
-        }
-        return optionalRegisteredCard.get();
-    }
-
-    // 자동결제 실패 FCM 푸시
-    private void sendFailureNotification(MobiUser owner) {
-        FcmSendDto fcmSendDto = new FcmSendDto(owner.getFcmToken().getValue(), "자동결제 실패", "자동결제를 위한 카드가 등록되지 않았습니다.");
-        sendFcmMessageWithErrorHandling(fcmSendDto);
-    }
-
     // FCM 메시지 전송
-    private void sendFcmMessage(MobiUser user, Map<String, String> data) {
-        FcmSendDto fcmSendDto = new FcmSendDto(user.getFcmToken().getValue(), data);
+    private void sendFcmMessage(MobiUser mobiUser, Map<String, String> data) {
+        FcmSendDto fcmSendDto = new FcmSendDto(mobiUser.getFcmToken().getValue(), data);
         sendFcmMessageWithErrorHandling(fcmSendDto);
     }
 
