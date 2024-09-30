@@ -7,11 +7,9 @@ import android.media.AudioAttributes
 import android.media.RingtoneManager
 import android.util.Log
 import com.google.firebase.FirebaseApp
-import com.kimnlee.common.BuildConfig
 import com.kimnlee.common.auth.AuthManager
 import com.kimnlee.firebase.FCMService
 import com.kimnlee.common.auth.KakaoSdkInitializer
-import com.kimnlee.common.auth.api.UnAuthService
 import com.kimnlee.common.network.ApiClient
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
