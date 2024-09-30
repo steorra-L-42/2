@@ -2,6 +2,8 @@ package com.example.mobipay.util;
 
 import com.example.mobipay.global.authentication.dto.accountcheck.AccountCheckRequest;
 import com.example.mobipay.global.authentication.dto.accountcheck.AccountCheckResponse;
+import com.example.mobipay.global.authentication.dto.accountdepositupdate.AccountDepositUpdateRequest;
+import com.example.mobipay.global.authentication.dto.accountdepositupdate.AccountDepositUpdateResponse;
 import com.example.mobipay.global.authentication.dto.accountregister.AccountRegisterRequest;
 import com.example.mobipay.global.authentication.dto.accountregister.AccountRegisterResponse;
 import com.example.mobipay.global.authentication.dto.cardcheck.CardCheckRequest;
@@ -34,6 +36,8 @@ public class RestClientUtil {
     private static final String CARD_REGISTER_URL = SSAFY_PREFIX + "/edu/creditCard/createCreditCard";
     private static final String ACCOUNT_CHECK_URL = SSAFY_PREFIX + "/edu/demandDeposit/inquireDemandDepositAccountList";
     private static final String CARD_CHECK_URL = SSAFY_PREFIX + "/edu/creditCard/inquireSignUpCreditCardList";
+    private static final String ACCOUNT_DEPOSIT_UPDATE_URL =
+            SSAFY_PREFIX + "/edu/demandDeposit/updateDemandDepositAccountDeposit";
 
     private final Validator validator;
     private final RestClient restClient = RestClient.create();
@@ -81,6 +85,15 @@ public class RestClientUtil {
                                                        Class<CardCheckResponse> response) {
 
         ResponseEntity<CardCheckResponse> responseEntity = post(request, CARD_CHECK_URL, response);
+        validate(responseEntity);
+        return responseEntity;
+    }
+
+    public ResponseEntity<AccountDepositUpdateResponse> updateAccountDeposit(AccountDepositUpdateRequest request,
+                                                                             Class<AccountDepositUpdateResponse> response) {
+
+        ResponseEntity<AccountDepositUpdateResponse> responseEntity = post(request, ACCOUNT_DEPOSIT_UPDATE_URL,
+                response);
         validate(responseEntity);
         return responseEntity;
     }
