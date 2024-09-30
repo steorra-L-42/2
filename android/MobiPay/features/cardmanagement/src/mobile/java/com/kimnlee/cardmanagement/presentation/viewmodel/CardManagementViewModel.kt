@@ -1,9 +1,9 @@
 package com.kimnlee.cardmanagement.presentation.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.kimnlee.cardmanagement.data.model.Photos
-import com.kimnlee.cardmanagement.data.model.User
+import com.kimnlee.cardmanagement.data.model.Card
 import com.kimnlee.cardmanagement.data.repository.CardManagementRepository
 import com.kimnlee.common.auth.AuthManager
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,27 +12,31 @@ import kotlinx.coroutines.launch
 
 class CardManagementViewModel(private val authManager: AuthManager) : ViewModel() {
     private val repository = CardManagementRepository(authManager)
-    private val _photoUiState = MutableStateFlow<PhotoUiState>(PhotoUiState.Loading)
-    val photoUiState: StateFlow<PhotoUiState> = _photoUiState
+    private val _cardUiState = MutableStateFlow<CardUiState>(CardUiState.Loading)
+    val cardUiState: StateFlow<CardUiState> = _cardUiState
 
     init {
         fetchPhotos()
+        Log.d("_dddddddd",_cardUiState.value.toString())
+        Log.d("dddddddd",cardUiState.value.toString())
     }
     fun fetchPhotos() {
         viewModelScope.launch {
-            _photoUiState.value = PhotoUiState.Loading
+            _cardUiState.value = CardUiState.Loading
+
             try {
-                val photos = repository.getPhotos()
-                _photoUiState.value = PhotoUiState.Success(photos)
+                val cards = repository.getCards()
+                Log.d("photos",cards.toString())
+                _cardUiState.value = CardUiState.Success(cards)
             } catch (e: Exception) {
-                _photoUiState.value = PhotoUiState.Error("Failed to fetch users: ${e.message}")
+                _cardUiState.value = CardUiState.Error("Failed to fetch users: ${e.message}")
             }
         }
     }
 }
 
-sealed class PhotoUiState {
-    object Loading : PhotoUiState()
-    data class Success(val photos: List<Photos>) : PhotoUiState()
-    data class Error(val message: String) : PhotoUiState()
+sealed class CardUiState {
+    object Loading : CardUiState()
+    data class Success(val cards: List<Card>) : CardUiState()
+    data class Error(val message: String) : CardUiState()
 }

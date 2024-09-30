@@ -16,7 +16,7 @@ class ApiClient private constructor(private val authManager: AuthManager?) {
     private val authInterceptor = Interceptor { chain ->
         val originalRequest = chain.request()
         val authToken = authManager?.getAuthToken()
-
+        println(authToken + " 232222222222222222222222222")
         val newRequest = if (!authToken.isNullOrEmpty()) {
             originalRequest.newBuilder()
                 .header("Authorization", "Bearer $authToken")
