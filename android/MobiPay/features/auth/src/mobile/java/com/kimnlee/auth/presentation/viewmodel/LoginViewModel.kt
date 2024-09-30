@@ -84,12 +84,8 @@ class LoginViewModel(private val authManager: AuthManager) : ViewModel() {
 
                 authManager.setLoggedIn(true)
                 _isLoggedIn.value = true
-            } else {
-                Log.e("LoginViewModel", "Login failed: ${response.code()}")
-            }
-        } catch (e: HttpException) {
-            if (e.code() == 404) {
-                val errorBody = e.response()?.errorBody()?.string()
+            } else if (response.code() == 404) {
+                val errorBody = response.errorBody()?.string()
                 errorBody?.let {
                     val parts = it.split("Email:", "Picture:")
                     if (parts.size >= 3) {
@@ -100,9 +96,9 @@ class LoginViewModel(private val authManager: AuthManager) : ViewModel() {
                 _needsRegistration.value = true
                 kakaoAccessToken = token.accessToken
                 kakaoRefreshToken = token.refreshToken
-            } else {
-                Log.e("LoginViewModel", "Login failed", e)
             }
+        } catch (e: Exception) {
+            Log.e(TAG, "Login failed", e)
         }
     }
 

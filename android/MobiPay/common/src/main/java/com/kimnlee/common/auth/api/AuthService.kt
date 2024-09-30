@@ -7,7 +7,7 @@ import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.POST
 
-interface UnAuthService {
+interface AuthService {
     @POST("api/v1/users/login")
     suspend fun login(@Body loginRequest: LoginRequest): Response<Void>
 

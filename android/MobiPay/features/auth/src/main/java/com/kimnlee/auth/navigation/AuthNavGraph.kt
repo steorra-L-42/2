@@ -16,9 +16,9 @@ fun NavGraphBuilder.authNavGraph(
     authManager: AuthManager,
     loginViewModel: LoginViewModel
 ) {
-    navigation(startDestination = "login", route = "auth") {
+    navigation(startDestination = "auth_main", route = "auth") {
         composable(
-            "login",
+            "auth_main",
             enterTransition = { EnterTransition.None },
             exitTransition = { ExitTransition.None }
         ) {
