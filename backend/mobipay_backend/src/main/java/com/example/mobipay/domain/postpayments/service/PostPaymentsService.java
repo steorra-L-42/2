@@ -21,6 +21,8 @@ import com.example.mobipay.domain.postpayments.error.InvalidMobiApiKeyException;
 import com.example.mobipay.domain.registeredcard.entity.RegisteredCard;
 import com.example.mobipay.domain.registeredcard.repository.RegisteredCardRepository;
 import jakarta.transaction.Transactional;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -155,18 +157,23 @@ public class PostPaymentsService {
     // FCM 메시지 데이터 생성
     private Map<String, String> buildFcmDataForTransaction(PaymentRequest request, ApprovalWaiting approvalWaiting,
                                                            Merchant merchant, String cardNo, boolean autoPay) {
-        return Map.of(
-                "autoPay", String.valueOf(autoPay),
-                "cardNo", cardNo,
-                "approvalWaitingId", approvalWaiting.getId().toString(),
-                "merchantId", merchant.getId().toString(),
-                "paymentBalance", request.getPaymentBalance().toString(),
-                "merchantName", merchant.getMerchantName(),
-                "info", request.getInfo(),
-                "lat", merchant.getLat().toString(),
-                "lng", merchant.getLng().toString(),
-                "type", TRANSACTION_REQUEST.getValue()
-        );
+        Map<String, String> fcmData = new HashMap<>();
+        fcmData.put("autoPay", String.valueOf(autoPay));
+        fcmData.put("approvalWaitingId", approvalWaiting.getId().toString());
+        fcmData.put("merchantId", merchant.getId().toString());
+        fcmData.put("paymentBalance", request.getPaymentBalance().toString());
+        fcmData.put("merchantName", merchant.getMerchantName());
+        fcmData.put("info", request.getInfo());
+        fcmData.put("lat", merchant.getLat().toString());
+        fcmData.put("lng", merchant.getLng().toString());
+        fcmData.put("type", TRANSACTION_REQUEST.getValue());
+
+        // cardNo가 null이 아니면 추가
+        if (cardNo != null) {
+            fcmData.put("cardNo", cardNo);
+        }
+
+        return Collections.unmodifiableMap(fcmData); // 불변 맵으로 반환
     }
 
     // FCM 메시지 전송
