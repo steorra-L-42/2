@@ -203,6 +203,10 @@ class FCMService : FirebaseMessagingService() {
             Log.d(TAG, "Notification Title: ${notification.title}")
             Log.d(TAG, "Notification Body: ${notification.body}")
 
+            if (remoteMessage.data.isNotEmpty()) {
+                Log.d(TAG, "페이로드: ${remoteMessage.data}")
+            }
+
             confirmFCMReceived(remoteMessage.messageId ?: "No Message ID")
 
             val user2 = MobiUser(15, "MobiUserTMP", IconCompat.createWithResource(applicationContext, R.drawable.ic_mobipay))
@@ -210,6 +214,7 @@ class FCMService : FirebaseMessagingService() {
             list2.add(user2)
             notify(applicationContext, MobiConversation(77, "Title1", list2, BitmapFactory.decodeResource(resources, R.drawable.ic_mobipay)))
 
+            // 네비게이션에 Alert 창을 띄우기 위한 코드
             val intent2 = Intent("com.kimnlee.mobipay.SHOW_ALERT")
             intent2.putExtra("title", "모비페이 결제요청")
             intent2.putExtra("content", notification.body)
