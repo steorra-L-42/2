@@ -17,11 +17,17 @@ public class PaymentController {
 
     @PostMapping("/request")
     public ResponseEntity<PaymentResponse> request() {
-        return null;
+
+       PaymentResponse response = paymentService.request();
+
+        return ResponseEntity.ok(response);
     }
 
    @PostMapping("/result")
     public ResponseEntity<PaymentResponse> result() {
-        return null;
+
+        paymentService.result();
+
+        return ResponseEntity.ok().build();
     }
 }

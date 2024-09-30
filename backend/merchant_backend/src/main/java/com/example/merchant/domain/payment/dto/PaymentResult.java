@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @AllArgsConstructor
 @Getter
-public class PaymentResultRequest {
+public class PaymentResult {
 
     @NotNull(message = "Success is empty")
     private Boolean success;
