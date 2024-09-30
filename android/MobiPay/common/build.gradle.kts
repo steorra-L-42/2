@@ -22,13 +22,16 @@ android {
         if (localPropertiesFile.exists()) {
             localProperties.load(FileInputStream(localPropertiesFile))
         }
-        val baseUrl = localProperties.getProperty("BASE_URL") ?: "http://54.250.106.89:8080"
-        val baseServer = localProperties.get("BASE_SERVER") ?: "https://mobipay.kr/"
-        val kakaoApiKey = localProperties.getProperty("KAKAO_API_KEY")
+
+        val fcmBaseUrl = localProperties.getProperty("FCM_BASE_URL") ?: "http://54.250.106.89:8080"
+        val ocrBaseUrl = localProperties.getProperty("OCR_BASE_URL") ?: "http://54.250.106.89:8080"
+        val baseUrl = localProperties.getProperty("BASE_URL") ?: "No Base URL Defined"
+        val kakaoApiKey = localProperties.getProperty("KAKAO_API_KEY") ?: "No Api Key Defined"
         val naverMapClientSecret = localProperties.getProperty("NAVER_MAP_CLIENT_SECRET") ?: "NO_TOKEN_NO_LOCAL_PROPERTIES"
 
+        buildConfigField("String", "FCM_BASE_URL", "\"$fcmBaseUrl\"")
+        buildConfigField("String", "OCR_BASE_URL", "\"$ocrBaseUrl\"")
         buildConfigField("String", "BASE_URL", "\"$baseUrl\"")
-        buildConfigField("String", "BASE_SERVER", "\"$baseServer\"")
         buildConfigField("String", "KAKAO_API_KEY", "\"$kakaoApiKey\"")
         buildConfigField("String", "NAVER_MAP_CLIENT_SECRET", "\"$naverMapClientSecret\"")
     }
