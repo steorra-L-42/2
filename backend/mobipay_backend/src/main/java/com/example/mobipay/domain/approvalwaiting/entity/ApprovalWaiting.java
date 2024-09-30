@@ -44,7 +44,7 @@ public class ApprovalWaiting {
         this.paymentBalance = paymentBalance;
     }
 
-    public static ApprovalWaiting of(Long paymentBalance) {
+    public static ApprovalWaiting from(Long paymentBalance) {
         return new ApprovalWaiting(paymentBalance);
     }
 
