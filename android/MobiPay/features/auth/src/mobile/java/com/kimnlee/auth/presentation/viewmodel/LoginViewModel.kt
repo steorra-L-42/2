@@ -163,7 +163,7 @@ class LoginViewModel(
     }
 
     // 200ok 오면 fcm token 바디에 넣어서 보내주기
-    suspend fun sendTokens() {
+    private suspend fun sendTokens() {
         Log.d(TAG, "sendTokens called")
         val currentAuthToken = authManager.getAuthToken()
         Log.d(TAG, "Current auth token in sendTokens: ${currentAuthToken?.take(10) ?: "null"}...")
