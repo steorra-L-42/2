@@ -214,6 +214,7 @@ class FCMService : FirebaseMessagingService() {
             list2.add(user2)
             notify(applicationContext, MobiConversation(77, "Title1", list2, BitmapFactory.decodeResource(resources, R.drawable.ic_mobipay)))
 
+            // 네비게이션에 Alert 창을 띄우기 위한 코드
             val intent2 = Intent("com.kimnlee.mobipay.SHOW_ALERT")
             intent2.putExtra("title", "모비페이 결제요청")
             intent2.putExtra("content", notification.body)
