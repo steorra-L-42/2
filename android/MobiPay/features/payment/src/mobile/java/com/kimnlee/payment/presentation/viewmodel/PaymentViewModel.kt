@@ -17,7 +17,7 @@ class PaymentViewModel(
     private val authManager: AuthManager,
     private val apiClient: ApiClient) : ViewModel() {
 
-    private val authService: PaymentApiService = apiClient.authenticatedApi.create(PaymentApiService::class.java)
+    private val paymentService: PaymentApiService = apiClient.authenticatedApi.create(PaymentApiService::class.java)
 
     private val _photoUiState = MutableStateFlow<PhotoUiState>(PhotoUiState.Loading)
     val photoUiState: StateFlow<PhotoUiState> = _photoUiState // 읽기 전용
@@ -29,7 +29,7 @@ class PaymentViewModel(
         viewModelScope.launch {
             _photoUiState.value = PhotoUiState.Loading
             try {
-                val photos = authService.getPhotos()
+                val photos = paymentService.getPhotos()
                 _photoUiState.value = PhotoUiState.Success(photos)
             } catch (e: Exception) {
                 _photoUiState.value = PhotoUiState.Error("Failed to fetch users: ${e.message}")

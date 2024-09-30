@@ -16,7 +16,7 @@ class CardManagementViewModel(
     private val authManager: AuthManager,
     private val apiClient: ApiClient) : ViewModel() {
 
-    private val authService: CardManagementApiService = apiClient.authenticatedApi.create(CardManagementApiService::class.java)
+    private val cardMangementService: CardManagementApiService = apiClient.authenticatedApi.create(CardManagementApiService::class.java)
 
     private val _photoUiState = MutableStateFlow<PhotoUiState>(PhotoUiState.Loading)
     val photoUiState: StateFlow<PhotoUiState> = _photoUiState
@@ -28,7 +28,7 @@ class CardManagementViewModel(
         viewModelScope.launch {
             _photoUiState.value = PhotoUiState.Loading
             try {
-                val photos = authService.getPhotos()
+                val photos = cardMangementService.getPhotos()
                 _photoUiState.value = PhotoUiState.Success(photos)
             } catch (e: Exception) {
                 _photoUiState.value = PhotoUiState.Error("Failed to fetch users: ${e.message}")
