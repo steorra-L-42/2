@@ -7,6 +7,7 @@ import com.example.merchant.domain.parking.error.NotExistParkingException;
 import com.example.merchant.global.error.ErrorCode;
 import com.example.merchant.global.error.ErrorResponseDto;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.web.server.WebServerException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -37,6 +38,12 @@ public class ControllerAdvice {
     public ResponseEntity<ErrorResponseDto> handleMultipleNotPaidException  (MultipleNotPaidException e) {
         log.info("MultipleNotPaidException: " + e.getMessage());
         return getResponse(ErrorCode.MULTIPLENOTPAID);
+    }
+
+    @ExceptionHandler(WebServerException.class)
+    public ResponseEntity<ErrorResponseDto> handleWebServerException  (WebServerException e) {
+        log.error("WebServerException: " + e.getMessage());
+        return getResponse(ErrorCode.WEBSOCKETERROR);
     }
 
     private ResponseEntity<ErrorResponseDto> getResponse(ErrorCode errorCode) {
