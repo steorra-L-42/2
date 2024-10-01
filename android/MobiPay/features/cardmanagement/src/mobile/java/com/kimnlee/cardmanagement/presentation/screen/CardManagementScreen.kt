@@ -80,17 +80,12 @@ fun CardManagementScreen(
         )
 
         Spacer(modifier = Modifier.padding(16.dp))
-        when (val state = photoUiState) {
-            is PhotoUiState.Loading -> {
-//        when (val state = registrationCardUiState) {
-//            is RegistrationCardUiState.Loading -> {
+        when (val state = registrationCardUiState) {
+            is RegistrationCardUiState.Loading -> {
                 CircularProgressIndicator()
             }
-
-            is PhotoUiState.Success -> {
-                if (state.photos.isEmpty()) {
-//            is RegistrationCardUiState.Success -> {
-//                if (state.cards.isEmpty()) {
+            is RegistrationCardUiState.Success -> {
+                if (state.cards.isEmpty()) {
                     Text("등록된 카드가 없습니다.")
                     AddCardButton { viewModel.openBottomSheet() }
                 } else {
@@ -98,12 +93,11 @@ fun CardManagementScreen(
                         verticalArrangement = Arrangement.spacedBy(16.dp),
                         modifier = Modifier.weight(1f)
                     ) {
-//                        items(state.cards) { card ->
+                        items(state.cards) { card ->
+                            CardItem(card, onNavigateToDetail, painterResource(id = R.drawable.bc_baro), "카드")
+                        }
                         item {
                             AddCardButton { viewModel.openBottomSheet() }
-                        }
-                        items(state.photos) { card ->
-                            CardItem(card, onNavigateToDetail, painterResource(id = R.drawable.bc_baro), "카드")
                         }
                     }
                     if (showBottomSheet) {
@@ -117,8 +111,7 @@ fun CardManagementScreen(
                     }
             }
                 }
-            is PhotoUiState.Error -> {
-//            is RegistrationCardUiState.Error -> {
+            is RegistrationCardUiState.Error -> {
                 Text(
                     text = state.message,
                     color = MaterialTheme.colorScheme.error,
@@ -127,6 +120,7 @@ fun CardManagementScreen(
                 Button(onClick = { viewModel.requestRegistrationCards() }) {
                     Text("다시 시도")
                 }
+                Spacer(modifier = Modifier.padding(16.dp))
                 Button(onClick = { viewModel.openBottomSheet() }) {
                     Text("추가하러 가기")
                 }
@@ -146,8 +140,7 @@ fun CardManagementScreen(
 
 @Composable
 fun CardItem(
-    card: Photos,
-//    card: RegistrationCard,
+    card: RegistrationCard,
     onNavigateToDetail: () -> Unit,
     painter: Painter,
     contentDescription: String
@@ -181,8 +174,7 @@ fun CardItem(
             verticalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = "카드 이름",
-//                text = card.cardName,
+                text = card.cardName,
                 style = MaterialTheme.typography.headlineMedium,
                 color = Color.White
             )
@@ -192,18 +184,19 @@ fun CardItem(
             ) {
                  Row{
                     Text(text ="1일 한도" )
-//                    Text(text ="${card.oneDayLimit}" )
-                     Text(text = "100,000")
+                    Text(text ="${card.oneDayLimit}" )
                 }
                 Row{
                     Text(text ="1회 한도" )
-//                    Text(text ="${card.oneDayLimit}" )
-                    Text(text = "100,000")
+                    Text(text =
+                        if (card.oneDayLimit != 0){ "${card.oneDayLimit}원" } else{"0원"}
+                    )
                 }
                 Row{
                     Text(text ="자동 결제 여부" )
-//                    card.autoPayStatus ?: Text(text = "100,000", style = MaterialTheme.typography.bodySmall)
-                    Text(text = "자동 결제 중")
+                    if (card.autoPayStatus){
+                        Text(text = "O", style = MaterialTheme.typography.bodySmall)
+                    }
                 }
             }
         }

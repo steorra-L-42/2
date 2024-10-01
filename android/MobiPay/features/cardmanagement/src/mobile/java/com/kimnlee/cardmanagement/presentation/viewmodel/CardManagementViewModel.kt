@@ -12,8 +12,11 @@ import com.kimnlee.cardmanagement.data.api.CardManagementApiService
 import com.kimnlee.cardmanagement.data.repository.CardManagementRepository
 import com.kimnlee.common.auth.AuthManager
 import com.kimnlee.common.network.ApiClient
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
@@ -41,6 +44,9 @@ class CardManagementViewModel(
     // 바텀 시트
     private val _showBottomSheet = MutableStateFlow(false)
     val showBottomSheet: StateFlow<Boolean> = _showBottomSheet.asStateFlow()
+
+//    private val _ownedCardList = MutableSharedFlow<List<OwnedCard>>()
+//    val ownedCardList: SharedFlow<List<OwnedCard>> = _ownedCardList.asSharedFlow()
 
     init {
         fetchPhotos()

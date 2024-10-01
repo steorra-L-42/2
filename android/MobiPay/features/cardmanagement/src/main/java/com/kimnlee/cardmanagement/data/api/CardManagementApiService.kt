@@ -3,9 +3,6 @@ package com.kimnlee.cardmanagement.data.api
 import OwnedCardListResponse
 import Photos
 import RegistrationCardListResponse
-import com.kimnlee.common.network.ApiClient
-import com.kimnlee.cardmanagement.data.model.Photos
-import com.kimnlee.common.auth.AuthManager
 import retrofit2.Response
 import retrofit2.http.GET
 
