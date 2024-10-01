@@ -10,6 +10,7 @@ import com.example.merchant.domain.parking.error.InvalidMerApiKeyException;
 import com.example.merchant.domain.parking.error.MultipleNotPaidException;
 import com.example.merchant.domain.parking.error.NotExistParkingException;
 import com.example.merchant.domain.parking.repository.ParkingRepository;
+import com.example.merchant.util.credential.CredentialUtil;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,10 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ParkingService {
 
-    @Value("${merchant.api.key}")
-    private String MER_API_KEY;
-
     private final ParkingRepository parkingRepository;
+    private final CredentialUtil credentialUtil;
 
     @Transactional
     public ParkingEntryResponse entry(ParkingEntryRequest request, String merApiKey) {
@@ -51,7 +50,7 @@ public class ParkingService {
     }
 
     private void validateMerApiKey(String merApiKey) {
-        if (MER_API_KEY.equals(merApiKey)) {
+        if (credentialUtil.getPOS_MER_API_KEY().equals(merApiKey)) {
             return;
         }
         throw new InvalidMerApiKeyException();
