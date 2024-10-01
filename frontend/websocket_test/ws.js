@@ -28,6 +28,7 @@ sendBtn.addEventListener('click', function() {
             // 	"info": "입차시간 1:34, 출차시간 5:45"// 결제 정보
             // }
             document.getElementById('message').value += JSON.stringify(message) + '\n';
+            // 실제로는 success가 true일 때만 socket.close()를 호출해야 함
             socket.close(); // 세션 종료
         }
     };
