@@ -48,6 +48,9 @@ class LoginViewModel(
 
     init {
         viewModelScope.launch {
+
+            _isLoggedIn.value = authManager.isLoggedInImmediately()
+
             combine(isLoggedIn, needsRegistration) { isLoggedIn, needsRegistration ->
                 when {
                     isLoggedIn -> "home"
@@ -110,6 +113,7 @@ class LoginViewModel(
                 _needsRegistration.value = true
                 kakaoAccessToken = token.accessToken
                 kakaoRefreshToken = token.refreshToken
+                _navigationEvent.emit("registration")
             }
         } catch (e: Exception) {
             Log.e(TAG, "Login failed", e)
@@ -174,7 +178,7 @@ class LoginViewModel(
             }
         }
 
-        fcmToken?.let { token ->
+        fcmToken?.let {
             val sendTokensRequest = SendTokenRequest(token = fcmToken)
 
             try {
@@ -186,27 +190,41 @@ class LoginViewModel(
                     // isLoggedIn true로 만들고 나머지 상태 원상복구
                     authManager.setLoggedIn(true)
                     _isLoggedIn.value = true
+                    _navigationEvent.emit("home")
+                    Log.d(TAG, "Login process completed, navigating to home")
                 } else {
                     Log.e(TAG, "FCM 토큰 전송 실패: ${response.code()}")
+                    _isLoggedIn.value = false
+                    authManager.setLoggedIn(false)
                 }
             } catch (e: Exception) {
                 Log.d(TAG, "fcm토큰 서버로 전송 실패")
+                // 예외 발생 시 처리
+                _isLoggedIn.value = false
+                authManager.setLoggedIn(false)
             }
+        } ?: run {
+            Log.e(TAG, "FCM 토큰을 가져오지 못했습니다")
+            // FCM 토큰을 가져오지 못한 경우 처리
+            _isLoggedIn.value = false
+            authManager.setLoggedIn(false)
         }
-
-
     }
 
     // 테스트 로그인으로 로그인하면 카카오에서 로그아웃 처리가 안되기 때문에 테스트 로그인때는 TestLogout으로 로그아웃 할것
     fun logout() {
         viewModelScope.launch {
-            val result = authManager.logoutWithKakao()
-            if (result.isSuccess) {
-                authManager.setLoggedIn(false)
-                _isLoggedIn.value = false
-                authManager.clearTokens()
-                Log.i(TAG, "Test logout successful. Auth Token cleared.")
-                _navigationEvent.emit("auth")
+            try {
+                val result = authManager.logoutWithKakao()
+                if (result.isSuccess) {
+                    resetStatus()
+                    Log.i(TAG, "Logout successful. Auth Token cleared.")
+                    _navigationEvent.emit("auth")
+                } else {
+                    Log.e(TAG, "Kakao logout failed")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Logout failed", e)
             }
         }
     }
@@ -229,7 +247,7 @@ class LoginViewModel(
             _isLoggedIn.value = false
             authManager.clearTokens()
             _registrationResult.value = null
-            Log.i("TestLogout", "Test logout successful. Auth Token cleared.")
+            Log.i(TAG, "Test logout successful. Auth Token cleared.")
             _navigationEvent.emit("auth")
         }
     }
