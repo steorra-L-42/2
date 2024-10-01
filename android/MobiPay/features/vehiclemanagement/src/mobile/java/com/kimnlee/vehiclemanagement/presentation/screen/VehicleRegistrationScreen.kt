@@ -43,6 +43,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.kimnlee.common.network.ApiClient
 import com.kimnlee.vehiclemanagement.data.model.LicensePlateAnalyzer
 import com.kimnlee.vehiclemanagement.presentation.viewmodel.VehicleManagementViewModel
 import java.util.concurrent.Executors
@@ -52,7 +53,8 @@ private const val TAG = "VehicleRegistrationScreen"
 @Composable
 fun VehicleRegistrationScreen(
     onNavigateBack: () -> Unit,
-    viewModel: VehicleManagementViewModel = viewModel()
+    viewModel: VehicleManagementViewModel,
+    apiClient: ApiClient
 ) {
     var licensePlate by remember { mutableStateOf("") }
     val context = LocalContext.current
@@ -91,219 +93,138 @@ fun VehicleRegistrationScreen(
         )
         Spacer(modifier = Modifier.height(16.dp))
 
-        if (!vehicleNumberCheck) {
-            if (!hasCameraPermission) {
-                Button(
-                    onClick = {
-                        cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
-                        hasCameraPermission = true
-                        recognizedLicensePlate = ""
-                        isAnalyzing = true
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("카메라로 차량 번호 인식하기")
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                OutlinedTextField(
-                    value = licensePlate,
-                    onValueChange = { licensePlate = it },
-                    label = { Text("차량 번호") },
-                    modifier = Modifier.fillMaxWidth(),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
-                )
-
-                Spacer(modifier = Modifier.height(100.dp))
-
-                Text("차량 이미지 추가를 위한 공간")
-
-                Spacer(modifier = Modifier.height(100.dp))
-
-                Button(
-                    onClick = {
-                        viewModel.addVehicle(licensePlate)
-                        showDialog = true
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("다음")
-                }
-            } else {
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth()
-                        .background(Color.Black)
-                ) {
-                    AndroidView(
-                        factory = { ctx ->
-                            val previewView = PreviewView(ctx).apply {
-                                layoutParams = ViewGroup.LayoutParams(
-                                    ViewGroup.LayoutParams.MATCH_PARENT,
-                                    ViewGroup.LayoutParams.MATCH_PARENT
-                                )
-                            }
-
-                            val cameraProviderFuture = ProcessCameraProvider.getInstance(ctx)
-                            cameraProviderFuture.addListener({
-                                val cameraProvider = cameraProviderFuture.get()
-                                val preview = Preview.Builder().build()
-
-                                val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
-
-                                val imageAnalyzer = ImageAnalysis.Builder()
-                                    .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                                    .build()
-
-                                imageAnalyzer.setAnalyzer(
-                                    cameraExecutor,
-                                    LicensePlateAnalyzer(
-                                        context = ctx,
-                                        isAnalyzing = { isAnalyzing },
-                                        onLicensePlateRecognized = { plateNumber ->
-                                            recognizedLicensePlate = plateNumber
-                                        }
-                                    )
-                                )
-
-                                preview.setSurfaceProvider(previewView.surfaceProvider)
-
-                                try {
-                                    cameraProvider.unbindAll()
-                                    cameraProvider.bindToLifecycle(
-                                        lifecycleOwner,
-                                        cameraSelector,
-                                        preview,
-                                        imageAnalyzer
-                                    )
-                                } catch (e: Exception) {
-                                    Log.e("CameraPreview", "Use case binding failed", e)
-                                }
-                            }, ContextCompat.getMainExecutor(ctx))
-
-                            previewView
-                        },
-                        modifier = Modifier.fillMaxSize()
-                    )
-                }
-
-                LaunchedEffect(recognizedLicensePlate) {
-                    if (recognizedLicensePlate.isNotEmpty()) {
-                        licensePlate = recognizedLicensePlate
-                        hasCameraPermission = false
-                        isAnalyzing = false
-                    }
-                }
+        if (!hasCameraPermission) {
+            Button(
+                onClick = {
+                    cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+                    hasCameraPermission = true
+                    recognizedLicensePlate = ""
+                    isAnalyzing = true
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("카메라로 차량 번호 인식하기")
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            if (showDialog) {
-                AlertDialog(
-                    onDismissRequest = { showDialog = false },
-                    title = { Text(licensePlate) },
-                    text = { Text("이 차량 번호가 맞나요?.") },
-                    confirmButton = {
-                        Button(
-                            onClick = {
-                                showDialog = false
-                                vehicleNumberCheck = true
-                            }
-                        ) {
-                            Text("확인")
-                        }
-                        Button(
-                            onClick = {
-                                showDialog = false
-                            }
-                        ) {
-                            Text("취소")
-                        }
-                    }
-                )
+            OutlinedTextField(
+                value = licensePlate,
+                onValueChange = { licensePlate = it },
+                label = { Text("차량 번호") },
+                modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
+            )
+
+            Spacer(modifier = Modifier.height(100.dp))
+
+            Text("차량 이미지 추가를 위한 공간")
+
+            Spacer(modifier = Modifier.height(100.dp))
+
+            Button(
+                onClick = {
+                    showDialog = true
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("다음")
             }
         } else {
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Text("차량 번호: $licensePlate")
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text("주결제 카드 등록")
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            Text("카드 목록 공간") // API 목록 받아오기
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            Row {
-                OutlinedTextField(
-                    value = oneDayLimit,
-                    onValueChange = { newValue ->
-                        if (newValue.all { it.isDigit() }) {
-                            oneDayLimit = newValue
-                        }
-                    },
-                    label = { Text("1일 한도") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.width(300.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("원", fontSize = 48.sp)
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Row {
-                OutlinedTextField(
-                    value = oneTimeLimit,
-                    onValueChange = { newValue ->
-                        if (newValue.all { it.isDigit() }) {
-                            oneTimeLimit = newValue
-                        }
-                    },
-                    label = { Text("1회 한도") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.width(300.dp),
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("원", fontSize = 48.sp)
-            }
-
-            Spacer(modifier = Modifier.height(48.dp))
-
-            Button(
-                onClick = {
-                    onNavigateBack()
-                    vehicleNumberCheck = false
-                },
-                modifier = Modifier.fillMaxWidth()
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .background(Color.Black)
             ) {
-                Text("등록")
+                AndroidView(
+                    factory = { ctx ->
+                        val previewView = PreviewView(ctx).apply {
+                            layoutParams = ViewGroup.LayoutParams(
+                                ViewGroup.LayoutParams.MATCH_PARENT,
+                                ViewGroup.LayoutParams.MATCH_PARENT
+                            )
+                        }
+
+                        val cameraProviderFuture = ProcessCameraProvider.getInstance(ctx)
+                        cameraProviderFuture.addListener({
+                            val cameraProvider = cameraProviderFuture.get()
+                            val preview = Preview.Builder().build()
+
+                            val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
+
+                            val imageAnalyzer = ImageAnalysis.Builder()
+                                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                                .build()
+
+                            imageAnalyzer.setAnalyzer(
+                                cameraExecutor,
+                                LicensePlateAnalyzer(
+                                    context = ctx,
+                                    isAnalyzing = { isAnalyzing },
+                                    onLicensePlateRecognized = { plateNumber ->
+                                        recognizedLicensePlate = plateNumber
+                                    },
+                                    apiClient = apiClient
+                                )
+                            )
+
+                            preview.setSurfaceProvider(previewView.surfaceProvider)
+
+                            try {
+                                cameraProvider.unbindAll()
+                                cameraProvider.bindToLifecycle(
+                                    lifecycleOwner,
+                                    cameraSelector,
+                                    preview,
+                                    imageAnalyzer
+                                )
+                            } catch (e: Exception) {
+                                Log.e("CameraPreview", "Use case binding failed", e)
+                            }
+                        }, ContextCompat.getMainExecutor(ctx))
+
+                        previewView
+                    },
+                    modifier = Modifier.fillMaxSize()
+                )
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Button(
-                onClick = {
-                    vehicleNumberCheck = false
-                },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("이전")
+            LaunchedEffect(recognizedLicensePlate) {
+                if (recognizedLicensePlate.isNotEmpty()) {
+                    licensePlate = recognizedLicensePlate
+                    hasCameraPermission = false
+                    isAnalyzing = false
+                }
             }
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
-        Button(
-            onClick = onNavigateBack,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("취소")
+        if (showDialog) {
+            AlertDialog(
+                onDismissRequest = { showDialog = false },
+                title = { Text(licensePlate) },
+                text = { Text("이 차량 번호가 맞나요?.") },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            viewModel.registerVehicle(licensePlate)
+                            showDialog = false
+                            onNavigateBack()
+                        }
+                    ) {
+                        Text("확인")
+                    }
+                    Button(
+                        onClick = {
+                            showDialog = false
+                        }
+                    ) {
+                        Text("취소")
+                    }
+                }
+            )
         }
     }
 }

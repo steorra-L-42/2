@@ -7,11 +7,17 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.kimnlee.common.components.BottomNavigation
+import com.kimnlee.common.network.ApiClient
 import com.kimnlee.vehiclemanagement.presentation.screen.VehicleManagementDetailScreen
 import com.kimnlee.vehiclemanagement.presentation.screen.VehicleManagementScreen
 import com.kimnlee.vehiclemanagement.presentation.screen.VehicleRegistrationScreen
+import com.kimnlee.vehiclemanagement.presentation.viewmodel.VehicleManagementViewModel
 
-fun NavGraphBuilder.vehicleManagementNavGraph(navController: NavHostController) {
+fun NavGraphBuilder.vehicleManagementNavGraph(
+    navController: NavHostController,
+    apiClient: ApiClient,
+    vehicleManagementViewModel: VehicleManagementViewModel
+) {
     navigation(startDestination = "vehiclemanagement_main", route = "vehiclemanagement") {
         composable("vehiclemanagement_main",
             enterTransition = { EnterTransition.None },
@@ -22,12 +28,8 @@ fun NavGraphBuilder.vehicleManagementNavGraph(navController: NavHostController) 
                     onNavigateToDetail = { vehicleId ->
                         navController.navigate("vehiclemanagement_detail/$vehicleId")
                     },
-                    onNavigateToHome = {
-                        navController.navigate("home") {
-                            popUpTo("home") { inclusive = true }
-                        }
-                    },
-                    onNavigateToRegistration = { navController.navigate("vehiclemanagement_registration") }
+                    onNavigateToRegistration = { navController.navigate("vehiclemanagement_registration") },
+                    viewModel = vehicleManagementViewModel
                 )
             }
         }
@@ -42,7 +44,8 @@ fun NavGraphBuilder.vehicleManagementNavGraph(navController: NavHostController) 
                     onNavigateBack = { navController.navigateUp() },
                     onNavigateToInvitePhone = { navController.navigate("memberinvitation_phone/$vehicleId") },
                     onNavigateToNotification = { navController.navigate("notification_main") },
-                    navController = navController
+                    navController = navController,
+                    viewModel = vehicleManagementViewModel
                 )
             }
         }
@@ -52,7 +55,9 @@ fun NavGraphBuilder.vehicleManagementNavGraph(navController: NavHostController) 
         ) {
             BottomNavigation(navController) {
                 VehicleRegistrationScreen(
-                    onNavigateBack = { navController.navigateUp() }
+                    onNavigateBack = { navController.navigateUp() },
+                    apiClient = apiClient,
+                    viewModel = vehicleManagementViewModel
                 )
             }
         }

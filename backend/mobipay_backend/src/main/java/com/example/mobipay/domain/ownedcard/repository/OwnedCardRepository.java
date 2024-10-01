@@ -8,6 +8,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
+public interface OwnedCardRepository extends JpaRepository<OwnedCard, String> {
+
+    Optional<OwnedCard> findByCardNo(String cardNo);
+}
+
 public interface OwnedCardRepository extends JpaRepository<OwnedCard, Long> {
 
     List<OwnedCard> findAllByMobiUser(MobiUser mobiUser);

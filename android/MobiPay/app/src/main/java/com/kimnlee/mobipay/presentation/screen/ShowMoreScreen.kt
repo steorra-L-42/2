@@ -14,6 +14,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.PlatformTextStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -133,7 +135,7 @@ fun ShowMoreScreen(
                         MenuItem("초대 대기", { navController.navigate("memberinvitation_invitationwaiting") }, emoji = "📩"),
                         MenuItem("메뉴 1", { }),
                         MenuItem("메뉴 2", { }),
-                        MenuItem("로그아웃", { viewModel.testLogout() })
+                        MenuItem("로그아웃", { viewModel.logout() })
                     )
                 )
             }
@@ -192,18 +194,29 @@ fun MenuItemCard(item: MenuItem) {
                 Text(
                     text = item.emoji,
                     fontFamily = FontFamily(Font(R.font.emoji)),
-                    fontSize = 18.sp,
+                    fontSize = 16.sp,
+                    style = TextStyle(
+                        platformStyle = PlatformTextStyle(
+                            includeFontPadding = false
+                        )
+                    ),
                     modifier = Modifier
-                        .padding(top = 6.dp)
-                        .padding(end = 8.dp)
+                        .alignByBaseline()
+//                        .padding(top = 6.dp)
+//                        .padding(end = 8.dp)
                 )
             }
             Text(
                 text = item.text,
                 color = textColor,
-                fontSize = 16.sp,
+                fontSize = 17.sp,
                 textAlign = if (isLogout) TextAlign.Center else TextAlign.Start,
-                modifier = if (isLogout) Modifier.fillMaxWidth() else Modifier
+                style = TextStyle(
+                    platformStyle = PlatformTextStyle(
+                        includeFontPadding = false
+                    )
+                ),
+                modifier = if (isLogout) Modifier.fillMaxWidth().alignByBaseline() else Modifier.alignByBaseline()
             )
         }
     }

@@ -1,45 +1,147 @@
 package com.kimnlee.vehiclemanagement.presentation.viewmodel
 
+import android.content.ContentValues.TAG
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kimnlee.common.auth.api.AuthService
+import com.kimnlee.common.network.ApiClient
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import com.kimnlee.vehiclemanagement.R // 이미지 리소스를 사용하기 위해 R을 가져옵니다.
-import kotlinx.coroutines.flow.asStateFlow
+import com.kimnlee.vehiclemanagement.R
+import com.kimnlee.vehiclemanagement.data.api.VehicleApiService
+import com.kimnlee.vehiclemanagement.data.model.CarMember
+import com.kimnlee.vehiclemanagement.data.model.VehicleItem
+import com.kimnlee.vehiclemanagement.data.model.VehicleRegistrationRequest
 
-data class Vehicle(val id: Int, val name: String, val imageResId: Int)
+data class Vehicle(
+    val carId: Int,
+    val number: String,
+    val created: String,
+    val autoPayStatus: Boolean,
+    val ownerId: Int,
+    val imageResId: Int
+)
 
-class VehicleManagementViewModel : ViewModel() {
+class VehicleManagementViewModel(
+    private val apiClient: ApiClient
+) : ViewModel() {
+
+    private val vehicleService: VehicleApiService = apiClient.authenticatedApi.create(VehicleApiService::class.java)
+
     private val _vehicles = MutableStateFlow<List<Vehicle>>(emptyList())
     val vehicles: StateFlow<List<Vehicle>> = _vehicles
 
+    private val _apiVehicles = MutableStateFlow<List<VehicleItem>>(emptyList())
+    val apiVehicles: StateFlow<List<VehicleItem>> = _apiVehicles
+
+    private val _registrationStatus = MutableStateFlow<RegistrationStatus>(RegistrationStatus.Idle)
+    val registrationStatus: StateFlow<RegistrationStatus> = _registrationStatus
+
+    private val _carMembers = MutableStateFlow<List<CarMember>>(emptyList())
+    val carMembers: StateFlow<List<CarMember>> = _carMembers
+
     init {
-        // 더미 데이터로 초기화(실제로는 데이터베이스에서 가져와야 합니다)
+        getUserVehicles()
+    }
+
+    // 사용자가 소속된 차량의 목록 불러오기
+    private fun getUserVehicles() {
         viewModelScope.launch {
-            _vehicles.value = listOf(
-                Vehicle(1, "123 가 4567", R.drawable.genesis_g90),
-                Vehicle(2, "258 하 1302", R.drawable.genesis_g90),
-                Vehicle(3, "182 아 1021", R.drawable.genesis_g90)
-            )
+            try {
+                val response = vehicleService.getUserVehicleList()
+                if (response.isSuccessful) {
+                    val vehicleResponse = response.body()
+                    vehicleResponse?.let { listResponse ->
+                        _apiVehicles.value = listResponse.items
+
+                        // API 응답을 기존 Vehicle 형식으로 변환
+                        _vehicles.value = listResponse.items.map { apiVehicle ->
+                            Vehicle(
+                                carId = apiVehicle.carId,
+                                number = apiVehicle.number,
+                                created = apiVehicle.created,
+                                autoPayStatus = apiVehicle.autoPayStatus,
+                                ownerId = apiVehicle.ownerId,
+                                imageResId = R.drawable.genesis_g90 // 임시 자동차 사진(나중에 사용자의 차사진으로 대체해야함)
+                            )
+                        }
+                    }
+                    Log.d(TAG, "차량 목록 가져오기 성공")
+                } else {
+                    Log.e("VehicleManagementViewModel", "Failed to get vehicles: ${response.code()}")
+                }
+            } catch (e: Exception) {
+                Log.e("VehicleManagementViewModel", "Error getting vehicles", e)
+            }
         }
     }
 
-    fun addVehicle(name: String) {
+    fun registerVehicle(number: String) {
         viewModelScope.launch {
-            val updatedList = _vehicles.value.toMutableList()
-            val newVehicle = Vehicle(
-                id = updatedList.size + 1,
-                name = name,
-                imageResId = R.drawable.genesis_g90 // 기본 이미지 설정
-            )
-            updatedList.add(newVehicle)
-            _vehicles.value = updatedList // 새로운 리스트를 다시 할당(실제로는 데이터베이스에 저장)
-            println("New vehicle list size: ${_vehicles.value.size}")
+            _registrationStatus.value = RegistrationStatus.Loading
+            try {
+                val registrationRequest = VehicleRegistrationRequest(number)
+                val response = vehicleService.registerVehicle(registrationRequest)
+                if (response.isSuccessful) {
+                    val registeredVehicle = response.body()
+                    registeredVehicle?.let {
+                        val newVehicle = Vehicle(
+                            carId = it.carId,
+                            number = it.number,
+                            created = it.created,
+                            autoPayStatus = it.autoPayStatus,
+                            ownerId = it.ownerId,
+                            imageResId = R.drawable.genesis_g90
+                        )
+                        _vehicles.value = _vehicles.value + newVehicle
+                        _apiVehicles.value += VehicleItem(
+                            carId = it.carId,
+                            number = it.number,
+                            created = it.created,
+                            autoPayStatus = it.autoPayStatus,
+                            ownerId = it.ownerId
+                        )
+                        _registrationStatus.value = RegistrationStatus.Success
+                        Log.d(TAG, "차량 등록 성공")
+                    }
+                } else {
+                    Log.e("VehicleManagementViewModel", "Failed to register vehicle: ${response.code()}")
+                    _registrationStatus.value = RegistrationStatus.Error("Registration failed: ${response.message()}")
+                }
+            } catch (e: Exception) {
+                Log.e("VehicleManagementViewModel", "Error registering vehicle", e)
+                _registrationStatus.value = RegistrationStatus.Error("Registration failed: ${e.message}")
+            }
+        }
+    }
+
+    fun requestCarMembers(carId: Int) {
+        viewModelScope.launch {
+            try {
+                val response = vehicleService.getVehicleMembers(carId)
+                if (response.isSuccessful) {
+                    response.body()?.let { carMembersResponse ->
+                        _carMembers.value = carMembersResponse.items
+                    }
+                } else {
+                    Log.e(TAG, "Failed to get car members: ${response.code()}")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error getting car members", e)
+            }
         }
     }
 
     fun getVehicleById(id: Int): Vehicle? {
-        return _vehicles.value.find { it.id == id }
+        return _vehicles.value.find { it.carId == id }
     }
+}
+
+sealed class RegistrationStatus {
+    object Idle : RegistrationStatus()
+    object Loading : RegistrationStatus()
+    object Success : RegistrationStatus()
+    data class Error(val message: String) : RegistrationStatus()
 }

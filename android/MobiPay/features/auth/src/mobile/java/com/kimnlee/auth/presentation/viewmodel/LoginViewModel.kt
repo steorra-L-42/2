@@ -6,14 +6,29 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kakao.sdk.auth.model.OAuthToken
 import com.kimnlee.common.auth.AuthManager
+import com.kimnlee.common.auth.api.AuthService
 import com.kimnlee.common.auth.model.LoginRequest
 import com.kimnlee.common.auth.model.RegistrationRequest
+import com.kimnlee.common.auth.model.SendTokenRequest
+import com.kimnlee.common.network.ApiClient
+import com.kimnlee.firebase.FCMService
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import retrofit2.HttpException
+import kotlin.coroutines.resume
 
 private const val TAG = "LoginViewModel"
-class LoginViewModel(private val authManager: AuthManager) : ViewModel() {
+class LoginViewModel(
+    private val authManager: AuthManager,
+    private val apiClient: ApiClient,
+    private val fcmService: FCMService
+) : ViewModel() {
+
+    private val unAuthService: AuthService = apiClient.unAuthenticatedApi.create(AuthService::class.java)
+    private val authService: AuthService = apiClient.authenticatedApi.create(AuthService::class.java)
+
     private val _isLoggedIn = MutableStateFlow(false)
     val isLoggedIn: StateFlow<Boolean> = _isLoggedIn
 
@@ -33,6 +48,9 @@ class LoginViewModel(private val authManager: AuthManager) : ViewModel() {
 
     init {
         viewModelScope.launch {
+
+            _isLoggedIn.value = authManager.isLoggedInImmediately()
+
             combine(isLoggedIn, needsRegistration) { isLoggedIn, needsRegistration ->
                 when {
                     isLoggedIn -> "home"
@@ -66,12 +84,14 @@ class LoginViewModel(private val authManager: AuthManager) : ViewModel() {
             scopes = listOf("account_email", "profile_image", "talk_message")
         )
         try {
-            val response = authManager.login(loginRequest)
+            val response = unAuthService.login(loginRequest)
 
             if (response.isSuccessful) {
                 val authTokenFromHeaders = response.headers()["Authorization"]?.split(" ")?.getOrNull(1)
                 authTokenFromHeaders?.let {
+                    Log.d(TAG, "Calling saveAuthToken from sendLoginRequest")
                     authManager.saveAuthToken(it)
+                    Log.d(TAG, "Auth token saved in sendLoginRequest")
                 }
                 val refreshToken = response.headers()["Set-Cookie"]?.let { setCookie ->
                     setCookie.split(";").firstOrNull { it.trimStart().startsWith("refreshToken=") }
@@ -79,11 +99,8 @@ class LoginViewModel(private val authManager: AuthManager) : ViewModel() {
                         ?.trim()
                 }
                 refreshToken?.let { authManager.saveRefreshToken(it) }
-                Log.d(TAG, "sendLoginRequest: Auth token: $authTokenFromHeaders")
-                Log.d(TAG, "sendLoginRequest: Refresh token: ${authManager.getAuthToken()}")
-
-                authManager.setLoggedIn(true)
-                _isLoggedIn.value = true
+                Log.d(TAG, "About to call sendTokens from sendLoginRequest")
+                sendTokens()
             } else if (response.code() == 404) {
                 val errorBody = response.errorBody()?.string()
                 errorBody?.let {
@@ -96,6 +113,7 @@ class LoginViewModel(private val authManager: AuthManager) : ViewModel() {
                 _needsRegistration.value = true
                 kakaoAccessToken = token.accessToken
                 kakaoRefreshToken = token.refreshToken
+                _navigationEvent.emit("registration")
             }
         } catch (e: Exception) {
             Log.e(TAG, "Login failed", e)
@@ -114,12 +132,14 @@ class LoginViewModel(private val authManager: AuthManager) : ViewModel() {
             )
 
             try {
-                val response = authManager.register(registrationRequest)
+                val response = unAuthService.register(registrationRequest)
 
                 if (response.isSuccessful) {
                     val authTokenFromHeaders = response.headers()["Authorization"]?.split(" ")?.getOrNull(1)
                     authTokenFromHeaders?.let {
+                        Log.d(TAG, "Calling saveAuthToken from register")
                         authManager.saveAuthToken(it)
+                        Log.d(TAG, "Auth token saved in register")
                     }
                     val refreshToken = response.headers()["Set-Cookie"]?.let { setCookie ->
                         setCookie.split(";").firstOrNull { it.trimStart().startsWith("refreshToken=") }
@@ -127,10 +147,10 @@ class LoginViewModel(private val authManager: AuthManager) : ViewModel() {
                             ?.trim()
                     }
                     refreshToken?.let { authManager.saveRefreshToken(it) }
-                    authManager.setLoggedIn(true)
-                    _isLoggedIn.value = true
                     _needsRegistration.value = false
                     _registrationResult.value = true
+                    Log.d(TAG, "About to call sendTokens from register")
+                    sendTokens()
                     Log.d("KakaoLogin", "로그인 성공 AuthToken: ${authManager.getAuthToken()}, RefreshToken: ${authManager.getRefreshToken()}")
                 }
             } catch (e: HttpException) {
@@ -146,16 +166,69 @@ class LoginViewModel(private val authManager: AuthManager) : ViewModel() {
         }
     }
 
+    // 200ok 오면 fcm token 바디에 넣어서 보내주기
+    private suspend fun sendTokens() {
+        Log.d(TAG, "sendTokens called")
+        val currentAuthToken = authManager.getAuthToken()
+        Log.d(TAG, "Current auth token in sendTokens: ${currentAuthToken?.take(10) ?: "null"}...")
+
+        val fcmToken = suspendCancellableCoroutine<String?> { continuation ->
+            fcmService.getToken { token ->
+                continuation.resume(token)
+            }
+        }
+
+        fcmToken?.let {
+            val sendTokensRequest = SendTokenRequest(token = fcmToken)
+
+            try {
+                Log.d(TAG, "About to call authManager.sendTokens")
+                val response = authService.sendTokens(sendTokensRequest)
+
+                if (response.isSuccessful) {
+                    Log.d(TAG, "FCM token sent successfully")
+                    // isLoggedIn true로 만들고 나머지 상태 원상복구
+                    authManager.setLoggedIn(true)
+                    _isLoggedIn.value = true
+                    _navigationEvent.emit("home")
+                    Log.d(TAG, "Login process completed, navigating to home")
+                } else {
+                    Log.e(TAG, "FCM 토큰 전송 실패: ${response.code()}")
+                    _isLoggedIn.value = false
+                    authManager.setLoggedIn(false)
+                }
+            } catch (e: Exception) {
+                Log.d(TAG, "fcm토큰 서버로 전송 실패")
+                // 예외 발생 시 처리
+                _isLoggedIn.value = false
+                authManager.setLoggedIn(false)
+            }
+        } ?: run {
+            Log.e(TAG, "FCM 토큰을 가져오지 못했습니다")
+            // FCM 토큰을 가져오지 못한 경우 처리
+            _isLoggedIn.value = false
+            authManager.setLoggedIn(false)
+        }
+    }
+
+    // 테스트 로그인으로 로그인하면 카카오에서 로그아웃 처리가 안되기 때문에 테스트 로그인때는 TestLogout으로 로그아웃 할것
     fun logout() {
         viewModelScope.launch {
-            authManager.logout().onSuccess {
-                authManager.setLoggedIn(false)
-                _isLoggedIn.value = false
-            }.onFailure { error ->
-                // 에러 처리 로직
+            try {
+                val result = authManager.logoutWithKakao()
+                if (result.isSuccess) {
+                    resetStatus()
+                    Log.i(TAG, "Logout successful. Auth Token cleared.")
+                    _navigationEvent.emit("auth")
+                } else {
+                    Log.e(TAG, "Kakao logout failed")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Logout failed", e)
             }
         }
     }
+
 
     fun testLogin() {
         viewModelScope.launch {
@@ -167,13 +240,14 @@ class LoginViewModel(private val authManager: AuthManager) : ViewModel() {
         }
     }
 
+    // 카카오 로그인 안될시에 디버깅 번거로우므로 임시로 남겨놓고 나중에 지울 예정
     fun testLogout() {
         viewModelScope.launch {
             authManager.setLoggedIn(false)
             _isLoggedIn.value = false
             authManager.clearTokens()
             _registrationResult.value = null
-            Log.i("TestLogout", "Test logout successful. Auth Token cleared.")
+            Log.i(TAG, "Test logout successful. Auth Token cleared.")
             _navigationEvent.emit("auth")
         }
     }

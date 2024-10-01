@@ -1,13 +1,16 @@
 package com.kimnlee.common.network
 
+import android.content.ContentValues.TAG
+import android.util.Log
 import com.kimnlee.common.BuildConfig
 import com.kimnlee.common.auth.AuthManager
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-class ApiClient private constructor(private val authManager: AuthManager?) {
+class ApiClient private constructor(private val tokenProvider: () -> String?) {
 
     private val baseUrl = BuildConfig.BASE_URL
     private val fcmBaseUrl = BuildConfig.FCM_BASE_URL
@@ -15,7 +18,7 @@ class ApiClient private constructor(private val authManager: AuthManager?) {
 
     private val authInterceptor = Interceptor { chain ->
         val originalRequest = chain.request()
-        val authToken = authManager?.getAuthToken()
+        val authToken = tokenProvider()
 
         val newRequest = if (!authToken.isNullOrEmpty()) {
             originalRequest.newBuilder()
@@ -24,7 +27,6 @@ class ApiClient private constructor(private val authManager: AuthManager?) {
         } else {
             originalRequest
         }
-
         chain.proceed(newRequest)
     }
 
@@ -68,9 +70,9 @@ class ApiClient private constructor(private val authManager: AuthManager?) {
         @Volatile
         private var instance: ApiClient? = null
 
-        fun getInstance(authManager: AuthManager? = null): ApiClient {
+        fun getInstance(tokenProvider: () -> String?): ApiClient {
             return instance ?: synchronized(this) {
-                instance ?: ApiClient(authManager).also { instance = it }
+                instance ?: ApiClient(tokenProvider).also { instance = it }
             }
         }
     }
