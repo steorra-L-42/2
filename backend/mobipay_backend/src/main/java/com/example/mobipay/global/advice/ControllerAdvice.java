@@ -10,6 +10,7 @@ import com.example.mobipay.domain.invitation.error.InvitationNoFoundException;
 import com.example.mobipay.domain.invitation.error.NotApprovedOrRejectedException;
 import com.example.mobipay.domain.invitation.error.NotInvitedException;
 import com.example.mobipay.domain.mobiuser.error.MobiUserNotFoundException;
+import com.example.mobipay.domain.ownedcard.error.OwnedCardNotFoundException;
 import com.example.mobipay.global.authentication.error.AccountProductNotFoundException;
 import com.example.mobipay.global.authentication.error.CardProductNotFoundException;
 import com.example.mobipay.global.error.ErrorCode;
@@ -94,6 +95,12 @@ public class ControllerAdvice {
     public ResponseEntity<ErrorResponseDto> handleNotInvitedException(NotInvitedException e) {
         log.info(e.getMessage());
         return getResponse(ErrorCode.NOT_INVITED);
+    }
+
+    @ExceptionHandler(OwnedCardNotFoundException.class)
+    public ResponseEntity<ErrorResponseDto> handelOwnedCardNotFoundException(OwnedCardNotFoundException e) {
+        log.info(e.getMessage());
+        return getResponse(ErrorCode.NOT_FOUND_CARD);
     }
 
     private ResponseEntity<ErrorResponseDto> getResponse(ErrorCode errorCode) {

@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @EqualsAndHashCode
 public class RegisteredCardId implements Serializable {
 
-    private String mobiUserId;
-    private String ownedCardId;
+    private Long mobiUserId;
+    private Long ownedCardId;
 
 }

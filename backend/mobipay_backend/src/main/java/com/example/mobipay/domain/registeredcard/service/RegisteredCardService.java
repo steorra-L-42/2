@@ -1,8 +1,19 @@
 package com.example.mobipay.domain.registeredcard.service;
 
+import com.example.mobipay.domain.mobiuser.entity.MobiUser;
+import com.example.mobipay.domain.mobiuser.error.MobiUserNotFoundException;
+import com.example.mobipay.domain.mobiuser.repository.MobiUserRepository;
+import com.example.mobipay.domain.ownedcard.entity.OwnedCard;
+import com.example.mobipay.domain.ownedcard.error.OwnedCardNotFoundException;
+import com.example.mobipay.domain.ownedcard.repository.OwnedCardRepository;
+import com.example.mobipay.domain.registeredcard.dto.RegisteredCardRequest;
+import com.example.mobipay.domain.registeredcard.dto.RegisteredCardResponse;
+import com.example.mobipay.domain.registeredcard.entity.RegisteredCard;
 import com.example.mobipay.domain.registeredcard.repository.RegisteredCardRepository;
+import com.example.mobipay.oauth2.dto.CustomOAuth2User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 @Service
@@ -10,15 +21,32 @@ import org.springframework.stereotype.Service;
 public class RegisteredCardService {
 
     private final RegisteredCardRepository registeredCardRepository;
+    private final MobiUserRepository mobiUserRepository;
+    private final OwnedCardRepository ownedCardRepository;
 
-    //@Transactional
-    // 카드 조회 로직
-//    public void CheckOwnedCardList()
+    @Transactional
+    public RegisteredCardResponse registeredCard(RegisteredCardRequest request, CustomOAuth2User oauth2User) {
 
-    // 카드 등록 로직
-//    public void registerCard(Long mobiUserId, Long ownedCardId, MobiCardRegisterRequest request) {
-//
-//    }
+        // 사용자 정보 조회
+        MobiUser mobiUser = findMobiUser(oauth2User.getMobiUserId());
 
-    // 자동결제카드 등록 로직
+        OwnedCard ownedCard = ownedCardRepository.findOwnedCardById(request.getOwnedCardId())
+                .orElseThrow(OwnedCardNotFoundException::new);
+
+        RegisteredCard registeredCard = RegisteredCard.of(request.getOneDayLimit(), request.getOneTimeLimit(),
+                request.getPassword());
+
+        registeredCard.setCardOwner(mobiUser, ownedCard);
+
+        registeredCardRepository.save(registeredCard);
+
+        return RegisteredCardResponse.of(registeredCard);
+
+    }
+
+    private MobiUser findMobiUser(Long mobiUserId) {
+
+        return mobiUserRepository.findById(mobiUserId)
+                .orElseThrow(MobiUserNotFoundException::new);
+    }
 }

@@ -47,7 +47,7 @@ public class CustomOAuth2User implements OAuth2User {
     }
 
     public String getPhoneNumber() {
-        return userDTO.getPhonenumber();
+        return userDTO.getPhoneNumber();
     }
 
     public String getPicture() {
