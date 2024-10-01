@@ -42,8 +42,15 @@ public class CredentialUtil {
     @Value("${street.mobi.api.key}")
     private String STREET_MOBI_API_KEY; // STREET -> MOBI
 
-    public void validatePosMerApiKey(String merApiKey) {
-        if (POS_MER_API_KEY.equals(merApiKey)) {
+    public void validatePosMerApiKey(String posMerApiKey) {
+        if (POS_MER_API_KEY.equals(posMerApiKey)) {
+            return;
+        }
+        throw new InvalidMerApiKeyException();
+    }
+
+    public void validateMobiMerApiKey(String mobiMerApiKey) {
+        if(MOBI_MER_API_KEY.equals(mobiMerApiKey)) {
             return;
         }
         throw new InvalidMerApiKeyException();
@@ -72,4 +79,5 @@ public class CredentialUtil {
             default -> throw new InvalidMerchantTypeException();
         };
     }
+
 }

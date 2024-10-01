@@ -7,6 +7,7 @@ import android.media.AudioAttributes
 import android.media.RingtoneManager
 import android.util.Log
 import com.google.firebase.FirebaseApp
+import com.kimnlee.common.FCMDependencyProvider
 import com.kimnlee.common.PaymentOperations
 import com.kimnlee.common.auth.AuthManager
 import com.kimnlee.firebase.FCMService
@@ -19,23 +20,23 @@ import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.naver.maps.map.NaverMapSdk
 
 private const val TAG = "MobiPayApplication"
-class MobiPayApplication : Application() {
+class MobiPayApplication : Application(), FCMDependencyProvider {
 
-    lateinit var authManager: AuthManager
-    lateinit var apiClient: ApiClient
+    private lateinit var authManagerInstance: AuthManager
+    private lateinit var apiClientInstance: ApiClient
     lateinit var fcmService: FCMService
     private lateinit var paymentRepository: PaymentRepository
-    val paymentOperations: PaymentOperations
+    override val paymentOperations: PaymentOperations
         get() = paymentRepository
 
     override fun onCreate() {
         super.onCreate()
 
-        authManager = AuthManager(this)
-        apiClient = ApiClient.getInstance { authManager.getAuthToken() }
+        authManagerInstance = AuthManager(this)
+        apiClientInstance = ApiClient.getInstance { authManagerInstance.getAuthToken() }
 
         val paymentApiService = apiClient.unAuthenticatedApi.create(PaymentApiService::class.java)
-        paymentRepository = PaymentRepository(paymentApiService)
+        paymentRepository = PaymentRepository(paymentApiService, applicationContext)
 
         // 카카오 SDK 초기화
         KakaoSdkInitializer.initialize(this)
@@ -85,4 +86,10 @@ class MobiPayApplication : Application() {
             getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.createNotificationChannel(channel)
     }
+
+    override val apiClient: ApiClient
+        get() = apiClientInstance
+
+    override val authManager: AuthManager
+        get() = authManagerInstance
 }

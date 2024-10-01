@@ -1,20 +1,15 @@
 package com.kimnlee.vehiclemanagement.data.api
 
-import com.kimnlee.vehiclemanagement.presentation.viewmodel.Vehicle
+import com.kimnlee.vehiclemanagement.data.model.VehicleListResponse
+import com.kimnlee.vehiclemanagement.data.model.VehicleRegistrationRequest
+import com.kimnlee.vehiclemanagement.data.model.VehicleRegistrationResponse
+import retrofit2.Response
 import retrofit2.http.*
-
-data class VehiclesResponse(val items: List<VehicleDto>)
-
-data class VehicleDto(
-    val carId: Int,
-    val number: String,
-    val created: String,
-    val autoPayStatus: Boolean,
-    val ownerId: Int,
-)
 
 interface VehicleApiService {
     @GET("api/v1/cars")
-    suspend fun getVehicles(
-    ): VehiclesResponse
+    suspend fun getUserVehicleList(): Response<VehicleListResponse>
+
+    @POST("api/v1/cars")
+    suspend fun registerVehicle(@Body vehicleRegistrationRequest: VehicleRegistrationRequest): Response<VehicleRegistrationResponse>
 }

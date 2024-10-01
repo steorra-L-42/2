@@ -31,7 +31,7 @@ import androidx.compose.material.icons.filled.AddCircle
 fun VehicleManagementScreen(
     onNavigateToDetail: (Int) -> Unit,
     onNavigateToRegistration: () -> Unit,
-    viewModel: VehicleManagementViewModel = viewModel()
+    viewModel: VehicleManagementViewModel
 ) {
     val vehicles by viewModel.vehicles.collectAsState()
 
@@ -51,39 +51,44 @@ fun VehicleManagementScreen(
                 VehicleItem(vehicle, onClick = { onNavigateToDetail(vehicle.carId) })
                 Spacer(modifier = Modifier.height(16.dp))
             }
-        }
 
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(200.dp)
-                .clickable(onClick = onNavigateToRegistration),
-            shape = RoundedCornerShape(8.dp),
-            colors = CardDefaults.cardColors(containerColor = MobiCardBgGray),
-            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp)
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.AddCircle,
-                    contentDescription = "차량 등록하러 가기",
-                    modifier = Modifier.size(48.dp),
-                    tint = Color.Black
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text("차량 등록하러 가기", style = MaterialTheme.typography.bodyLarge)
+            item {
+                AddVehicleCard(onNavigateToRegistration)
             }
         }
     }
 }
 
-// 실제로는 DB에 요청해서 리스트를 받아옴
+@Composable
+fun AddVehicleCard(onClick: () -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(200.dp)
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(8.dp),
+        colors = CardDefaults.cardColors(containerColor = MobiCardBgGray),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Icon(
+                imageVector = Icons.Filled.AddCircle,
+                contentDescription = "차량 등록하러 가기",
+                modifier = Modifier.size(48.dp),
+                tint = Color.Black
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text("차량 등록하러 가기", style = MaterialTheme.typography.bodyLarge)
+        }
+    }
+}
+
 @Composable
 fun VehicleItem(vehicle: Vehicle, onClick: () -> Unit) {
     Card(

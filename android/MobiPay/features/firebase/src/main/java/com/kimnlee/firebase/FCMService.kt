@@ -33,6 +33,10 @@ import retrofit2.Response
 import retrofit2.Retrofit
 
 private const val TAG = "FCMService"
+private const val FCM_TYPE_MEMBER_INVITATION = "invitation"
+private const val FCM_TYPE_PAYMENT_REQUEST = "transactionRequest"
+private const val FCM_TYPE_PAYMENT_RESULT = "transactionResult"
+private const val FCM_TYPE_AUTO_PAY_FAILURE = "autoPayFailed"
 
 class FCMService : FirebaseMessagingService() {
 
@@ -56,6 +60,7 @@ class FCMService : FirebaseMessagingService() {
             Log.e(TAG, "Application context does not implement FCMDependencyProvider")
             return
         }
+        Log.d(TAG, "initializeDependencies: 초기화 완료@@@@@@@@@@@@@@@@")
 
         apiClient = dependencyProvider.apiClient
         authManager = dependencyProvider.authManager
@@ -266,10 +271,34 @@ class FCMService : FirebaseMessagingService() {
 
             val lat = responseJson["lat"]
             val lng = responseJson["lng"]
+            val fcmType = responseJson["type"]
+            Log.d(TAG, "processMessage: FCM타입은 $fcmType")
+            when (fcmType) {
+                FCM_TYPE_PAYMENT_RESULT -> {
+                    // 결제 결과화면 표시
+                }
+                FCM_TYPE_PAYMENT_REQUEST -> {
+                    Log.d(TAG, "processMessage: 타입 인지했음")
+                    if (lat != null && lng != null) {
+                        Log.d(TAG, "processMessage: NULL도 아니고요")
 
-            if (lat != null && lng != null) {
-                paymentOperations?.processFCM(lat, lng)
+                        Log.d(TAG, "processMessage: ${paymentOperations == null}")
+                        
+                        paymentOperations?.processFCM(lat, lng)
+                    }
+                }
+                FCM_TYPE_MEMBER_INVITATION -> {
+//                    memberInvitation()
+                }
+                FCM_TYPE_AUTO_PAY_FAILURE -> {
+
+                }
+                else -> {
+
+                }
             }
+
+
 
             val title = responseJson["title"] ?: "No Title"
             val body = responseJson["body"] ?: "No Body"
@@ -282,8 +311,8 @@ class FCMService : FirebaseMessagingService() {
             // 사용자 화면에 Notification 송출하는 코드
             notify(applicationContext, MobiConversation(77, title, body, list2, BitmapFactory.decodeResource(resources, R.drawable.ic_mobipay)))
 
-            val type = "결제알림"
-            broadcastForAlert(type, title, body)
+            val alertType = "결제알림"
+            broadcastForAlert(alertType, title, body)
         }
     }
 
@@ -297,7 +326,7 @@ class FCMService : FirebaseMessagingService() {
     }
 
     /**
-     * Android Auto 네비게이션 화면에 ALERT를 띄우는 화면
+     * Android Auto 네비게이션 화면에 ALERT를 띄우는 코드
      */
     private fun broadcastForAlert(type: String, title : String, body : String){
         val intent = Intent("com.kimnlee.mobipay.SHOW_ALERT")
