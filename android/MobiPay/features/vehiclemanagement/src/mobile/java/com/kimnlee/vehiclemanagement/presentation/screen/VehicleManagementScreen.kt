@@ -117,7 +117,7 @@ fun VehicleItem(vehicle: Vehicle, onClick: () -> Unit) {
             )
             Spacer(modifier = Modifier.height(8.dp))
 
-            TextOnLP(vehicle.number)
+            TextOnLP(formatLicensePlate(vehicle.number))
         }
     }
 }
