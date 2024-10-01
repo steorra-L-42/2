@@ -1,5 +1,6 @@
 package com.kimnlee.cardmanagement.presentation.screen
 
+import Card
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -25,6 +26,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
 import com.kimnlee.cardmanagement.R
 import com.kimnlee.cardmanagement.presentation.viewmodel.CardManagementViewModel
+import com.kimnlee.cardmanagement.presentation.viewmodel.CardUiState
 import com.kimnlee.cardmanagement.presentation.viewmodel.PhotoUiState
 
 @Composable
@@ -33,7 +35,7 @@ fun CardManagementScreen(
     onNavigateToRegistration: () -> Unit,
     viewModel: CardManagementViewModel = viewModel()
 ) {
-    val photoUiState by viewModel.photoUiState.collectAsState()
+    val cardUiState by viewModel.cardUiState.collectAsState()
 
     Column(
         modifier = Modifier
@@ -42,78 +44,87 @@ fun CardManagementScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "사용자 관리 (카드 관리 모듈)",
+            text = "카드 관리",
             style = MaterialTheme.typography.headlineMedium,
         )
         Spacer(modifier = Modifier.padding(16.dp))
-        // API 응답 데이터 표시 photo
-        when (val state = photoUiState) {
-            // 아직 응답이 오지 않았다면 원형 로딩창 출력
-            is PhotoUiState.Loading -> {
+
+        when (val state = cardUiState) {
+            is CardUiState.Loading -> {
                 CircularProgressIndicator()
             }
-            // 응답 받으면 출력
-            is PhotoUiState.Success -> {
-                LazyRow (
+            is CardUiState.Success -> {
+                LazyRow(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.fillMaxWidth()
-                ){
-                    items(state.photos) { photo ->
-                        Card(
-                            modifier = Modifier
-                                .padding(8.dp), // 카드 간의 간격 설정
-                            colors = CardDefaults.cardColors(Color.Transparent), // 카드 배경 투명화
-                            elevation = CardDefaults.cardElevation(0.dp) // 그림자 제거
-                        ) {
-                            Image(
-                                painter = rememberAsyncImagePainter(
-                                    model = photo.url ?: painterResource(id = R.drawable.card_example),
-                                    contentScale = ContentScale.Crop // 이미지 비율을 유지하면서 크기에 맞게 조정
-                                ),
-                                contentDescription = photo.title,
-                                modifier = Modifier
-                                    .clickable { onNavigateToDetail() }
-                                    .sizeIn(
-                                        minWidth = 350.dp,
-                                        minHeight = 100.dp,
-                                        maxHeight = 197.dp
-                                    )
-                                    .clip(RoundedCornerShape(16.dp)),
-                                contentScale = ContentScale.FillWidth, // 카드 크기
-                                )
-                            Text(text = "albumId: ${photo.albumId}")
-                            Text(text = "Website: ${photo.id}")
-                        }
+                ) {
+                    items(state.cards) { card ->
+                        CardItem(card, onNavigateToDetail)
                     }
                 }
                 Spacer(modifier = Modifier.padding(16.dp))
-                OutlinedButton(
-                    onClick = onNavigateToRegistration ,
-                    modifier = Modifier
-                        .fillMaxWidth(0.66f)
-                        .fillMaxSize(0.33f), // 화면의 1/3 크기
-                    shape = RoundedCornerShape(16.dp), // 4개의 각이 둥근 사각형
-                    border = BorderStroke(1.dp, Color.Gray)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Add, // "+" 아이콘
-                        contentDescription = "Add Card",
-                        tint = Color.Gray, // 아이콘 색상 설정
-                        modifier = Modifier.fillMaxSize(0.5f)
-
-                    )
-                }
+                AddCardButton(onNavigateToRegistration)
             }
-            is PhotoUiState.Error -> {
+            is CardUiState.Error -> {
                 Text(
                     text = state.message,
                     color = MaterialTheme.colorScheme.error,
                     modifier = Modifier.padding(vertical = 16.dp)
                 )
-                Button(onClick = { viewModel.fetchPhotos() }) {
+                Button(onClick = { viewModel.requestUserCards() }) {
                     Text("다시 시도")
                 }
             }
         }
     }
+}
+
+@Composable
+fun CardItem(card: Card, onNavigateToDetail: () -> Unit) {
+    Card(
+        modifier = Modifier
+            .padding(8.dp)
+            .clickable(onClick = onNavigateToDetail),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(4.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .width(300.dp)
+                .padding(16.dp)
+        ) {
+            Text(
+                text = maskCardNumber(card.cardNo),
+                style = MaterialTheme.typography.headlineSmall,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            Text(text = "만료일: ${card.cardExpriyDate}")
+            Text(text = "출금일: ${card.withdrawalDate}")
+        }
+    }
+}
+
+@Composable
+fun AddCardButton(onNavigateToRegistration: () -> Unit) {
+    OutlinedButton(
+        onClick = onNavigateToRegistration,
+        modifier = Modifier
+            .fillMaxWidth(0.66f)
+            .height(100.dp),
+        shape = RoundedCornerShape(16.dp),
+        border = BorderStroke(1.dp, Color.Gray)
+    ) {
+        Icon(
+            imageVector = Icons.Default.Add,
+            contentDescription = "Add Card",
+            tint = Color.Gray,
+            modifier = Modifier.size(40.dp)
+        )
+    }
+}
+
+fun maskCardNumber(cardNumber: String): String {
+    val visiblePart = cardNumber.take(4)
+    val maskedPart = "*".repeat(cardNumber.length - 4)
+    return "$visiblePart$maskedPart"
 }
