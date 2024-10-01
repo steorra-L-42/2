@@ -77,7 +77,14 @@ public class PaymentRequestTest {
         void fail_400_type_empty() throws Exception {
             // given
             final String url = "/api/v1/merchants/payments/request";
-            final String requestBody = "{\"type\":\"\",\"paymentBalance\":50000,\"carNumber\":\"123가4567\",\"info\":\"info\"}";
+            final String requestBody = """
+                    {
+                        "type":"",
+                        "paymentBalance":50000,
+                        "carNumber":"123가4567",
+                        "info":"info"
+                    }
+                    """;
             // when
             ResultActions result = mockMvc.perform(post(url)
                     .header("merApiKey", POS_MER_API_KEY)
@@ -93,7 +100,14 @@ public class PaymentRequestTest {
         void fail_400_type_null() throws Exception {
             // given
             final String url = "/api/v1/merchants/payments/request";
-            final String requestBody = "{\"type\":\"null\",\"paymentBalance\":50000,\"carNumber\":\"123가4567\",\"info\":\"info\"}";
+            final String requestBody = """
+                    {
+                        "type":null,
+                        "paymentBalance":50000,
+                        "carNumber":"123가4567",
+                        "info":"info"
+                    }
+                    """;
             // when
             ResultActions result = mockMvc.perform(post(url)
                     .header("merApiKey", POS_MER_API_KEY)
@@ -109,7 +123,14 @@ public class PaymentRequestTest {
         void fail_400_type_not_registered() throws Exception {
             // given
             final String url = "/api/v1/merchants/payments/request";
-            final String requestBody = "{\"type\":\"EMART\",\"paymentBalance\":50000,\"carNumber\":\"123가4567\",\"info\":\"info\"}";
+            final String requestBody = """
+                    {
+                        "type":"EMART",
+                        "paymentBalance":50000,
+                        "carNumber":"123가4567",
+                        "info":"info"
+                    }
+                    """;
             // when
             ResultActions result = mockMvc.perform(post(url)
                     .header("merApiKey", POS_MER_API_KEY)
@@ -130,7 +151,14 @@ public class PaymentRequestTest {
         void fail_400_paymentBalance_empty() throws Exception {
             // given
             final String url = "/api/v1/merchants/payments/request";
-            final String requestBody = "{\"type\":\"OIL\",\"paymentBalance\":,\"carNumber\":\"123가4567\",\"info\":\"info\"}";
+            final String requestBody = """
+                    {
+                        "type":"OIL",
+                        "paymentBalance":,
+                        "carNumber":"123가4567",
+                        "info":"info"
+                    }
+                    """;
             // when
             ResultActions result = mockMvc.perform(post(url)
                     .header("merApiKey", POS_MER_API_KEY)
@@ -146,7 +174,14 @@ public class PaymentRequestTest {
         void fail_400_paymentBalance_null() throws Exception {
             // given
             final String url = "/api/v1/merchants/payments/request";
-            final String requestBody = "{\"type\":\"OIL\",\"paymentBalance\":null,\"carNumber\":\"123가4567\",\"info\":\"info\"}";
+            final String requestBody = """
+                    {
+                        "type":"OIL",
+                        "paymentBalance":null,
+                        "carNumber":"123가4567",
+                        "info":"info"
+                    }
+                    """;
             // when
             ResultActions result = mockMvc.perform(post(url)
                     .header("merApiKey", POS_MER_API_KEY)
@@ -162,7 +197,14 @@ public class PaymentRequestTest {
         void fail_400_paymentBalance_zero() throws Exception {
             // given
             final String url = "/api/v1/merchants/payments/request";
-            final String requestBody = "{\"type\":\"OIL\",\"paymentBalance\":0,\"carNumber\":\"123가4567\",\"info\":\"info\"}";
+            final String requestBody = """
+                    {
+                        "type":"OIL",
+                        "paymentBalance":0,
+                        "carNumber":"123가4567",
+                        "info":"info"
+                    }
+                    """;
             // when
             ResultActions result = mockMvc.perform(post(url)
                     .header("merApiKey", POS_MER_API_KEY)
@@ -178,7 +220,14 @@ public class PaymentRequestTest {
         void fail_400_paymentBalance_negative() throws Exception {
             // given
             final String url = "/api/v1/merchants/payments/request";
-            final String requestBody = "{\"type\":\"OIL\",\"paymentBalance\":-50000,\"carNumber\":\"123가4567\",\"info\":\"info\"}";
+            final String requestBody = """
+                    {
+                        "type":"OIL",
+                        "paymentBalance":-50000,
+                        "carNumber":"123가4567",
+                        "info":"info"
+                    }
+                    """;
             // when
             ResultActions result = mockMvc.perform(post(url)
                     .header("merApiKey", POS_MER_API_KEY)
@@ -194,7 +243,14 @@ public class PaymentRequestTest {
         void fail_400_paymentBalance_not_number() throws Exception {
             // given
             final String url = "/api/v1/merchants/payments/request";
-            final String requestBody = "{\"type\":\"OIL\",\"paymentBalance\":\"오만원\",\"carNumber\":\"123가4567\",\"info\":\"info\"}";
+            final String requestBody = """
+                    {
+                        "type":"OIL",
+                        "paymentBalance":"오만원",
+                        "carNumber":"123가4567",
+                        "info":"info"
+                    }
+                    """;
             // when
             ResultActions result = mockMvc.perform(post(url)
                     .header("merApiKey", POS_MER_API_KEY)
@@ -214,7 +270,14 @@ public class PaymentRequestTest {
         void fail_400_cardNumber_empty() throws Exception {
             // given
             final String url = "/api/v1/merchants/payments/request";
-            final String requestBody = "{\"type\":\"OIL\",\"paymentBalance\":50000,\"carNumber\":\"\",\"info\":\"info\"}";
+            final String requestBody = """
+                    {
+                        "type":"OIL",
+                        "paymentBalance":50000,
+                        "carNumber":"",
+                        "info":"info"
+                    }
+                    """;
             // when
             ResultActions result = mockMvc.perform(post(url)
                     .header("merApiKey", POS_MER_API_KEY)
@@ -230,7 +293,14 @@ public class PaymentRequestTest {
         void fail_400_cardNumber_null() throws Exception {
             // given
             final String url = "/api/v1/merchants/payments/request";
-            final String requestBody = "{\"type\":\"OIL\",\"paymentBalance\":50000,\"carNumber\":null,\"info\":\"info\"}";
+            final String requestBody = """
+                    {
+                        "type":"OIL",
+                        "paymentBalance":50000,
+                        "carNumber":null,
+                        "info":"info"
+                    }
+                    """;
             // when
             ResultActions result = mockMvc.perform(post(url)
                     .header("merApiKey", POS_MER_API_KEY)
@@ -246,7 +316,14 @@ public class PaymentRequestTest {
         void fail_400_cardNumber_exceeds_8() throws Exception {
             // given
             final String url = "/api/v1/merchants/payments/request";
-            final String requestBody = "{\"type\":\"OIL\",\"paymentBalance\":50000,\"carNumber\":\"123가45678\",\"info\":\"info\"}";
+            final String requestBody = """
+                    {
+                        "type":"OIL",
+                        "paymentBalance":50000,
+                        "carNumber":"123가45678",
+                        "info":"info"
+                    }
+                    """;
             // when
             ResultActions result = mockMvc.perform(post(url)
                     .header("merApiKey", POS_MER_API_KEY)
@@ -266,7 +343,14 @@ public class PaymentRequestTest {
         void fail_400_info_empty() throws Exception {
             // given
             final String url = "/api/v1/merchants/payments/request";
-            final String requestBody = "{\"type\":\"OIL\",\"paymentBalance\":50000,\"carNumber\":\"123가4567\"}";
+            final String requestBody = """
+                    {
+                        "type":"OIL",
+                        "paymentBalance":50000,
+                        "carNumber":"123가4567"
+                    }
+                    """;
+
             // when
             ResultActions result = mockMvc.perform(post(url)
                     .header("merApiKey", POS_MER_API_KEY)
@@ -282,7 +366,14 @@ public class PaymentRequestTest {
         void fail_400_info_null() throws Exception {
             // given
             final String url = "/api/v1/merchants/payments/request";
-            final String requestBody = "{\"type\":\"OIL\",\"paymentBalance\":50000,\"cardNumber\":\"123가4567\",\"info\":null}";
+            final String requestBody = """
+                    {
+                        "type":"OIL",
+                        "paymentBalance":50000,
+                        "carNumber":"123가4567",
+                        "info":null
+                    }
+                    """;
             // when
             ResultActions result = mockMvc.perform(post(url)
                     .header("merApiKey", POS_MER_API_KEY)
@@ -303,7 +394,15 @@ public class PaymentRequestTest {
         void fail_401_merApiKey_invalid() throws Exception {
             // given
             final String url = "/api/v1/merchants/payments/request";
-            final String requestBody = "{\"type\":\"OIL\",\"paymentBalance\":50000,\"carNumber\":\"123가4567\",\"info\":\"info\"}";
+            final String requestBody = """
+                    {
+                        "type":"OIL",
+                        "paymentBalance":50000,
+                        "carNumber":"123가4567",
+                        "info":"info"
+                    }
+                    """;
+
             // when
             ResultActions result = mockMvc.perform(post(url)
                     .header("merApiKey", "hahahahahahaha")
@@ -319,7 +418,15 @@ public class PaymentRequestTest {
         void fail_401_merApiKey_empty() throws Exception {
             // given
             final String url = "/api/v1/merchants/payments/request";
-            final String requestBody = "{\"type\":\"OIL\",\"paymentBalance\":50000,\"carNumber\":\"123가4567\",\"info\":\"info\"}";
+            final String requestBody = """
+                    {
+                        "type":"OIL",
+                        "paymentBalance":50000,
+                        "carNumber":"123가4567",
+                        "info":"info"
+                    }
+                    """;
+
             // when
             ResultActions result = mockMvc.perform(post(url)
                     .header("merApiKey", "")
@@ -338,7 +445,15 @@ public class PaymentRequestTest {
         // given
         Mockito.when(mobiPay.request(any(), any())).thenReturn(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
         final String url = "/api/v1/merchants/payments/request";
-        final String requestBody = "{\"type\":\"OIL\",\"paymentBalance\":50000,\"carNumber\":\"123가4567\",\"info\":\"info\"}";
+        final String requestBody = """
+                {
+                    "type":"OIL",
+                    "paymentBalance":50000,
+                    "carNumber":"123가4567",
+                    "info":"info"
+                }
+                """;
+
         // when
         ResultActions result = mockMvc.perform(post(url)
                 .header("merApiKey", POS_MER_API_KEY)
