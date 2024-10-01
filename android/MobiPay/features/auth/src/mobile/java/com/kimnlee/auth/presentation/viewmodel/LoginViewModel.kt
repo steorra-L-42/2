@@ -197,22 +197,16 @@ class LoginViewModel(
 
     }
 
-    // 테스트 필요함
+    // 테스트 로그인으로 로그인하면 카카오에서 로그아웃 처리가 안되기 때문에 테스트 로그인때는 TestLogout으로 로그아웃 할것
     fun logout() {
         viewModelScope.launch {
-            try {
-                val response = authService.logout()
-                if (response.isSuccessful) {
-                    authManager.clearTokens()
-                    authManager.setLoggedIn(false)
-                    _isLoggedIn.value = false
-                    _navigationEvent.emit("auth")
-                } else {
-                    // 로그아웃 실패 처리
-                    Log.e(TAG, "Logout failed: ${response.code()}")
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "Logout failed", e)
+            val result = authManager.logoutWithKakao()
+            if (result.isSuccess) {
+                authManager.setLoggedIn(false)
+                _isLoggedIn.value = false
+                authManager.clearTokens()
+                Log.i(TAG, "Test logout successful. Auth Token cleared.")
+                _navigationEvent.emit("auth")
             }
         }
     }
@@ -228,6 +222,7 @@ class LoginViewModel(
         }
     }
 
+    // 카카오 로그인 안될시에 디버깅 번거로우므로 임시로 남겨놓고 나중에 지울 예정
     fun testLogout() {
         viewModelScope.launch {
             authManager.setLoggedIn(false)

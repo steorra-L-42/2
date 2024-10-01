@@ -97,6 +97,18 @@ class AuthManager(private val context: Context) {
         }
     }
 
+    suspend fun logoutWithKakao(): Result<Unit> = suspendCancellableCoroutine { continuation ->
+        UserApiClient.instance.logout { error ->
+            if (error != null) {
+                Log.e(TAG, "카카오 로그아웃 실패", error)
+                continuation.resume(Result.failure(error))
+            } else {
+                Log.i(TAG, "카카오 로그아웃 성공")
+                continuation.resume(Result.success(Unit))
+            }
+        }
+    }
+
     companion object {
         private const val KEY_AUTH_TOKEN = "auth_token"
         private const val KEY_REFRESH_TOKEN = "refresh_token"
