@@ -42,8 +42,6 @@ class MainActivity : ComponentActivity() {
         setContent {
             MobiPayTheme {
                 val navController = rememberNavController()
-//                AppNavGraph(navController, authManager, applicationContext, apiClient, fcmService)
-                AppNavGraph(navController, authManager, applicationContext, apiClient, fcmService)
                 val isLoggedIn by authManager.isLoggedIn.collectAsState(initial = false)
 
                 LaunchedEffect(isLoggedIn) {
