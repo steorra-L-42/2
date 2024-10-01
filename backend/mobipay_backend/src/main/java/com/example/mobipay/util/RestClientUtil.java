@@ -2,6 +2,7 @@ package com.example.mobipay.util;
 
 import com.example.mobipay.domain.postpayments.dto.cardtransaction.CardTransactionRequest;
 import com.example.mobipay.domain.postpayments.dto.cardtransaction.CardTransactionResponse;
+import com.example.mobipay.domain.postpayments.dto.paymentresult.PaymentResultRequest;
 import com.example.mobipay.global.authentication.dto.accountcheck.AccountCheckRequest;
 import com.example.mobipay.global.authentication.dto.accountcheck.AccountCheckResponse;
 import com.example.mobipay.global.authentication.dto.accountdepositupdate.AccountDepositUpdateRequest;
@@ -18,6 +19,7 @@ import com.example.mobipay.global.authentication.dto.ssafyuserregister.SsafyUser
 import com.example.mobipay.global.authentication.dto.ssafyuserregister.SsafyUserRegisterResponse;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
+import java.util.Map;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -41,6 +43,7 @@ public class RestClientUtil {
     private static final String ACCOUNT_DEPOSIT_UPDATE_URL =
             SSAFY_PREFIX + "/edu/demandDeposit/updateDemandDepositAccountDeposit";
     private static final String CARD_TRANSACTION_URL = SSAFY_PREFIX + "/edu/creditCard/createCreditCardTransaction";
+    private static final String RESULT_TO_MERCHANT_SERVER_URL = "https://merchant.mobipay.kr/api/v1/merchants/payments/result";
 
     private final Validator validator;
     private final RestClient restClient = RestClient.create();
@@ -109,9 +112,31 @@ public class RestClientUtil {
         return responseEntity;
     }
 
+    public ResponseEntity<Void> sendResultToMerchantServer(PaymentResultRequest request,
+                                                           Map<String, String> additionalHeaders) {
+
+        return post(request, RESULT_TO_MERCHANT_SERVER_URL, Void.class, additionalHeaders);
+    }
+
     private <T, R> ResponseEntity<R> post(T requestBody, String url, Class<R> responseClass) {
         return restClient.post()
                 .uri(url)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .body(requestBody)
+                .retrieve()
+                .onStatus(
+                        HttpStatusCode::is4xxClientError,
+                        (request, response) -> ResponseEntity.status(response.getStatusCode())
+                                .body(response.getBody())
+                )
+                .toEntity(responseClass);
+    }
+
+    private <T, R> ResponseEntity<R> post(T requestBody, String url, Class<R> responseClass,
+                                          Map<String, String> additionalHeaders) {
+        return restClient.post()
+                .uri(url)
+                .headers(httpHeaders -> additionalHeaders.forEach(httpHeaders::add))
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .body(requestBody)
                 .retrieve()
