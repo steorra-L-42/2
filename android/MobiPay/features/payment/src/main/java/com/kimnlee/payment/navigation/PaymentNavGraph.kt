@@ -6,7 +6,9 @@ import androidx.compose.animation.ExitTransition
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
+import androidx.navigation.navDeepLink
 import androidx.navigation.navigation
+import com.kimnlee.common.FCMData
 import com.kimnlee.common.components.BottomNavigation
 import com.kimnlee.payment.data.dummyMerchants
 import com.kimnlee.payment.data.dummyTransactions
@@ -15,7 +17,9 @@ import com.kimnlee.payment.presentation.screen.PaymentDetailListScreen
 import com.kimnlee.payment.presentation.screen.PaymentDetailScreen
 
 
-fun NavGraphBuilder.paymentNavGraph(navController: NavHostController) {
+fun NavGraphBuilder.paymentNavGraph(
+    navController: NavHostController
+) {
     navigation(startDestination = "payment_main", route = "paymenthistory") {
         composable("payment_main",
             enterTransition = { EnterTransition.None },
@@ -53,9 +57,10 @@ fun NavGraphBuilder.paymentNavGraph(navController: NavHostController) {
         }
         composable("paymentsucceed",
             enterTransition = { EnterTransition.None },
-            exitTransition = { ExitTransition.None }
+            exitTransition = { ExitTransition.None },
+            deepLinks = listOf(navDeepLink { uriPattern = "mobipay://paymentsucceed" })
         ) {
-            PaymentSucceedScreen()
+            PaymentSucceedScreen(navController)
         }
     }
 }

@@ -9,9 +9,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.compose.rememberNavController
+import com.google.gson.Gson
 import com.kimnlee.auth.presentation.viewmodel.AuthenticationState
 import com.kimnlee.auth.presentation.viewmodel.BiometricViewModel
 import com.kimnlee.auth.presentation.viewmodel.LoginViewModel
+import com.kimnlee.common.FCMData
 import com.kimnlee.common.ui.theme.MobiPayTheme
 import com.kimnlee.mobipay.navigation.AppNavGraph
 
@@ -31,6 +33,10 @@ class MainActivity : ComponentActivity() {
         val fcmService = (application as MobiPayApplication).fcmService
 
         biometricViewModel = ViewModelProvider(this).get(BiometricViewModel::class.java)
+
+        val fcmDataJson = intent?.getStringExtra("fcmData")
+        val fcmData = fcmDataJson?.let { Gson().fromJson(it, FCMData::class.java) }
+
         loginViewModel = LoginViewModel(authManager, apiClient, fcmService)
 
         setContent {
@@ -74,5 +80,10 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
     }
 }
