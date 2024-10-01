@@ -20,6 +20,7 @@ import com.kimnlee.common.auth.model.SendTokenResponse
 import com.kimnlee.common.network.ApiClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
@@ -52,6 +53,10 @@ class AuthManager(private val context: Context) {
         context.dataStore.edit { preferences ->
             preferences[IS_LOGGED_IN] = isLoggedIn
         }
+    }
+
+    suspend fun isLoggedInImmediately(): Boolean {
+        return context.dataStore.data.first()[IS_LOGGED_IN] ?: false
     }
 
     fun saveAuthToken(token: String) {
@@ -94,6 +99,18 @@ class AuthManager(private val context: Context) {
             UserApiClient.instance.loginWithKakaoTalk(activity, callback = callback)
         } else {
             UserApiClient.instance.loginWithKakaoAccount(activity, callback = callback)
+        }
+    }
+
+    suspend fun logoutWithKakao(): Result<Unit> = suspendCancellableCoroutine { continuation ->
+        UserApiClient.instance.logout { error ->
+            if (error != null) {
+                Log.e(TAG, "카카오 로그아웃 실패", error)
+                continuation.resume(Result.failure(error))
+            } else {
+                Log.i(TAG, "카카오 로그아웃 성공")
+                continuation.resume(Result.success(Unit))
+            }
         }
     }
 
