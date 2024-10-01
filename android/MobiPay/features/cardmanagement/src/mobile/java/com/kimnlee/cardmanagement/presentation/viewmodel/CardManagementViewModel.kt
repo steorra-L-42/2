@@ -29,6 +29,7 @@ class CardManagementViewModel(
 
     init {
         fetchPhotos()
+        requestUserCards()
     }
 
     fun fetchPhotos() {
@@ -51,7 +52,7 @@ class CardManagementViewModel(
                 if (response.isSuccessful) {
                     val cardList = response.body()?.items ?: emptyList()
                     _cardUiState.value = CardUiState.Success(cardList)
-                    Log.d(TAG, "카드 목록 받아오기 성공")
+                    Log.d(TAG, "카드 목록 받아오기 성공: ${cardList.size} 개의 카드")
                 } else {
                     _cardUiState.value = CardUiState.Error("Failed to fetch cards: ${response.code()}")
                 }

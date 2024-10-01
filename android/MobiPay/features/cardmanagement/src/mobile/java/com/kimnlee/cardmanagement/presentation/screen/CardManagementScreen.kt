@@ -6,6 +6,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -54,16 +55,21 @@ fun CardManagementScreen(
                 CircularProgressIndicator()
             }
             is CardUiState.Success -> {
-                LazyRow(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    items(state.cards) { card ->
-                        CardItem(card, onNavigateToDetail)
+                if (state.cards.isEmpty()) {
+                    Text("등록된 카드가 없습니다.")
+                } else {
+                    LazyColumn(
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        items(state.cards) { card ->
+                            CardItem(card, onNavigateToDetail)
+                        }
+                        item {
+                            AddCardButton(onNavigateToRegistration)
+                        }
                     }
                 }
-                Spacer(modifier = Modifier.padding(16.dp))
-                AddCardButton(onNavigateToRegistration)
             }
             is CardUiState.Error -> {
                 Text(
@@ -83,48 +89,75 @@ fun CardManagementScreen(
 fun CardItem(card: Card, onNavigateToDetail: () -> Unit) {
     Card(
         modifier = Modifier
-            .padding(8.dp)
+            .fillMaxWidth()
+            .height(200.dp)
             .clickable(onClick = onNavigateToDetail),
         shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(4.dp)
+        elevation = CardDefaults.cardElevation(8.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF1E3A8A))
     ) {
         Column(
             modifier = Modifier
-                .width(300.dp)
-                .padding(16.dp)
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
                 text = maskCardNumber(card.cardNo),
-                style = MaterialTheme.typography.headlineSmall,
-                modifier = Modifier.padding(bottom = 8.dp)
+                style = MaterialTheme.typography.headlineMedium,
+                color = Color.White
             )
-            Text(text = "만료일: ${card.cardExpriyDate}")
-            Text(text = "출금일: ${card.withdrawalDate}")
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column {
+                    Text("만료일", color = Color.White.copy(alpha = 0.7f))
+                    Text(formatExpiryDate(card.cardExpiryDate), color = Color.White)
+                }
+            }
         }
     }
 }
 
 @Composable
 fun AddCardButton(onNavigateToRegistration: () -> Unit) {
-    OutlinedButton(
-        onClick = onNavigateToRegistration,
+    Card(
         modifier = Modifier
-            .fillMaxWidth(0.66f)
-            .height(100.dp),
+            .fillMaxWidth()
+            .height(200.dp)
+            .clickable(onClick = onNavigateToRegistration),
         shape = RoundedCornerShape(16.dp),
-        border = BorderStroke(1.dp, Color.Gray)
+        elevation = CardDefaults.cardElevation(4.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.LightGray)
     ) {
-        Icon(
-            imageVector = Icons.Default.Add,
-            contentDescription = "Add Card",
-            tint = Color.Gray,
-            modifier = Modifier.size(40.dp)
-        )
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Icon(
+                imageVector = Icons.Default.Add,
+                contentDescription = "Add Card",
+                tint = Color.Gray,
+                modifier = Modifier.size(40.dp)
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text("카드 추가", style = MaterialTheme.typography.bodyLarge)
+        }
     }
 }
 
 fun maskCardNumber(cardNumber: String): String {
-    val visiblePart = cardNumber.take(4)
-    val maskedPart = "*".repeat(cardNumber.length - 4)
-    return "$visiblePart$maskedPart"
+    val visiblePart = cardNumber.take(cardNumber.length - 4)
+    val maskedPart = "****"
+    return (visiblePart + maskedPart)
+        .chunked(4)
+        .joinToString(" ")
+}
+
+fun formatExpiryDate(date: String): String {
+    return "${date.substring(0, 4)} ${date.substring(4, 6)} ${date.substring(6, 8)}"
 }
