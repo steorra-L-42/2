@@ -46,8 +46,8 @@ android {
 
 dependencies {
 
-    implementation(project(":features:firebase"))
     implementation(project(":common"))
+    implementation(project(":features:firebase"))
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
