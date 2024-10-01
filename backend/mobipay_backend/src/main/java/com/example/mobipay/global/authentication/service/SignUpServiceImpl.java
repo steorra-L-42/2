@@ -18,6 +18,8 @@ import com.example.mobipay.global.authentication.dto.UserInfo;
 import com.example.mobipay.global.authentication.dto.UserPair;
 import com.example.mobipay.global.authentication.dto.accountcheck.AccountCheckRequest;
 import com.example.mobipay.global.authentication.dto.accountcheck.AccountCheckResponse;
+import com.example.mobipay.global.authentication.dto.accountdepositupdate.AccountDepositUpdateRequest;
+import com.example.mobipay.global.authentication.dto.accountdepositupdate.AccountDepositUpdateResponse;
 import com.example.mobipay.global.authentication.dto.accountregister.AccountRegisterRequest;
 import com.example.mobipay.global.authentication.dto.accountregister.AccountRegisterResponse;
 import com.example.mobipay.global.authentication.dto.cardcheck.CardCheckRequest;
@@ -33,6 +35,7 @@ import com.example.mobipay.global.authentication.error.AccountProductNotFoundExc
 import com.example.mobipay.global.authentication.error.CardProductNotFoundException;
 import com.example.mobipay.util.RestClientUtil;
 import jakarta.transaction.Transactional;
+import java.util.Arrays;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -47,6 +50,7 @@ public class SignUpServiceImpl implements SignUpService {
     private static final String CARD_REGISTER_API_NAME = "createCreditCard";
     private static final String ACCOUNT_CHECK_API_NAME = "inquireDemandDepositAccountList";
     private static final String CARD_CHECK_API_NAME = "inquireSignUpCreditCardList";
+    private static final String ACCOUNT_DEPOSIT_UPDATE_API_NAME = "updateDemandDepositAccountDeposit";
     private static final String ACCOUNT_TYPE_UNIQUE_NO = "004-1-c880da59551a4e";
     private static final String[] CARD_UNIQUE_NO =
             new String[]{"1001-664f125022bf433", "1002-218c5933582e430", "1005-6d3da5e1ab334fc"};
@@ -175,6 +179,9 @@ public class SignUpServiceImpl implements SignUpService {
         account.addRelation(userPair.getMobiUser(), accountProduct);
 
         accountRepository.save(account);
+
+        // 계좌 저장 후 금액 추가
+        updateAccountDeposit(userPair, account.getAccountNo());
     }
 
     // 카드 조회
@@ -216,9 +223,12 @@ public class SignUpServiceImpl implements SignUpService {
     private Account registerAccount(UserPair userPair) {
         // 계좌 등록
         ResponseEntity<AccountRegisterResponse> accountRegisterResponse = requestRegisterAccount(userPair);
+        // 계좌 초기 금액 입금
+        AccountRegisterResponse.Rec rec = accountRegisterResponse.getBody().getRec();
+        updateAccountDeposit(userPair, rec.getAccountNo());
 
         // 계좌, 계좌상품, MobiUser 연관관계 설정
-        Account account = Account.of(accountRegisterResponse.getBody().getRec());
+        Account account = Account.of(rec);
         AccountProduct accountProduct = accountProductRepository.findByAccountTypeUniqueNo(ACCOUNT_TYPE_UNIQUE_NO)
                 .orElseThrow(AccountProductNotFoundException::new);
 
@@ -239,10 +249,21 @@ public class SignUpServiceImpl implements SignUpService {
         return restClientUtil.registerAccount(accountRegisterRequest, AccountRegisterResponse.class);
     }
 
+    // 계좌 초기 금액 입금
+    private void updateAccountDeposit(UserPair userPair, String accountNo) {
+        AccountDepositUpdateRequest accountDepositUpdateRequest = new AccountDepositUpdateRequest(
+                ACCOUNT_DEPOSIT_UPDATE_API_NAME,
+                ssafyApiKey,
+                userPair.getSsafyUser().getUserKey(),
+                accountNo
+        );
+        restClientUtil.updateAccountDeposit(accountDepositUpdateRequest, AccountDepositUpdateResponse.class);
+    }
+
     // 카드 등록 & 엔티티 연관관계 설정
     private void registerCards(UserPair userPair, Account account) {
         // 카드 등록
-        for (String cardUniqueNo : CARD_UNIQUE_NO) {
+        Arrays.stream(CARD_UNIQUE_NO).forEach(cardUniqueNo -> {
             ResponseEntity<CardRegisterResponse> cardRegisterResponse = requestRegisterCard(userPair, account,
                     cardUniqueNo);
 
@@ -251,11 +272,10 @@ public class SignUpServiceImpl implements SignUpService {
             CardProduct cardProduct = cardProductRepository.findByCardUniqueNo(cardUniqueNo)
                     .orElseThrow(CardProductNotFoundException::new);
 
-            ownedCard.addRelation(userPair.getMobiUser(), account, cardProduct);
-
             // save
+            ownedCard.addRelation(userPair.getMobiUser(), account, cardProduct);
             ownedCardRepository.save(ownedCard);
-        }
+        });
     }
 
     // 카드 등록 요청

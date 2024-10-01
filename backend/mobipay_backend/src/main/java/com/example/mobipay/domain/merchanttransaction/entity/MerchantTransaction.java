@@ -1,6 +1,8 @@
 package com.example.mobipay.domain.merchanttransaction.entity;
 
 import com.example.mobipay.domain.merchant.entity.Merchant;
+import com.example.mobipay.domain.postpayments.dto.ApprovalPaymentRequest;
+import com.example.mobipay.domain.postpayments.dto.cardtransaction.CardTransactionResponse;
 import com.example.mobipay.domain.registeredcard.entity.RegisteredCard;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -10,9 +12,12 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinColumns;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.http.ResponseEntity;
 
 @Entity
 @Getter
@@ -50,4 +55,32 @@ public class MerchantTransaction {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "merchant_id")
     private Merchant merchant;
+
+    private MerchantTransaction(ApprovalPaymentRequest request, ResponseEntity<CardTransactionResponse> response) {
+        this.transactionUniqueNo = response.getBody().getRec().getTransactionUniqueNo();
+        LocalDateTime now = LocalDateTime.now();
+        this.transactionDate = now.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        this.transactionTime = now.format(DateTimeFormatter.ofPattern("HHmmss"));
+        this.paymentBalance = request.getPaymentBalance();
+        this.info = request.getInfo();
+    }
+
+    public static MerchantTransaction of(ApprovalPaymentRequest request,
+                                         ResponseEntity<CardTransactionResponse> response) {
+        return new MerchantTransaction(request, response);
+    }
+
+    public void addRelations(RegisteredCard registeredCard, Merchant merchant) {
+        if (this.registeredCard != null) {
+            this.registeredCard.getMerchantTransactions().remove(this);
+        }
+        this.registeredCard = registeredCard;
+        registeredCard.getMerchantTransactions().add(this);
+
+        if (this.merchant != null) {
+            this.merchant.getMerchantTransactions().remove(this);
+        }
+        this.merchant = merchant;
+        merchant.getMerchantTransactions().add(this);
+    }
 }

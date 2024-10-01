@@ -28,8 +28,7 @@ fun NavGraphBuilder.authNavGraph(
                     navController.navigate("home") {
                         popUpTo("auth") { inclusive = true }
                     }
-                },
-                onNavigateToSignUp = { navController.navigate("signup") }
+                }
             )
         }
         composable(
