@@ -10,18 +10,18 @@ import lombok.NoArgsConstructor;
 
 /**
  * Payment result
- * MER -> POS
+ * MOBI -> MER
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @AllArgsConstructor
 @Getter
-public class PaymentResult {
+public class PaymentResultRequest {
 
     @NotNull(message = "Success is empty")
     private Boolean success;
 
-    @NotNull(message = "Type is empty")
-    private MerchantType type;
+    @NotNull(message = "Merchant Id is empty")
+    private Long merchantId;
 
     @NotNull(message = "Payment balance is empty")
     @Min(value = 1, message = "Payment balance must be greater than 0")
@@ -29,8 +29,4 @@ public class PaymentResult {
 
     @NotNull(message = "Payment info is null")
     private String info;
-
-    public static PaymentResult of(PaymentResultRequest result, MerchantType type) {
-        return new PaymentResult(result.getSuccess(), type, result.getPaymentBalance(), result.getInfo());
-    }
 }

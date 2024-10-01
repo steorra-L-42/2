@@ -3,6 +3,7 @@ package com.example.merchant.util.credential;
 import com.example.merchant.domain.parking.error.InvalidMerApiKeyException;
 import com.example.merchant.domain.payment.error.InvalidMerchantTypeException;
 import com.example.merchant.global.enums.MerchantType;
+import com.example.merchant.util.credential.error.UnknownMerchantIdException;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -80,4 +81,25 @@ public class CredentialUtil {
         };
     }
 
+    public MerchantType getMerchantTypeById(Long merchantId) {
+
+        // switch doesn't support Long type
+        MerchantType type;
+        if (PARKING_MER_ID.equals(merchantId)) {
+            type = MerchantType.PARKING;
+        } else if (OIL_MER_ID.equals(merchantId)) {
+            type = MerchantType.OIL;
+        } else if (FOOD_MER_ID.equals(merchantId)) {
+            type = MerchantType.FOOD;
+        } else if (WASHING_MER_ID.equals(merchantId)) {
+            type = MerchantType.WASHING;
+        } else if (MOTEL_MER_ID.equals(merchantId)) {
+            type = MerchantType.MOTEL;
+        } else if (STREET_MER_ID.equals(merchantId)) {
+            type = MerchantType.STREET;
+        } else {
+            throw new UnknownMerchantIdException();
+        }
+        return type;
+    }
 }
