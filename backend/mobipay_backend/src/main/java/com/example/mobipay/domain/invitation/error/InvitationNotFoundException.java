@@ -1,12 +1,12 @@
 package com.example.mobipay.domain.invitation.error;
 
-public class InvitationNoFoundException extends RuntimeException {
+public class InvitationNotFoundException extends RuntimeException {
 
-    public InvitationNoFoundException() {
+    public InvitationNotFoundException() {
         super("Invitation not found");
     }
 
-    public InvitationNoFoundException(String message) {
+    public InvitationNotFoundException(String message) {
         super(message);
     }
 
