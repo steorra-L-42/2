@@ -46,10 +46,6 @@ public class WebSocketHandler extends TextWebSocketHandler {
         MerchantInfo info = objectMapper.readValue(message.getPayload(), MerchantInfo.class);
         MERCHANT_SESSIONID.put(info.getType(), session.getId());
         log.info("Received message: " + message.getPayload() + " | MERCHANT_SESSION: " + MERCHANT_SESSIONID);
-        // TODO: sendResult 지우기
-        // 3초 후 결제 결과 전송
-        Thread.sleep(3000);
-        sendResult(info.getType(), new PaymentResult(true, info.getType(), 10000, "test 응답 - 결제 기능 구현 중"));
     }
 
     /**
@@ -61,6 +57,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
     public void sendResult(MerchantType type, PaymentResult result) throws Exception {
         final String payload = objectMapper.writeValueAsString(result);
         CLIENTS.get(MERCHANT_SESSIONID.get(type)).sendMessage(new TextMessage(payload));
+        log.info("Sent message: " + payload + " -> " + MERCHANT_SESSIONID.get(type));
     }
 
     @ExceptionHandler(Exception.class)
