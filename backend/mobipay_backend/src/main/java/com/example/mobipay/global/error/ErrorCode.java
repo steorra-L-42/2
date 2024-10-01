@@ -28,8 +28,8 @@ public enum ErrorCode {
     INVALID_CARD_NO(HttpStatus.BAD_REQUEST, "올바르지 않은 카드번호 입니다."),
     NOT_REGISTERED_CARD(HttpStatus.BAD_REQUEST, "존재하지 않는 등록된 카드입니다."),
     INVALID_PAYMENT_BALANCE(HttpStatus.BAD_REQUEST, "올바르지 않은 결제금액입니다."),
-    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 에러입니다.");
-
+    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 에러입니다."),
+    NOT_FOUND_CARD(HttpStatus.FORBIDDEN, "해당 카드에 대한 권한이 없습니다.");
 
     private final HttpStatus status;
     private final String message;

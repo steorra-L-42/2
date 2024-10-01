@@ -21,7 +21,7 @@ public class UserDTO {
     private String picture;
 
     @NotEmpty
-    private String phonenumber;
+    private String phoneNumber;
 
     @NotEmpty
     private String role;

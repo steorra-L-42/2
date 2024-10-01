@@ -18,6 +18,7 @@ import com.example.mobipay.domain.postpayments.error.InvalidMobiApiKeyException;
 import com.example.mobipay.domain.postpayments.error.InvalidPaymentBalanceException;
 import com.example.mobipay.domain.postpayments.error.RegisteredCardNotFoundException;
 import com.example.mobipay.domain.postpayments.error.TransactionAlreadyApprovedException;
+import com.example.mobipay.domain.ownedcard.error.OwnedCardNotFoundException;
 import com.example.mobipay.global.authentication.error.AccountProductNotFoundException;
 import com.example.mobipay.global.authentication.error.CardProductNotFoundException;
 import com.example.mobipay.global.error.ErrorCode;
@@ -152,6 +153,12 @@ public class ControllerAdvice {
     public ResponseEntity<ErrorResponseDto> handleInvalidPaymentBalanceException(InvalidPaymentBalanceException e) {
         log.info(e.getMessage());
         return getResponse(ErrorCode.INVALID_PAYMENT_BALANCE);
+    }
+
+    @ExceptionHandler(OwnedCardNotFoundException.class)
+    public ResponseEntity<ErrorResponseDto> handelOwnedCardNotFoundException(OwnedCardNotFoundException e) {
+        log.info(e.getMessage());
+        return getResponse(ErrorCode.NOT_FOUND_CARD);
     }
 
     private ResponseEntity<ErrorResponseDto> getResponse(ErrorCode errorCode) {
