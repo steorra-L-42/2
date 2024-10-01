@@ -33,7 +33,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class PostPaymentsService {
+public class PostPaymentsRequestService {
 
     private final MerchantRepository merchantRepository;
     private final CarRepository carRepository;

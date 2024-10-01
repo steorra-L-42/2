@@ -2,7 +2,7 @@ package com.example.mobipay.domain.postpayments.controller;
 
 import com.example.mobipay.domain.postpayments.dto.PaymentRequest;
 import com.example.mobipay.domain.postpayments.dto.PaymentResponse;
-import com.example.mobipay.domain.postpayments.service.PostPaymentsService;
+import com.example.mobipay.domain.postpayments.service.PostPaymentsRequestService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
@@ -18,13 +18,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/postpayments")
 public class PostPaymentsController {
 
-    private final PostPaymentsService postPaymentsService;
+    private final PostPaymentsRequestService postPaymentsRequestService;
 
     @PostMapping("/request")
     public ResponseEntity<PaymentResponse> requestPayment(@RequestHeader("mobiApiKey") @NotNull String mobiApiKey,
                                                           @RequestBody @Valid PaymentRequest request) {
 
-        postPaymentsService.sendRequestToCarGroup(request, mobiApiKey);
+        postPaymentsRequestService.sendRequestToCarGroup(request, mobiApiKey);
 
         return ResponseEntity.ok(PaymentResponse.builder().build());
     }
