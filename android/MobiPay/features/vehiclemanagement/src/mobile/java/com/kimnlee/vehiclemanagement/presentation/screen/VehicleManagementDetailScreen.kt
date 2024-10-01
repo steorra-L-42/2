@@ -24,7 +24,7 @@ fun VehicleManagementDetailScreen(
     onNavigateBack: () -> Unit,
     onNavigateToInvitePhone: (Int) -> Unit,
     onNavigateToNotification: () -> Unit,
-    viewModel: VehicleManagementViewModel = viewModel(),
+    viewModel: VehicleManagementViewModel,
     navController: NavController
 ) {
     val vehicle = viewModel.getVehicleById(vehicleId)
