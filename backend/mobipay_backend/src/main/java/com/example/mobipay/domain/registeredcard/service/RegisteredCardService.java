@@ -8,11 +8,13 @@ import com.example.mobipay.domain.ownedcard.error.OwnedCardNotFoundException;
 import com.example.mobipay.domain.ownedcard.repository.OwnedCardRepository;
 import com.example.mobipay.domain.registeredcard.dto.RegisteredCardAutoPayRequest;
 import com.example.mobipay.domain.registeredcard.dto.RegisteredCardAutoPayResponse;
+import com.example.mobipay.domain.registeredcard.dto.RegisteredCardListResponse;
 import com.example.mobipay.domain.registeredcard.dto.RegisteredCardRequest;
 import com.example.mobipay.domain.registeredcard.dto.RegisteredCardResponse;
 import com.example.mobipay.domain.registeredcard.entity.RegisteredCard;
 import com.example.mobipay.domain.registeredcard.repository.RegisteredCardRepository;
 import com.example.mobipay.oauth2.dto.CustomOAuth2User;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,15 +48,16 @@ public class RegisteredCardService {
 
     }
 
-//    public RegisteredCardListResponse registeredCardList(CustomOAuth2User oauth2User) {
-//
-//        // 사용자 정보 조회
-//        MobiUser mobiUser = findMobiUser(oauth2User.getMobiUserId());
-//
-//        Car car =
-//
-////        carid 안에 존재하는 멤버들의 등록한 카드를 노출
-//    }
+    public RegisteredCardListResponse registeredCardList(CustomOAuth2User oauth2User) {
+
+        // 사용자 정보 조회
+        MobiUser mobiUser = findMobiUser(oauth2User.getMobiUserId());
+
+        List<RegisteredCard> registeredCards = registeredCardRepository.findByMobiUserId(mobiUser.getId());
+
+        return RegisteredCardListResponse.from(registeredCards);
+
+    }
 
     @Transactional
     public RegisteredCardAutoPayResponse registeredCardAutoPay(RegisteredCardAutoPayRequest request,

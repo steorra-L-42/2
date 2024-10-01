@@ -2,6 +2,7 @@ package com.example.mobipay.domain.registeredcard.controller;
 
 import com.example.mobipay.domain.registeredcard.dto.RegisteredCardAutoPayRequest;
 import com.example.mobipay.domain.registeredcard.dto.RegisteredCardAutoPayResponse;
+import com.example.mobipay.domain.registeredcard.dto.RegisteredCardListResponse;
 import com.example.mobipay.domain.registeredcard.dto.RegisteredCardRequest;
 import com.example.mobipay.domain.registeredcard.dto.RegisteredCardResponse;
 import com.example.mobipay.domain.registeredcard.service.RegisteredCardService;
@@ -10,6 +11,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -31,14 +33,15 @@ public class RegisteredCardController {
         return ResponseEntity.ok(response);
     }
 
-//    @GetMapping
-//    public ResponseEntity<RegisteredCardListResponse> registerCardList(
-//            @AuthenticationPrincipal CustomOAuth2User oauth2User) {
-//
-//        RegisteredCardListResponse response = registeredCardService.registeredCardList(oauth2User);
-//        return ResponseEntity.ok(response);
-//
-//    }
+    @GetMapping
+    public ResponseEntity<RegisteredCardListResponse> registerCardList(
+            @AuthenticationPrincipal CustomOAuth2User oauth2User) {
+
+        RegisteredCardListResponse response = registeredCardService.registeredCardList(oauth2User);
+
+        return ResponseEntity.ok(response);
+
+    }
 
     @PatchMapping("/auto-pay")
     public ResponseEntity<RegisteredCardAutoPayResponse> autoPayCard(
