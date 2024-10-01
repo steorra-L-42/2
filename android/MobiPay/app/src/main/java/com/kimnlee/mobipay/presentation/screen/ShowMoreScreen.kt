@@ -133,7 +133,7 @@ fun ShowMoreScreen(
                         MenuItem("초대 대기", { navController.navigate("memberinvitation_invitationwaiting") }, emoji = "📩"),
                         MenuItem("메뉴 1", { }),
                         MenuItem("메뉴 2", { }),
-                        MenuItem("로그아웃", { viewModel.testLogout() })
+                        MenuItem("로그아웃", { viewModel.logout() })
                     )
                 )
             }
