@@ -5,28 +5,34 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.BitmapFactory
 import android.media.RingtoneManager
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
-import androidx.core.app.Person
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.CATEGORY_MESSAGE
 import androidx.core.app.NotificationCompat.VISIBILITY_PUBLIC
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.app.Person
 import androidx.core.app.RemoteInput
 import androidx.core.graphics.drawable.IconCompat
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
+import com.google.gson.Gson
+import com.kimnlee.common.FCMData
 import com.kimnlee.common.FCMDependencyProvider
 import com.kimnlee.common.PaymentOperations
+import com.kimnlee.common.auth.AuthManager
 import com.kimnlee.common.network.ApiClient
 import com.kimnlee.common.network.BackendService
-import com.kimnlee.common.auth.AuthManager
-import com.kimnlee.payment.data.repository.PaymentRepository
+import com.kimnlee.common.utils.EXTRA_CONVERSATION_ID_KEY
+import com.kimnlee.common.utils.MessagingService
+import com.kimnlee.common.utils.MobiConversation
+import com.kimnlee.common.utils.MobiUser
+import com.kimnlee.common.utils.MobiNotificationManager
+import com.kimnlee.common.utils.REMOTE_INPUT_RESULT_KEY
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -45,6 +51,8 @@ class FCMService : FirebaseMessagingService() {
     private var paymentOperations: PaymentOperations? = null
     private lateinit var mNotificationManager: NotificationManagerCompat
 
+    private lateinit var notificationManager: MobiNotificationManager
+
     private val fcmApi: Retrofit? by lazy {
         apiClient?.fcmApi
     }
@@ -60,13 +68,15 @@ class FCMService : FirebaseMessagingService() {
             Log.e(TAG, "Application context does not implement FCMDependencyProvider")
             return
         }
-        Log.d(TAG, "initializeDependencies: 초기화 완료@@@@@@@@@@@@@@@@")
 
         apiClient = dependencyProvider.apiClient
         authManager = dependencyProvider.authManager
         paymentOperations = dependencyProvider.paymentOperations
 
         mNotificationManager = NotificationManagerCompat.from(applicationContext)
+
+        notificationManager = MobiNotificationManager.getInstance(applicationContext)
+
     }
 
     fun getToken(callback: (String) -> Unit) {
@@ -100,7 +110,7 @@ class FCMService : FirebaseMessagingService() {
 
         Log.d(TAG, "onCreate: BASE URL = ${fcmApi?.baseUrl()}")
 
-        mNotificationManager = NotificationManagerCompat.from(applicationContext)
+//        mNotificationManager = NotificationManagerCompat.from(applicationContext)
     }
 
     fun createReplyRemoteInput(context: Context): RemoteInput {
@@ -108,7 +118,8 @@ class FCMService : FirebaseMessagingService() {
     }
 
     fun createReplyIntent(
-        context: Context, appConversation: MobiConversation): Intent {
+        context: Context, appConversation: MobiConversation
+    ): Intent {
 
         val intent = Intent(context, MessagingService::class.java)
 
@@ -119,7 +130,8 @@ class FCMService : FirebaseMessagingService() {
 
 
     fun createReplyAction(
-        context: Context, appConversation: MobiConversation): NotificationCompat.Action {
+        context: Context, appConversation: MobiConversation
+    ): NotificationCompat.Action {
         val replyIntent: Intent = createReplyIntent(context, appConversation)
 
         val replyPendingIntent = PendingIntent.getService(
@@ -128,7 +140,7 @@ class FCMService : FirebaseMessagingService() {
             replyIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE)
 
-        val replyAction = NotificationCompat.Action.Builder(R.drawable.ic_mobipay, "Reply", replyPendingIntent)
+        val replyAction = NotificationCompat.Action.Builder(R.drawable.ic_mobipay, "답장", replyPendingIntent)
             .setSemanticAction(NotificationCompat.Action.SEMANTIC_ACTION_REPLY)
             .setShowsUserInterface(false)
             .addRemoteInput(createReplyRemoteInput(context))
@@ -138,14 +150,16 @@ class FCMService : FirebaseMessagingService() {
     }
 
     fun createMarkAsReadIntent(
-        context: Context, appConversation: MobiConversation): Intent {
+        context: Context, appConversation: MobiConversation
+    ): Intent {
         val intent = Intent(context, MessagingService::class.java)
         intent.putExtra(EXTRA_CONVERSATION_ID_KEY, appConversation.id)
         return intent
     }
 
     fun createMarkAsReadAction(
-        context: Context, appConversation: MobiConversation): NotificationCompat.Action {
+        context: Context, appConversation: MobiConversation
+    ): NotificationCompat.Action {
         val markAsReadIntent = createMarkAsReadIntent(context, appConversation)
         val markAsReadPendingIntent = PendingIntent.getService(
             context,
@@ -163,7 +177,8 @@ class FCMService : FirebaseMessagingService() {
 
     @RequiresApi(Build.VERSION_CODES.R)
     fun createMessagingStyle(
-        context: Context, appConversation: MobiConversation): NotificationCompat.MessagingStyle {
+        context: Context, appConversation: MobiConversation
+    ): NotificationCompat.MessagingStyle {
 
         val appDeviceUser: MobiUser = MobiUser(1, "Kim", IconCompat.createWithResource(applicationContext, R.drawable.ic_mobipay))
 
@@ -267,24 +282,30 @@ class FCMService : FirebaseMessagingService() {
         if (remoteMessage.data.isNotEmpty()) {
             Log.d(TAG, "페이로드: ${remoteMessage.data}")
 
-            val responseJson = remoteMessage.data
+//            val responseJson = remoteMessage.data
+//
+//            val lat = responseJson["lat"]
+//            val lng = responseJson["lng"]
+//            val fcmType = responseJson["type"]
 
-            val lat = responseJson["lat"]
-            val lng = responseJson["lng"]
-            val fcmType = responseJson["type"]
-            Log.d(TAG, "processMessage: FCM타입은 $fcmType")
-            when (fcmType) {
+            val responseJsonString = Gson().toJson(remoteMessage.data)
+
+            val fcmData = Gson().fromJson(responseJsonString, FCMData::class.java)
+
+            Log.d(TAG, "processMessage: FCM타입은 $fcmData.type")
+            when (fcmData.type) {
                 FCM_TYPE_PAYMENT_RESULT -> {
                     // 결제 결과화면 표시
                 }
                 FCM_TYPE_PAYMENT_REQUEST -> {
+//                    notificationManager.notify()
                     Log.d(TAG, "processMessage: 타입 인지했음")
-                    if (lat != null && lng != null) {
+                    if (fcmData.lat != null && fcmData.lng != null) {
                         Log.d(TAG, "processMessage: NULL도 아니고요")
 
                         Log.d(TAG, "processMessage: ${paymentOperations == null}")
                         
-                        paymentOperations?.processFCM(lat, lng)
+                        paymentOperations?.processFCM(fcmData)
                     }
                 }
                 FCM_TYPE_MEMBER_INVITATION -> {
@@ -300,8 +321,8 @@ class FCMService : FirebaseMessagingService() {
 
 
 
-            val title = responseJson["title"] ?: "No Title"
-            val body = responseJson["body"] ?: "No Body"
+//            val title = responseJson["title"] ?: "No Title"
+//            val body = responseJson["body"] ?: "No Body"
 
             confirmFCMReceived(remoteMessage.messageId ?: "No Message ID")
 
@@ -309,10 +330,11 @@ class FCMService : FirebaseMessagingService() {
             val list2 = mutableListOf<MobiUser>()
             list2.add(user2)
             // 사용자 화면에 Notification 송출하는 코드
-            notify(applicationContext, MobiConversation(77, title, body, list2, BitmapFactory.decodeResource(resources, R.drawable.ic_mobipay)))
+//            notify(applicationContext, MobiConversation(77, title, body, list2, BitmapFactory.decodeResource(resources, R.drawable.ic_mobipay)))
 
             val alertType = "결제알림"
-            broadcastForAlert(alertType, title, body)
+            broadcastForAlert(alertType, "테스트", "맥도날드\n천만원")
+//            broadcastForAlert(alertType, title, body)
         }
     }
 

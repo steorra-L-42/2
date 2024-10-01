@@ -1,4 +1,4 @@
-package com.kimnlee.firebase
+package com.kimnlee.common.utils
 
 import android.app.IntentService
 import android.content.Intent
