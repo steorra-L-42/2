@@ -11,13 +11,8 @@ import org.springframework.stereotype.Repository;
 public interface OwnedCardRepository extends JpaRepository<OwnedCard, String> {
 
     Optional<OwnedCard> findByCardNo(String cardNo);
-}
-
-public interface OwnedCardRepository extends JpaRepository<OwnedCard, Long> {
 
     List<OwnedCard> findAllByMobiUser(MobiUser mobiUser);
-
-//    List<OwnedCard> findByMobiUserAndCardId(MobiUser mobiUser, Long cardId);
 
     Optional<OwnedCard> findOwnedCardById(Long cardId);
 }

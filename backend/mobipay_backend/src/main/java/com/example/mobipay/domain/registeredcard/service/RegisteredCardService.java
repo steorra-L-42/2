@@ -36,13 +36,21 @@ public class RegisteredCardService {
         RegisteredCard registeredCard = RegisteredCard.of(request.getOneDayLimit(), request.getOneTimeLimit(),
                 request.getPassword());
 
-        registeredCard.setCardOwner(mobiUser, ownedCard);
+        registeredCard.addRelations(mobiUser, ownedCard);
 
         registeredCardRepository.save(registeredCard);
 
         return RegisteredCardResponse.of(registeredCard);
 
     }
+
+//    public RegisteredCardListResponse registeredCardList(CustomOAuth2User oauth2User) {
+//
+//        // 사용자 정보 조회
+//        MobiUser mobiUser = findMobiUser(oauth2User.getMobiUserId());
+//
+//
+//    }
 
     private MobiUser findMobiUser(Long mobiUserId) {
 
