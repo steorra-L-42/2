@@ -122,7 +122,7 @@ public class JWTFilter extends OncePerRequestFilter {
                 .email(email)
                 .name(name)
                 .picture(picture)
-                .phonenumber(phonenumber)
+                .phoneNumber(phonenumber)
                 .build();
 
         //CustomOAuth2User에 유저 정보 담기

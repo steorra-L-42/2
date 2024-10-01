@@ -67,6 +67,15 @@ public class RegisteredCard {
         return new RegisteredCard(password);
     }
 
+    public static RegisteredCard of(Integer oneDayLimit, Integer oneTimeLimit, String password) {
+        RegisteredCard registeredCard = new RegisteredCard();
+        registeredCard.oneDayLimit = oneDayLimit;
+        registeredCard.oneTimeLimit = oneTimeLimit;
+        registeredCard.password = password;
+
+        return registeredCard;
+    }
+
     public void addRelations(MobiUser mobiUser, OwnedCard ownedCard) {
         if (this.mobiUser != null) {
             this.mobiUser.getRegisteredCards().remove(this);
@@ -82,4 +91,6 @@ public class RegisteredCard {
         this.ownedCardId = ownedCard.getId();
         ownedCard.getRegisteredCards().add(this);
     }
+
+
 }

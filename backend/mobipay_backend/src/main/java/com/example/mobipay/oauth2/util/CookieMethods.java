@@ -14,7 +14,7 @@ public class CookieMethods {
         jakarta.servlet.http.Cookie cookie = new jakarta.servlet.http.Cookie(key, value);
         cookie.setMaxAge(REFRESH.getExpiration());
         cookie.setSecure(true);
-        cookie.setHttpOnly(true);
+        cookie.setHttpOnly(false);
         cookie.setPath("/");
 
         return cookie;
@@ -24,7 +24,7 @@ public class CookieMethods {
         Cookie cookie = new Cookie(REFRESH.getType(), null);
         cookie.setMaxAge(0);
         cookie.setPath("/");
-        cookie.setHttpOnly(true);
+        cookie.setHttpOnly(false);
         response.addCookie(cookie);
     }
 }

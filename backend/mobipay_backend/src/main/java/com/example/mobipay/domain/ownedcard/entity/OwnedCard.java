@@ -69,9 +69,11 @@ public class OwnedCard extends AuditableCreatedEntity {
         this.cardExpiryDate = cardExpiryDate;
     }
 
+
     public static OwnedCard of(CardRec rec) {
         return new OwnedCard(rec.getCardNo(), rec.getCvc(), rec.getWithdrawalDate(), rec.getCardExpiryDate());
     }
+
 
     public void addRelation(MobiUser mobiUser, Account account, CardProduct cardProduct) {
         if (this.mobiUser != null) {
