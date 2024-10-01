@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import com.kimnlee.vehiclemanagement.R
 import com.kimnlee.vehiclemanagement.data.api.VehicleApiService
+import com.kimnlee.vehiclemanagement.data.model.CarMember
 import com.kimnlee.vehiclemanagement.data.model.VehicleItem
 import com.kimnlee.vehiclemanagement.data.model.VehicleRegistrationRequest
 
@@ -37,6 +38,9 @@ class VehicleManagementViewModel(
 
     private val _registrationStatus = MutableStateFlow<RegistrationStatus>(RegistrationStatus.Idle)
     val registrationStatus: StateFlow<RegistrationStatus> = _registrationStatus
+
+    private val _carMembers = MutableStateFlow<List<CarMember>>(emptyList())
+    val carMembers: StateFlow<List<CarMember>> = _carMembers
 
     init {
         getUserVehicles()
@@ -109,6 +113,23 @@ class VehicleManagementViewModel(
             } catch (e: Exception) {
                 Log.e("VehicleManagementViewModel", "Error registering vehicle", e)
                 _registrationStatus.value = RegistrationStatus.Error("Registration failed: ${e.message}")
+            }
+        }
+    }
+
+    fun requestCarMembers(carId: Int) {
+        viewModelScope.launch {
+            try {
+                val response = vehicleService.getVehicleMembers(carId)
+                if (response.isSuccessful) {
+                    response.body()?.let { carMembersResponse ->
+                        _carMembers.value = carMembersResponse.items
+                    }
+                } else {
+                    Log.e(TAG, "Failed to get car members: ${response.code()}")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error getting car members", e)
             }
         }
     }
