@@ -7,31 +7,36 @@ import android.media.AudioAttributes
 import android.media.RingtoneManager
 import android.util.Log
 import com.google.firebase.FirebaseApp
+import com.kimnlee.common.FCMDependencyProvider
+import com.kimnlee.common.PaymentOperations
 import com.kimnlee.common.auth.AuthManager
 import com.kimnlee.firebase.FCMService
 import com.kimnlee.common.auth.KakaoSdkInitializer
 import com.kimnlee.common.network.ApiClient
+import com.kimnlee.payment.data.api.PaymentApiService
+import com.kimnlee.payment.data.repository.PaymentRepository
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.naver.maps.map.NaverMapSdk
 
 private const val TAG = "MobiPayApplication"
-class MobiPayApplication : Application() {
+class MobiPayApplication : Application(), FCMDependencyProvider {
 
-    lateinit var authManager: AuthManager
-    lateinit var apiClient: ApiClient
+    private lateinit var authManagerInstance: AuthManager
+    private lateinit var apiClientInstance: ApiClient
     lateinit var fcmService: FCMService
+    private lateinit var paymentRepository: PaymentRepository
+    override val paymentOperations: PaymentOperations
+        get() = paymentRepository
 
     override fun onCreate() {
         super.onCreate()
 
-        // ApiClient 초기화
-//        apiClient = ApiClient.getInstance()
+        authManagerInstance = AuthManager(this)
+        apiClientInstance = ApiClient.getInstance { authManagerInstance.getAuthToken() }
 
-        // AuthManager 초기화
-        authManager = AuthManager(this)
-//        apiClient = ApiClient.getInstance(authManager)
-        apiClient = ApiClient.getInstance { authManager.getAuthToken() }
+        val paymentApiService = apiClient.unAuthenticatedApi.create(PaymentApiService::class.java)
+        paymentRepository = PaymentRepository(paymentApiService, applicationContext)
 
         // 카카오 SDK 초기화
         KakaoSdkInitializer.initialize(this)
@@ -39,7 +44,7 @@ class MobiPayApplication : Application() {
         Log.d(TAG, "[모비페이] onCreate: FCM init")
         FirebaseApp.initializeApp(this)
 
-        fcmService = FCMService(apiClient)
+        fcmService = FCMService()
 
         fcmService.getToken { token ->
             Log.d(TAG, "이 기기의 FCM 토큰: $token")
@@ -81,4 +86,10 @@ class MobiPayApplication : Application() {
             getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.createNotificationChannel(channel)
     }
+
+    override val apiClient: ApiClient
+        get() = apiClientInstance
+
+    override val authManager: AuthManager
+        get() = authManagerInstance
 }

@@ -21,6 +21,8 @@ import androidx.core.graphics.drawable.IconCompat
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
+import com.kimnlee.common.FCMDependencyProvider
+import com.kimnlee.common.PaymentOperations
 import com.kimnlee.common.network.ApiClient
 import com.kimnlee.common.network.BackendService
 import com.kimnlee.common.auth.AuthManager
@@ -28,17 +30,44 @@ import com.kimnlee.payment.data.repository.PaymentRepository
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import retrofit2.Retrofit
 
 private const val TAG = "FCMService"
+private const val FCM_TYPE_MEMBER_INVITATION = "invitation"
+private const val FCM_TYPE_PAYMENT_REQUEST = "transactionRequest"
+private const val FCM_TYPE_PAYMENT_RESULT = "transactionResult"
+private const val FCM_TYPE_AUTO_PAY_FAILURE = "autoPayFailed"
 
-class FCMService(private val apiClient: ApiClient) : FirebaseMessagingService() {
+class FCMService : FirebaseMessagingService() {
 
+    private var apiClient: ApiClient? = null
+    private var authManager: AuthManager? = null
+    private var paymentOperations: PaymentOperations? = null
     private lateinit var mNotificationManager: NotificationManagerCompat
-    private lateinit var paymentRepository: PaymentRepository
-    private lateinit var authManager: AuthManager
 
-    private val fcmApi = apiClient.fcmApi
-    private val backendService = fcmApi.create(BackendService::class.java)
+    private val fcmApi: Retrofit? by lazy {
+        apiClient?.fcmApi
+    }
+    private val backendService: BackendService? by lazy {
+        fcmApi?.create(BackendService::class.java)
+    }
+
+    // Service는 인자로 전달하지 못한다고 해서 common 모듈에 FCMDependencyProvider 만들고
+    // MobipayApplication에서 초기화된 apiClient, authManager, paymentRepository 인스턴스 가져오기
+    private fun initializeDependencies() {
+        val dependencyProvider = applicationContext as? FCMDependencyProvider
+        if (dependencyProvider == null) {
+            Log.e(TAG, "Application context does not implement FCMDependencyProvider")
+            return
+        }
+        Log.d(TAG, "initializeDependencies: 초기화 완료@@@@@@@@@@@@@@@@")
+
+        apiClient = dependencyProvider.apiClient
+        authManager = dependencyProvider.authManager
+        paymentOperations = dependencyProvider.paymentOperations
+
+        mNotificationManager = NotificationManagerCompat.from(applicationContext)
+    }
 
     fun getToken(callback: (String) -> Unit) {
         FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
@@ -56,9 +85,7 @@ class FCMService(private val apiClient: ApiClient) : FirebaseMessagingService() 
     override fun onCreate() {
         Log.d(TAG, "onCreate: FCM onCreate")
 
-//        authManager = AuthManager(applicationContext)
-        authManager = AuthManager.getInstance(applicationContext)
-        paymentRepository = PaymentRepository(this.authManager)
+        initializeDependencies()
 
         // FCM 토큰 확인
         FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
@@ -71,7 +98,7 @@ class FCMService(private val apiClient: ApiClient) : FirebaseMessagingService() 
             }
         }
 
-        Log.d(TAG, "onCreate: BASE URL = ${fcmApi.baseUrl()}")
+        Log.d(TAG, "onCreate: BASE URL = ${fcmApi?.baseUrl()}")
 
         mNotificationManager = NotificationManagerCompat.from(applicationContext)
     }
@@ -244,10 +271,34 @@ class FCMService(private val apiClient: ApiClient) : FirebaseMessagingService() 
 
             val lat = responseJson["lat"]
             val lng = responseJson["lng"]
+            val fcmType = responseJson["type"]
+            Log.d(TAG, "processMessage: FCM타입은 $fcmType")
+            when (fcmType) {
+                FCM_TYPE_PAYMENT_RESULT -> {
+                    // 결제 결과화면 표시
+                }
+                FCM_TYPE_PAYMENT_REQUEST -> {
+                    Log.d(TAG, "processMessage: 타입 인지했음")
+                    if (lat != null && lng != null) {
+                        Log.d(TAG, "processMessage: NULL도 아니고요")
 
-            if (lat != null && lng != null) {
-                paymentRepository.processFCM(lat, lng)
+                        Log.d(TAG, "processMessage: ${paymentOperations == null}")
+                        
+                        paymentOperations?.processFCM(lat, lng)
+                    }
+                }
+                FCM_TYPE_MEMBER_INVITATION -> {
+//                    memberInvitation()
+                }
+                FCM_TYPE_AUTO_PAY_FAILURE -> {
+
+                }
+                else -> {
+
+                }
             }
+
+
 
             val title = responseJson["title"] ?: "No Title"
             val body = responseJson["body"] ?: "No Body"
@@ -260,8 +311,8 @@ class FCMService(private val apiClient: ApiClient) : FirebaseMessagingService() 
             // 사용자 화면에 Notification 송출하는 코드
             notify(applicationContext, MobiConversation(77, title, body, list2, BitmapFactory.decodeResource(resources, R.drawable.ic_mobipay)))
 
-            val type = "결제알림"
-            broadcastForAlert(type, title, body)
+            val alertType = "결제알림"
+            broadcastForAlert(alertType, title, body)
         }
     }
 
@@ -275,7 +326,7 @@ class FCMService(private val apiClient: ApiClient) : FirebaseMessagingService() 
     }
 
     /**
-     * Android Auto 네비게이션 화면에 ALERT를 띄우는 화면
+     * Android Auto 네비게이션 화면에 ALERT를 띄우는 코드
      */
     private fun broadcastForAlert(type: String, title : String, body : String){
         val intent = Intent("com.kimnlee.mobipay.SHOW_ALERT")
@@ -290,8 +341,8 @@ class FCMService(private val apiClient: ApiClient) : FirebaseMessagingService() 
      * 서버에 FCM 정상 수신을 알리는 함수
      */
     private fun confirmFCMReceived(msgId: String) {
-        val call = backendService.confirmFCMReceived(msgId)
-        call.enqueue(object : Callback<Void> {
+        val call = backendService?.confirmFCMReceived(msgId)
+        call?.enqueue(object : Callback<Void> {
             override fun onResponse(call: Call<Void>, response: Response<Void>) {
                 if (response.isSuccessful) {
                     Log.d(TAG, "onResponse: FCM 수신 confirm 완료")
@@ -314,8 +365,8 @@ class FCMService(private val apiClient: ApiClient) : FirebaseMessagingService() 
     }
 
     private fun sendTokenToServer(token: String) {
-        val call = backendService.registerToken(token)
-        call.enqueue(object : Callback<Void> {
+        val call = backendService?.registerToken(token)
+        call?.enqueue(object : Callback<Void> {
             override fun onResponse(call: Call<Void>, response: Response<Void>) {
                 if (response.isSuccessful) {
                     Log.d(TAG, "onResponse: FCM 토큰 정상 등록됨")
