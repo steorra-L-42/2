@@ -107,7 +107,7 @@ fun VehicleItem(vehicle: Vehicle, onClick: () -> Unit) {
             verticalArrangement = Arrangement.Center
         ) {
             Image(
-                painter = painterResource(id = R.drawable.genesis_g90),
+                painter = painterResource(id = R.drawable.a3),
                 contentDescription = "차량 이미지",
                 modifier = Modifier
                     .fillMaxWidth()
