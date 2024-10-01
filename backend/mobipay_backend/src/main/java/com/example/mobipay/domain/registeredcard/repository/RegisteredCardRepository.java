@@ -10,4 +10,6 @@ import org.springframework.stereotype.Repository;
 public interface RegisteredCardRepository extends JpaRepository<RegisteredCard, RegisteredCardId> {
 
     Optional<RegisteredCard> findByMobiUserIdAndAutoPayStatus(Long mobiUserId, Boolean autoPayStatus);
+
+    Optional<RegisteredCard> findByOwnedCardIdAndMobiUserId(Long ownedCardId, Long mobiUserId);
 }
