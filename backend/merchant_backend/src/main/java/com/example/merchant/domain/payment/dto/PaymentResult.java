@@ -8,6 +8,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+/**
+ * Payment result
+ * MER -> POS
+ */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @AllArgsConstructor
 @Getter
@@ -25,4 +29,8 @@ public class PaymentResult {
 
     @NotNull(message = "Payment info is null")
     private String info;
+
+    public static PaymentResult of(PaymentResultRequest result, MerchantType type) {
+        return new PaymentResult(result.getSuccess(), type, result.getPaymentBalance(), result.getInfo());
+    }
 }

@@ -16,6 +16,8 @@ import com.example.mobipay.oauth2.dto.CustomOAuth2User;
 import com.example.mobipay.util.SecurityTestUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.stream.Stream;
+import org.aspectj.lang.annotation.After;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -100,6 +102,13 @@ public class CarRegisterTest {
         Car testCar = Car.from("testCar");
         testCar.setOwner(testUser);
         carRepository.save(testCar);
+    }
+
+    @AfterEach
+    void cleanUp() {
+        carGroupRepository.deleteAll();
+        carRepository.deleteAll();
+        mobiUserRepository.deleteAll();
     }
 
     @ParameterizedTest(name = "{index}: {0}")

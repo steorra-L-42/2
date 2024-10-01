@@ -1,5 +1,6 @@
 package com.example.mobipay.global.advice;
 
+import com.example.mobipay.domain.approvalwaiting.error.ApprovalWaitingNotFoundException;
 import com.example.mobipay.domain.car.error.CarNotFoundException;
 import com.example.mobipay.domain.car.error.DuplicatedCarNumberException;
 import com.example.mobipay.domain.car.error.NotMemberException;
@@ -10,13 +11,22 @@ import com.example.mobipay.domain.invitation.error.InvitationNoFoundException;
 import com.example.mobipay.domain.invitation.error.NotApprovedOrRejectedException;
 import com.example.mobipay.domain.invitation.error.NotInvitedException;
 import com.example.mobipay.domain.merchant.error.MerchantNotFoundException;
+import com.example.mobipay.domain.merchanttransaction.error.MerchantTransactionNotFoundException;
 import com.example.mobipay.domain.mobiuser.error.MobiUserNotFoundException;
+import com.example.mobipay.domain.ownedcard.error.OwnedCardNotFoundException;
+import com.example.mobipay.domain.postpayments.error.CardTransactionServerError;
+import com.example.mobipay.domain.postpayments.error.InvalidCardNoException;
 import com.example.mobipay.domain.postpayments.error.InvalidMobiApiKeyException;
+import com.example.mobipay.domain.postpayments.error.InvalidPaymentBalanceException;
+import com.example.mobipay.domain.postpayments.error.ReceiptUserMismatchException;
+import com.example.mobipay.domain.postpayments.error.RegisteredCardNotFoundException;
+import com.example.mobipay.domain.postpayments.error.TransactionAlreadyApprovedException;
 import com.example.mobipay.global.authentication.error.AccountProductNotFoundException;
 import com.example.mobipay.global.authentication.error.CardProductNotFoundException;
 import com.example.mobipay.global.error.ErrorCode;
 import com.example.mobipay.global.error.ErrorResponseDto;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -110,9 +120,64 @@ public class ControllerAdvice {
         return getResponse(ErrorCode.INVALID_MOBI_API_KEY);
     }
 
+    @ExceptionHandler(TransactionAlreadyApprovedException.class)
+    public ResponseEntity<ErrorResponseDto> handleTransactionAlreadyApprovedException(
+            TransactionAlreadyApprovedException e) {
+        log.info(e.getMessage());
+        return getResponse(ErrorCode.TRANSACTION_ALREADY_APPROVED);
+    }
+
+    @ExceptionHandler(ApprovalWaitingNotFoundException.class)
+    public ResponseEntity<ErrorResponseDto> handleApprovalWaitingNotFoundException(ApprovalWaitingNotFoundException e) {
+        log.info(e.getMessage());
+        return getResponse(ErrorCode.APPROVAL_WAITING_NOT_FOUND);
+    }
+
+    @ExceptionHandler(InvalidCardNoException.class)
+    public ResponseEntity<ErrorResponseDto> handleInvalidCardNoException(InvalidCardNoException e) {
+        log.info(e.getMessage());
+        return getResponse(ErrorCode.INVALID_CARD_NO);
+    }
+
+
+    @ExceptionHandler(RegisteredCardNotFoundException.class)
+    public ResponseEntity<ErrorResponseDto> handleRegisteredCardNotFoundException(RegisteredCardNotFoundException e) {
+        log.info(e.getMessage());
+        return getResponse(ErrorCode.NOT_REGISTERED_CARD);
+    }
+
+    @ExceptionHandler(CardTransactionServerError.class)
+    public ResponseEntity<ErrorResponseDto> handleCardTransactionServerError(CardTransactionServerError e) {
+        log.info(e.getMessage());
+        return getResponse(ErrorCode.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(InvalidPaymentBalanceException.class)
+    public ResponseEntity<ErrorResponseDto> handleInvalidPaymentBalanceException(InvalidPaymentBalanceException e) {
+        log.info(e.getMessage());
+        return getResponse(ErrorCode.INVALID_PAYMENT_BALANCE);
+    }
+
+    @ExceptionHandler(OwnedCardNotFoundException.class)
+    public ResponseEntity<ErrorResponseDto> handelOwnedCardNotFoundException(OwnedCardNotFoundException e) {
+        log.info(e.getMessage());
+        return getResponse(ErrorCode.NOT_FOUND_CARD);
+    }
+
+    @ExceptionHandler(MerchantTransactionNotFoundException.class)
+    public ResponseEntity<ErrorResponseDto> handleMerchantTransactionNotFoundException(
+            MerchantTransactionNotFoundException e) {
+        log.info(e.getMessage());
+        return getResponse(ErrorCode.MERCHANT_TRANSACTION_NOT_FOUND);
+    }
+
+    @ExceptionHandler(ReceiptUserMismatchException.class)
+    public ResponseEntity<ErrorResponseDto> handleReceiptUserMismatchException(ReceiptUserMismatchException e) {
+        log.info(e.getMessage());
+        return getResponse(ErrorCode.RECEIPT_USER_MISMATCH);
+    }
+
     private ResponseEntity<ErrorResponseDto> getResponse(ErrorCode errorCode) {
         return ResponseEntity.status(errorCode.getStatus()).body(new ErrorResponseDto(errorCode));
     }
 }
-
-

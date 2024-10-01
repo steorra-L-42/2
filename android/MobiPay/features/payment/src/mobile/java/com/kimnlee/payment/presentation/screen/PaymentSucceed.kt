@@ -1,4 +1,6 @@
+import android.app.Activity
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
@@ -9,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -18,9 +21,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.kimnlee.common.components.MobiTheme
+import androidx.navigation.NavController
+import com.google.gson.Gson
+import com.kimnlee.common.FCMData
 import com.kimnlee.common.R
 import com.kimnlee.common.ui.theme.MobiPayTheme
+import java.math.BigInteger
+import java.text.NumberFormat
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 // Custom Font Family
 val pRegularFontFamily = FontFamily(Font(R.font.pregular))
@@ -28,7 +38,13 @@ val pBoldFontFamily = FontFamily(Font(R.font.pbold))
 val pMediumFontFamily = FontFamily(Font(R.font.pmedium))
 
 @Composable
-fun PaymentSucceedScreen() {
+fun PaymentSucceedScreen(navController: NavController) {
+
+    val context = LocalContext.current
+    val fcmDataJson = (context as? Activity)?.intent?.getStringExtra("fcmData")
+
+    val fcmDataExtra = fcmDataJson?.let { Gson().fromJson(it, FCMData::class.java) }
+
     MobiPayTheme {
         Column(
             modifier = Modifier
@@ -69,19 +85,32 @@ fun PaymentSucceedScreen() {
 
             Spacer(modifier = Modifier.height(40.dp))
 
-            PaymentDetailsCard()
+            PaymentDetailsCard(fcmDataExtra)
 
             Spacer(modifier = Modifier.height(80.dp))
 
-            ReturnToMainButton()
+            ReturnToMainButton(navController)
 
             Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }
 
+fun taxCalc(originalAmount: BigInteger, tenOrOne: Int): BigInteger {
+    return when (tenOrOne) {
+        10 -> (originalAmount / BigInteger("11")) * BigInteger("10")
+        1 -> originalAmount / BigInteger("11")
+        else -> BigInteger.ZERO
+    }
+}
+
+fun moneyFormat(amount: BigInteger): String {
+    val numberFormat = NumberFormat.getInstance(Locale.KOREA)
+    return numberFormat.format(amount) + "원"
+}
+
 @Composable
-fun PaymentDetailsCard() {
+fun PaymentDetailsCard(fcmData: FCMData?) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(10.dp),
@@ -91,28 +120,38 @@ fun PaymentDetailsCard() {
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
-            PaymentDetailRow("승인번호", "435227483920")
+            PaymentDetailRow("가맹점명", fcmData?.merchantName ?: "맥도날드 동탄나루점")
             Spacer(modifier = Modifier.height(14.dp))
-            PaymentDetailRow("일시", "2024/11/11 18:18:18")
+            PaymentDetailRow("일시", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss")))
             Spacer(modifier = Modifier.height(14.dp))
             PaymentDetailRow("결제 카드", "모비카드 8282")
             Spacer(modifier = Modifier.height(14.dp))
-            PaymentDetailRow("금액", "10,000원")
+            PaymentDetailRow("금액", moneyFormat(taxCalc(BigInteger(fcmData?.paymentBalance), 10)))
             Spacer(modifier = Modifier.height(14.dp))
-            PaymentDetailRow("부가세", "1,000원")
+            PaymentDetailRow("부가세", moneyFormat(taxCalc(BigInteger(fcmData?.paymentBalance), 1)))
             Spacer(modifier = Modifier.height(14.dp))
-            PaymentDetailRow("합계", "11,000원")
+            PaymentDetailRow("합계", moneyFormat(BigInteger(fcmData?.paymentBalance)))
         }
     }
 }
 
 @Composable
-fun ReturnToMainButton() {
+fun ReturnToMainButton(navController: NavController) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(50.dp),
         colors = CardDefaults.cardColors(containerColor = colorResource(id = R.color.mobi_blue)),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable {
+                navController.navigate("home") {
+                    popUpTo(0) {  // '0' indicates popping all the way to the root of the back stack
+                        inclusive = true  // Removes all back stack entries
+                    }
+                    launchSingleTop = true  // Ensures that only a single instance of the home screen is in the stack
+                }
+            }
+        ,
     ) {
         Text(
             text = "메인 화면으로 돌아가기",

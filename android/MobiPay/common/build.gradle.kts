@@ -85,8 +85,9 @@ dependencies {
     api(libs.lifecycle.runtime.ktx)
     api(libs.androidx.lifecycle.viewmodel.compose)
 
-    // 카카오 로그인 API 모듈
-    api(libs.v2.user)
+    // Google Play Location, Maps
+    api(libs.play.services.location)
+    api(libs.play.services.maps)
 
     // Retrofit
     api(libs.retrofit)
@@ -107,6 +108,9 @@ dependencies {
 
     // EncryptSharedPreferences
     implementation(libs.androidx.security.crypto)
+
+    // Kakao Login API
+    api(libs.v2.user)
 
     // Naver Maps
     api(libs.map.sdk)

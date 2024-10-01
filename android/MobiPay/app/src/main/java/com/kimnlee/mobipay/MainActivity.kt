@@ -4,16 +4,23 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.compose.rememberNavController
+import com.google.gson.Gson
 import com.kimnlee.auth.presentation.viewmodel.AuthenticationState
 import com.kimnlee.auth.presentation.viewmodel.BiometricViewModel
+import com.kimnlee.auth.presentation.viewmodel.LoginViewModel
+import com.kimnlee.common.FCMData
 import com.kimnlee.common.ui.theme.MobiPayTheme
 import com.kimnlee.mobipay.navigation.AppNavGraph
 
 class MainActivity : ComponentActivity() {
 
     private lateinit var biometricViewModel: BiometricViewModel
+    private lateinit var loginViewModel: LoginViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,10 +33,32 @@ class MainActivity : ComponentActivity() {
         val fcmService = (application as MobiPayApplication).fcmService
 
         biometricViewModel = ViewModelProvider(this).get(BiometricViewModel::class.java)
+
+        val fcmDataJson = intent?.getStringExtra("fcmData")
+        val fcmData = fcmDataJson?.let { Gson().fromJson(it, FCMData::class.java) }
+
+        loginViewModel = LoginViewModel(authManager, apiClient, fcmService)
+
         setContent {
             MobiPayTheme {
                 val navController = rememberNavController()
-                AppNavGraph(navController, authManager, applicationContext, apiClient, fcmService)
+                val isLoggedIn by authManager.isLoggedIn.collectAsState(initial = false)
+
+                LaunchedEffect(isLoggedIn) {
+                    if (isLoggedIn) {
+                        navController.navigate("home") {
+                            popUpTo("auth") { inclusive = true }
+                        }
+                    }
+                }
+
+                AppNavGraph(
+                    navController,
+                    authManager,
+                    applicationContext,
+                    apiClient,
+                    loginViewModel
+                )
             }
         }
     }
@@ -51,5 +80,10 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
     }
 }

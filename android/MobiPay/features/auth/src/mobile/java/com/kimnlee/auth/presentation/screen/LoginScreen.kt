@@ -47,8 +47,7 @@ import com.kimnlee.common.ui.theme.MobiTextDarkGray
 @Composable
 fun LoginScreen(
     viewModel: LoginViewModel,
-    onNavigateToHome: () -> Unit,
-    onNavigateToSignUp: () -> Unit
+    onNavigateToHome: () -> Unit
 ) {
     val isLoggedIn by viewModel.isLoggedIn.collectAsState()
     val context = LocalContext.current

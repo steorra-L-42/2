@@ -20,6 +20,7 @@ import com.kimnlee.common.auth.model.SendTokenResponse
 import com.kimnlee.common.network.ApiClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
@@ -30,7 +31,7 @@ import kotlin.coroutines.resume
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "auth")
 private const val TAG = "AuthManager"
 
-class AuthManager private constructor(private val applicationContext: Context) {
+class AuthManager(private val context: Context) {
 
     private val IS_LOGGED_IN = booleanPreferencesKey("is_logged_in")
     private val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
@@ -38,20 +39,24 @@ class AuthManager private constructor(private val applicationContext: Context) {
     private val encryptedSharedPreferences = EncryptedSharedPreferences.create(
         "secret_shared_prefs",
         masterKeyAlias,
-        applicationContext,
+        context,
         EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
         EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
     )
 
-    val isLoggedIn: Flow<Boolean> = applicationContext.dataStore.data
+    val isLoggedIn: Flow<Boolean> = context.dataStore.data
         .map { preferences ->
             preferences[IS_LOGGED_IN] ?: false
         }
 
     suspend fun setLoggedIn(isLoggedIn: Boolean) {
-        applicationContext.dataStore.edit { preferences ->
+        context.dataStore.edit { preferences ->
             preferences[IS_LOGGED_IN] = isLoggedIn
         }
+    }
+
+    suspend fun isLoggedInImmediately(): Boolean {
+        return context.dataStore.data.first()[IS_LOGGED_IN] ?: false
     }
 
     fun saveAuthToken(token: String) {
@@ -97,17 +102,20 @@ class AuthManager private constructor(private val applicationContext: Context) {
         }
     }
 
+    suspend fun logoutWithKakao(): Result<Unit> = suspendCancellableCoroutine { continuation ->
+        UserApiClient.instance.logout { error ->
+            if (error != null) {
+                Log.e(TAG, "카카오 로그아웃 실패", error)
+                continuation.resume(Result.failure(error))
+            } else {
+                Log.i(TAG, "카카오 로그아웃 성공")
+                continuation.resume(Result.success(Unit))
+            }
+        }
+    }
+
     companion object {
         private const val KEY_AUTH_TOKEN = "auth_token"
         private const val KEY_REFRESH_TOKEN = "refresh_token"
-
-        @Volatile
-        private var INSTANCE: AuthManager? = null
-
-        fun getInstance(context: Context): AuthManager {
-            return INSTANCE ?: synchronized(this) {
-                INSTANCE ?: AuthManager(context.applicationContext).also { INSTANCE = it }
-            }
-        }
     }
 }

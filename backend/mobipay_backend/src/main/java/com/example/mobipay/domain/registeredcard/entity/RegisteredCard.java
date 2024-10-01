@@ -58,4 +58,39 @@ public class RegisteredCard {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owned_card_id", insertable = false, updatable = false)
     private OwnedCard ownedCard;
+
+    private RegisteredCard(String password) {
+        this.password = password;
+    }
+
+    public static RegisteredCard from(String password) {
+        return new RegisteredCard(password);
+    }
+
+    public static RegisteredCard of(Integer oneDayLimit, Integer oneTimeLimit, String password) {
+        RegisteredCard registeredCard = new RegisteredCard();
+        registeredCard.oneDayLimit = oneDayLimit;
+        registeredCard.oneTimeLimit = oneTimeLimit;
+        registeredCard.password = password;
+
+        return registeredCard;
+    }
+
+    public void addRelations(MobiUser mobiUser, OwnedCard ownedCard) {
+        if (this.mobiUser != null) {
+            this.mobiUser.getRegisteredCards().remove(this);
+        }
+        this.mobiUser = mobiUser;
+        this.mobiUserId = mobiUser.getId();
+        mobiUser.getRegisteredCards().add(this);
+
+        if (this.ownedCard != null) {
+            this.ownedCard.getRegisteredCards().remove(this);
+        }
+        this.ownedCard = ownedCard;
+        this.ownedCardId = ownedCard.getId();
+        ownedCard.getRegisteredCards().add(this);
+    }
+
+
 }
