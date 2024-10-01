@@ -1,6 +1,8 @@
-package com.kimnlee.firebase
+package com.kimnlee.common
 
-data class FcmData(
+import java.io.Serializable
+
+data class FCMData(
     val autoPay: String?,
     val cardNo: String?,
     val approvalWaitingId: String?,
@@ -11,4 +13,4 @@ data class FcmData(
     val lat: String?,
     val lng: String?,
     val type: String?
-)
+) : Serializable

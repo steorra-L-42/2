@@ -13,6 +13,7 @@ import com.kimnlee.common.auth.AuthManager
 import com.kimnlee.firebase.FCMService
 import com.kimnlee.common.auth.KakaoSdkInitializer
 import com.kimnlee.common.network.ApiClient
+import com.kimnlee.common.utils.MobiNotificationManager
 import com.kimnlee.payment.data.api.PaymentApiService
 import com.kimnlee.payment.data.repository.PaymentRepository
 import com.mapbox.navigation.base.options.NavigationOptions
@@ -22,6 +23,7 @@ import com.naver.maps.map.NaverMapSdk
 private const val TAG = "MobiPayApplication"
 class MobiPayApplication : Application(), FCMDependencyProvider {
 
+    private lateinit var mobiNotificationManager: MobiNotificationManager
     private lateinit var authManagerInstance: AuthManager
     private lateinit var apiClientInstance: ApiClient
     lateinit var fcmService: FCMService
@@ -32,11 +34,12 @@ class MobiPayApplication : Application(), FCMDependencyProvider {
     override fun onCreate() {
         super.onCreate()
 
+        mobiNotificationManager = MobiNotificationManager.getInstance(this)
         authManagerInstance = AuthManager(this)
         apiClientInstance = ApiClient.getInstance { authManagerInstance.getAuthToken() }
 
         val paymentApiService = apiClient.unAuthenticatedApi.create(PaymentApiService::class.java)
-        paymentRepository = PaymentRepository(paymentApiService, applicationContext)
+        paymentRepository = PaymentRepository(paymentApiService, mobiNotificationManager, applicationContext)
 
         // 카카오 SDK 초기화
         KakaoSdkInitializer.initialize(this)

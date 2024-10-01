@@ -2,6 +2,9 @@ package com.kimnlee.freedrive.presentation.screen
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -49,7 +52,10 @@ import androidx.car.app.model.Action
 import androidx.car.app.model.Alert
 import androidx.car.app.model.CarIcon
 import androidx.car.app.model.CarText
+import androidx.car.app.notification.CarAppExtender
 import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.graphics.drawable.IconCompat
 import com.mapbox.androidauto.search.PlaceRecord
 
@@ -157,6 +163,40 @@ class MainCarSession : Session() {
 
     private fun unregisterReceiver() {
         carContext.unregisterReceiver(alertReceiver)
+    }
+
+
+    fun showHUN(title: String, content: String) {
+        val notificationId = 1001
+        val channelId = "payment_request"
+
+        val reRouteIntent = Intent("com.kimnlee.mobipay.PAYMENT_APPROVAL")
+        val reRoutePendingIntent = PendingIntent.getBroadcast(
+            carContext,
+            0,
+            reRouteIntent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+
+        val notification = NotificationCompat.Builder(carContext, channelId)
+            .setSmallIcon(R.drawable.ic_mobipay)
+            .setContentTitle(title)
+            .setContentText(content)
+            .addAction(
+                NotificationCompat.Action.Builder(
+                    null,
+                    "승인",
+                    reRoutePendingIntent
+                ).build()
+            )
+            .extend(
+                CarAppExtender.Builder()
+                    .setImportance(NotificationManager.IMPORTANCE_HIGH)
+                    .build()
+            )
+            .build()
+
+        NotificationManagerCompat.from(carContext).notify(notificationId, notification)
     }
 
     init {

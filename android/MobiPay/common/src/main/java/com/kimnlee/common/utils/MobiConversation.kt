@@ -1,4 +1,4 @@
-package com.kimnlee.firebase
+package com.kimnlee.common.utils
 
 import android.graphics.Bitmap
 import androidx.core.graphics.drawable.IconCompat
