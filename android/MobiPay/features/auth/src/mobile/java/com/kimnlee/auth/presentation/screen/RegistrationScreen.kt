@@ -14,6 +14,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kimnlee.auth.presentation.viewmodel.LoginViewModel
+import com.kimnlee.common.ui.theme.MobiBgGray
+import com.kimnlee.common.ui.theme.MobiTextDarkGray
 
 @Composable
 fun RegistrationScreen(
@@ -62,7 +64,8 @@ fun RegistrationScreen(
         Text(
             "휴대폰 번호",
             fontSize = 14.sp,
-            color = Color.Gray
+            style = MaterialTheme.typography.headlineMedium,
+            color = MobiTextDarkGray
         )
         OutlinedTextField(
             value = phoneNumber,
@@ -77,7 +80,8 @@ fun RegistrationScreen(
         Text(
             "이름",
             fontSize = 14.sp,
-            color = Color.Gray
+            style = MaterialTheme.typography.headlineMedium,
+            color = MobiTextDarkGray
         )
         OutlinedTextField(
             value = name,
@@ -99,6 +103,29 @@ fun RegistrationScreen(
             shape = RoundedCornerShape(8.dp)
         ) {
             Text("확인", fontSize = 16.sp)
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(
+            onClick = {
+                onBackPressed()
+                viewModel.resetStatus()
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MobiBgGray
+            ),
+            shape = RoundedCornerShape(8.dp)
+        ) {
+            Text(
+                text = "뒤로가기",
+                style = MaterialTheme.typography.headlineMedium,
+                fontSize = 16.sp,
+                color = Color(0xFF3182F6)
+            )
         }
 
         Spacer(modifier = Modifier.height(40.dp))
