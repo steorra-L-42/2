@@ -171,12 +171,6 @@ public class ControllerAdvice {
         return getResponse(ErrorCode.MERCHANT_TRANSACTION_NOT_FOUND);
     }
 
-    @ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<ErrorResponseDto> handleConstraintViolationException(ConstraintViolationException e) {
-        log.info(e.getMessage());
-        return getResponse(ErrorCode.INTERNAL_SERVER_ERROR);
-    }
-
     @ExceptionHandler(ReceiptUserMismatchException.class)
     public ResponseEntity<ErrorResponseDto> handleReceiptUserMismatchException(ReceiptUserMismatchException e) {
         log.info(e.getMessage());
