@@ -17,3 +17,11 @@ data class RegistrationRequest(
     val accessToken: String,
     val refreshToken: String,
 )
+
+data class SendTokenRequest(
+    val token: String
+)
+
+data class SendTokenResponse(
+    val message: String
+)

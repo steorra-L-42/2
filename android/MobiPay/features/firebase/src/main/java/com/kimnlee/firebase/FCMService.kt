@@ -21,6 +21,8 @@ import androidx.core.graphics.drawable.IconCompat
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
+import com.kimnlee.common.FCMDependencyProvider
+import com.kimnlee.common.PaymentOperations
 import com.kimnlee.common.network.ApiClient
 import com.kimnlee.common.network.BackendService
 import com.kimnlee.common.auth.AuthManager
@@ -28,17 +30,39 @@ import com.kimnlee.payment.data.repository.PaymentRepository
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import retrofit2.Retrofit
 
 private const val TAG = "FCMService"
 
 class FCMService : FirebaseMessagingService() {
 
+    private var apiClient: ApiClient? = null
+    private var authManager: AuthManager? = null
+    private var paymentOperations: PaymentOperations? = null
     private lateinit var mNotificationManager: NotificationManagerCompat
-    private lateinit var paymentRepository: PaymentRepository
-    private lateinit var authManager: AuthManager
 
-    private val fcmApi = ApiClient.getInstance().fcmApi
-    private val backendService = fcmApi.create(BackendService::class.java)
+    private val fcmApi: Retrofit? by lazy {
+        apiClient?.fcmApi
+    }
+    private val backendService: BackendService? by lazy {
+        fcmApi?.create(BackendService::class.java)
+    }
+
+    // Service는 인자로 전달하지 못한다고 해서 common 모듈에 FCMDependencyProvider 만들고
+    // MobipayApplication에서 초기화된 apiClient, authManager, paymentRepository 인스턴스 가져오기
+    private fun initializeDependencies() {
+        val dependencyProvider = applicationContext as? FCMDependencyProvider
+        if (dependencyProvider == null) {
+            Log.e(TAG, "Application context does not implement FCMDependencyProvider")
+            return
+        }
+
+        apiClient = dependencyProvider.apiClient
+        authManager = dependencyProvider.authManager
+        paymentOperations = dependencyProvider.paymentOperations
+
+        mNotificationManager = NotificationManagerCompat.from(applicationContext)
+    }
 
     fun getToken(callback: (String) -> Unit) {
         FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
@@ -56,9 +80,7 @@ class FCMService : FirebaseMessagingService() {
     override fun onCreate() {
         Log.d(TAG, "onCreate: FCM onCreate")
 
-//        authManager = AuthManager(applicationContext)
-        authManager = AuthManager.getInstance(applicationContext)
-        paymentRepository = PaymentRepository(this.authManager)
+        initializeDependencies()
 
         // FCM 토큰 확인
         FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
@@ -71,7 +93,7 @@ class FCMService : FirebaseMessagingService() {
             }
         }
 
-        Log.d(TAG, "onCreate: BASE URL = ${fcmApi.baseUrl()}")
+        Log.d(TAG, "onCreate: BASE URL = ${fcmApi?.baseUrl()}")
 
         mNotificationManager = NotificationManagerCompat.from(applicationContext)
     }
@@ -246,7 +268,7 @@ class FCMService : FirebaseMessagingService() {
             val lng = responseJson["lng"]
 
             if (lat != null && lng != null) {
-                paymentRepository.processFCM(lat, lng)
+                paymentOperations?.processFCM(lat, lng)
             }
 
             val title = responseJson["title"] ?: "No Title"
@@ -290,8 +312,8 @@ class FCMService : FirebaseMessagingService() {
      * 서버에 FCM 정상 수신을 알리는 함수
      */
     private fun confirmFCMReceived(msgId: String) {
-        val call = backendService.confirmFCMReceived(msgId)
-        call.enqueue(object : Callback<Void> {
+        val call = backendService?.confirmFCMReceived(msgId)
+        call?.enqueue(object : Callback<Void> {
             override fun onResponse(call: Call<Void>, response: Response<Void>) {
                 if (response.isSuccessful) {
                     Log.d(TAG, "onResponse: FCM 수신 confirm 완료")
@@ -314,8 +336,8 @@ class FCMService : FirebaseMessagingService() {
     }
 
     private fun sendTokenToServer(token: String) {
-        val call = backendService.registerToken(token)
-        call.enqueue(object : Callback<Void> {
+        val call = backendService?.registerToken(token)
+        call?.enqueue(object : Callback<Void> {
             override fun onResponse(call: Call<Void>, response: Response<Void>) {
                 if (response.isSuccessful) {
                     Log.d(TAG, "onResponse: FCM 토큰 정상 등록됨")

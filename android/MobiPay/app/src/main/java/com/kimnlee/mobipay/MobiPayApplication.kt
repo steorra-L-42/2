@@ -7,10 +7,13 @@ import android.media.AudioAttributes
 import android.media.RingtoneManager
 import android.util.Log
 import com.google.firebase.FirebaseApp
+import com.kimnlee.common.PaymentOperations
 import com.kimnlee.common.auth.AuthManager
 import com.kimnlee.firebase.FCMService
 import com.kimnlee.common.auth.KakaoSdkInitializer
 import com.kimnlee.common.network.ApiClient
+import com.kimnlee.payment.data.api.PaymentApiService
+import com.kimnlee.payment.data.repository.PaymentRepository
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.naver.maps.map.NaverMapSdk
@@ -20,16 +23,19 @@ class MobiPayApplication : Application() {
 
     lateinit var authManager: AuthManager
     lateinit var apiClient: ApiClient
+    lateinit var fcmService: FCMService
+    private lateinit var paymentRepository: PaymentRepository
+    val paymentOperations: PaymentOperations
+        get() = paymentRepository
 
     override fun onCreate() {
         super.onCreate()
 
-        // ApiClient 초기화
-        apiClient = ApiClient.getInstance()
+        authManager = AuthManager(this)
+        apiClient = ApiClient.getInstance { authManager.getAuthToken() }
 
-        // AuthManager 초기화
-        authManager = AuthManager.getInstance(this)
-        apiClient = ApiClient.getInstance(authManager)
+        val paymentApiService = apiClient.unAuthenticatedApi.create(PaymentApiService::class.java)
+        paymentRepository = PaymentRepository(paymentApiService)
 
         // 카카오 SDK 초기화
         KakaoSdkInitializer.initialize(this)
@@ -37,7 +43,7 @@ class MobiPayApplication : Application() {
         Log.d(TAG, "[모비페이] onCreate: FCM init")
         FirebaseApp.initializeApp(this)
 
-        val fcmService = FCMService()
+        fcmService = FCMService()
 
         fcmService.getToken { token ->
             Log.d(TAG, "이 기기의 FCM 토큰: $token")

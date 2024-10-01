@@ -1,5 +1,6 @@
 package com.example.merchant.domain.payment.dto;
 
+import com.example.merchant.util.mobipay.dto.MobiPaymentResponse;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -12,12 +13,15 @@ public class PaymentResponse {
     private Long merchantId;
     private Integer paymentBalance;
 
-    public static PaymentResponse of(Long approvalWaitingId, Long carId, Long merchantId, Integer paymentBalance) {
+    public static PaymentResponse from(MobiPaymentResponse mobiPaymentResponse) {
+        if(mobiPaymentResponse == null) { // 4XX error 일때 null이 들어올 수 있음. 그대로 전달.
+            return null;
+        }
         return PaymentResponse.builder()
-            .approvalWaitingId(approvalWaitingId)
-            .carId(carId)
-            .merchantId(merchantId)
-            .paymentBalance(paymentBalance)
+            .approvalWaitingId(mobiPaymentResponse.getApprovalWaitingId())
+            .carId(mobiPaymentResponse.getCarId())
+            .merchantId(mobiPaymentResponse.getMerchantId())
+            .paymentBalance(mobiPaymentResponse.getPaymentBalance())
             .build();
     }
 
