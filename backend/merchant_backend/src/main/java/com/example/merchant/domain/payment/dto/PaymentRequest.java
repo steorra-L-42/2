@@ -23,7 +23,7 @@ public class PaymentRequest {
     private Integer paymentBalance;
 
     @NotBlank(message = "Car number is empty")
-    @Size(min = 8, max = 8, message = "Car number must be 8 characters")
+    @Size(min = 7, max = 8, message = "Car number must be 7~8 characters")
     private String carNumber;
 
     @NotNull(message = "Payment info is null")

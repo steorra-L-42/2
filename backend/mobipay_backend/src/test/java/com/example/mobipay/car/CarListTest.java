@@ -13,6 +13,8 @@ import com.example.mobipay.domain.mobiuser.entity.MobiUser;
 import com.example.mobipay.domain.mobiuser.repository.MobiUserRepository;
 import com.example.mobipay.oauth2.dto.CustomOAuth2User;
 import com.example.mobipay.util.SecurityTestUtil;
+import org.aspectj.lang.annotation.After;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -71,6 +73,12 @@ public class CarListTest {
     void entitySetUp() {
         testUser = MobiUser.of("email", "name", "phoneNumber", "picture");
         mobiUserRepository.save(testUser);
+    }
+
+    @AfterEach
+    void cleanUp() {
+        carRepository.deleteAll();
+        mobiUserRepository.deleteAll();
     }
 
     @Test
