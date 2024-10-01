@@ -2,7 +2,7 @@ package com.example.merchant.domain.payment.controller;
 
 import com.example.merchant.domain.payment.dto.PaymentRequest;
 import com.example.merchant.domain.payment.dto.PaymentResponse;
-import com.example.merchant.domain.payment.dto.PaymentResult;
+import com.example.merchant.domain.payment.dto.PaymentResultRequest;
 import com.example.merchant.domain.payment.service.PaymentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +29,7 @@ public class PaymentController {
 
    @PostMapping("/result")
     public ResponseEntity<PaymentResponse> result(@RequestHeader("merApiKey") String merApiKey,
-                                                  @RequestBody @Valid PaymentResult request) {
+                                                  @RequestBody @Valid PaymentResultRequest request) {
 
         paymentService.result(merApiKey, request);
 

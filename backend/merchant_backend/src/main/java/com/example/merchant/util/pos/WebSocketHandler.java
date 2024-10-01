@@ -1,6 +1,7 @@
 package com.example.merchant.util.pos;
 
 import com.example.merchant.domain.payment.dto.PaymentResult;
+import com.example.merchant.domain.payment.dto.PaymentResultRequest;
 import com.example.merchant.global.enums.MerchantType;
 import com.example.merchant.util.pos.dto.MerchantInfo;
 import com.example.merchant.util.pos.dto.SessionId;

@@ -3,6 +3,8 @@ package com.example.merchant.domain.payment.service;
 import com.example.merchant.domain.payment.dto.PaymentRequest;
 import com.example.merchant.domain.payment.dto.PaymentResponse;
 import com.example.merchant.domain.payment.dto.PaymentResult;
+import com.example.merchant.domain.payment.dto.PaymentResultRequest;
+import com.example.merchant.global.enums.MerchantType;
 import com.example.merchant.util.credential.CredentialUtil;
 import com.example.merchant.util.mobipay.MobiPay;
 import com.example.merchant.util.mobipay.dto.MobiPaymentRequest;
@@ -34,10 +36,13 @@ public class PaymentService {
                 .body(PaymentResponse.from(mobiPaymentResponse.getBody()));
     }
 
-    public void result(String mobiMerApiKey, PaymentResult result) {
+    public void result(String mobiMerApiKey, PaymentResultRequest result) {
 
         credentialUtil.validateMobiMerApiKey(mobiMerApiKey);
+
         // send a result to POS
-        webSocketHandler.sendResult(result.getType(), result);
+        MerchantType type = credentialUtil.getMerchantTypeById(result.getMerchantId());
+        PaymentResult paymentResult = PaymentResult.of(result, type);
+        webSocketHandler.sendResult(type, paymentResult);
     }
 }
