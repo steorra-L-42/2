@@ -17,6 +17,7 @@ import com.example.mobipay.domain.postpayments.dto.ApprovalPaymentRequest;
 import com.example.mobipay.domain.postpayments.dto.ApprovalPaymentResponse;
 import com.example.mobipay.domain.postpayments.dto.cardtransaction.CardTransactionRequest;
 import com.example.mobipay.domain.postpayments.dto.cardtransaction.CardTransactionResponse;
+import com.example.mobipay.domain.postpayments.dto.paymentresult.PaymentResultRequest;
 import com.example.mobipay.domain.postpayments.error.CardTransactionServerError;
 import com.example.mobipay.domain.postpayments.error.InvalidCardNoException;
 import com.example.mobipay.domain.postpayments.error.InvalidPaymentBalanceException;
@@ -28,6 +29,7 @@ import com.example.mobipay.domain.registeredcard.repository.RegisteredCardReposi
 import com.example.mobipay.oauth2.dto.CustomOAuth2User;
 import com.example.mobipay.util.RestClientUtil;
 import jakarta.persistence.LockModeType;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -67,17 +69,53 @@ public class PostPaymentsApprovalService {
             return ApprovalPaymentResponse.from(request);
         }
 
-        // approvalWaiting 검증
-        ApprovalWaiting approvalWaiting = validateApprovalWaiting(request);
-        // cardNo 및 registeredCard 검증
-        OwnedCard ownedCard = validateCardNo(request);
-        RegisteredCard registeredCard = validateRegisteredCard(mobiUser, ownedCard);
-        // merchant 검증
-        Merchant merchant = validateMerchant(request);
-        // SSAFY_API 결제 진행 요청
-        processTransaction(request, mobiUser, ownedCard, registeredCard, merchant, approvalWaiting);
+        Merchant merchant = null;
+        try {
+            // approvalWaiting 검증
+            ApprovalWaiting approvalWaiting = validateApprovalWaiting(request);
+            // merchant 검증
+            merchant = validateMerchant(request);
+            // cardNo 및 registeredCard 검증
+            OwnedCard ownedCard = validateCardNo(request);
+            RegisteredCard registeredCard = validateRegisteredCard(mobiUser, ownedCard);
+            // SSAFY_API 결제 진행 요청
+            processTransaction(request, mobiUser, ownedCard, registeredCard, merchant, approvalWaiting);
+
+            // paymentBalance가 일치하지 않거나, 올바르지 않은 merchantId일 경우 실패 메시지를 보내지 않는다.
+            // 검증되지 않은 정보이기 때문.
+        } catch (TransactionAlreadyApprovedException | InvalidPaymentBalanceException | MerchantNotFoundException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            sendTransactionFailedResult(request, merchant);
+            throw e;
+        }
+        sendTransactionSuccessResult(request, merchant);
 
         return ApprovalPaymentResponse.from(request);
+    }
+
+    // 결제 성공 결과 요청
+    private void sendTransactionSuccessResult(ApprovalPaymentRequest request, Merchant merchant) {
+        Map<String, String> additionalHeaders = Map.of("merApiKey", merchant.getApiKey());
+        PaymentResultRequest paymentResultRequest = new PaymentResultRequest(
+                true, request.getMerchantId(), request.getPaymentBalance(), request.getInfo());
+
+        ResponseEntity<Void> response = restClientUtil.sendResultToMerchantServer(paymentResultRequest,
+                additionalHeaders);
+        log.info("[Transaction Success] merchant server response: " + response.getStatusCode());
+    }
+
+    // 결제 실패 결과 요청
+    private void sendTransactionFailedResult(ApprovalPaymentRequest request, Merchant merchant) {
+        Map<String, String> additionalHeaders = Map.of("merApiKey", merchant.getApiKey());
+        PaymentResultRequest paymentResultRequest = new PaymentResultRequest(
+                false, request.getMerchantId(), request.getPaymentBalance(), request.getInfo());
+
+        ResponseEntity<Void> response = restClientUtil.sendResultToMerchantServer(paymentResultRequest,
+                additionalHeaders);
+        log.info("[Transaction Failed] merchant server response: " + response.getStatusCode());
     }
 
     // oauth2User 검증

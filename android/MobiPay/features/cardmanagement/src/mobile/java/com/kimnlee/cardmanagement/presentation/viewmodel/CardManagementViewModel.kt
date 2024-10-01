@@ -1,11 +1,14 @@
 package com.kimnlee.cardmanagement.presentation.viewmodel
 
+import Card
+import android.content.ContentValues.TAG
+import android.util.Log
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kimnlee.cardmanagement.data.api.CardManagementApiService
 import com.kimnlee.cardmanagement.data.model.Photos
-import com.kimnlee.cardmanagement.data.model.Card
+import com.kimnlee.cardmanagement.data.model.User
 import com.kimnlee.cardmanagement.data.repository.CardManagementRepository
 import com.kimnlee.common.auth.AuthManager
 import com.kimnlee.common.network.ApiClient
@@ -17,8 +20,7 @@ class CardManagementViewModel(
     private val authManager: AuthManager,
     private val apiClient: ApiClient) : ViewModel() {
 
-    private val cardMangementService: CardManagementApiService = apiClient.authenticatedApi.create(CardManagementApiService::class.java)
-    private val repository = CardManagementRepository(cardMangementService)
+    private val cardManagementService: CardManagementApiService = apiClient.authenticatedApi.create(CardManagementApiService::class.java)
 
     // 더미 데이터 용
     private val _photoUiState = MutableStateFlow<PhotoUiState>(PhotoUiState.Loading)
@@ -29,17 +31,19 @@ class CardManagementViewModel(
 
     init {
         fetchPhotos()
+        requestUserCards()
         Log.d("_dddddddd",_cardUiState.value.toString())
         Log.d("dddddddd",cardUiState.value.toString())
 
     }
+
 
     // 더미 데이터 용
     fun fetchPhotos() {
         viewModelScope.launch {
             _photoUiState.value = PhotoUiState.Loading
             try {
-                val photos = cardMangementService.getPhotos()
+                val photos = cardManagementService.getPhotos()
                 _photoUiState.value = PhotoUiState.Success(photos)
             } catch (e: Exception) {
                 _photoUiState.value = PhotoUiState.Error("Failed to fetch users: ${e.message}")
@@ -47,28 +51,30 @@ class CardManagementViewModel(
         }
     }
 
-    fun fetchCards() {
+    fun requestUserCards() {
         viewModelScope.launch {
             _cardUiState.value = CardUiState.Loading
             try {
-                val cards = repository.getCards()
-                Log.d("photos",cards.toString())
-                _cardUiState.value = CardUiState.Success(cards)
+                val response = cardManagementService.getUserCards()
+                if (response.isSuccessful) {
+                    val cardList = response.body()?.items ?: emptyList()
+                    _cardUiState.value = CardUiState.Success(cardList)
+                    Log.d(TAG, "카드 목록 받아오기 성공: ${cardList.size} 개의 카드")
+                } else {
+                    _cardUiState.value = CardUiState.Error("Failed to fetch cards: ${response.code()}")
+                }
             } catch (e: Exception) {
-                _cardUiState.value = CardUiState.Error("Failed to fetch users: ${e.message}")
+                _cardUiState.value = CardUiState.Error("Failed to fetch cards: ${e.message}")
             }
-
         }
     }
 }
 
-// 더미 데이터 용
 sealed class PhotoUiState {
     object Loading : PhotoUiState()
     data class Success(val photos: List<Photos>) : PhotoUiState()
     data class Error(val message: String) : PhotoUiState()
 }
-
 
 sealed class CardUiState {
     object Loading : CardUiState()
