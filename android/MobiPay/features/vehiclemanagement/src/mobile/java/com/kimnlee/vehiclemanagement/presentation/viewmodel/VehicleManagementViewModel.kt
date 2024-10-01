@@ -1,5 +1,6 @@
 package com.kimnlee.vehiclemanagement.presentation.viewmodel
 
+import android.content.ContentValues.TAG
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -63,6 +64,7 @@ class VehicleManagementViewModel(
                             )
                         }
                     }
+                    Log.d(TAG, "차량 목록 가져오기 성공")
                 } else {
                     Log.e("VehicleManagementViewModel", "Failed to get vehicles: ${response.code()}")
                 }
@@ -98,6 +100,7 @@ class VehicleManagementViewModel(
                             ownerId = it.ownerId
                         )
                         _registrationStatus.value = RegistrationStatus.Success
+                        Log.d(TAG, "차량 등록 성공")
                     }
                 } else {
                     Log.e("VehicleManagementViewModel", "Failed to register vehicle: ${response.code()}")
