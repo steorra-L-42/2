@@ -61,4 +61,8 @@ public class ApprovalWaiting {
         this.merchant = merchant;
         merchant.getApprovalWaitings().add(this);
     }
+
+    public void activateApproved() {
+        this.approved = true;
+    }
 }

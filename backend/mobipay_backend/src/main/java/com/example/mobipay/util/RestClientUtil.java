@@ -1,5 +1,7 @@
 package com.example.mobipay.util;
 
+import com.example.mobipay.domain.postpayments.dto.cardtransaction.CardTransactionRequest;
+import com.example.mobipay.domain.postpayments.dto.cardtransaction.CardTransactionResponse;
 import com.example.mobipay.global.authentication.dto.accountcheck.AccountCheckRequest;
 import com.example.mobipay.global.authentication.dto.accountcheck.AccountCheckResponse;
 import com.example.mobipay.global.authentication.dto.accountdepositupdate.AccountDepositUpdateRequest;
@@ -38,6 +40,7 @@ public class RestClientUtil {
     private static final String CARD_CHECK_URL = SSAFY_PREFIX + "/edu/creditCard/inquireSignUpCreditCardList";
     private static final String ACCOUNT_DEPOSIT_UPDATE_URL =
             SSAFY_PREFIX + "/edu/demandDeposit/updateDemandDepositAccountDeposit";
+    private static final String CARD_TRANSACTION_URL = SSAFY_PREFIX + "/edu/creditCard/createCreditCardTransaction";
 
     private final Validator validator;
     private final RestClient restClient = RestClient.create();
@@ -98,6 +101,14 @@ public class RestClientUtil {
         return responseEntity;
     }
 
+    public ResponseEntity<CardTransactionResponse> processCardTransaction(CardTransactionRequest request,
+                                                                          Class<CardTransactionResponse> response) {
+
+        ResponseEntity<CardTransactionResponse> responseEntity = post(request, CARD_TRANSACTION_URL, response);
+        validate(responseEntity);
+        return responseEntity;
+    }
+
     private <T, R> ResponseEntity<R> post(T requestBody, String url, Class<R> responseClass) {
         return restClient.post()
                 .uri(url)
@@ -106,7 +117,8 @@ public class RestClientUtil {
                 .retrieve()
                 .onStatus(
                         HttpStatusCode::is4xxClientError,
-                        (request, response) -> ResponseEntity.status(response.getStatusCode()).build()
+                        (request, response) -> ResponseEntity.status(response.getStatusCode())
+                                .body(response.getBody())
                 )
                 .toEntity(responseClass);
     }
