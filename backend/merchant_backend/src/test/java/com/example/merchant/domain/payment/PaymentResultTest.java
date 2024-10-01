@@ -1,7 +1,5 @@
 package com.example.merchant.domain.payment;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -9,13 +7,11 @@ import com.example.merchant.MerchantApplication;
 import com.example.merchant.util.credential.CredentialUtil;
 import com.example.merchant.util.pos.WebSocketHandler;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.platform.commons.logging.Logger;
 import org.junit.platform.commons.logging.LoggerFactory;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -69,7 +65,7 @@ import org.springframework.web.context.WebApplicationContext;
             final String requestBody = """
                     {
                         "success": null,
-                        "type": "FOOD",
+                        "merchantId": "1911",
                         "paymentBalance": 5000,
                         "info": "A hot americano with a piece of pineapple"
                     }
@@ -92,7 +88,7 @@ import org.springframework.web.context.WebApplicationContext;
             final String requestBody = """
                     {
                         "success": "success",
-                        "type": "FOOD",
+                        "merchantId": "1911",
                         "paymentBalance": 5000,
                         "info": "A hot americano with a piece of pineapple"
                     }
@@ -107,15 +103,15 @@ import org.springframework.web.context.WebApplicationContext;
             result.andExpect(status().isBadRequest());
         }
 
-        @DisplayName("type이 null인 경우")
+        @DisplayName("merchantId null인 경우")
         @org.junit.jupiter.api.Test
-        void fail400_BadRequest_type_null() throws Exception {
+        void fail400_BadRequest_merchantId_null() throws Exception {
             // given
             final String url = "/api/v1/merchants/payments/result";
             final String requestBody = """
                     {
                         "success": true,
-                        "type": null,
+                        "merchantId": null,
                         "paymentBalance": 5000,
                         "info": "A hot americano with a piece of pineapple"
                     }
@@ -129,15 +125,37 @@ import org.springframework.web.context.WebApplicationContext;
             result.andExpect(status().isBadRequest());
         }
 
-        @DisplayName("존재하지 않는 type인 경우")
+        @DisplayName("존재하지 않는 merchantId인 경우")
         @org.junit.jupiter.api.Test
-        void fail400_BadRequest_type_invalid() throws Exception {
+        void fail400_BadRequest_merchantId_notNumber() throws Exception {
             // given
             final String url = "/api/v1/merchants/payments/result";
             final String requestBody = """
                     {
                         "success": true,
-                        "type": "INVALID",
+                        "merchantId": "천구백십일",
+                        "paymentBalance": 5000,
+                        "info": "A hot americano with a piece of pineapple"
+                    }
+                    """;
+            // when
+            ResultActions result = mockMvc.perform(post(url)
+                    .header("merApiKey", MOBI_MER_API_KEY)
+                    .contentType("application/json")
+                    .content(requestBody));
+            // then
+            result.andExpect(status().isBadRequest());
+        }
+
+        @DisplayName("존재하지 않는 merchantId인 경우")
+        @org.junit.jupiter.api.Test
+        void fail400_BadRequest_merchantId_invalid() throws Exception {
+            // given
+            final String url = "/api/v1/merchants/payments/result";
+            final String requestBody = """
+                    {
+                        "success": true,
+                        "merchantId": "9999",
                         "paymentBalance": 5000,
                         "info": "A hot americano with a piece of pineapple"
                     }
@@ -159,7 +177,7 @@ import org.springframework.web.context.WebApplicationContext;
             final String requestBody = """
                     {
                         "success": true,
-                        "type": "FOOD",
+                        "merchantId": "1911",
                         "paymentBalance": null,
                         "info": "A hot americano with a piece of pineapple"
                     }
@@ -181,7 +199,7 @@ import org.springframework.web.context.WebApplicationContext;
             final String requestBody = """
                     {
                         "success": true,
-                        "type": "FOOD",
+                        "merchantId": "1911",
                         "paymentBalance": 0,
                         "info": "A hot americano with a piece of pineapple"
                     }
@@ -203,7 +221,7 @@ import org.springframework.web.context.WebApplicationContext;
             final String requestBody = """
                     {
                         "success": true,
-                        "type": "FOOD",
+                        "merchantId": "1911",
                         "paymentBalance": -5000,
                         "info": "A hot americano with a piece of pineapple"
                     }
@@ -225,7 +243,7 @@ import org.springframework.web.context.WebApplicationContext;
             final String requestBody = """
                     {
                         "success": true,
-                        "type": "FOOD",
+                        "merchantId": "1911",
                         "paymentBalance": "오천원",
                         "info": "A hot americano with a piece of pineapple"
                     }
@@ -247,7 +265,7 @@ import org.springframework.web.context.WebApplicationContext;
             final String requestBody = """
                     {
                         "success": true,
-                        "type": "FOOD",
+                        "merchantId": "1911",
                         "paymentBalance": 5000,
                         "info": null
                     }
@@ -274,7 +292,7 @@ import org.springframework.web.context.WebApplicationContext;
             final String requestBody = """
                     {
                         "success": true,
-                        "type": "FOOD",
+                        "merchantId": "1911",
                         "paymentBalance": 5000,
                         "info": "A hot americano with a piece of pineapple"
                     }
@@ -296,7 +314,7 @@ import org.springframework.web.context.WebApplicationContext;
             final String requestBody = """
                     {
                         "success": true,
-                        "type": "FOOD",
+                        "merchantId": "1911",
                         "paymentBalance": 5000,
                         "info": "A hot americano with a piece of pineapple"
                     }
@@ -323,7 +341,7 @@ import org.springframework.web.context.WebApplicationContext;
             final String requestBody = """
                     {
                         "success": true,
-                        "type": "FOOD",
+                        "merchantId": "1911",
                         "paymentBalance": 5000,
                         "info": "A hot americano with a piece of pineapple"
                     }
@@ -345,7 +363,7 @@ import org.springframework.web.context.WebApplicationContext;
             final String requestBody = """
                     {
                         "success": false,
-                        "type": "FOOD",
+                        "merchantId": "1911",
                         "paymentBalance": 5000,
                         "info": "A hot americano with a piece of pineapple"
                     }
