@@ -31,7 +31,7 @@ import androidx.compose.material.icons.filled.AddCircle
 fun VehicleManagementScreen(
     onNavigateToDetail: (Int) -> Unit,
     onNavigateToRegistration: () -> Unit,
-    viewModel: VehicleManagementViewModel = viewModel()
+    viewModel: VehicleManagementViewModel
 ) {
     val vehicles by viewModel.vehicles.collectAsState()
 

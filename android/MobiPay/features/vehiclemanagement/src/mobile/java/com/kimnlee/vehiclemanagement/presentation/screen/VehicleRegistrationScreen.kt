@@ -53,7 +53,7 @@ private const val TAG = "VehicleRegistrationScreen"
 @Composable
 fun VehicleRegistrationScreen(
     onNavigateBack: () -> Unit,
-    viewModel: VehicleManagementViewModel = viewModel(),
+    viewModel: VehicleManagementViewModel,
     apiClient: ApiClient
 ) {
     var licensePlate by remember { mutableStateOf("") }
@@ -125,7 +125,7 @@ fun VehicleRegistrationScreen(
 
                 Button(
                     onClick = {
-                        viewModel.addVehicle(licensePlate)
+                        viewModel.registerVehicle(licensePlate)
                         showDialog = true
                     },
                     modifier = Modifier.fillMaxWidth()
