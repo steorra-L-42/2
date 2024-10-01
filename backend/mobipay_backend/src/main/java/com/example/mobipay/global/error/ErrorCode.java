@@ -28,6 +28,8 @@ public enum ErrorCode {
     INVALID_CARD_NO(HttpStatus.BAD_REQUEST, "올바르지 않은 카드번호 입니다."),
     NOT_REGISTERED_CARD(HttpStatus.BAD_REQUEST, "존재하지 않는 등록된 카드입니다."),
     INVALID_PAYMENT_BALANCE(HttpStatus.BAD_REQUEST, "올바르지 않은 결제금액입니다."),
+    MERCHANT_TRANSACTION_NOT_FOUND(HttpStatus.NOT_FOUND, "가맹점 거래기록을 찾을 수 없습니다."),
+    RECEIPT_USER_MISMATCH(HttpStatus.FORBIDDEN, "카드 가맹점을 찾을 수 없습니다."),
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 에러입니다."),
     NOT_FOUND_CARD(HttpStatus.FORBIDDEN, "해당 카드에 대한 권한이 없습니다.");
 
