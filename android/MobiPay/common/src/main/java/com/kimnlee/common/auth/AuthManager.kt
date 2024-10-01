@@ -20,6 +20,7 @@ import com.kimnlee.common.auth.model.SendTokenResponse
 import com.kimnlee.common.network.ApiClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
@@ -52,6 +53,10 @@ class AuthManager(private val context: Context) {
         context.dataStore.edit { preferences ->
             preferences[IS_LOGGED_IN] = isLoggedIn
         }
+    }
+
+    suspend fun isLoggedInImmediately(): Boolean {
+        return context.dataStore.data.first()[IS_LOGGED_IN] ?: false
     }
 
     fun saveAuthToken(token: String) {

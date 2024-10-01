@@ -6,6 +6,8 @@ import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -32,18 +34,17 @@ fun AppNavGraph(
     authManager: AuthManager,
     context: Context,
     apiClient: ApiClient,
-    fcmService: FCMService
+    loginViewModel: LoginViewModel
 ) {
     val application = context as Application
     val biometricViewModel = BiometricViewModel(application)
-    val loginViewModel = LoginViewModel(authManager, apiClient, fcmService)
     val cardManagementViewModel = CardManagementViewModel(authManager, apiClient)
+    val isLoggedIn by loginViewModel.isLoggedIn.collectAsState()
 
     LaunchedEffect(loginViewModel) {
         loginViewModel.navigationEvent.collect { route ->
             navController.navigate(route) {
                 popUpTo(navController.graph.startDestinationId) {
-//                    saveState = true
                     inclusive = true
                 }
                 launchSingleTop = true
@@ -54,7 +55,7 @@ fun AppNavGraph(
 
     NavHost(
         navController = navController,
-        startDestination = "auth"
+        startDestination = if (isLoggedIn) "home" else "auth"
     ) {
 
         composable(
