@@ -242,7 +242,8 @@ fun HomeScreen(
                     Row(
                     ){
                         Text(
-                            text = "\uD83D\uDCCD",
+                            text = "\uE116",
+//                            text = "\uD83D\uDCCD",
                             style = MaterialTheme.typography.headlineMedium,
                             fontFamily = FontFamily(Font(R.font.emoji)),
                             fontSize = 22.sp,
