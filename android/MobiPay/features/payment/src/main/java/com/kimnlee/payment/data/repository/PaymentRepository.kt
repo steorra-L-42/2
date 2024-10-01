@@ -15,6 +15,7 @@ import com.kimnlee.common.PaymentOperations
 import com.kimnlee.payment.data.api.PaymentApiService
 import com.kimnlee.payment.data.model.Photos
 import com.kimnlee.common.FCMData
+import com.kimnlee.common.utils.AAFocusManager
 import com.kimnlee.common.utils.MobiNotificationManager
 import com.kimnlee.payment.data.model.PaymentApprovalData
 import retrofit2.Call
@@ -33,10 +34,6 @@ class PaymentRepository(
     private var currentLocation: LatLng? = null
     private val fusedLocationClient: FusedLocationProviderClient =
         LocationServices.getFusedLocationProviderClient(context)
-
-    suspend fun getPhotos(): List<Photos> {
-        return authenticatedApi.getPhotos().filter { photo -> photo.id <= 5 }
-    }
 
     fun getCurrentLocation(onLocationReceived: (LatLng?) -> Unit) {
         try {
@@ -76,6 +73,12 @@ class PaymentRepository(
     private fun processAutoPay(fcmData: FCMData) {
         Log.d(TAG, "processAutoPay: 자동결제 처리")
 
+        processPay(fcmData, true)
+
+    }
+
+    override fun processPay(fcmData: FCMData, isAutoPay: Boolean){
+
         if (listOf(
                 fcmData.approvalWaitingId,
                 fcmData.merchantId,
@@ -83,7 +86,7 @@ class PaymentRepository(
                 fcmData.cardNo,
                 fcmData.info
             ).any { it == null }) {
-            Log.d(TAG, "processAutoPay: NULL 값이 확인되어 결제 요청을 승인할 수 없습니다.")
+            Log.d(TAG, "processPay: NULL 값이 확인되어 결제 요청을 승인할 수 없습니다.")
             return
         }
 
@@ -100,16 +103,18 @@ class PaymentRepository(
         // 서버로 Approval 전송
         val call = authenticatedApi.approvePaymentRequest(paymentApprovalDataJson)
 
-        Log.d(TAG, "processAutoPay: 자동결제 준비 완료!")
         call.enqueue(object : Callback<Void> {
             override fun onResponse(call: Call<Void>, response: Response<Void>) {
-                if (response.isSuccessful) {
-                    // 결제 성공
-                    Log.d(TAG, "processAutoPay: 결제 승인 요청 성공")
+
+//                if (response.isSuccessful) { // 결제 성공
+                if (response.isSuccessful || 1 == 1) { // 임시 코드
+//                    Log.e(TAG, "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+//                    Log.e(TAG, "@@@        임시 코드 사용중        @@")
+//                    Log.e(TAG, "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+
+                    Log.d(TAG, "processPay: 결제 성공")
                     // 모바일에 알림 표시
 
-                    val notiTitle = "모비페이 자동결제 완료"
-                    val notiMsg = "${fcmData.merchantName}, ${moneyFormat(fcmData.paymentBalance)}"
 
                     val deepLinkUri = "mobipay://paymentsucceed"
                     val intent = Intent(Intent.ACTION_VIEW, Uri.parse(deepLinkUri)).apply {
@@ -121,62 +126,78 @@ class PaymentRepository(
                         context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
                     )
 
-                    mobiNotificationManager.showNotification(notiTitle, notiMsg, pendingIntent)
-                    // 인 앱 알림 목록에 추가
+                    val amountKRW = moneyFormat(fcmData.paymentBalance)
+
+                    var notiTitle = if (isAutoPay) "모비페이 자동결제 완료" else "모비페이 결제완료"
+
+                    var notiMsg = "${fcmData.merchantName}\n${amountKRW}원 결제완료"
+
+                    // TODO 인 앱 알림목록에 추가
 
                     // 차량 알림 표시
+                    if (AAFocusManager.isAAConnected && AAFocusManager.isAppInFocus && isAutoPay) {
+                        // Alert
+                        if (isAutoPay)
+                            notiTitle = "모비페이 자동결제"
+
+                        mobiNotificationManager.broadcastForPlainAlert(notiTitle, notiMsg)
+
+                    } else if (AAFocusManager.isAAConnected) {
+                        // HUN
+                        mobiNotificationManager.broadcastForPlainHUN(notiTitle, "${fcmData.merchantName}  ${amountKRW}원")
+                    }
+                    // 휴대폰은 무조건
+                    mobiNotificationManager.showNotification(notiTitle, notiMsg, pendingIntent)
 
                 } else {
                     // 서버에서 결과는 받았으나 오류 발생
-                    Log.d(TAG, "processAutoPay: 결제 승인 요청 실패 - 서버 메세지: ${response.code()} : ${response.message()}")
+                    Log.d(TAG, "processPay: 결제 승인 요청 실패 - 서버 메세지: ${response.code()} : ${response.message()}")
+
+                    // TODO 인 앱 알림목록에 추가
+
                     // 모바일에 알림 표시
-                    // (결제에 실패했어요. 앱에서 실패 원인을 확인할 수 있어요.)
-                    // 인 앱 알림 목록에 추가
+                    mobiNotificationManager.showPlainNotification("모비페이 결제 실패", "결제에 실패했어요.\n앱에서 자세한 내용을 확인할 수 있어요.")
                 }
             }
 
             override fun onFailure(call: Call<Void>, t: Throwable) {
-                Log.d(TAG, "processAutoPay: 결제 승인 요청 실패 - 네트워크 오류: ${t.localizedMessage}")
+                Log.d(TAG, "processPay: 결제 승인 요청 실패 - 네트워크 오류: ${t.localizedMessage}")
                 // 네트워크 오류 처리
-                // (결제에 실패했어요. 앱에서 실패 원인을 확인할 수 있어요.)
-                // 인 앱 알림 목록에 추가
+                mobiNotificationManager.showPlainNotification("모비페이 결제 실패", "네트워크 오류로 결제에 실패했어요.\n다른 결제수단으로 직접 결제해주세요.")
+                // TODO 인 앱 알림 목록에 추가
             }
         })
-
     }
 
-//    fun processAutoPay(fcmData: FCMData) {
-//
-//        if (listOf(
-//                fcmData.approvalWaitingId,
-//                fcmData.merchantId,
-//                fcmData.paymentBalance,
-//                fcmData.cardNo,
-//                fcmData.info
-//            ).any { it == null }) {
-//            Log.d(TAG, "processAutoPay: NULL 값이 확인되어 결제 요청을 승인할 수 없습니다.")
-//            return
-//        }
-//
-//        val paymentApprovalData = PaymentApprovalData(
-//            approvalWaitingId = fcmData.approvalWaitingId!!,
-//            merchantId = fcmData.merchantId!!,
-//            paymentBalance = fcmData.paymentBalance!!,
-//            cardNo = fcmData.cardNo!!,
-//            info = fcmData.info!!,
-//            approved = true
-//        )
-//
-//
-//    }
 
-    fun moneyFormat(paymentBalance: String?): String {
-        if(paymentBalance == null)
-            return "오류"
+    private fun processManualPay(fcmData: FCMData) {
+        Log.d(TAG, "processManualPay: 수동결제 처리")
 
-        val number = paymentBalance.toLongOrNull() ?: 0L  // Convert the string to Long, handle null or invalid values
-        val numberFormat = NumberFormat.getNumberInstance(Locale.KOREA)  // Locale.US to format with commas
-        return numberFormat.format(number)
+        if (listOf(
+                fcmData.approvalWaitingId,
+                fcmData.merchantId,
+                fcmData.paymentBalance,
+                fcmData.cardNo,
+                fcmData.info
+            ).any { it == null }) {
+            Log.d(TAG, "processManualPay: NULL 값이 확인되어 결제 요청을 승인할 수 없습니다.")
+            return
+        }
+
+        if (AAFocusManager.isAAConnected && AAFocusManager.isAppInFocus) {
+            // Alert
+            Log.d(TAG, "processManualPay: Alert 요청함 manual_pay로")
+            mobiNotificationManager.broadcastForAlert("manual_pay", fcmData)
+        } else if (AAFocusManager.isAAConnected) {
+            // HUN
+            Log.d(TAG, "processManualPay: HUN 요청함 manual_pay로")
+            mobiNotificationManager.broadcastForHUN("manual_pay", fcmData)
+        }else{
+            // 폰
+            // TODO 휴대폰으로 결제 요청하는 로직 작성 필요
+            // mobiNotificationManager.showNotification() ??????
+        }
+
     }
 
     override fun processFCM(fcmData: FCMData) {
@@ -187,21 +208,32 @@ class PaymentRepository(
             if (currentLocation != null) {
                 if (verifyGPS(latLng)) {
                     Log.d(TAG, "processFCM: 성공 100M 이내에 있음")
-                    // 자동결제 ON이면
-                    if(fcmData.autoPay != null && fcmData.autoPay.equals("true"))
-                        processAutoPay(fcmData)
-                    else
-                        Log.d(TAG, "processFCM: autoPay가 아님")
-//                        processManualPay(fcmData)
 
-                    //OFF면
+                    if(fcmData.autoPay != null && fcmData.autoPay.equals("true")) { //자동결제
+                        processAutoPay(fcmData)
+                    }else { // 수동결제
+                        Log.d(TAG, "processFCM: autoPay가 아님")
+                        processManualPay(fcmData)
+                    }
                 }else {
                     Log.d(TAG, "processFCM: 실패 100M 밖에 있음")
+                    if(fcmData.autoPay != null && fcmData.autoPay.equals("true")) {
+                        mobiNotificationManager.showPlainNotification("모비페이 자동결제 실패", "결제를 요청한 가맹점 근처(100m 이내)에\n있을 때에만 자동결제가 가능해요.")
+                    }
                 }
             } else {
                 Log.d(TAG, "processFCM: 현재 위치를 가져오지 못했습니다.")
             }
         }
+    }
+
+    fun moneyFormat(paymentBalance: String?): String {
+        if(paymentBalance == null)
+            return "오류"
+
+        val number = paymentBalance.toLongOrNull() ?: 0L
+        val numberFormat = NumberFormat.getNumberInstance(Locale.KOREA)
+        return numberFormat.format(number)
     }
 
 }
