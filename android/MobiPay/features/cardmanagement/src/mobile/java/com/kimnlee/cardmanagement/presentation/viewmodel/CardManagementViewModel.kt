@@ -1,10 +1,11 @@
 package com.kimnlee.cardmanagement.presentation.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kimnlee.cardmanagement.data.api.CardManagementApiService
 import com.kimnlee.cardmanagement.data.model.Photos
-import com.kimnlee.cardmanagement.data.model.User
+import com.kimnlee.cardmanagement.data.model.Card
 import com.kimnlee.cardmanagement.data.repository.CardManagementRepository
 import com.kimnlee.common.auth.AuthManager
 import com.kimnlee.common.network.ApiClient
@@ -17,13 +18,23 @@ class CardManagementViewModel(
     private val apiClient: ApiClient) : ViewModel() {
 
     private val cardMangementService: CardManagementApiService = apiClient.authenticatedApi.create(CardManagementApiService::class.java)
+    private val repository = CardManagementRepository(cardMangementService)
 
+    // 더미 데이터 용
     private val _photoUiState = MutableStateFlow<PhotoUiState>(PhotoUiState.Loading)
     val photoUiState: StateFlow<PhotoUiState> = _photoUiState
 
+    private val _cardUiState = MutableStateFlow<CardUiState>(CardUiState.Loading)
+    val cardUiState: StateFlow<CardUiState> = _cardUiState
+
     init {
         fetchPhotos()
+        Log.d("_dddddddd",_cardUiState.value.toString())
+        Log.d("dddddddd",cardUiState.value.toString())
+
     }
+
+    // 더미 데이터 용
     fun fetchPhotos() {
         viewModelScope.launch {
             _photoUiState.value = PhotoUiState.Loading
@@ -35,10 +46,32 @@ class CardManagementViewModel(
             }
         }
     }
+
+    fun fetchCards() {
+        viewModelScope.launch {
+            _cardUiState.value = CardUiState.Loading
+            try {
+                val cards = repository.getCards()
+                Log.d("photos",cards.toString())
+                _cardUiState.value = CardUiState.Success(cards)
+            } catch (e: Exception) {
+                _cardUiState.value = CardUiState.Error("Failed to fetch users: ${e.message}")
+            }
+
+        }
+    }
 }
 
+// 더미 데이터 용
 sealed class PhotoUiState {
     object Loading : PhotoUiState()
     data class Success(val photos: List<Photos>) : PhotoUiState()
     data class Error(val message: String) : PhotoUiState()
+}
+
+
+sealed class CardUiState {
+    object Loading : CardUiState()
+    data class Success(val cards: List<Card>) : CardUiState()
+    data class Error(val message: String) : CardUiState()
 }

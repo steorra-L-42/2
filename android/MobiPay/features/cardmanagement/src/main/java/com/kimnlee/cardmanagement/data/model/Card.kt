@@ -12,3 +12,18 @@ data class Card(
     val accountId : Long,
     val cardUniqueNo: String
 )
+data class Photos(
+    val albumId: Int,
+    val id: Int,
+    val title : String,
+    val url : String,
+    val thumbnailUrl : String
+)
+data class RegistrationCard(
+    val mobiUserId: Long,
+    val ownedCardId: Long,
+    val oneDayLimit: Int,
+    val oneTimeLimit: Int,
+    val cardName: String,
+    val autoPayStatus: Boolean,
+)
