@@ -10,10 +10,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
@@ -23,11 +26,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.kimnlee.auth.presentation.viewmodel.LoginViewModel
 import com.kimnlee.common.R
 import com.kimnlee.common.ui.theme.MobiBgGray
 import com.kimnlee.common.ui.theme.MobiTextAlmostBlack
 import com.kimnlee.common.ui.theme.MobiTextDarkGray
+import com.kimnlee.mobipay.presentation.viewmodel.ShowMoreViewModel
 
 val ButtonColor = Color(0xFFF2F3F5)
 val SettingsIconColor = Color(0xFFB1B8C0)
@@ -35,9 +40,14 @@ val SettingsIconColor = Color(0xFFB1B8C0)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ShowMoreScreen(
-    viewModel: LoginViewModel,
+    loginViewModel: LoginViewModel,
+    showMoreViewModel: ShowMoreViewModel,
     navController: NavController
 ) {
+
+    val userName by showMoreViewModel.userName.collectAsState()
+    val userPicture by showMoreViewModel.userPicture.collectAsState()
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -84,21 +94,17 @@ fun ShowMoreScreen(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Box(
+                            AsyncImage(
+                                model = userPicture,
+                                contentDescription = "Profile Picture",
                                 modifier = Modifier
                                     .size(60.dp)
-                                    .clip(CircleShape)
-                                    .background(Color.LightGray)
-                            ) {
-                                Text(
-                                    "프사",
-                                    modifier = Modifier.align(Alignment.Center),
-                                    color = Color.White
-                                )
-                            }
+                                    .clip(CircleShape),
+                                contentScale = ContentScale.Crop
+                            )
                             Spacer(modifier = Modifier.width(16.dp))
                             Text(
-                                text = "김싸피",
+                                text = userName,
                                 style = MaterialTheme.typography.headlineMedium,
                                 fontSize = 18.sp,
                                 fontWeight = FontWeight.Bold,
@@ -135,7 +141,7 @@ fun ShowMoreScreen(
                         MenuItem("초대 대기", { navController.navigate("memberinvitation_invitationwaiting") }, emoji = "📩"),
                         MenuItem("메뉴 1", { }),
                         MenuItem("메뉴 2", { }),
-                        MenuItem("로그아웃", { viewModel.logout() })
+                        MenuItem("로그아웃", { loginViewModel.logout() })
                     )
                 )
             }
