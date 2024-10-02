@@ -3,7 +3,7 @@ package com.kimnlee.cardmanagement.data.repository
 import OwnedCard
 import OwnedCardListResponse
 import Photos
-import RegistrationCardListResponse
+import RegisteredCardListResponse
 
 import com.kakao.sdk.user.model.User
 import com.kimnlee.cardmanagement.data.api.CardManagementApiService
@@ -24,7 +24,7 @@ class CardManagementRepository(private val authenticatedApi: CardManagementApiSe
     }
 
     // 자신이 등록한 카드의 목록을 조회
-    suspend fun getRegistrationCards(): Response<RegistrationCardListResponse> {
+    suspend fun getRegistrationCards(): Response<RegisteredCardListResponse> {
         return authenticatedApi.getRegistrationCards()
     }
 }

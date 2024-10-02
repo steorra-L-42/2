@@ -130,7 +130,6 @@ fun VehicleManagementDetailScreen(
                 }
             }
         }
-
         if (showBottomSheet) {
             MemberInvitationBottomSheet(
                 vehicleId = vehicleId,
