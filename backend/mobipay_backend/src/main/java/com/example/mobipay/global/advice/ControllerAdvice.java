@@ -5,9 +5,10 @@ import com.example.mobipay.domain.car.error.CarNotFoundException;
 import com.example.mobipay.domain.car.error.DuplicatedCarNumberException;
 import com.example.mobipay.domain.car.error.NotMemberException;
 import com.example.mobipay.domain.car.error.NotOwnerException;
+import com.example.mobipay.domain.fcmtoken.error.FCMException;
 import com.example.mobipay.domain.invitation.error.AlreadyDecidedException;
 import com.example.mobipay.domain.invitation.error.AlreadyInvitedException;
-import com.example.mobipay.domain.invitation.error.InvitationNoFoundException;
+import com.example.mobipay.domain.invitation.error.InvitationNotFoundException;
 import com.example.mobipay.domain.invitation.error.NotApprovedOrRejectedException;
 import com.example.mobipay.domain.invitation.error.NotInvitedException;
 import com.example.mobipay.domain.merchant.error.MerchantNotFoundException;
@@ -84,8 +85,8 @@ public class ControllerAdvice {
         return getResponse(ErrorCode.ALREADY_INVITED);
     }
 
-    @ExceptionHandler(InvitationNoFoundException.class)
-    public ResponseEntity<ErrorResponseDto> handleInvitationNotFoundException(InvitationNoFoundException e) {
+    @ExceptionHandler(InvitationNotFoundException.class)
+    public ResponseEntity<ErrorResponseDto> handleInvitationNotFoundException(InvitationNotFoundException e) {
         log.info(e.getMessage());
         return getResponse(ErrorCode.INVITATION_NOT_FOUND);
     }
@@ -139,7 +140,6 @@ public class ControllerAdvice {
         return getResponse(ErrorCode.INVALID_CARD_NO);
     }
 
-
     @ExceptionHandler(RegisteredCardNotFoundException.class)
     public ResponseEntity<ErrorResponseDto> handleRegisteredCardNotFoundException(RegisteredCardNotFoundException e) {
         log.info(e.getMessage());
@@ -175,6 +175,12 @@ public class ControllerAdvice {
     public ResponseEntity<ErrorResponseDto> handleReceiptUserMismatchException(ReceiptUserMismatchException e) {
         log.info(e.getMessage());
         return getResponse(ErrorCode.RECEIPT_USER_MISMATCH);
+    }
+
+    @ExceptionHandler(FCMException.class)
+    public ResponseEntity<ErrorResponseDto> handleFCMException(FCMException e) {
+        log.info(e.getMessage());
+        return getResponse(ErrorCode.FCM_ERROR);
     }
 
     private ResponseEntity<ErrorResponseDto> getResponse(ErrorCode errorCode) {
