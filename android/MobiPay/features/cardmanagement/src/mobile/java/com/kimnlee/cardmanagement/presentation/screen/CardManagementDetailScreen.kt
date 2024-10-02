@@ -19,10 +19,10 @@ fun CardManagementDetailScreen(
             text = "카드 관리 상세",
             style = MaterialTheme.typography.headlineMedium
         )
+
         Spacer(modifier = Modifier.height(16.dp))
         Button(onClick = onNavigateBack) {
             Text("뒤로 가기")
         }
-
     }
 }
