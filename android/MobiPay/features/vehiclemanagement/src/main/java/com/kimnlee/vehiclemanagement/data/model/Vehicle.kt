@@ -5,7 +5,8 @@ data class VehicleItem(
     val number: String,             // 차량 번호
     val created: String,            // 생성 날짜
     val autoPayStatus: Boolean,     // 자동 결제 여부
-    val ownerId: Int                // 차주 PK
+    val ownerId: Int,               // 차주 PK
+    val carModel: String,           // 차량 모델
 )
 
 data class VehicleListResponse(
@@ -13,7 +14,8 @@ data class VehicleListResponse(
 )
 
 data class VehicleRegistrationRequest(
-    val number: String              // 차량 번호
+    val number: String,             // 차량 번호
+    val carModel: String         // 차량 모델
 )
 
 data class VehicleRegistrationResponse(
@@ -21,5 +23,6 @@ data class VehicleRegistrationResponse(
     val number: String,
     val created: String,
     val autoPayStatus: Boolean,
-    val ownerId: Int
+    val ownerId: Int,
+    val carModel: String
 )
