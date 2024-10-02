@@ -15,17 +15,29 @@ public class ReceiptResponse {
     private final String info;
     private final String merchantName;
     private final String cardNo;
-
+    private final String cardName;
+    private final Long merchantId;
+    private final Double lat;
+    private final Double lng;
 
     public static ReceiptResponse from(MerchantTransaction merchantTransaction) {
+        var merchant = merchantTransaction.getMerchant();
+        var registeredCard = merchantTransaction.getRegisteredCard();
+        var ownedCard = registeredCard.getOwnedCard();
+        var cardProduct = ownedCard.getCardProduct();
+
         return ReceiptResponse.builder()
                 .transactionUniqueNo(merchantTransaction.getTransactionUniqueNo())
                 .transactionDate(merchantTransaction.getTransactionDate())
                 .transactionTime(merchantTransaction.getTransactionTime())
                 .paymentBalance(merchantTransaction.getPaymentBalance())
                 .info(merchantTransaction.getInfo())
-                .merchantName(merchantTransaction.getMerchant().getMerchantName())
-                .cardNo(merchantTransaction.getRegisteredCard().getOwnedCard().getCardNo())
+                .merchantName(merchant.getMerchantName())
+                .cardNo(ownedCard.getCardNo())
+                .cardName(cardProduct.getCardName())
+                .merchantId(merchant.getId())
+                .lat(merchant.getLat())
+                .lng(merchant.getLng())
                 .build();
     }
 }
