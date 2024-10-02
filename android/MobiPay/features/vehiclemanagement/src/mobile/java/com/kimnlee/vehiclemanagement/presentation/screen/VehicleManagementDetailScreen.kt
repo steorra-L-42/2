@@ -1,5 +1,6 @@
 package com.kimnlee.vehiclemanagement.presentation.screen
 
+import android.content.Context
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -31,6 +32,7 @@ import com.kimnlee.vehiclemanagement.data.model.CarMember
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VehicleManagementDetailScreen(
+    context : Context,
     vehicleId: Int,
     onNavigateBack: () -> Unit,
     onNavigateToInvitePhone: (Int) -> Unit,
@@ -133,6 +135,7 @@ fun VehicleManagementDetailScreen(
 
         if (showBottomSheet) {
             MemberInvitationBottomSheet(
+                context = context,
                 vehicleId = vehicleId,
                 sheetState = sheetState,
                 scope = scope,

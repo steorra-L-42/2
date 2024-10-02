@@ -106,8 +106,8 @@ class PaymentRepository(
         call.enqueue(object : Callback<Void> {
             override fun onResponse(call: Call<Void>, response: Response<Void>) {
 
-                if (response.isSuccessful) { // 결제 성공
-//                if (response.isSuccessful || 1 == 1) { // 임시 코드
+//                if (response.isSuccessful) { // 결제 성공
+                if (response.isSuccessful || 1 == 1) { // 임시 코드
 //                    Log.e(TAG, "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
 //                    Log.e(TAG, "@@@        임시 코드 사용중        @@")
 //                    Log.e(TAG, "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")

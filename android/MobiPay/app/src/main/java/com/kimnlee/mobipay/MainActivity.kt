@@ -1,5 +1,7 @@
 package com.kimnlee.mobipay
 
+import android.Manifest
+import android.bluetooth.BluetoothManager
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -7,6 +9,7 @@ import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -16,6 +19,7 @@ import com.google.gson.Gson
 import com.kimnlee.auth.presentation.viewmodel.AuthenticationState
 import com.kimnlee.auth.presentation.viewmodel.BiometricViewModel
 import com.kimnlee.auth.presentation.viewmodel.LoginViewModel
+import com.kimnlee.memberinvitation.presentation.viewmodel.MemberInvitationViewModel
 import com.kimnlee.common.FCMData
 import com.kimnlee.common.ui.theme.MobiPayTheme
 import com.kimnlee.mobipay.navigation.AppNavGraph
@@ -25,6 +29,7 @@ class MainActivity : ComponentActivity() {
 
     private lateinit var biometricViewModel: BiometricViewModel
     private lateinit var loginViewModel: LoginViewModel
+    private lateinit var memberInvitationViewModel: MemberInvitationViewModel
 
     private var paymentApprovalReceiver: PaymentApprovalReceiver? = null
 
@@ -41,6 +46,13 @@ class MainActivity : ComponentActivity() {
         biometricViewModel = ViewModelProvider(this).get(BiometricViewModel::class.java)
 
         loginViewModel = LoginViewModel(authManager, apiClient, fcmService)
+
+        memberInvitationViewModel = MemberInvitationViewModel()
+        val bluetoothManager = this.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+        val bluetoothAdapter = bluetoothManager.adapter
+        memberInvitationViewModel.initBluetoothAdapter(bluetoothAdapter)
+
+        requestPermissions()
 
         registerPayReceiver()
 
@@ -62,11 +74,41 @@ class MainActivity : ComponentActivity() {
                     authManager,
                     applicationContext,
                     apiClient,
-                    loginViewModel
+                    loginViewModel,
+                    memberInvitationViewModel
                 )
             }
         }
     }
+
+
+
+    private fun requestPermissions() {
+        val permissions = mutableListOf<String>()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            permissions.add(Manifest.permission.BLUETOOTH_ADVERTISE)
+            permissions.add(Manifest.permission.BLUETOOTH_SCAN)
+            permissions.add(Manifest.permission.BLUETOOTH_CONNECT)
+        } else {
+            permissions.add(Manifest.permission.BLUETOOTH)
+            permissions.add(Manifest.permission.BLUETOOTH_ADMIN)
+        }
+
+        // Location permission is required for BLE scanning
+        permissions.add(Manifest.permission.ACCESS_FINE_LOCATION)
+
+        val permissionLauncher = registerForActivityResult(RequestMultiplePermissions()) { permissionsGranted ->
+            val allPermissionsGranted = permissionsGranted.values.all { it }
+            if (!allPermissionsGranted) {
+                // Handle permission denial
+                // You might want to inform the user that the app cannot function without these permissions
+            }
+        }
+
+        permissionLauncher.launch(permissions.toTypedArray())
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == biometricViewModel.BIO_AUTH) {

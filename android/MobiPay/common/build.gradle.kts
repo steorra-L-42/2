@@ -122,6 +122,10 @@ dependencies {
     implementation(libs.jjwt.impl)
     implementation(libs.jjwt.jackson)
 
+    // coil (gif)
+    api(libs.coil.compose)
+    api(libs.coil.gif)
+
     implementation(libs.guava)
     testImplementation(libs.junit)
     implementation(libs.androidx.datastore.preferences)

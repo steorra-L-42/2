@@ -1,5 +1,6 @@
 package com.kimnlee.memberinvitation.navigation
 
+import android.content.Context
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.navigation.NavGraphBuilder
@@ -11,9 +12,10 @@ import com.kimnlee.memberinvitation.presentation.screen.InvitationWaitingScreen
 import com.kimnlee.memberinvitation.presentation.screen.MemberInvitationScreen
 import com.kimnlee.memberinvitation.presentation.screen.MemberInvitationConfirmationScreen
 import com.kimnlee.memberinvitation.presentation.screen.MemberInvitationViaPhoneScreen
+import com.kimnlee.memberinvitation.presentation.viewmodel.MemberInvitationViewModel
 
 
-fun NavGraphBuilder.memberInvitationNavGraph(navController: NavHostController) {
+fun NavGraphBuilder.memberInvitationNavGraph(navController: NavHostController, context: Context, memberInvitationViewModel: MemberInvitationViewModel) {
     navigation(startDestination = "member_main/{vehicleId}", route = "memberinvitation") {
         composable("member_main/{vehicleId}",
             enterTransition = { EnterTransition.None },
@@ -23,10 +25,12 @@ fun NavGraphBuilder.memberInvitationNavGraph(navController: NavHostController) {
             val vehicleId = 5 //임시로 넣어둔 것
             BottomNavigation(navController) {
                 MemberInvitationScreen(
+                    context = context,
                     vehicleId = vehicleId,
                     onNavigateBack = { navController.navigateUp() },
                     onNavigateToInvitePhone = { navController.navigate("memberinvitation_phone/$vehicleId") },
-                    onNavigateToConfirmation = { navController.navigate("member_confirmation/$vehicleId") }
+                    onNavigateToConfirmation = { navController.navigate("member_confirmation/$vehicleId") },
+                    viewModel = memberInvitationViewModel
                 )
             }
         }
@@ -57,6 +61,7 @@ fun NavGraphBuilder.memberInvitationNavGraph(navController: NavHostController) {
             exitTransition = { ExitTransition.None }
         ) {
             InvitationWaitingScreen(
+                memberInvitationViewModel = memberInvitationViewModel,
                 navController = navController
             )
         }
