@@ -82,11 +82,8 @@ class VehicleManagementViewModel(
             _registrationStatus.value = RegistrationStatus.Loading
             try {
                 val registrationRequest = VehicleRegistrationRequest(number, carModel)
-                Log.d(registrationRequest.toString(), "차량 등록 요청")
                 val response = vehicleService.registerVehicle(registrationRequest)
-                Log.d(response.toString(), "차량 등록 요청??????")
                 if (response.isSuccessful) {
-                    Log.d(response.toString(), "차량 등록 요청 성공!!!!!!!!!!!!!!!!!!!")
                     val registeredVehicle = response.body()
                     registeredVehicle?.let {
                         val newVehicle = Vehicle(

@@ -4,7 +4,7 @@ data class CarMember(
     val mobiUserId: Int,        // 사용자 id
     val name: String,           // 사용자 이름
     val picture: String,        // 썸네일 이미지
-    val phoneNumber: String,   // 사용자 전화번호
+    val phoneNumber: String,    // 사용자 전화번호
     val created: String         // 생성일
 )
 
