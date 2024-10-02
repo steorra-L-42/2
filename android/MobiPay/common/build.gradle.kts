@@ -28,12 +28,14 @@ android {
         val baseUrl = localProperties.getProperty("BASE_URL") ?: "No Base URL Defined"
         val kakaoApiKey = localProperties.getProperty("KAKAO_API_KEY") ?: "No Api Key Defined"
         val naverMapClientSecret = localProperties.getProperty("NAVER_MAP_CLIENT_SECRET") ?: "NO_TOKEN_NO_LOCAL_PROPERTIES"
+        val secretKey = localProperties.getProperty("SECRET_KEY")
 
         buildConfigField("String", "FCM_BASE_URL", "\"$fcmBaseUrl\"")
         buildConfigField("String", "OCR_BASE_URL", "\"$ocrBaseUrl\"")
         buildConfigField("String", "BASE_URL", "\"$baseUrl\"")
         buildConfigField("String", "KAKAO_API_KEY", "\"$kakaoApiKey\"")
         buildConfigField("String", "NAVER_MAP_CLIENT_SECRET", "\"$naverMapClientSecret\"")
+        buildConfigField("String", "SECRET_KEY", "\"$secretKey\"")
     }
 
     buildTypes {

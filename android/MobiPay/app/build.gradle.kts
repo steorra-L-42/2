@@ -81,6 +81,12 @@ dependencies {
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.firebase.common.ktx)
     implementation(libs.androidx.core.splashscreen)
+    // jwt토큰 파싱해서 유저정보 가져오는 라이브러리들
+    implementation(libs.jjwt.api)
+    implementation(libs.jjwt.impl)
+    implementation(libs.jjwt.jackson)
+    // ShowMoreScreen에서 asyncImage 컴포즈를 사용하기 위해
+    implementation(libs.coil.compose)
 
 
     testImplementation(libs.junit)
