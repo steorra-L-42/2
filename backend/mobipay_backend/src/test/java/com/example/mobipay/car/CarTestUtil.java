@@ -10,14 +10,16 @@ import org.springframework.test.web.servlet.ResultActions;
 
 public class CarTestUtil {
 
-    public static String createCarRegisterRequest(ObjectMapper objectMapper, String carNumber) throws Exception {
-        CarRegisterRequest carRegisterRequest = new CarRegisterRequest(carNumber);
+    public static String createCarRegisterRequest(ObjectMapper objectMapper, String carNumber, String carModel)
+            throws Exception {
+        CarRegisterRequest carRegisterRequest = new CarRegisterRequest(carNumber, carModel);
         return objectMapper.writeValueAsString(carRegisterRequest);
     }
 
-    public static ResultActions performCarRegistration(MockMvc mockMvc, ObjectMapper objectMapper, String carNumber)
+    public static ResultActions performCarRegistration(MockMvc mockMvc, ObjectMapper objectMapper, String carNumber,
+                                                       String carModel)
             throws Exception {
-        String requestBody = createCarRegisterRequest(objectMapper, carNumber);
+        String requestBody = createCarRegisterRequest(objectMapper, carNumber, carModel);
         return mockMvc.perform(post("/api/v1/cars")
                 .accept(MediaType.APPLICATION_JSON_VALUE)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
