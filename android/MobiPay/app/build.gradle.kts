@@ -81,7 +81,8 @@ dependencies {
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.firebase.common.ktx)
     implementation(libs.androidx.core.splashscreen)
-
+    // ShowMoreScreen에서 asyncImage 컴포즈를 사용하기 위해
+    implementation(libs.coil.compose)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
