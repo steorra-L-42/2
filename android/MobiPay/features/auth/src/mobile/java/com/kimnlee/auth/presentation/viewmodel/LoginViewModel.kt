@@ -194,6 +194,7 @@ class LoginViewModel(
                     Log.d(TAG, "FCM token sent successfully")
                     // isLoggedIn true로 만들고 나머지 상태 원상복구
                     authManager.setLoggedIn(true)
+                    authManager.saveUserInfoFromToken() // 저장된 authToken에서 사용자 정보 파싱하고 저장
                     _isLoggedIn.value = true
                     _navigationEvent.emit("home")
                     Log.d(TAG, "Login process completed, navigating to home")
@@ -262,6 +263,7 @@ class LoginViewModel(
             authManager.setLoggedIn(false)
             _isLoggedIn.value = false
             authManager.clearTokens()
+            authManager.clearUserInfo()
             _registrationResult.value = null
             _needsRegistration.value = false
         }
