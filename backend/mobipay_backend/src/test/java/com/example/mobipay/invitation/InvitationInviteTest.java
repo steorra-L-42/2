@@ -2,6 +2,7 @@ package com.example.mobipay.invitation;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -12,14 +13,14 @@ import com.example.mobipay.domain.car.repository.CarRepository;
 import com.example.mobipay.domain.cargroup.entity.CarGroup;
 import com.example.mobipay.domain.cargroup.repository.CarGroupRepository;
 import com.example.mobipay.domain.fcmtoken.entity.FcmToken;
+import com.example.mobipay.domain.fcmtoken.error.FCMException;
 import com.example.mobipay.domain.fcmtoken.repository.FcmTokenRepository;
-import com.example.mobipay.domain.fcmtoken.service.FcmServiceImpl;
+import com.example.mobipay.domain.fcmtoken.service.FcmService;
 import com.example.mobipay.domain.invitation.repository.InvitationRepository;
 import com.example.mobipay.domain.mobiuser.entity.MobiUser;
 import com.example.mobipay.domain.mobiuser.repository.MobiUserRepository;
 import com.example.mobipay.oauth2.dto.CustomOAuth2User;
 import com.example.mobipay.util.SecurityTestUtil;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -28,8 +29,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -38,7 +37,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.web.context.WebApplicationContext;
 
 
 @SpringBootTest
@@ -46,11 +44,7 @@ import org.springframework.web.context.WebApplicationContext;
 @AutoConfigureMockMvc
 public class InvitationInviteTest {
 
-    private static final Logger log = LoggerFactory.getLogger(InvitationInviteTest.class);
-
-    private final WebApplicationContext context;
     private final MockMvc mockMvc;
-    private final ObjectMapper objectMapper;
 
     private final InvitationRepository invitationRepository;
     private final CarGroupRepository carGroupRepository;
@@ -59,19 +53,17 @@ public class InvitationInviteTest {
     private final FcmTokenRepository fcmTokenRepository;
 
     @MockBean
-    private FcmServiceImpl fcmServiceImpl;
+    private FcmService fcmServiceImpl;
 
     @MockBean
     private CustomOAuth2User customOAuth2User;
 
     @Autowired
-    public InvitationInviteTest(WebApplicationContext context, MockMvc mockMvc, ObjectMapper objectMapper,
-                                InvitationRepository invitationRepository, CarGroupRepository carGroupRepository,
+    public InvitationInviteTest(MockMvc mockMvc, InvitationRepository invitationRepository,
+                                CarGroupRepository carGroupRepository,
                                 MobiUserRepository mobiUserRepository, CarRepository carRepository,
                                 FcmTokenRepository fcmTokenRepository) {
-        this.context = context;
         this.mockMvc = mockMvc;
-        this.objectMapper = objectMapper;
         this.invitationRepository = invitationRepository;
         this.carGroupRepository = carGroupRepository;
         this.mobiUserRepository = mobiUserRepository;
@@ -108,8 +100,6 @@ public class InvitationInviteTest {
         @DisplayName("null인 휴대전화 번호")
         public void phoneNumber_null() throws Exception {
             //given
-            Mockito.when(fcmServiceImpl.sendMessage(any())).thenReturn(true);
-
             MobiUser owner = mobiUserRepository.save(MobiUser.of(
                     "owner@gmail.com", "owner", "010-1111-1111", "ownerPicture"));
 
@@ -140,8 +130,6 @@ public class InvitationInviteTest {
         @DisplayName("빈 휴대전화 번호")
         public void phoneNumber_empty() throws Exception {
             //given
-            Mockito.when(fcmServiceImpl.sendMessage(any())).thenReturn(true);
-
             MobiUser owner = mobiUserRepository.save(MobiUser.of(
                     "owner@gmail.com", "owner", "010-1111-1111", "ownerPicture"));
 
@@ -172,8 +160,6 @@ public class InvitationInviteTest {
         @DisplayName("20글자보다 긴 휴대전화 번호")
         public void phoneNumber_long() throws Exception {
             //given
-            Mockito.when(fcmServiceImpl.sendMessage(any())).thenReturn(true);
-
             MobiUser owner = mobiUserRepository.save(MobiUser.of(
                     "owner@gmail.com", "owner", "010-1111-1111", "ownerPicture"));
 
@@ -205,8 +191,6 @@ public class InvitationInviteTest {
         @DisplayName("숫자 또는 - 이외의 문자가 포함된 휴대전화 번호(특수문자)")
         public void phoneNumber_specialChar(String phoneNumber) throws Exception {
             //given
-            Mockito.when(fcmServiceImpl.sendMessage(any())).thenReturn(true);
-
             MobiUser owner = mobiUserRepository.save(MobiUser.of(
                     "owner@gmail.com", "owner", "010-1111-1111", "ownerPicture"));
 
@@ -237,8 +221,6 @@ public class InvitationInviteTest {
         @DisplayName("null인 carId")
         public void carId_null() throws Exception {
             //given
-            Mockito.when(fcmServiceImpl.sendMessage(any())).thenReturn(true);
-
             MobiUser owner = mobiUserRepository.save(MobiUser.of(
                     "owner@gmail.com", "owner", "010-1111-1111", "ownerPicture"));
 
@@ -269,8 +251,6 @@ public class InvitationInviteTest {
         @DisplayName("음수 carId")
         public void carId_negative() throws Exception {
             // given
-            Mockito.when(fcmServiceImpl.sendMessage(any())).thenReturn(true);
-
             MobiUser owner = mobiUserRepository.save(MobiUser.of(
                     "owner@gmail.com", "owner", "010-1111-1111", "ownerPicture"));
             Car car = Car.from("123가4567");
@@ -305,8 +285,6 @@ public class InvitationInviteTest {
         @DisplayName("이미 초대한 멤버")
         public void alreadyInvited() throws Exception {
             // given
-            Mockito.when(fcmServiceImpl.sendMessage(any())).thenReturn(true);
-
             MobiUser owner = mobiUserRepository.save(MobiUser.of(
                     "owner@gmail.com", "owner", "010-1111-1111", "ownerPicture"));
             MobiUser alreadyInvited = mobiUserRepository.save(MobiUser.of(
@@ -342,8 +320,6 @@ public class InvitationInviteTest {
         @DisplayName("차주 본인을 초대")
         public void ownerInvited() throws Exception {
             // given
-            Mockito.when(fcmServiceImpl.sendMessage(any())).thenReturn(true);
-
             MobiUser owner = mobiUserRepository.save(MobiUser.of(
                     "owner@gmail.com", "owner", "010-1111-1111", "ownerPicture"));
 
@@ -380,14 +356,12 @@ public class InvitationInviteTest {
         @DisplayName("차주가 아님")
         public void notOwner() throws Exception {
             // given
-            Mockito.when(fcmServiceImpl.sendMessage(any())).thenReturn(true);
-
             MobiUser owner = mobiUserRepository.save(MobiUser.of(
                     "owner@gmail.com", "owner", "010-1111-1111", "ownerPicture"));
             MobiUser invitee = mobiUserRepository.save(MobiUser.of(
                     "invitee@gmail.com", "invitee", "010-2222-2222", "inviteePicture"));
             MobiUser notOwner = mobiUserRepository.save(MobiUser.of(
-                    "notOnwer","notOwner", "010-3333-3333", "notOwnerPicture"));
+                    "notOnwer", "notOwner", "010-3333-3333", "notOwnerPicture"));
 
             Car car = Car.from("123가4567");
             car.setOwner(owner);
@@ -418,8 +392,6 @@ public class InvitationInviteTest {
         @DisplayName("존재하지 않는 사용자가 보낸 요청")
         public void notExistUser() throws Exception {
             // given
-            Mockito.when(fcmServiceImpl.sendMessage(any())).thenReturn(true);
-
             MobiUser owner = mobiUserRepository.save(MobiUser.of(
                     "owner@gmail.com", "owner", "010-1111-1111", "ownerPicture"));
             MobiUser invitee = mobiUserRepository.save(MobiUser.of(
@@ -431,7 +403,7 @@ public class InvitationInviteTest {
 
             carGroupRepository.save(CarGroup.of(car, owner));
 
-            Long notExistUserId = owner.getId()+invitee.getId();
+            Long notExistUserId = owner.getId() + invitee.getId();
             SecurityTestUtil.setUpMockUser(customOAuth2User, notExistUserId);
 
             final String url = "/api/v1/invitations";
@@ -459,14 +431,12 @@ public class InvitationInviteTest {
         @DisplayName("차량이 존재하지 않음")
         public void notExistCar() throws Exception {
             // given
-            Mockito.when(fcmServiceImpl.sendMessage(any())).thenReturn(true);
-
             MobiUser owner = mobiUserRepository.save(MobiUser.of(
                     "owner@gmail.com", "owner", "010-1111-1111", "ownerPicture"));
             MobiUser invitee = mobiUserRepository.save(MobiUser.of(
                     "invitee@gmail.com", "invitee", "010-2222-2222", "inviteePicture"));
 
-            Long notExistUserId = owner.getId()+invitee.getId();
+            Long notExistUserId = owner.getId() + invitee.getId();
             SecurityTestUtil.setUpMockUser(customOAuth2User, notExistUserId);
 
             final String url = "/api/v1/invitations";
@@ -490,8 +460,6 @@ public class InvitationInviteTest {
         @DisplayName("휴대전화 번호로 가입한 사용자 계정이 존재하지 않음")
         public void notExistUser() throws Exception {
             // given
-            Mockito.when(fcmServiceImpl.sendMessage(any())).thenReturn(true);
-
             MobiUser owner = mobiUserRepository.save(MobiUser.of(
                     "owner@gmail.com", "owner", "010-1111-1111", "ownerPicture"));
 
@@ -509,7 +477,6 @@ public class InvitationInviteTest {
                     }
                     """.formatted("010-9999-9999", car.getId());
 
-            Mockito.when(fcmServiceImpl.sendMessage(any())).thenReturn(true);
             // when
             ResultActions result = mockMvc.perform(post(url).with(csrf())
                     .accept(MediaType.APPLICATION_JSON)
@@ -528,7 +495,8 @@ public class InvitationInviteTest {
         @DisplayName("FCM 전송 실패")
         public void fcmFail() throws Exception {
             // given
-            Mockito.when(fcmServiceImpl.sendMessage(any())).thenReturn(false);
+            doThrow(new FCMException("fcm push failed")).when(fcmServiceImpl).sendMessage(any());
+
             Mockito.when(customOAuth2User.getName()).thenReturn("owner");
             Mockito.when(customOAuth2User.getPicture()).thenReturn("ownerPicture");
 
@@ -576,9 +544,8 @@ public class InvitationInviteTest {
         @DisplayName("초대 요청 성공")
         public void success() throws Exception {
             // given
-           Mockito.when(fcmServiceImpl.sendMessage(any())).thenReturn(true);
-           Mockito.when(customOAuth2User.getName()).thenReturn("owner");
-           Mockito.when(customOAuth2User.getPicture()).thenReturn("ownerPicture");
+            Mockito.when(customOAuth2User.getName()).thenReturn("owner");
+            Mockito.when(customOAuth2User.getPicture()).thenReturn("ownerPicture");
 
             MobiUser owner = MobiUser.of(
                     "owner@gmail.com", "owner", "010-1111-1111", "ownerPicture");

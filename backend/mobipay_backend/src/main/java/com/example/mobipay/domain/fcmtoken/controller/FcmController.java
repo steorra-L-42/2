@@ -3,11 +3,11 @@ package com.example.mobipay.domain.fcmtoken.controller;
 import com.example.mobipay.domain.fcmtoken.dto.FcmSendDto;
 import com.example.mobipay.domain.fcmtoken.dto.FcmTokenRequestDto;
 import com.example.mobipay.domain.fcmtoken.dto.FcmTokenResponseDto;
+import com.example.mobipay.domain.fcmtoken.error.FCMException;
 import com.example.mobipay.domain.fcmtoken.service.FcmService;
 import com.example.mobipay.oauth2.dto.CustomOAuth2User;
-import com.google.firebase.messaging.FirebaseMessagingException;
+import com.google.firebase.FirebaseException;
 import jakarta.validation.Valid;
-import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -43,10 +43,13 @@ public class FcmController {
 
     // 메시지 보내기 테스트용 api
     @PostMapping("/send")
-    public ResponseEntity<?> pushMessage(@RequestBody @Valid FcmSendDto request)
-            throws IOException, FirebaseMessagingException {
-        fcmService.sendMessage(request);
+    public ResponseEntity<?> pushMessage(@RequestBody @Valid FcmSendDto request) {
 
+        try {
+            fcmService.sendMessage(request);
+        } catch (FirebaseException e) {
+            throw new FCMException(e.getMessage());
+        }
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
