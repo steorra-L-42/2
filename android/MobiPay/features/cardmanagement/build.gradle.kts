@@ -50,7 +50,6 @@ dependencies {
 
     // plus JB - 24.09.10~
     implementation(libs.androidx.ui.tooling.preview.android)
-    implementation(libs.coil.compose)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

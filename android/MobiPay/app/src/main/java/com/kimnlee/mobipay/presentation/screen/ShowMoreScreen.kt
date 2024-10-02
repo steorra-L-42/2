@@ -28,6 +28,7 @@ import com.kimnlee.common.R
 import com.kimnlee.common.ui.theme.MobiBgGray
 import com.kimnlee.common.ui.theme.MobiTextAlmostBlack
 import com.kimnlee.common.ui.theme.MobiTextDarkGray
+import com.kimnlee.memberinvitation.presentation.viewmodel.MemberInvitationViewModel
 
 val ButtonColor = Color(0xFFF2F3F5)
 val SettingsIconColor = Color(0xFFB1B8C0)
@@ -36,6 +37,7 @@ val SettingsIconColor = Color(0xFFB1B8C0)
 @Composable
 fun ShowMoreScreen(
     viewModel: LoginViewModel,
+    memberInvitationViewModel: MemberInvitationViewModel,
     navController: NavController
 ) {
     Scaffold(
@@ -133,7 +135,7 @@ fun ShowMoreScreen(
                     items = listOf(
                         MenuItem("결제 내역", { navController.navigate("paymenthistory") }, emoji = "💳"),
                         MenuItem("초대 대기", { navController.navigate("memberinvitation_invitationwaiting") }, emoji = "📩"),
-                        MenuItem("메뉴 1", { }),
+                        MenuItem("멤버 초대(임시)", {navController.navigate("memberinvitation")}),
                         MenuItem("메뉴 2", { }),
                         MenuItem("로그아웃", { viewModel.logout() })
                     )
@@ -205,6 +207,7 @@ fun MenuItemCard(item: MenuItem) {
 //                        .padding(top = 6.dp)
 //                        .padding(end = 8.dp)
                 )
+                Spacer(modifier = Modifier.width(6.dp))
             }
             Text(
                 text = item.text,
@@ -216,7 +219,9 @@ fun MenuItemCard(item: MenuItem) {
                         includeFontPadding = false
                     )
                 ),
-                modifier = if (isLogout) Modifier.fillMaxWidth().alignByBaseline() else Modifier.alignByBaseline()
+                modifier = if (isLogout) Modifier
+                    .fillMaxWidth()
+                    .alignByBaseline() else Modifier.alignByBaseline()
             )
         }
     }

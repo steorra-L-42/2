@@ -1,6 +1,7 @@
 package com.kimnlee.mobipay.navigation
 
 import android.app.Application
+import android.bluetooth.BluetoothManager
 import android.content.Context
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
@@ -22,6 +23,7 @@ import com.kimnlee.common.components.BottomNavigation
 import com.kimnlee.common.network.ApiClient
 import com.kimnlee.firebase.FCMService
 import com.kimnlee.memberinvitation.navigation.memberInvitationNavGraph
+import com.kimnlee.memberinvitation.presentation.viewmodel.MemberInvitationViewModel
 import com.kimnlee.mobipay.presentation.screen.HomeScreen
 import com.kimnlee.mobipay.presentation.screen.ShowMoreScreen
 import com.kimnlee.notification.navigation.notificationNavGraph
@@ -35,7 +37,8 @@ fun AppNavGraph(
     authManager: AuthManager,
     context: Context,
     apiClient: ApiClient,
-    loginViewModel: LoginViewModel
+    loginViewModel: LoginViewModel,
+    memberInvitationViewModel: MemberInvitationViewModel
 ) {
     val application = context as Application
     val biometricViewModel = BiometricViewModel(application)
@@ -44,6 +47,10 @@ fun AppNavGraph(
     val isLoggedIn by loginViewModel.isLoggedIn.collectAsState()
 
     LaunchedEffect(loginViewModel) {
+        val bluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+        val bluetoothAdapter = bluetoothManager.adapter
+        memberInvitationViewModel.initBluetoothAdapter(bluetoothAdapter)
+
         loginViewModel.navigationEvent.collect { route ->
             navController.navigate(route) {
                 popUpTo(navController.graph.startDestinationId) {
@@ -80,6 +87,7 @@ fun AppNavGraph(
             BottomNavigation(navController) {
                 ShowMoreScreen(
                     viewModel = loginViewModel,
+                    memberInvitationViewModel = memberInvitationViewModel,
                     navController = navController
                 )
             }
@@ -99,8 +107,8 @@ fun AppNavGraph(
         authNavGraph(navController, authManager, loginViewModel)
         paymentNavGraph(navController)
         cardManagementNavGraph(navController, authManager, cardManagementViewModel)
-        vehicleManagementNavGraph(navController, apiClient, vehicleManagementViewModel)
-        memberInvitationNavGraph(navController)
+        vehicleManagementNavGraph(navController, context, apiClient, vehicleManagementViewModel)
+        memberInvitationNavGraph(navController, context, memberInvitationViewModel)
         notificationNavGraph(navController)
     }
 }

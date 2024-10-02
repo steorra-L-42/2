@@ -18,11 +18,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 
 
 @Composable
-fun MemberInvitationOptionItem(icon: ImageVector, title: String, description: String, onItemClick : () -> Unit ) {
+fun MemberInvitationOptionItem(icon: String, title: String, description: String, onItemClick : () -> Unit ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -31,10 +33,16 @@ fun MemberInvitationOptionItem(icon: ImageVector, title: String, description: St
             .padding(16.dp).clickable { onItemClick() },
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = Color.Blue,
+//        Icon(
+//            imageVector = icon,
+//            contentDescription = null,
+//            tint = Color.Blue,
+//            modifier = Modifier.size(36.dp),
+//        )
+        Text(
+            text = icon,
+            style = MaterialTheme.typography.titleLarge,
+            fontFamily = FontFamily(Font(com.kimnlee.common.R.font.emoji)),
             modifier = Modifier.size(36.dp),
         )
 
