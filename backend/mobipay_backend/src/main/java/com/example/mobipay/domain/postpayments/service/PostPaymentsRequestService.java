@@ -11,6 +11,7 @@ import com.example.mobipay.domain.car.repository.CarRepository;
 import com.example.mobipay.domain.cargroup.entity.CarGroup;
 import com.example.mobipay.domain.cargroup.repository.CarGroupRepository;
 import com.example.mobipay.domain.fcmtoken.dto.FcmSendDto;
+import com.example.mobipay.domain.fcmtoken.error.FCMException;
 import com.example.mobipay.domain.fcmtoken.service.FcmService;
 import com.example.mobipay.domain.merchant.entity.Merchant;
 import com.example.mobipay.domain.merchant.error.MerchantNotFoundException;
@@ -21,6 +22,7 @@ import com.example.mobipay.domain.postpayments.dto.PaymentResponse;
 import com.example.mobipay.domain.postpayments.error.InvalidMobiApiKeyException;
 import com.example.mobipay.domain.registeredcard.entity.RegisteredCard;
 import com.example.mobipay.domain.registeredcard.repository.RegisteredCardRepository;
+import com.google.firebase.FirebaseException;
 import jakarta.transaction.Transactional;
 import java.util.Collections;
 import java.util.HashMap;
@@ -190,8 +192,8 @@ public class PostPaymentsRequestService {
     private void sendFcmMessageWithErrorHandling(FcmSendDto fcmSendDto) {
         try {
             fcmService.sendMessage(fcmSendDto);
-        } catch (Exception e) {
-            log.error(e.getMessage());
+        } catch (FirebaseException e) {
+            throw new FCMException(e.getMessage());
         }
     }
 }

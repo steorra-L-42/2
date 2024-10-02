@@ -12,8 +12,8 @@ import androidx.car.app.model.Template
 import androidx.car.app.navigation.model.RoutePreviewNavigationTemplate
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import com.kimnlee.common.utils.AAFocusManager
 import com.mapbox.androidauto.MapboxCarContext
-import com.mapbox.androidauto.R
 import com.mapbox.androidauto.internal.extensions.addBackPressedHandler
 import com.mapbox.androidauto.internal.logAndroidAuto
 import com.mapbox.androidauto.location.CarLocationRenderer
@@ -28,14 +28,9 @@ import com.mapbox.androidauto.preview.PreviewCarRoutesProvider
 import com.mapbox.androidauto.screenmanager.MapboxScreen
 import com.mapbox.androidauto.screenmanager.MapboxScreenManager
 import com.mapbox.androidauto.search.PlaceRecord
-import com.mapbox.maps.CameraOptions
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
-import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
-import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
-import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
-import com.mapbox.navigation.ui.maps.route.line.model.RouteLineClearValue
 
 internal class CarRoutePreviewScreen @UiThread constructor(
     private val mapboxCarContext: MapboxCarContext,
@@ -68,6 +63,7 @@ internal class CarRoutePreviewScreen @UiThread constructor(
 
             override fun onResume(owner: LifecycleOwner) {
                 logAndroidAuto("CarRoutePreviewScreen onResume")
+                AAFocusManager.screenResumed()
                 mapboxCarContext.mapboxCarMap.registerObserver(carLocationRenderer)
                 mapboxCarContext.mapboxCarMap.registerObserver(carSpeedLimitRenderer)
                 mapboxCarContext.mapboxCarMap.registerObserver(carNavigationCamera)
@@ -77,6 +73,7 @@ internal class CarRoutePreviewScreen @UiThread constructor(
 
             override fun onPause(owner: LifecycleOwner) {
                 logAndroidAuto("CarRoutePreviewScreen onPause")
+                AAFocusManager.screenPaused()
                 mapboxCarContext.mapboxCarMap.unregisterObserver(carLocationRenderer)
                 mapboxCarContext.mapboxCarMap.unregisterObserver(carSpeedLimitRenderer)
                 mapboxCarContext.mapboxCarMap.unregisterObserver(carNavigationCamera)

@@ -81,7 +81,7 @@ public class FcmRegisterTest {
                 .content(requestBody));
 
         FcmToken createdFcmToken = fcmTokenRepository.findByValue("fcmTokenValue").get();
-        
+
         // then
         result.andExpect(status().isOk());
         assertEquals(mobiUser.getFcmToken(), createdFcmToken);

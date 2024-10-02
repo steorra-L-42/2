@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.media.RingtoneManager
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
@@ -16,8 +17,10 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.Person
 import androidx.core.app.RemoteInput
 import androidx.core.graphics.drawable.IconCompat
+import com.kimnlee.common.FCMData
 import com.kimnlee.common.R
 
+private const val TAG = "MobiNotificationManager"
 class MobiNotificationManager private constructor(private val applicationContext: Context) {
 
     companion object {
@@ -128,7 +131,6 @@ class MobiNotificationManager private constructor(private val applicationContext
     }
 
 
-//    fun notify(context: Context, appConversation: MobiConversation) {
     fun notify(appConversation: MobiConversation) {
 
         val replyAction = createReplyAction(applicationContext, appConversation)
@@ -165,12 +167,52 @@ class MobiNotificationManager private constructor(private val applicationContext
         }
     }
 
+    /**
+     * Android Auto 네비게이션 화면에 ALERT를 띄우는 코드
+     */
+    fun broadcastForPlainAlert(title: String, body: String){
+        val intent = Intent("com.kimnlee.mobipay.SHOW_PLAIN_ALERT")
+        intent.putExtra("title", title)
+        intent.putExtra("body", body)
+        applicationContext.sendBroadcast(intent)
+        Log.d(TAG, "broadcastForPlainAlert: sent Broadcast")
+    }
+
+    /**
+     * Android Auto 네비게이션 화면에 Head Up Notification을 띄우는 코드
+     */
+    fun broadcastForPlainHUN(title: String, body: String){
+        val intent = Intent("com.kimnlee.mobipay.SHOW_PLAIN_HUN")
+        intent.putExtra("title", title)
+        intent.putExtra("body", body)
+        applicationContext.sendBroadcast(intent)
+        Log.d(TAG, "broadcastForPlainHUN: sent Broadcast")
+    }
+
+    /**
+     * FCMData를 사용해 Android Auto 네비게이션 화면에 ALERT를 띄우는 코드
+     */
+    fun broadcastForAlert(type: String, fcmData: FCMData){
+        val intent = Intent("com.kimnlee.mobipay.SHOW_ALERT")
+        intent.putExtra("type", type)
+        intent.putExtra("fcmData", fcmData)
+        applicationContext.sendBroadcast(intent)
+        Log.d(TAG, "broadcastForAlert: sent Broadcast")
+    }
+
+    /**
+     * FCMData를 사용해 Android Auto 네비게이션 화면에 Head Up Notification을 띄우는 코드
+     */
+    fun broadcastForHUN(type: String, fcmData: FCMData){
+        val intent = Intent("com.kimnlee.mobipay.SHOW_HUN")
+        intent.putExtra("type", type)
+        intent.putExtra("fcmData", fcmData)
+        applicationContext.sendBroadcast(intent)
+        Log.d(TAG, "broadcastForHUN: sent Broadcast")
+    }
+
     fun showNotification(title: String, message: String, pendingIntent: PendingIntent) {
         val channelId = "payment_request"
-//        val intent = Intent(context, YourTargetActivity::class.java).apply {
-//            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-//        }
-//        val pendingIntent: PendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
 
         val notification = NotificationCompat.Builder(applicationContext, channelId)
             .setSmallIcon(R.drawable.ic_mobipay)
@@ -182,5 +224,19 @@ class MobiNotificationManager private constructor(private val applicationContext
             .build()
 
         NotificationManagerCompat.from(applicationContext).notify(123, notification) // Unique ID for the notification
+    }
+
+    fun showPlainNotification(title: String, message: String) {
+        val channelId = "payment_request"
+
+        val notification = NotificationCompat.Builder(applicationContext, channelId)
+            .setSmallIcon(R.drawable.ic_mobipay)
+            .setContentTitle(title)
+            .setContentText(message)
+            .setPriority(NotificationCompat.PRIORITY_MAX)
+            .setAutoCancel(true)
+            .build()
+
+        NotificationManagerCompat.from(applicationContext).notify(222, notification) // Unique ID for the notification
     }
 }

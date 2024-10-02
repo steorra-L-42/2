@@ -14,6 +14,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.kimnlee.common.utils.AAFocusManager
 import com.mapbox.androidauto.MapboxCarContext
 import com.mapbox.androidauto.R
 import com.mapbox.androidauto.internal.extensions.addBackPressedHandler
@@ -23,7 +24,6 @@ import com.mapbox.androidauto.preview.CarRoutePreviewRequestCallback
 import com.mapbox.androidauto.screenmanager.MapboxScreen
 import com.mapbox.androidauto.screenmanager.MapboxScreenManager
 import com.mapbox.androidauto.search.PlaceRecord
-import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
@@ -86,6 +86,7 @@ internal class MerchantListScreen @UiThread constructor(
             }
 
             override fun onResume(owner: LifecycleOwner) {
+                AAFocusManager.screenResumed()
                 mapboxCarContext.mapboxCarMap
                     .registerObserver(carNavigationCamera)
                     .registerObserver(carLocationRenderer)
@@ -94,6 +95,7 @@ internal class MerchantListScreen @UiThread constructor(
 
             override fun onPause(owner: LifecycleOwner) {
                 super.onPause(owner)
+                AAFocusManager.screenPaused()
                 mapboxCarContext.mapboxCarMap
                     .unregisterObserver(carNavigationCamera)
                     .unregisterObserver(carLocationRenderer)

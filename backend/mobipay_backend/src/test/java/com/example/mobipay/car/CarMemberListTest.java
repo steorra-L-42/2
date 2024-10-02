@@ -1,7 +1,5 @@
 package com.example.mobipay.car;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -22,13 +20,12 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.web.context.WebApplicationContext;
@@ -39,7 +36,8 @@ import org.springframework.web.context.WebApplicationContext;
 public class CarMemberListTest {
 
     private static final Logger log = LoggerFactory.getLogger(CarMemberListTest.class);
-
+    @Mock
+    CustomOAuth2User customOAuth2User;
     @Autowired
     private WebApplicationContext contest;
     @Autowired
@@ -53,9 +51,6 @@ public class CarMemberListTest {
     @Autowired
     private CarGroupRepository carGroupRepository;
 
-    @Mock
-    CustomOAuth2User customOAuth2User;
-
     @BeforeEach
     void setUp() {
         carGroupRepository.deleteAll();
@@ -68,6 +63,30 @@ public class CarMemberListTest {
         carGroupRepository.deleteAll();
         carRepository.deleteAll();
         mobiUserRepository.deleteAll();
+    }
+
+    @Test
+    @DisplayName("실패: 403 Forbidden : 차량의 멤버가 아닌 경우")
+    void fail_403_not_car_member() throws Exception {
+        // given
+        MobiUser owner = mobiUserRepository.save(MobiUser.of(
+                "owner@gmail.com", "owner", "010-1111-1111", "ownerPicture"));
+        MobiUser nobody = mobiUserRepository.save(MobiUser.of(
+                "nobody@gmail.com", "nobody", "010-2222-2222", "noBodyPicture"));
+
+        Car car = Car.of("123가4567", "carModel");
+        car.setOwner(owner);
+        car = carRepository.save(car);
+        carGroupRepository.save(CarGroup.of(car, owner));
+
+        SecurityTestUtil.setUpMockUser(customOAuth2User, nobody.getId());
+        final String url = "/api/v1/cars/" + car.getId() + "/members";
+
+        // when
+        ResultActions result = mockMvc.perform(get(url));
+
+        // then
+        result.andExpect(status().isForbidden());
     }
 
     // 실패: 400 Bad Request : carId가 null인 경우
@@ -108,30 +127,6 @@ public class CarMemberListTest {
         }
     }
 
-    @Test
-    @DisplayName("실패: 403 Forbidden : 차량의 멤버가 아닌 경우")
-    void fail_403_not_car_member() throws Exception {
-        // given
-        MobiUser owner = mobiUserRepository.save(MobiUser.of(
-                "owner@gmail.com", "owner", "010-1111-1111", "ownerPicture"));
-        MobiUser nobody = mobiUserRepository.save(MobiUser.of(
-                "nobody@gmail.com", "nobody", "010-2222-2222", "noBodyPicture"));
-
-        Car car = Car.from("123가4567");
-        car.setOwner(owner);
-        car = carRepository.save(car);
-        carGroupRepository.save(CarGroup.of(car, owner));
-
-        SecurityTestUtil.setUpMockUser(customOAuth2User, nobody.getId());
-        final String url = "/api/v1/cars/"+ car.getId() + "/members";
-
-        // when
-        ResultActions result = mockMvc.perform(get(url));
-
-        // then
-        result.andExpect(status().isForbidden());
-    }
-
     @Nested
     @DisplayName("실패: 404 Not Found")
     class Fail_404 {
@@ -142,14 +137,14 @@ public class CarMemberListTest {
             MobiUser owner = mobiUserRepository.save(MobiUser.of(
                     "owner@gmail.com", "owner", "010-1111-1111", "ownerPicture"));
 
-            Car car = Car.from("123가4567");
+            Car car = Car.of("123가4567", "carModel");
             car.setOwner(owner);
             car = carRepository.save(car);
             carGroupRepository.save(CarGroup.of(car, owner));
 
             final Long NotJoinedMobiUserId = owner.getId() + 999L;
             SecurityTestUtil.setUpMockUser(customOAuth2User, NotJoinedMobiUserId);
-            final String url = "/api/v1/cars/"+ car.getId() + "/members";
+            final String url = "/api/v1/cars/" + car.getId() + "/members";
 
             // when
             ResultActions result = mockMvc.perform(get(url));
@@ -203,13 +198,13 @@ public class CarMemberListTest {
             MobiUser owner = mobiUserRepository.save(MobiUser.of(
                     "owner@gmail.com", "owner", "010-1111-1111", "ownerPicture"));
 
-            Car car = Car.from("123가4567");
+            Car car = Car.of("123가4567", "carModel");
             car.setOwner(owner);
             car = carRepository.save(car);
             carGroupRepository.save(CarGroup.of(car, owner));
 
             SecurityTestUtil.setUpMockUser(customOAuth2User, owner.getId());
-            final String url = "/api/v1/cars/"+ car.getId() + "/members";
+            final String url = "/api/v1/cars/" + car.getId() + "/members";
 
             // when
             ResultActions result = mockMvc.perform(get(url));
@@ -232,14 +227,14 @@ public class CarMemberListTest {
             MobiUser invitee = mobiUserRepository.save(MobiUser.of(
                     "invitee@gmail.com", "invitee", "010-2222-2222", "inviteePicture"));
 
-            Car car = Car.from("123가4567");
+            Car car = Car.of("123가4567", "carModel");
             car.setOwner(owner);
             car = carRepository.save(car);
             carGroupRepository.save(CarGroup.of(car, owner));
             carGroupRepository.save(CarGroup.of(car, invitee));
 
             SecurityTestUtil.setUpMockUser(customOAuth2User, invitee.getId());
-            final String url = "/api/v1/cars/"+ car.getId() + "/members";
+            final String url = "/api/v1/cars/" + car.getId() + "/members";
 
             // when
             ResultActions result = mockMvc.perform(get(url));

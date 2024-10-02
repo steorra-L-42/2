@@ -2,6 +2,7 @@ package com.kimnlee.freedrive.presentation.screen
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -52,12 +53,18 @@ import androidx.car.app.model.Action
 import androidx.car.app.model.Alert
 import androidx.car.app.model.CarIcon
 import androidx.car.app.model.CarText
+import androidx.car.app.model.OnClickListener
 import androidx.car.app.notification.CarAppExtender
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.graphics.drawable.IconCompat
+import com.kimnlee.common.FCMData
 import com.mapbox.androidauto.search.PlaceRecord
+import java.math.BigInteger
+import java.text.NumberFormat
+import java.util.Locale
+import kotlin.math.log
 
 private const val TAG = "MainCarSession"
 private val customStyleUrl = "mapbox://styles/harveyl/cm163kfgg019r01q1a4nc9hm3"
@@ -110,50 +117,177 @@ class MainCarSession : Session() {
 
     private val alertReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            Log.d(TAG, "onReceive: Broadcast Received")
-            intent?.let {
-                val title = it.getStringExtra("title") ?: "모비페이 결제요청"
-                val subtitle = it.getStringExtra("content") ?: "가맹점\n00,000원"
-                showPurchaseAlert(title, subtitle)
+//            Log.d(TAG, "onReceive: Boroadcast 호출 됨")
+            val action = intent?.action ?: ""
+            val type = intent?.getStringExtra("type") ?: ""
+            val title = intent?.getStringExtra("title") ?: ""
+            val body = intent?.getStringExtra("body") ?: ""
+//            Log.d(TAG, "onReceive: 타입은 $type")
+
+            if (action == "com.kimnlee.mobipay.SHOW_PLAIN_ALERT"){
+                Log.d(TAG, "onReceive: $action")
+                showAlert(title, body, null)
+            }else if (action == "com.kimnlee.mobipay.SHOW_PLAIN_HUN"){
+                Log.d(TAG, "onReceive: $action")
+                showHUN(title, body, null)
+            }
+
+            (intent?.getSerializableExtra("fcmData") as? FCMData)?.let { fcmData ->
+                Log.d(TAG, "onReceive: FCM데이터 $fcmData")
+                if(action !== "" && type !== ""){
+                    if (action == "com.kimnlee.mobipay.SHOW_ALERT"){
+                        Log.d(TAG, "onReceive: $action")
+                        processAlert(type, fcmData)
+                    }else if (action == "com.kimnlee.mobipay.SHOW_HUN"){
+                        Log.d(TAG, "onReceive: $action")
+                        processHUN(type, fcmData)
+                    }
+                }
             }
         }
     }
-    private fun showPurchaseAlert(title: String, subtitle: String) {
-        carContext.getCarService(AppManager::class.java).showAlert(
-            Alert.Builder(
-                /*alertId*/ 1,
-                /*title*/ CarText.create(title),
-                /*durationMillis*/ 5000
+
+    fun moneyFormat(amount: BigInteger): String {
+        val numberFormat = NumberFormat.getInstance(Locale.KOREA)
+        return numberFormat.format(amount) + "원"
+    }
+
+    private fun processAlert(intentType: String, fcmData: FCMData){
+        Log.d(TAG, "processAlert: Alert 처리")
+        val amount = fcmData.paymentBalance?.let { BigInteger(it) }
+
+        var title = "관리자에게 문의하세요"
+        var onClickListener : OnClickListener? = null
+
+        if(intentType == "manual_pay"){
+            title = "모비페이 결제요청"
+            onClickListener = OnClickListener {
+                // 결제 처리
+                val paymentApprovalIntent = Intent("com.kimnlee.mobipay.PAYMENT_APPROVAL").apply {
+                    putExtra("fcmData", fcmData)  // Assuming you have an FCMData object to send as an extra
+                }
+
+                carContext.sendBroadcast(paymentApprovalIntent)
+            }
+        }else if(intentType == "manual_pay_complete"){
+            title = "모비페이 결제완료"
+        }else if(intentType == "auto_pay_complete"){
+            title = "모비페이 결제완료"
+        }
+        val body = fcmData.merchantName+ "\n" + amount?.let { moneyFormat(it) }
+        Log.d(TAG, "processAlert: 자동결제 바디 $body")
+
+        showAlert(title, body, onClickListener)
+    }
+
+
+    private fun processHUN(intentType: String, fcmData: FCMData){
+        Log.d(TAG, "processHUN: HUN 처리")
+        val amount = fcmData.paymentBalance?.let { BigInteger(it) }
+
+        var title = "관리자에게 문의하세요"
+//        var isRequest = false
+
+
+        var paymentApprovalIntent: Intent? = null
+
+        if(intentType == "manual_pay"){
+            title = "모비페이 결제요청"
+//            isRequest = true
+            paymentApprovalIntent = Intent("com.kimnlee.mobipay.PAYMENT_APPROVAL").apply {
+                putExtra("fcmData", fcmData)
+            }
+
+        }else if(intentType == "manual_pay_complete"){
+            title = "모비페이 결제완료"
+        }else if(intentType == "auto_pay_complete"){
+            title = "모비페이 자동결제 완료"
+        }
+        val body = fcmData.merchantName+ "   " + amount?.let { moneyFormat(it) }
+
+        showHUN(title, body, paymentApprovalIntent)
+    }
+
+    fun showHUN(title: String, content: String, paymentApprovalIntent: Intent?) {
+        val notificationId = 1001
+        val channelId = "payment_request"
+
+        var paymentApprovalPendingIntent : PendingIntent? = null
+
+        if(paymentApprovalIntent !== null){
+            paymentApprovalPendingIntent = PendingIntent.getBroadcast(
+                carContext,
+                0,
+                paymentApprovalIntent,
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
             )
-                .setIcon(
-                    CarIcon.Builder(
-                        IconCompat.createWithResource(carContext, R.drawable.ic_mobipay)
+        }
+
+        val notificationBuilder = NotificationCompat.Builder(carContext, channelId)
+            .setSmallIcon(R.drawable.ic_mobipay)
+            .setContentTitle(title)
+            .setContentText(content)
+            .extend(
+                CarAppExtender.Builder()
+                    .setImportance(NotificationManager.IMPORTANCE_HIGH)
+                    .build()
+            )
+
+        if (paymentApprovalIntent !== null) {
+            notificationBuilder
+                .setTimeoutAfter(10000)
+                .addAction(
+                    NotificationCompat.Action.Builder(
+                        null,
+                        "승인",
+                        paymentApprovalPendingIntent
                     ).build()
                 )
-                .setSubtitle(CarText.create(subtitle))
-                .addAction(
-                    Action.Builder()
-                        .setTitle("결제 승인")
-                        .setOnClickListener {
-                            // 결제승인 처리
-                        }
-                        .build()
-                )
-//                .addAction(
-//                    Action.Builder()
-//                        .setTitle("거절")
-//                        .setOnClickListener {
-//                            // 결제 거절 처리 근데 그냥 timeout으로 두자
-//                        }
-//                        .build()
-//                )
-                .build()
+        } else {
+            notificationBuilder.setTimeoutAfter(7000)
+        }
+
+        NotificationManagerCompat.from(carContext).notify(notificationId, notificationBuilder.build())
+    }
+
+    // 안 되면 롤백
+    private fun showAlert(title: String, subtitle: String, onClickListener: OnClickListener?) {
+        var duration = 10000L
+        if(onClickListener == null)
+            duration = 8000L
+
+        val alertBuilder = Alert.Builder(
+            kotlin.random.Random.nextInt(),
+            CarText.create(title),
+            duration // 12초
         )
+            .setIcon(
+                CarIcon.Builder(
+                    IconCompat.createWithResource(carContext, R.drawable.ic_mobipay)
+                ).build()
+            )
+            .setSubtitle(CarText.create(subtitle))
+
+        // onClickListener가 null이 아닌 경우에만 버튼 표시
+        onClickListener?.let {
+            val actionBuilder = Action.Builder()
+                .setTitle("결제 승인")
+                .setOnClickListener(it)
+
+            alertBuilder.addAction(actionBuilder.build())
+        }
+
+        carContext.getCarService(AppManager::class.java).showAlert(alertBuilder.build())
     }
 
     private fun registerAlertReceiver() {
         // carContext 헷갈리면 getCarContext() 사용
-        val intentFilter = IntentFilter("com.kimnlee.mobipay.SHOW_ALERT")
+        val intentFilter = IntentFilter().apply {
+            addAction("com.kimnlee.mobipay.SHOW_ALERT")
+            addAction("com.kimnlee.mobipay.SHOW_HUN")
+            addAction("com.kimnlee.mobipay.SHOW_PLAIN_ALERT")
+            addAction("com.kimnlee.mobipay.SHOW_PLAIN_HUN")
+        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             carContext.registerReceiver(alertReceiver, intentFilter, Context.RECEIVER_EXPORTED)
         }else{
@@ -165,47 +299,13 @@ class MainCarSession : Session() {
         carContext.unregisterReceiver(alertReceiver)
     }
 
-
-    fun showHUN(title: String, content: String) {
-        val notificationId = 1001
-        val channelId = "payment_request"
-
-        val reRouteIntent = Intent("com.kimnlee.mobipay.PAYMENT_APPROVAL")
-        val reRoutePendingIntent = PendingIntent.getBroadcast(
-            carContext,
-            0,
-            reRouteIntent,
-            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-        )
-
-        val notification = NotificationCompat.Builder(carContext, channelId)
-            .setSmallIcon(R.drawable.ic_mobipay)
-            .setContentTitle(title)
-            .setContentText(content)
-            .addAction(
-                NotificationCompat.Action.Builder(
-                    null,
-                    "승인",
-                    reRoutePendingIntent
-                ).build()
-            )
-            .extend(
-                CarAppExtender.Builder()
-                    .setImportance(NotificationManager.IMPORTANCE_HIGH)
-                    .build()
-            )
-            .build()
-
-        NotificationManagerCompat.from(carContext).notify(notificationId, notification)
-    }
-
     init {
 
         // 결제 알림 수행을 위한 Receiver 등록
         lifecycle.addObserver(object : DefaultLifecycleObserver {
             override fun onCreate(owner: LifecycleOwner) {
                 super.onCreate(owner)
-                registerAlertReceiver() // Register after the session has been created
+                registerAlertReceiver()
             }
 
             override fun onDestroy(owner: LifecycleOwner) {
