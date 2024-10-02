@@ -12,6 +12,7 @@ import com.example.mobipay.domain.registeredcard.dto.RegisteredCardListResponse;
 import com.example.mobipay.domain.registeredcard.dto.RegisteredCardRequest;
 import com.example.mobipay.domain.registeredcard.dto.RegisteredCardResponse;
 import com.example.mobipay.domain.registeredcard.entity.RegisteredCard;
+import com.example.mobipay.domain.registeredcard.error.AlreadyRegisteredCard;
 import com.example.mobipay.domain.registeredcard.repository.RegisteredCardRepository;
 import com.example.mobipay.oauth2.dto.CustomOAuth2User;
 import java.util.List;
@@ -37,8 +38,16 @@ public class RegisteredCardService {
         OwnedCard ownedCard = ownedCardRepository.findOwnedCardById(request.getOwnedCardId())
                 .orElseThrow(OwnedCardNotFoundException::new);
 
-        RegisteredCard registeredCard = RegisteredCard.of(request.getOneDayLimit(), request.getOneTimeLimit(),
-                request.getPassword(), false);
+        registeredCardRepository.findByOwnedCardId(ownedCard.getId())
+                .ifPresent(card -> {
+                    throw new AlreadyRegisteredCard();
+                });
+
+        RegisteredCard registeredCard = RegisteredCard.of(
+                request.getOneDayLimit(),
+                request.getOneTimeLimit(),
+                request.getPassword(),
+                false);
 
         registeredCard.addRelations(mobiUser, ownedCard);
 

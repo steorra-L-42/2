@@ -22,12 +22,12 @@ import com.example.mobipay.domain.postpayments.error.InvalidPaymentBalanceExcept
 import com.example.mobipay.domain.postpayments.error.ReceiptUserMismatchException;
 import com.example.mobipay.domain.postpayments.error.RegisteredCardNotFoundException;
 import com.example.mobipay.domain.postpayments.error.TransactionAlreadyApprovedException;
+import com.example.mobipay.domain.registeredcard.error.AlreadyRegisteredCard;
 import com.example.mobipay.global.authentication.error.AccountProductNotFoundException;
 import com.example.mobipay.global.authentication.error.CardProductNotFoundException;
 import com.example.mobipay.global.error.ErrorCode;
 import com.example.mobipay.global.error.ErrorResponseDto;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -181,6 +181,12 @@ public class ControllerAdvice {
     public ResponseEntity<ErrorResponseDto> handleFCMException(FCMException e) {
         log.info(e.getMessage());
         return getResponse(ErrorCode.FCM_ERROR);
+    }
+
+    @ExceptionHandler(AlreadyRegisteredCard.class)
+    public ResponseEntity<ErrorResponseDto> handleAlreadyRegisteredCard(AlreadyRegisteredCard e) {
+        log.info(e.getMessage());
+        return getResponse(ErrorCode.ALREADY_REGISTERED_CARD);
     }
 
     private ResponseEntity<ErrorResponseDto> getResponse(ErrorCode errorCode) {
