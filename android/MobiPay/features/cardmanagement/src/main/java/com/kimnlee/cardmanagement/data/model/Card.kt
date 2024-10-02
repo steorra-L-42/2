@@ -21,9 +21,12 @@ data class RegistrationCard(
     val cardName: String,
     val autoPayStatus: Boolean,
 )
+
 data class RegistrationCardListResponse(
     val items: List<RegistrationCard>       // 카드 목록
 )
+
+// 더미 데이터
 data class Photos(
     val albumId: Int,
     val id: Int,
