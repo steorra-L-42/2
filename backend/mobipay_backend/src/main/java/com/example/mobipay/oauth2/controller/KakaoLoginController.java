@@ -12,6 +12,9 @@ import com.example.mobipay.oauth2.dto.KakaoUserInfoResponseDto;
 import com.example.mobipay.oauth2.dto.UserRequestDto;
 import com.example.mobipay.oauth2.service.KakaoTokenService;
 import com.example.mobipay.oauth2.service.UserService;
+import com.example.mobipay.oauth2.util.CookieMethods;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,6 +38,7 @@ public class KakaoLoginController {
     private final KakaoTokenService kakaoTokenService;
     private final MobiUserRepository mobiUserRepository;
     private final SignUpServiceImpl signUpServiceImpl;
+    private final CookieMethods cookieMethods;
 
     @Value("${KAKAO_USER_INFO_URI}")
     private String UserInfoUri;
@@ -80,7 +84,8 @@ public class KakaoLoginController {
 
 
     @PostMapping("/detail")
-    public ResponseEntity<String> requestUserDetails(@RequestBody UserRequestDto userRequestDto) {
+    public ResponseEntity<String> requestUserDetails(@RequestBody UserRequestDto userRequestDto,
+                                                     HttpServletResponse response) {
         // 여기서 토큰은 유저의 카카오 Token, DB에 저장하기 위해 다시 값을 받음
         String email = userRequestDto.getEmail();
         String name = userRequestDto.getName();
@@ -95,12 +100,20 @@ public class KakaoLoginController {
 
         kakaoTokenService.saveOrUpdateKakaoToken(accessToken, refreshToken, mobiUser);
 
-        String jwtaccessToken = userService.generateJwtAccessToken(mobiUser);
-
+        String jwtAccessToken = userService.generateJwtAccessToken(mobiUser);
+        Cookie jwtRefreshToken = userService.generateJwtRefreshToken(mobiUser);
+        response.addCookie(jwtRefreshToken);
         HttpHeaders headers = new HttpHeaders();
-        headers.add(ACCESS.getType(), BEARER.getType() + jwtaccessToken);  // 헤더에 JWT 토큰 추가
+        headers.add(ACCESS.getType(), BEARER.getType() + jwtAccessToken);  // 헤더에 JWT 토큰 추가
+        // 응답 바디에 JSON 형태의 데이터를 포함
+        String responseBody = String.format(
+                "{ \"email\": \"%s\", \"name\": \"%s\", \"phoneNumber\": \"%s\", \"jwtAccessToken\": \"%s\" }",
+                email, name, phoneNumber, jwtAccessToken
+        );
 
-        return ResponseEntity.ok().headers(headers).build();
+        headers.add(HttpHeaders.SET_COOKIE, jwtRefreshToken.toString());
+
+        return ResponseEntity.ok().headers(headers).body(responseBody);
     }
 
     public ResponseEntity<String> sendUserDetailRequest(String email, String picture) {

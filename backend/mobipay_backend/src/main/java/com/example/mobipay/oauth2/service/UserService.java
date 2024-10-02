@@ -42,8 +42,8 @@ public class UserService {
                 mobiUser.getId(),
                 mobiUser.getEmail(),
                 mobiUser.getName(),
-                mobiUser.getPicture(),
-                mobiUser.getPhoneNumber()
+                mobiUser.getPhoneNumber(),
+                mobiUser.getPicture()
         );
     }
 
