@@ -20,7 +20,7 @@ data class Vehicle(
     val created: String,
     val autoPayStatus: Boolean,
     val ownerId: Int,
-    val imageResId: Int
+    val carModel: String
 )
 
 class VehicleManagementViewModel(
@@ -63,7 +63,7 @@ class VehicleManagementViewModel(
                                 created = apiVehicle.created,
                                 autoPayStatus = apiVehicle.autoPayStatus,
                                 ownerId = apiVehicle.ownerId,
-                                imageResId = R.drawable.a3 // 임시 자동차 사진(나중에 사용자의 차사진으로 대체해야함)
+                                carModel = apiVehicle.carModel
                             )
                         }
                     }
@@ -77,13 +77,16 @@ class VehicleManagementViewModel(
         }
     }
 
-    fun registerVehicle(number: String) {
+    fun registerVehicle(number: String, carModel: String) {
         viewModelScope.launch {
             _registrationStatus.value = RegistrationStatus.Loading
             try {
-                val registrationRequest = VehicleRegistrationRequest(number)
+                val registrationRequest = VehicleRegistrationRequest(number, carModel)
+                Log.d(registrationRequest.toString(), "차량 등록 요청")
                 val response = vehicleService.registerVehicle(registrationRequest)
+                Log.d(response.toString(), "차량 등록 요청??????")
                 if (response.isSuccessful) {
+                    Log.d(response.toString(), "차량 등록 요청 성공!!!!!!!!!!!!!!!!!!!")
                     val registeredVehicle = response.body()
                     registeredVehicle?.let {
                         val newVehicle = Vehicle(
@@ -92,7 +95,7 @@ class VehicleManagementViewModel(
                             created = it.created,
                             autoPayStatus = it.autoPayStatus,
                             ownerId = it.ownerId,
-                            imageResId = R.drawable.a3
+                            carModel = it.carModel
                         )
                         _vehicles.value = _vehicles.value + newVehicle
                         _apiVehicles.value += VehicleItem(
@@ -100,7 +103,8 @@ class VehicleManagementViewModel(
                             number = it.number,
                             created = it.created,
                             autoPayStatus = it.autoPayStatus,
-                            ownerId = it.ownerId
+                            ownerId = it.ownerId,
+                            carModel = it.carModel
                         )
                         _registrationStatus.value = RegistrationStatus.Success
                         Log.d(TAG, "차량 등록 성공")

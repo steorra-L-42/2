@@ -30,7 +30,6 @@ import com.example.mobipay.global.authentication.dto.AccountRec;
 import com.example.mobipay.global.authentication.dto.CardRec;
 import com.example.mobipay.oauth2.dto.CustomOAuth2User;
 import com.example.mobipay.util.SecurityTestUtil;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -61,8 +60,6 @@ public class ReceiptTest {
 
     @Autowired
     private MockMvc mockMvc;
-    @Autowired
-    private ObjectMapper objectMapper;
     @Autowired
     private JdbcTemplate jdbcTemplate;
     @Autowired
@@ -122,6 +119,8 @@ public class ReceiptTest {
         String cardNo = "1234567890123456";
         Long paymentBalance = 50000L;
         Long transactionUniqueNo = 1L;
+        String transactionDate = "20241002";
+        String transactionTime = "160200";
 
         MobiUser mobiUser = MobiUser.of("bbam@gmail.com", "mobiuser", "010-1111-1111", "mobiUserPicture");
         mobiUserRepository.save(mobiUser);
@@ -165,6 +164,9 @@ public class ReceiptTest {
         when(cardTransactionResponseMock.getRec()).thenReturn(recResponseMock);
         // 3. transactionUniqueNo 반환 값 설정
         when(recResponseMock.getTransactionUniqueNo()).thenReturn(transactionUniqueNo);
+        when(recResponseMock.getTransactionDate()).thenReturn(transactionDate);
+        when(recResponseMock.getTransactionTime()).thenReturn(transactionTime);
+        when(recResponseMock.getPaymentBalance()).thenReturn(paymentBalance);
         // 4. Mocking ResponseEntity
         ResponseEntity<CardTransactionResponse> responseMock = mock(ResponseEntity.class);
         when(responseMock.getBody()).thenReturn(cardTransactionResponseMock);
@@ -183,10 +185,16 @@ public class ReceiptTest {
 
         result.andExpect(status().isOk())
                 .andExpect(jsonPath("$.transactionUniqueNo").value(transactionUniqueNo))
+                .andExpect(jsonPath("$.transactionDate").value(transactionDate))
+                .andExpect(jsonPath("$.transactionTime").value(transactionTime))
                 .andExpect(jsonPath("$.paymentBalance").value(paymentBalance))
                 .andExpect(jsonPath("$.info").value("info"))
                 .andExpect(jsonPath("$.merchantName").value(merchant.getMerchantName()))
-                .andExpect(jsonPath("$.cardNo").value(cardNo));
+                .andExpect(jsonPath("$.cardNo").value(cardNo))
+                .andExpect(jsonPath("$.cardName").value(cardProduct.getCardName()))
+                .andExpect(jsonPath("$.merchantId").value(merchant.getId()))
+                .andExpect(jsonPath("$.lat").value(merchant.getLat()))
+                .andExpect(jsonPath("$.lng").value(merchant.getLng()));
     }
 
     @ParameterizedTest(name = "{index}: {0}")

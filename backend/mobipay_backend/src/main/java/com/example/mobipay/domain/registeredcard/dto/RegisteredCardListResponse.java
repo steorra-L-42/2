@@ -10,6 +10,7 @@ import lombok.Getter;
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class RegisteredCardListResponse {
+    private final List<RegisteredCardListResponse> items;
     private Long mobiUserId;
     private Long ownedCardId;
     private Integer oneDayLimit;
@@ -17,15 +18,13 @@ public class RegisteredCardListResponse {
     private String cardName;
     private Boolean autoPayStatus;
 
-    private final List<RegisteredCardListResponse> items;
-
     public static RegisteredCardListResponse of(RegisteredCard registeredCard) {
         return RegisteredCardListResponse.builder()
                 .mobiUserId(registeredCard.getMobiUserId())
                 .ownedCardId(registeredCard.getOwnedCardId())
                 .oneDayLimit(registeredCard.getOneDayLimit())
                 .oneTimeLimit(registeredCard.getOneTimeLimit())
-                .cardName(registeredCard.getOwnedCard().getCardProduct().getCareName())
+                .cardName(registeredCard.getOwnedCard().getCardProduct().getCardName())
                 .autoPayStatus(registeredCard.getAutoPayStatus())
                 .build();
     }
