@@ -9,6 +9,7 @@ import androidx.car.app.model.Template
 import androidx.car.app.navigation.model.NavigationTemplate
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import com.kimnlee.common.utils.AAFocusManager
 import com.mapbox.androidauto.MapboxCarContext
 import com.mapbox.androidauto.action.MapboxMapActionStrip
 import com.mapbox.androidauto.internal.logAndroidAuto
@@ -24,7 +25,6 @@ import com.mapbox.androidauto.preview.CarRouteLineRenderer
 import com.mapbox.androidauto.screenmanager.MapboxScreen
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
-import com.mapbox.androidauto.R
 import com.mapbox.androidauto.screenmanager.MapboxScreenManager
 
 internal class ActiveGuidanceScreen constructor(
@@ -50,6 +50,7 @@ internal class ActiveGuidanceScreen constructor(
         lifecycle.addObserver(object : DefaultLifecycleObserver {
             override fun onResume(owner: LifecycleOwner) {
                 logAndroidAuto("ActiveGuidanceScreen onResume")
+                AAFocusManager.screenResumed()
                 mapboxCarContext.mapboxCarMap.registerObserver(carLocationRenderer)
                 mapboxCarContext.mapboxCarMap.registerObserver(carRoadLabelRenderer)
                 mapboxCarContext.mapboxCarMap.registerObserver(carSpeedLimitRenderer)
@@ -63,6 +64,7 @@ internal class ActiveGuidanceScreen constructor(
 
             override fun onPause(owner: LifecycleOwner) {
                 logAndroidAuto("ActiveGuidanceScreen onPause")
+                AAFocusManager.screenPaused()
                 mapboxCarContext.mapboxCarMap.unregisterObserver(carRoadLabelRenderer)
                 mapboxCarContext.mapboxCarMap.unregisterObserver(carLocationRenderer)
                 mapboxCarContext.mapboxCarMap.unregisterObserver(carSpeedLimitRenderer)
