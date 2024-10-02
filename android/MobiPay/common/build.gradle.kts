@@ -117,6 +117,11 @@ dependencies {
     // Naver Maps
     api(libs.map.sdk)
 
+    // jwt토큰 파싱해서 유저정보 가져오는 라이브러리들
+    implementation(libs.jjwt.api)
+    implementation(libs.jjwt.impl)
+    implementation(libs.jjwt.jackson)
+
     implementation(libs.guava)
     testImplementation(libs.junit)
     implementation(libs.androidx.datastore.preferences)
