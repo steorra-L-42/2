@@ -12,6 +12,7 @@ import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys
 import com.kakao.sdk.auth.model.OAuthToken
 import com.kakao.sdk.user.UserApiClient
+import com.kimnlee.common.BuildConfig
 import com.kimnlee.common.auth.api.AuthService
 import com.kimnlee.common.auth.model.LoginRequest
 import com.kimnlee.common.auth.model.RegistrationRequest
@@ -35,6 +36,7 @@ class AuthManager(private val context: Context) {
 
     private val IS_LOGGED_IN = booleanPreferencesKey("is_logged_in")
     private val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
+    private val secretKey = BuildConfig.SECRET_KEY
 
     private val encryptedSharedPreferences = EncryptedSharedPreferences.create(
         "secret_shared_prefs",
@@ -112,6 +114,10 @@ class AuthManager(private val context: Context) {
                 continuation.resume(Result.success(Unit))
             }
         }
+    }
+
+    fun getSecretKey(): String {
+        return secretKey
     }
 
     companion object {
