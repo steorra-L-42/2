@@ -19,7 +19,6 @@ import com.example.mobipay.oauth2.dto.CustomOAuth2User;
 import com.example.mobipay.util.SecurityTestUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.stream.Stream;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -46,6 +45,8 @@ import org.springframework.web.filter.CharacterEncodingFilter;
 public class CarAutoPayChangeTest {
 
     private static final String CREATED_CAR_NUMBER = "TEST_CAR";
+    private static final String CREATED_CAR_MODEL = "TEST_MODEL";
+
     @Autowired
     private MockMvc mockMvc;
     @Autowired
@@ -105,7 +106,8 @@ public class CarAutoPayChangeTest {
     void 올바른_자동결제_변경_테스트(String testName, Boolean autoPayStatus) throws Exception {
         SecurityTestUtil.setUpMockUser(customOAuth2User, testUser.getId());
         //when
-        ResultActions carRegisterResult = CarTestUtil.performCarRegistration(mockMvc, objectMapper, CREATED_CAR_NUMBER);
+        ResultActions carRegisterResult = CarTestUtil.performCarRegistration(mockMvc, objectMapper, CREATED_CAR_NUMBER,
+                CREATED_CAR_MODEL);
         carRegisterResult.andExpect(status().isOk());
 
         Car createdCar = carRepository.findByNumber(CREATED_CAR_NUMBER).get();
@@ -124,7 +126,8 @@ public class CarAutoPayChangeTest {
     void 존재하지_않는_유저_자동결제_변경_테스트() throws Exception {
         SecurityTestUtil.setUpMockUser(customOAuth2User, testUser.getId());
         //when
-        ResultActions carRegisterResult = CarTestUtil.performCarRegistration(mockMvc, objectMapper, CREATED_CAR_NUMBER);
+        ResultActions carRegisterResult = CarTestUtil.performCarRegistration(mockMvc, objectMapper, CREATED_CAR_NUMBER,
+                CREATED_CAR_MODEL);
         carRegisterResult.andExpect(status().isOk());
 
         Car createdCar = carRepository.findByNumber(CREATED_CAR_NUMBER).get();
@@ -141,7 +144,8 @@ public class CarAutoPayChangeTest {
     void 존재하지_않는_자동차_자동결제_변경_테스트() throws Exception {
         SecurityTestUtil.setUpMockUser(customOAuth2User, testUser.getId());
         //when
-        ResultActions carRegisterResult = CarTestUtil.performCarRegistration(mockMvc, objectMapper, CREATED_CAR_NUMBER);
+        ResultActions carRegisterResult = CarTestUtil.performCarRegistration(mockMvc, objectMapper, CREATED_CAR_NUMBER,
+                CREATED_CAR_MODEL);
         carRegisterResult.andExpect(status().isOk());
 
         ResultActions changeAutoPayStatusResult = performChangeAutoPayStatus(123456789L, true);
@@ -155,7 +159,8 @@ public class CarAutoPayChangeTest {
     void 차주가_아닌경우_자동결제_변경_테스트() throws Exception {
         SecurityTestUtil.setUpMockUser(customOAuth2User, testUser.getId());
         //when
-        ResultActions carRegisterResult = CarTestUtil.performCarRegistration(mockMvc, objectMapper, CREATED_CAR_NUMBER);
+        ResultActions carRegisterResult = CarTestUtil.performCarRegistration(mockMvc, objectMapper, CREATED_CAR_NUMBER,
+                CREATED_CAR_MODEL);
         carRegisterResult.andExpect(status().isOk());
 
         // 기존 차주와 다른 User를 만들고 customOAuth2User의 Id를 임의로 바꿔준다.

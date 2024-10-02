@@ -26,7 +26,7 @@ public class CardProduct {
     private String cardUniqueNo;
 
     @Column(name = "card_name", nullable = false, length = 20)
-    private String careName;
+    private String cardName;
 
     @Column(name = "baseline_performance", nullable = false)
     private Long baselinePerformance;

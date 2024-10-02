@@ -26,6 +26,7 @@ import com.kimnlee.memberinvitation.navigation.memberInvitationNavGraph
 import com.kimnlee.memberinvitation.presentation.viewmodel.MemberInvitationViewModel
 import com.kimnlee.mobipay.presentation.screen.HomeScreen
 import com.kimnlee.mobipay.presentation.screen.ShowMoreScreen
+import com.kimnlee.mobipay.presentation.viewmodel.ShowMoreViewModel
 import com.kimnlee.notification.navigation.notificationNavGraph
 import com.kimnlee.payment.navigation.paymentNavGraph
 import com.kimnlee.vehiclemanagement.navigation.vehicleManagementNavGraph
@@ -44,6 +45,7 @@ fun AppNavGraph(
     val biometricViewModel = BiometricViewModel(application)
     val cardManagementViewModel = CardManagementViewModel(authManager, apiClient)
     val vehicleManagementViewModel = VehicleManagementViewModel(apiClient)
+    val showMoreViewModel = ShowMoreViewModel(authManager)
     val isLoggedIn by loginViewModel.isLoggedIn.collectAsState()
 
     LaunchedEffect(loginViewModel) {
@@ -86,8 +88,8 @@ fun AppNavGraph(
         ) {
             BottomNavigation(navController) {
                 ShowMoreScreen(
-                    viewModel = loginViewModel,
-                    memberInvitationViewModel = memberInvitationViewModel,
+                    loginViewModel = loginViewModel,
+                    showMoreViewModel = showMoreViewModel,
                     navController = navController
                 )
             }
@@ -106,9 +108,10 @@ fun AppNavGraph(
 
         authNavGraph(navController, authManager, loginViewModel)
         paymentNavGraph(navController)
-        cardManagementNavGraph(navController, authManager, cardManagementViewModel)
+        cardManagementNavGraph(navController, authManager, cardManagementViewModel, apiClient)
         vehicleManagementNavGraph(navController, context, apiClient, vehicleManagementViewModel)
         memberInvitationNavGraph(navController, context, memberInvitationViewModel)
+
         notificationNavGraph(navController)
     }
 }

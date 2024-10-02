@@ -13,6 +13,7 @@ public class CarRegisterResponse {
     private LocalDateTime created;
     private Boolean autoPayStatus;
     private Long ownerId;
+    private String carModel;
 
     public static CarRegisterResponse of(Car car) {
         return CarRegisterResponse.builder()
@@ -21,6 +22,7 @@ public class CarRegisterResponse {
                 .created(car.getCreated())
                 .autoPayStatus(car.getAutoPayStatus())
                 .ownerId(car.getOwner().getId())
+                .carModel(car.getCarModel())
                 .build();
     }
 }

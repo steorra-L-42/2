@@ -48,7 +48,6 @@ dependencies {
 
     implementation(project(":common"))
 
-    // plus JB - 24.09.10~
     implementation(libs.androidx.ui.tooling.preview.android)
 
     testImplementation(libs.junit)

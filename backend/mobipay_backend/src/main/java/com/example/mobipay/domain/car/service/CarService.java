@@ -47,7 +47,7 @@ public class CarService {
         MobiUser mobiUser = findMobiUser(oauth2User.getMobiUserId());
 
         // 차량 & 차량 그룹 생성 및 연관관계 설정
-        Car car = Car.from(request.getNumber());
+        Car car = Car.of(request.getNumber(), request.getCarModel());
         car.setOwner(mobiUser);
         carRepository.save(car);
 
@@ -172,7 +172,7 @@ public class CarService {
 
         boolean notMember = car.getCarGroups().stream()
                 .noneMatch(carGroup -> carGroup.getMobiUser().equals(mobiUser));
-        if(notMember) {
+        if (notMember) {
             throw new NotMemberException();
         }
 

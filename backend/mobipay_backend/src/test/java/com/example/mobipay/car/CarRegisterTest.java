@@ -16,7 +16,6 @@ import com.example.mobipay.oauth2.dto.CustomOAuth2User;
 import com.example.mobipay.util.SecurityTestUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.stream.Stream;
-import org.aspectj.lang.annotation.After;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -60,20 +59,32 @@ public class CarRegisterTest {
 
     private static Stream<Arguments> validParameter() {
         return Stream.of(
-                Arguments.of("차량 등록 테스트", "09너3649"),
-                Arguments.of("차량 등록 테스트", "77칠7777")
+                Arguments.of("차량 등록 테스트", "09너3649", "빨간 마티즈"),
+                Arguments.of("차량 등록 테스트", "77칠7777", "황금 마티즈")
         );
     }
 
     private static Stream<Arguments> ConflictParameter() {
         return Stream.of(
-                Arguments.of("중복된 차량 등록 테스트", "testCar")
+                Arguments.of("중복된 차량 등록 테스트", "testCar", "carModel")
         );
     }
 
     private static Stream<Arguments> NotFoundParameter() {
         return Stream.of(
-                Arguments.of("존재하지 않는 유저 차량 등록 테스트", "12삼4567")
+                Arguments.of("존재하지 않는 유저 차량 등록 테스트", "12삼4567", "carModel")
+        );
+    }
+
+    private static Stream<Arguments> invalidRequestParameter() {
+        return Stream.of(
+                Arguments.of("[null] carNumber", null, "빨간 마티즈"),
+                Arguments.of("[empty] carNumber", "", "빨간 마티즈"),
+                Arguments.of("[blank] carNumber", "  ", "빨간 마티즈"),
+
+                Arguments.of("[null] carModel", "77칠7777", null),
+                Arguments.of("[empty] carModel", "77칠7777", ""),
+                Arguments.of("[blank] carModel", "77칠7777", " ")
         );
     }
 
@@ -99,7 +110,7 @@ public class CarRegisterTest {
         testUser = MobiUser.of("email", "name", "phoneNumber", "picture");
         mobiUserRepository.save(testUser);
 
-        Car testCar = Car.from("testCar");
+        Car testCar = Car.of("testCar", "carModel");
         testCar.setOwner(testUser);
         carRepository.save(testCar);
     }
@@ -114,10 +125,10 @@ public class CarRegisterTest {
     @ParameterizedTest(name = "{index}: {0}")
     @MethodSource("validParameter")
     @DisplayName("[OK] car register : 자동차 등록")
-    void 올바른_차량_등록_테스트(String testName, String carNumber) throws Exception {
+    void 올바른_차량_등록_테스트(String testName, String carNumber, String carModel) throws Exception {
         SecurityTestUtil.setUpMockUser(customOAuth2User, testUser.getId());
         // when
-        ResultActions result = CarTestUtil.performCarRegistration(mockMvc, objectMapper, carNumber);
+        ResultActions result = CarTestUtil.performCarRegistration(mockMvc, objectMapper, carNumber, carModel);
         Car createdCar = carRepository.findByNumber(carNumber).get();
         // then
         result.andExpect(status().isOk())
@@ -130,10 +141,10 @@ public class CarRegisterTest {
     @ParameterizedTest(name = "{index}: {0}")
     @MethodSource("ConflictParameter")
     @DisplayName("[Conflict] car register : 자동차 등록")
-    void 중복된_차량_등록_테스트(String testName, String carNumber) throws Exception {
+    void 중복된_차량_등록_테스트(String testName, String carNumber, String carModel) throws Exception {
         SecurityTestUtil.setUpMockUser(customOAuth2User, testUser.getId());
         // when
-        ResultActions result = CarTestUtil.performCarRegistration(mockMvc, objectMapper, carNumber);
+        ResultActions result = CarTestUtil.performCarRegistration(mockMvc, objectMapper, carNumber, carModel);
         // then
         result.andExpect(status().isConflict())
                 .andExpect(jsonPath("$.message").value(DUPLICATED_CAR_NUMBER.getMessage()));
@@ -142,12 +153,23 @@ public class CarRegisterTest {
     @ParameterizedTest(name = "{index}: {0}")
     @MethodSource("NotFoundParameter")
     @DisplayName("[NotFound] car register : 자동차 등록")
-    void 존재하지_않는_유저_차량_등록_테스트(String testName, String carNumber) throws Exception {
+    void 존재하지_않는_유저_차량_등록_테스트(String testName, String carNumber, String carModel) throws Exception {
         SecurityTestUtil.setUpMockUser(customOAuth2User, 123456789L);
         // when
-        ResultActions result = CarTestUtil.performCarRegistration(mockMvc, objectMapper, carNumber);
+        ResultActions result = CarTestUtil.performCarRegistration(mockMvc, objectMapper, carNumber, carModel);
         // then
         result.andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value(MOBI_USER_NOT_FOUND.getMessage()));
+    }
+
+    @ParameterizedTest(name = "{index}: {0}")
+    @MethodSource("invalidRequestParameter")
+    @DisplayName("[BadRequest] car register : 자동차 등록(잘못된 Request Parameter)")
+    void 올바르지_않은_요청_파라미터_차량_등록_테스트(String testName, String carNumber, String carModel) throws Exception {
+        SecurityTestUtil.setUpMockUser(customOAuth2User, testUser.getId());
+        // when
+        ResultActions result = CarTestUtil.performCarRegistration(mockMvc, objectMapper, carNumber, carModel);
+        // then
+        result.andExpect(status().isBadRequest());
     }
 }
