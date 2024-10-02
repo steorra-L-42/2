@@ -13,7 +13,6 @@ import com.example.mobipay.domain.mobiuser.entity.MobiUser;
 import com.example.mobipay.domain.mobiuser.repository.MobiUserRepository;
 import com.example.mobipay.oauth2.dto.CustomOAuth2User;
 import com.example.mobipay.util.SecurityTestUtil;
-import org.aspectj.lang.annotation.After;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -38,6 +37,7 @@ public class CarListTest {
 
     private static final Integer TEST_CAR_COUNT = 5;
     private static final String TEST_CAR_PREFIX = "testCar";
+    private static final String TEST_CAR_MODEL = "carModel";
 
     @Autowired
     private MockMvc mockMvc;
@@ -101,7 +101,8 @@ public class CarListTest {
             result.andExpect(jsonPath("$.items[" + i + "].carId").value(carIds[i]))
                     .andExpect(jsonPath("$.items[" + i + "].number").value(TEST_CAR_PREFIX + (i + 1)))
                     .andExpect(jsonPath("$.items[" + i + "].autoPayStatus").value(false))
-                    .andExpect(jsonPath("$.items[" + i + "].ownerId").value(ownerId));
+                    .andExpect(jsonPath("$.items[" + i + "].ownerId").value(ownerId))
+                    .andExpect(jsonPath("$.items[" + i + "].carModel").value(TEST_CAR_MODEL + (i + 1)));
         }
     }
 
@@ -132,7 +133,7 @@ public class CarListTest {
         carIds = new Long[TEST_CAR_COUNT];
 
         for (int i = 0; i < TEST_CAR_COUNT; i++) {
-            Car testCar = Car.from(TEST_CAR_PREFIX + (i + 1));
+            Car testCar = Car.of(TEST_CAR_PREFIX + (i + 1), TEST_CAR_MODEL + (i + 1));
             testCar.setOwner(testUser);
             carRepository.save(testCar);
             carIds[i] = testCar.getId();

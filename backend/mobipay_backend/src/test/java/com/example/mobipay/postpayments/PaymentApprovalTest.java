@@ -218,7 +218,7 @@ public class PaymentApprovalTest {
 
         mobiUserRepository.save(mobiUser);
 
-        Car car = Car.from("11가1111");
+        Car car = Car.of("123가4567", "carModel");
         car.setOwner(mobiUser);
         carRepository.save(car);
 
@@ -344,7 +344,7 @@ public class PaymentApprovalTest {
         MobiUser mobiUser = MobiUser.of("bbam@gmail.com", "mobiuser", "010-1111-1111", "mobiUserPicture");
         mobiUserRepository.save(mobiUser);
 
-        Car car = Car.from("11가1111");
+        Car car = Car.of("123가4567", "carModel");
         car.setOwner(mobiUser);
         carRepository.save(car);
 
@@ -385,7 +385,7 @@ public class PaymentApprovalTest {
         MobiUser mobiUser = MobiUser.of("bbam@gmail.com", "mobiuser", "010-1111-1111", "mobiUserPicture");
         mobiUserRepository.save(mobiUser);
 
-        Car car = Car.from("11가1111");
+        Car car = Car.of("123가4567", "carModel");
         car.setOwner(mobiUser);
         carRepository.save(car);
 
@@ -431,7 +431,7 @@ public class PaymentApprovalTest {
         MobiUser mobiUser = MobiUser.of("bbam@gmail.com", "mobiuser", "010-1111-1111", "mobiUserPicture");
         mobiUserRepository.save(mobiUser);
 
-        Car car = Car.from("11가1111");
+        Car car = Car.of("123가4567", "carModel");
         car.setOwner(mobiUser);
         carRepository.save(car);
 
@@ -476,7 +476,7 @@ public class PaymentApprovalTest {
         MobiUser mobiUser = MobiUser.of("bbam@gmail.com", "mobiuser", "010-1111-1111", "mobiUserPicture");
         mobiUserRepository.save(mobiUser);
 
-        Car car = Car.from("11가1111");
+        Car car = Car.of("123가4567", "carModel");
         car.setOwner(mobiUser);
         carRepository.save(car);
 
@@ -548,7 +548,7 @@ public class PaymentApprovalTest {
                 "otherMobiUserPicture");
         mobiUserRepository.save(otherMobiUser);
 
-        Car car = Car.from("11가1111");
+        Car car = Car.of("123가4567", "carModel");
         car.setOwner(mobiUser);
         carRepository.save(car);
 
@@ -629,7 +629,7 @@ public class PaymentApprovalTest {
                 "otherMobiUserPicture");
         mobiUserRepository.save(otherMobiUser);
 
-        Car car = Car.from("11가1111");
+        Car car = Car.of("123가4567", "carModel");
         car.setOwner(mobiUser);
         carRepository.save(car);
 
@@ -716,7 +716,7 @@ public class PaymentApprovalTest {
 
         mobiUserRepository.save(mobiUser);
 
-        Car car = Car.from("11가1111");
+        Car car = Car.of("123가4567", "carModel");
         car.setOwner(mobiUser);
         carRepository.save(car);
 
@@ -825,7 +825,7 @@ public class PaymentApprovalTest {
 
         mobiUserRepository.save(mobiUser);
 
-        Car car = Car.from("11가1111");
+        Car car = Car.of("123가4567", "carModel");
         car.setOwner(mobiUser);
         carRepository.save(car);
 

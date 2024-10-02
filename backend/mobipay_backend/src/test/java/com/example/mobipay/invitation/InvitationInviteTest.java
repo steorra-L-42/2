@@ -103,7 +103,7 @@ public class InvitationInviteTest {
             MobiUser owner = mobiUserRepository.save(MobiUser.of(
                     "owner@gmail.com", "owner", "010-1111-1111", "ownerPicture"));
 
-            Car car = Car.from("123가4567");
+            Car car = Car.of("123가4567", "carModel");
             car.setOwner(owner);
             car = carRepository.save(car);
 
@@ -133,7 +133,7 @@ public class InvitationInviteTest {
             MobiUser owner = mobiUserRepository.save(MobiUser.of(
                     "owner@gmail.com", "owner", "010-1111-1111", "ownerPicture"));
 
-            Car car = Car.from("123가4567");
+            Car car = Car.of("123가4567", "carModel");
             car.setOwner(owner);
             car = carRepository.save(car);
 
@@ -163,7 +163,7 @@ public class InvitationInviteTest {
             MobiUser owner = mobiUserRepository.save(MobiUser.of(
                     "owner@gmail.com", "owner", "010-1111-1111", "ownerPicture"));
 
-            Car car = Car.from("123가4567");
+            Car car = Car.of("123가4567", "carModel");
             car.setOwner(owner);
             car = carRepository.save(car);
 
@@ -194,7 +194,7 @@ public class InvitationInviteTest {
             MobiUser owner = mobiUserRepository.save(MobiUser.of(
                     "owner@gmail.com", "owner", "010-1111-1111", "ownerPicture"));
 
-            Car car = Car.from("123가4567");
+            Car car = Car.of("123가4567", "carModel");
             car.setOwner(owner);
             car = carRepository.save(car);
 
@@ -224,7 +224,7 @@ public class InvitationInviteTest {
             MobiUser owner = mobiUserRepository.save(MobiUser.of(
                     "owner@gmail.com", "owner", "010-1111-1111", "ownerPicture"));
 
-            Car car = Car.from("123가4567");
+            Car car = Car.of("123가4567", "carModel");
             car.setOwner(owner);
             car = carRepository.save(car);
 
@@ -253,7 +253,7 @@ public class InvitationInviteTest {
             // given
             MobiUser owner = mobiUserRepository.save(MobiUser.of(
                     "owner@gmail.com", "owner", "010-1111-1111", "ownerPicture"));
-            Car car = Car.from("123가4567");
+            Car car = Car.of("123가4567", "carModel");
             car.setOwner(owner);
             car = carRepository.save(car);
 
@@ -290,7 +290,7 @@ public class InvitationInviteTest {
             MobiUser alreadyInvited = mobiUserRepository.save(MobiUser.of(
                     "alreadyInvited@gmail.com", "alreadyInvited", "010-2222-2222", "alreadyInvitedPicture"));
 
-            Car car = Car.from("123가4567");
+            Car car = Car.of("123가4567", "carModel");
             car.setOwner(owner);
             car = carRepository.save(car);
 
@@ -323,7 +323,7 @@ public class InvitationInviteTest {
             MobiUser owner = mobiUserRepository.save(MobiUser.of(
                     "owner@gmail.com", "owner", "010-1111-1111", "ownerPicture"));
 
-            Car car = Car.from("123가4567");
+            Car car = Car.of("123가4567", "carModel");
             car.setOwner(owner);
             car = carRepository.save(car);
 
@@ -363,7 +363,7 @@ public class InvitationInviteTest {
             MobiUser notOwner = mobiUserRepository.save(MobiUser.of(
                     "notOnwer", "notOwner", "010-3333-3333", "notOwnerPicture"));
 
-            Car car = Car.from("123가4567");
+            Car car = Car.of("123가4567", "carModel");
             car.setOwner(owner);
             car = carRepository.save(car);
 
@@ -397,7 +397,7 @@ public class InvitationInviteTest {
             MobiUser invitee = mobiUserRepository.save(MobiUser.of(
                     "invitee@gmail.com", "invitee", "010-2222-2222", "inviteePicture"));
 
-            Car car = Car.from("123가4567");
+            Car car = Car.of("123가4567", "carModel");
             car.setOwner(owner);
             car = carRepository.save(car);
 
@@ -463,7 +463,7 @@ public class InvitationInviteTest {
             MobiUser owner = mobiUserRepository.save(MobiUser.of(
                     "owner@gmail.com", "owner", "010-1111-1111", "ownerPicture"));
 
-            Car car = Car.from("123가4567");
+            Car car = Car.of("123가4567", "carModel");
             car.setOwner(owner);
             car = carRepository.save(car);
 
@@ -513,7 +513,7 @@ public class InvitationInviteTest {
             owner = mobiUserRepository.save(owner);
             invitee = mobiUserRepository.save(invitee);
 
-            Car car = Car.from("123가4567");
+            Car car = Car.of("123가4567", "carModel");
             car.setOwner(owner);
             car = carRepository.save(car);
 
@@ -560,7 +560,7 @@ public class InvitationInviteTest {
             owner = mobiUserRepository.save(owner);
             invitee = mobiUserRepository.save(invitee);
 
-            Car car = Car.from("123가4567");
+            Car car = Car.of("123가4567", "carModel");
             car.setOwner(owner);
             car = carRepository.save(car);
 
