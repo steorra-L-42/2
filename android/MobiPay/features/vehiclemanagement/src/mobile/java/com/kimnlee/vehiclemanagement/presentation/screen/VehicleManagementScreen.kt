@@ -179,6 +179,7 @@ fun VehicleItem(vehicle: Vehicle, onClick: () -> Unit) {
         "XM3" -> R.drawable.xm3
         else -> R.drawable.ghibli
     }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()

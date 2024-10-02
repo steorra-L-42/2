@@ -60,9 +60,7 @@ fun VehicleRegistrationScreen(
     var isAnalyzing by remember { mutableStateOf(true) }
 
     val brands = listOf(
-        "아우디", "Mercedes-Benz", "KGM 모터스", "현대",
-        "BMW", "기아", "쉐보레", "제네시스",
-        "테슬라", "르노"
+        "현대", "제네시스", "기아", "쉐보레", "르노", "KGM 모터스", "Mercedes-Benz", "BMW", "아우디", "테슬라"
     )
     var selectedBrand by remember { mutableStateOf("") }
     var expandedBrand by remember { mutableStateOf(false) }
