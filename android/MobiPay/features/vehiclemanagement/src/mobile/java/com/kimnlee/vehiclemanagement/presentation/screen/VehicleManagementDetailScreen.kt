@@ -223,7 +223,6 @@ fun VehicleManagementDetailScreen(
                 }
             }
         }
-
         if (showBottomSheet) {
             MemberInvitationBottomSheet(
                 context = context,

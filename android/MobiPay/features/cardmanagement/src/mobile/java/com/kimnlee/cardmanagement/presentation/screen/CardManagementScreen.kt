@@ -1,23 +1,11 @@
 package com.kimnlee.cardmanagement.presentation.screen
 
-import Photos
-import RegistrationCard
-import android.util.Log
-import androidx.compose.animation.core.AnimationSpec
-import androidx.compose.animation.core.SpringSpec
-import androidx.compose.foundation.BorderStroke
+import RegisteredCard
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.FlingBehavior
-import androidx.compose.foundation.gestures.ScrollScope
-import androidx.compose.foundation.gestures.snapping.SnapFlingBehavior
-import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
@@ -34,7 +22,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
@@ -42,12 +29,10 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import coil.compose.rememberAsyncImagePainter
 import com.kimnlee.cardmanagement.R
 import com.kimnlee.cardmanagement.presentation.components.CardManagementBottomSheet
 import com.kimnlee.cardmanagement.presentation.viewmodel.CardManagementViewModel
-import com.kimnlee.cardmanagement.presentation.viewmodel.RegistrationCardUiState
-import com.kimnlee.cardmanagement.presentation.viewmodel.PhotoUiState
+import com.kimnlee.cardmanagement.presentation.viewmodel.RegistratedCardState
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -56,13 +41,11 @@ fun CardManagementScreen(
     onNavigateToDetail: () -> Unit,
     onNavigateToRegistration: () -> Unit,
     onNavigateToOwnedCards: () -> Unit,
-    viewModel: CardManagementViewModel = viewModel()
+    viewModel: CardManagementViewModel = viewModel(),
 ) {
     val scrollState = rememberScrollState()
-    val photoUiState by viewModel.photoUiState.collectAsState()
-    val listState = rememberLazyListState()
-    val registrationCardUiState by viewModel.registrationCardUiState.collectAsState()
-
+    val registeredCardState by viewModel.registratedCardState.collectAsState()
+    val registeredCards by viewModel.registeredCards.collectAsState()
     val showBottomSheet by viewModel.showBottomSheet.collectAsState()
 
     val scope = rememberCoroutineScope()
@@ -78,52 +61,31 @@ fun CardManagementScreen(
             text = "등록된 카드 확인",
             style = MaterialTheme.typography.headlineMedium,
         )
-
         Spacer(modifier = Modifier.padding(16.dp))
-        when (val state = registrationCardUiState) {
-            is RegistrationCardUiState.Loading -> {
+        when (val state = registeredCardState) {
+            is RegistratedCardState.Loading -> {
                 CircularProgressIndicator()
             }
-            is RegistrationCardUiState.Success -> {
-                if (state.cards.isEmpty()) {
+
+            is RegistratedCardState.Success -> {
+                if (registeredCards.isEmpty()) {
                     Text("등록된 카드가 없습니다.")
-                    AddCardButton { viewModel.openBottomSheet() }
                 } else {
                     LazyColumn(
                         verticalArrangement = Arrangement.spacedBy(16.dp),
                         modifier = Modifier.weight(1f)
                     ) {
-                        items(state.cards) { card ->
-                            CardItem(card, onNavigateToDetail, painterResource(id = R.drawable.bc_baro), "카드")
-                        }
-                        item {
-                            AddCardButton { viewModel.openBottomSheet() }
+                        items(registeredCards) { card ->
+                            CardItem(
+                                card,
+                                onNavigateToDetail,
+                                painterResource(id = R.drawable.bc_baro),
+                                "카드"
+                            )
                         }
                     }
-                    if (showBottomSheet) {
-                        CardManagementBottomSheet(
-                            sheetState = sheetState,
-                            scope = scope,
-                            viewModel = viewModel,
-                            onNavigateToRegistration = onNavigateToRegistration,
-                            onNavigateToOwnedCards = onNavigateToOwnedCards
-                        )
-                    }
-            }
                 }
-            is RegistrationCardUiState.Error -> {
-                Text(
-                    text = state.message,
-                    color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.padding(vertical = 16.dp)
-                )
-                Button(onClick = { viewModel.requestRegistrationCards() }) {
-                    Text("다시 시도")
-                }
-                Spacer(modifier = Modifier.padding(16.dp))
-                Button(onClick = { viewModel.openBottomSheet() }) {
-                    Text("추가하러 가기")
-                }
+                AddCardButton { viewModel.openBottomSheet() }
                 if (showBottomSheet) {
                     CardManagementBottomSheet(
                         sheetState = sheetState,
@@ -134,16 +96,27 @@ fun CardManagementScreen(
                     )
                 }
             }
+
+            is RegistratedCardState.Error -> {
+                Text(
+                    text = state.message,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(vertical = 16.dp)
+                )
+                Button(onClick = { viewModel.requestRegistrationCards() }) {
+                    Text("다시 시도")
+                }
+            }
         }
     }
 }
 
 @Composable
 fun CardItem(
-    card: RegistrationCard,
+    card: RegisteredCard,
     onNavigateToDetail: () -> Unit,
     painter: Painter,
-    contentDescription: String
+    contentDescription: String,
 ) {
     var imageWidth by remember { mutableStateOf(0) }
     Card(
@@ -167,41 +140,42 @@ fun CardItem(
                     },
                 contentScale = ContentScale.Crop
             )
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = card.cardName,
-                style = MaterialTheme.typography.headlineMedium,
-                color = Color.White
-            )
             Column(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
-                 Row{
-                    Text(text ="1일 한도" )
-                    Text(text ="${card.oneDayLimit}" )
-                }
-                Row{
-                    Text(text ="1회 한도" )
-                    Text(text =
-                        if (card.oneDayLimit != 0){ "${card.oneDayLimit}원" } else{"0원"}
-                    )
-                }
-                Row{
-                    Text(text ="자동 결제 여부" )
-                    if (card.autoPayStatus){
-                        Text(text = "O", style = MaterialTheme.typography.bodySmall)
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row {
+                        Text(text = "1일 한도")
+                        Text(text = "${card.oneDayLimit}")
+                    }
+                    Row {
+                        Text(text = "1회 한도")
+                        Text(
+                            text =
+                            if (card.oneDayLimit != 0) {
+                                "${card.oneDayLimit}원"
+                            } else {
+                                "0원"
+                            }
+                        )
+                    }
+                    Row {
+                        Text(text = "자동 결제 여부")
+                        if (card.autoPayStatus) {
+                            Text(text = "0", style = MaterialTheme.typography.bodySmall)
+                        }
                     }
                 }
             }
         }
     }
-}}
+}
 
 @Composable
 fun AddCardButton(openBottomSheet: () -> Unit) {
