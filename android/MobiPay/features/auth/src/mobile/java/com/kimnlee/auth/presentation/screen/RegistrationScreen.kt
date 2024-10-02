@@ -35,6 +35,7 @@ fun RegistrationScreen(
     var phoneNumberError by remember { mutableStateOf("") }
 
     val registrationResult by viewModel.registrationResult.collectAsState()
+    val registrationError by viewModel.registrationError.collectAsState()
 
     val focusRequesterLast = remember { FocusRequester() }
     val focusRequesterName = remember { FocusRequester() }
@@ -59,6 +60,10 @@ fun RegistrationScreen(
             false -> onRegistrationFailed()
             null -> {}
         }
+    }
+
+    LaunchedEffect(registrationError) {
+        phoneNumberError = registrationError ?: ""
     }
 
     Column(
@@ -102,6 +107,7 @@ fun RegistrationScreen(
                     val filtered = newValue.filter { it.isDigit() }
                     if (filtered.length <= 4) {
                         phoneMiddle = filtered
+                        phoneNumberError = "" // 입력 시 에러 메시지 초기화
                         if (filtered.length == 4) {
                             focusRequesterLast.requestFocus()
                         }
@@ -118,6 +124,7 @@ fun RegistrationScreen(
                     val filtered = newValue.filter { it.isDigit() }
                     if (filtered.length <= 4) {
                         phoneLast = filtered
+                        phoneNumberError = "" // 입력 시 에러 메시지 초기화
                         if (filtered.length == 4) {
                             focusRequesterName.requestFocus()
                         }
@@ -131,7 +138,7 @@ fun RegistrationScreen(
             )
         }
         if (phoneNumberError.isNotEmpty()) {
-            Text(phoneNumberError, color = Color.Red)
+            Text(phoneNumberError, color = Color.Red, modifier = Modifier.padding(top = 4.dp))
         }
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -159,7 +166,7 @@ fun RegistrationScreen(
         Button(
             onClick = {
                 if (!validatePhoneNumber()) {
-                    phoneNumberError = "올바른 전화번호 형식이 아닙니다."
+                    phoneNumberError = "올바른 전화번호 형식이 아니에요."
                 } else {
                     val fullPhoneNumber = "010$phoneMiddle$phoneLast"
                     viewModel.register(name, fullPhoneNumber)

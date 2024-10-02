@@ -38,6 +38,9 @@ class LoginViewModel(
     private val _registrationResult = MutableStateFlow<Boolean?>(null)
     val registrationResult: StateFlow<Boolean?> = _registrationResult
 
+    private val _registrationError = MutableStateFlow<String?>(null)
+    val registrationError: StateFlow<String?> = _registrationError
+
     private val _navigationEvent = MutableSharedFlow<String>()
     val navigationEvent = _navigationEvent.asSharedFlow()
 
@@ -152,6 +155,8 @@ class LoginViewModel(
                     Log.d(TAG, "About to call sendTokens from register")
                     sendTokens()
                     Log.d("KakaoLogin", "로그인 성공 AuthToken: ${authManager.getAuthToken()}, RefreshToken: ${authManager.getRefreshToken()}")
+                } else if (response.code() == 500) {
+                    _registrationError.value = "이미 가입된 전화번호에요."
                 }
             } catch (e: HttpException) {
                 _registrationResult.value = false
