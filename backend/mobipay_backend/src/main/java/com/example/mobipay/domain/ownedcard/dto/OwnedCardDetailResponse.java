@@ -1,12 +1,14 @@
 package com.example.mobipay.domain.ownedcard.dto;
 
 import com.example.mobipay.domain.ownedcard.entity.OwnedCard;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import java.time.LocalDateTime;
 import lombok.Builder;
 import lombok.Getter;
 
 @Getter
 @Builder
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class OwnedCardDetailResponse {
     private Long id;
     private String cardNo;
