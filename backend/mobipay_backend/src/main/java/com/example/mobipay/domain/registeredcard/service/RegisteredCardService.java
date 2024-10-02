@@ -29,7 +29,7 @@ public class RegisteredCardService {
     private final OwnedCardRepository ownedCardRepository;
 
     @Transactional
-    public RegisteredCardResponse registeredCard(RegisteredCardRequest request, CustomOAuth2User oauth2User) {
+    public RegisteredCardResponse registerCard(RegisteredCardRequest request, CustomOAuth2User oauth2User) {
 
         // 사용자 정보 조회
         MobiUser mobiUser = findMobiUser(oauth2User.getMobiUserId());
@@ -48,7 +48,7 @@ public class RegisteredCardService {
 
     }
 
-    public RegisteredCardListResponse registeredCardList(CustomOAuth2User oauth2User) {
+    public RegisteredCardListResponse registerCardList(CustomOAuth2User oauth2User) {
 
         // 사용자 정보 조회
         MobiUser mobiUser = findMobiUser(oauth2User.getMobiUserId());
@@ -60,8 +60,8 @@ public class RegisteredCardService {
     }
 
     @Transactional
-    public RegisteredCardAutoPayResponse registeredCardAutoPay(RegisteredCardAutoPayRequest request,
-                                                               CustomOAuth2User oauth2User) {
+    public RegisteredCardAutoPayResponse registerCardAutoPay(RegisteredCardAutoPayRequest request,
+                                                             CustomOAuth2User oauth2User) {
 
         MobiUser mobiUser = findMobiUser(oauth2User.getMobiUserId());
 
@@ -79,21 +79,22 @@ public class RegisteredCardService {
 
             registeredCardRepository.save(registeredCard);
 
-            return RegisteredCardAutoPayResponse.of(registeredCard);
+            return RegisteredCardAutoPayResponse.from(registeredCard);
         }
         // 2. autoPayStatus가 true일 경우 처리
 
         // 기존에 autoPayStatus가 true인 카드가 있는지 확인
-        RegisteredCard existingAutoPayCard = registeredCardRepository
-                .findByMobiUserIdAndAutoPayStatus(mobiUser.getId(), true)
-                .orElse(null);
+        List<RegisteredCard> existingAutoPayCard = registeredCardRepository
+                .findAllByMobiUserIdAndAutoPayStatus(mobiUser.getId(), true);
 
         // 기존 autoPayStatus가 true인카드가 있으면 autoPayStatus를 false로 변경
-        if (existingAutoPayCard != null) {
+        if (!existingAutoPayCard.isEmpty()) {
 
-            existingAutoPayCard.setAutoPayStatus(false);
+            for (RegisteredCard card : existingAutoPayCard) {
+                card.setAutoPayStatus(false);
+            }
 
-            registeredCardRepository.save(existingAutoPayCard);
+            registeredCardRepository.saveAll(existingAutoPayCard);
         }
 
         // 요청된 카드의 autoPayStatus를 true로 변경
@@ -102,7 +103,7 @@ public class RegisteredCardService {
         // 변경 사항 저장
         registeredCardRepository.save(registeredCard);
 
-        return RegisteredCardAutoPayResponse.of(registeredCard);
+        return RegisteredCardAutoPayResponse.from(registeredCard);
     }
 
     private MobiUser findMobiUser(Long mobiUserId) {

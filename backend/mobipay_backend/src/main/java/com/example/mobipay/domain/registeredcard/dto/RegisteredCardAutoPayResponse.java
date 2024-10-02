@@ -11,7 +11,7 @@ public class RegisteredCardAutoPayResponse {
     private Long ownedCardId;
     private Boolean autoPayStatus;
 
-    public static RegisteredCardAutoPayResponse of(RegisteredCard registeredCard) {
+    public static RegisteredCardAutoPayResponse from(RegisteredCard registeredCard) {
         return RegisteredCardAutoPayResponse.builder()
                 .mobiUserId(registeredCard.getMobiUserId())
                 .ownedCardId(registeredCard.getOwnedCardId())
