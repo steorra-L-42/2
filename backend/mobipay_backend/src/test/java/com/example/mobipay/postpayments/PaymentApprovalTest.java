@@ -50,9 +50,7 @@ import com.example.mobipay.oauth2.dto.CustomOAuth2User;
 import com.example.mobipay.util.RestClientUtil;
 import com.example.mobipay.util.SecurityTestUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.firebase.messaging.FirebaseMessagingException;
 import jakarta.transaction.Transactional;
-import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
@@ -63,7 +61,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -166,7 +163,7 @@ public class PaymentApprovalTest {
     }
 
     @BeforeEach
-    void setUp() throws IOException, FirebaseMessagingException {
+    void setUp() {
         jdbcTemplate.execute("SET FOREIGN_KEY_CHECKS = 0");
         carRepository.deleteAll();
         carGroupRepository.deleteAll();
@@ -177,8 +174,6 @@ public class PaymentApprovalTest {
         accountRepository.deleteAll();
         fcmTokenRepository.deleteAll();
         ssafyUserRepository.deleteAll();
-
-        Mockito.doReturn(true).when(fcmService).sendMessage(any());
     }
 
     @AfterEach

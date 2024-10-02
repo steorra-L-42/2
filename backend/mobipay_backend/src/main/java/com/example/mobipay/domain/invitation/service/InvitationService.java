@@ -8,10 +8,8 @@ import com.example.mobipay.domain.car.error.NotOwnerException;
 import com.example.mobipay.domain.car.repository.CarRepository;
 import com.example.mobipay.domain.cargroup.repository.CarGroupRepository;
 import com.example.mobipay.domain.fcmtoken.dto.FcmSendDto;
-import com.example.mobipay.domain.fcmtoken.enums.FcmTokenType;
 import com.example.mobipay.domain.fcmtoken.error.FCMException;
 import com.example.mobipay.domain.fcmtoken.service.FcmService;
-import com.example.mobipay.domain.fcmtoken.service.FcmServiceImpl;
 import com.example.mobipay.domain.invitation.dto.InvitationDecisionResponse;
 import com.example.mobipay.domain.invitation.dto.InvitationRequest;
 import com.example.mobipay.domain.invitation.dto.InvitationResponse;
@@ -20,15 +18,14 @@ import com.example.mobipay.domain.invitation.enums.ApproveStatus;
 import com.example.mobipay.domain.invitation.error.AlreadyDecidedException;
 import com.example.mobipay.domain.invitation.error.AlreadyInvitedException;
 import com.example.mobipay.domain.invitation.error.InvitationNotFoundException;
-import com.example.mobipay.domain.invitation.error.NotInvitedException;
 import com.example.mobipay.domain.invitation.error.NotApprovedOrRejectedException;
+import com.example.mobipay.domain.invitation.error.NotInvitedException;
 import com.example.mobipay.domain.invitation.repository.InvitationRepository;
 import com.example.mobipay.domain.mobiuser.entity.MobiUser;
 import com.example.mobipay.domain.mobiuser.error.MobiUserNotFoundException;
 import com.example.mobipay.domain.mobiuser.repository.MobiUserRepository;
 import com.example.mobipay.oauth2.dto.CustomOAuth2User;
 import com.google.firebase.messaging.FirebaseMessagingException;
-import java.io.IOException;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -100,7 +97,7 @@ public class InvitationService {
 
     private void validateApprovedOrRejected(ApproveStatus decision) {
         boolean ApprovedOrRejected = decision.equals(ApproveStatus.REJECTED) || decision.equals(ApproveStatus.APPROVED);
-        if(!ApprovedOrRejected) {
+        if (!ApprovedOrRejected) {
             throw new NotApprovedOrRejectedException();
         }
     }
@@ -122,13 +119,13 @@ public class InvitationService {
 
     private void validateAlreadyDecided(Invitation invitation) {
         boolean alreadyDecided = !invitation.getApproved().equals(ApproveStatus.WAITING);
-        if(alreadyDecided) {
+        if (alreadyDecided) {
             throw new AlreadyDecidedException();
         }
     }
 
     private void validateInvited(Long oauthMobiUserId, Long invitedMobiUserId) {
-        if(!oauthMobiUserId.equals(invitedMobiUserId)) {
+        if (!oauthMobiUserId.equals(invitedMobiUserId)) {
             throw new NotInvitedException();
         }
     }
@@ -138,17 +135,10 @@ public class InvitationService {
         String token = invitation.getMobiUser().getFcmToken().getValue();
         FcmSendDto fcmSendDto = new FcmSendDto(token, data);
 
-       boolean success;
-       // TODO: FcmService와 FcmServiceImpl 간의 예외 처리 방법 통일
         try {
-            success = fcmServiceImpl.sendMessage(fcmSendDto);
-        }catch (IOException | FirebaseMessagingException e) {
-            throw new FCMException("FCM 초대 메시지 전송 실패");
-        }
-        if(!success) {
-            throw new FCMException("FCM 초대 메시지 전송 실패");
+            fcmServiceImpl.sendMessage(fcmSendDto);
+        } catch (FirebaseMessagingException e) {
+            throw new FCMException(e.getMessage());
         }
     }
-
-
 }
