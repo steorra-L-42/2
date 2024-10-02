@@ -12,6 +12,7 @@ import androidx.car.app.model.Template
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import com.kimnlee.common.utils.AAFocusManager
 import com.mapbox.androidauto.R
 import com.mapbox.androidauto.internal.extensions.addBackPressedHandler
 import com.mapbox.androidauto.internal.logAndroidAuto
@@ -71,6 +72,15 @@ internal class PlaceSearchScreen @UiThread constructor(
                 MapboxNavigationApp.unregisterObserver(searchCarContext.routePreviewRequest)
                 MapboxNavigationApp.unregisterObserver(searchCarContext.carPlaceSearch)
             }
+
+            override fun onResume(owner: LifecycleOwner) {
+                AAFocusManager.screenResumed()
+            }
+
+            override fun onPause(owner: LifecycleOwner) {
+                AAFocusManager.screenPaused()
+            }
+
         })
     }
 

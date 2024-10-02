@@ -12,6 +12,7 @@ import androidx.core.graphics.drawable.IconCompat
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.kimnlee.freedrive.R
+import com.kimnlee.common.utils.AAFocusManager
 import com.mapbox.androidauto.MapboxCarContext
 import com.mapbox.androidauto.action.MapboxMapActionStrip
 import com.mapbox.androidauto.internal.logAndroidAuto
@@ -48,6 +49,7 @@ internal class FreeDriveCarScreen @UiThread constructor(
         lifecycle.addObserver(object : DefaultLifecycleObserver {
             override fun onResume(owner: LifecycleOwner) {
                 logAndroidAuto("FreeDriveCarScreen onResume")
+                AAFocusManager.screenResumed()
                 mapboxCarContext.mapboxCarMap.registerObserver(carRouteLineRenderer)
                 mapboxCarContext.mapboxCarMap.registerObserver(carLocationRenderer)
                 mapboxCarContext.mapboxCarMap.registerObserver(carRoadLabelRenderer)
@@ -58,6 +60,7 @@ internal class FreeDriveCarScreen @UiThread constructor(
 
             override fun onPause(owner: LifecycleOwner) {
                 logAndroidAuto("FreeDriveCarScreen onPause")
+                AAFocusManager.screenPaused()
                 mapboxCarContext.mapboxCarMap.unregisterObserver(carRouteLineRenderer)
                 mapboxCarContext.mapboxCarMap.unregisterObserver(carLocationRenderer)
                 mapboxCarContext.mapboxCarMap.unregisterObserver(carRoadLabelRenderer)

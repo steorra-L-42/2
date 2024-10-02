@@ -10,6 +10,7 @@ import androidx.car.app.validation.HostValidator
 import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import com.kimnlee.common.utils.AAFocusManager
 import com.kimnlee.freedrive.presentation.screen.MainCarSession
 
 private const val TAG = "MobiPayCarAppService"
@@ -26,13 +27,13 @@ class MobiPayCarAppService : CarAppService() {
 
     override fun onCreate() {
         super.onCreate()
-
+        AAFocusManager.aaConnected()
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-
+        AAFocusManager.aaDisconnected()
         getAndSaveLastLocation()
         Log.d(TAG, "안드로이드 오토 분리 감지")
     }

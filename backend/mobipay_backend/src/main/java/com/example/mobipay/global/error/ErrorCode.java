@@ -31,7 +31,8 @@ public enum ErrorCode {
     MERCHANT_TRANSACTION_NOT_FOUND(HttpStatus.NOT_FOUND, "가맹점 거래기록을 찾을 수 없습니다."),
     RECEIPT_USER_MISMATCH(HttpStatus.FORBIDDEN, "카드 가맹점을 찾을 수 없습니다."),
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 에러입니다."),
-    NOT_FOUND_CARD(HttpStatus.FORBIDDEN, "해당 카드에 대한 권한이 없습니다.");
+    NOT_FOUND_CARD(HttpStatus.FORBIDDEN, "해당 카드에 대한 권한이 없습니다."),
+    FCM_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "FCM 전송 에러입니다.");
 
     private final HttpStatus status;
     private final String message;

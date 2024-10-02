@@ -48,9 +48,11 @@ dependencies {
 
     implementation(project(":common"))
 
-    // plus JB - 24.09.10~
+    // 24.09.10
     implementation(libs.androidx.ui.tooling.preview.android)
     implementation(libs.coil.compose)
+    // 10.02
+    implementation(libs.text.recognition)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

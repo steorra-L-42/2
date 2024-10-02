@@ -16,6 +16,7 @@ interface AuthManagerProvider {
 interface PaymentOperations {
     fun verifyGPS(latlng: LatLng): Boolean
     fun processFCM(fcmData: FCMData)
+    fun processPay(fcmData: FCMData, isAutoPay: Boolean)
 }
 
 interface FCMDependencyProvider : ApiClientProvider, AuthManagerProvider {

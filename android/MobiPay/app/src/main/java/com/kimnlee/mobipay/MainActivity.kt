@@ -1,6 +1,9 @@
 package com.kimnlee.mobipay
 
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -16,11 +19,14 @@ import com.kimnlee.auth.presentation.viewmodel.LoginViewModel
 import com.kimnlee.common.FCMData
 import com.kimnlee.common.ui.theme.MobiPayTheme
 import com.kimnlee.mobipay.navigation.AppNavGraph
+import com.kimnlee.payment.PaymentApprovalReceiver
 
 class MainActivity : ComponentActivity() {
 
     private lateinit var biometricViewModel: BiometricViewModel
     private lateinit var loginViewModel: LoginViewModel
+
+    private var paymentApprovalReceiver: PaymentApprovalReceiver? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,10 +40,9 @@ class MainActivity : ComponentActivity() {
 
         biometricViewModel = ViewModelProvider(this).get(BiometricViewModel::class.java)
 
-        val fcmDataJson = intent?.getStringExtra("fcmData")
-        val fcmData = fcmDataJson?.let { Gson().fromJson(it, FCMData::class.java) }
-
         loginViewModel = LoginViewModel(authManager, apiClient, fcmService)
+
+        registerPayReceiver()
 
         setContent {
             MobiPayTheme {
@@ -86,4 +91,30 @@ class MainActivity : ComponentActivity() {
         super.onNewIntent(intent)
         setIntent(intent)
     }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        unregisterPayReceiver()
+    }
+
+
+    private fun registerPayReceiver() {
+        val intentFilter = IntentFilter("com.kimnlee.mobipay.PAYMENT_APPROVAL")
+        paymentApprovalReceiver = PaymentApprovalReceiver()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(paymentApprovalReceiver, intentFilter, Context.RECEIVER_EXPORTED)
+        } else {
+            registerReceiver(paymentApprovalReceiver, intentFilter)
+        }
+    }
+
+
+    private fun unregisterPayReceiver() {
+        paymentApprovalReceiver?.let {
+            unregisterReceiver(it)
+            paymentApprovalReceiver = null
+        }
+    }
+
 }
