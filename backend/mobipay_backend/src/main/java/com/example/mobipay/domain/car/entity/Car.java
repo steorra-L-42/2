@@ -35,6 +35,9 @@ public class Car extends AuditableCreatedEntity {
     @Column(name = "number", nullable = false, unique = true, length = 8)
     private String number;
 
+    @Column(name = "car_model", nullable = false, length = 20)
+    private String carModel;
+
     @Column(name = "auto_pay_status", nullable = false)
     private Boolean autoPayStatus = false;
 
@@ -51,11 +54,13 @@ public class Car extends AuditableCreatedEntity {
     @OneToMany(mappedBy = "car")
     private List<ApprovalWaiting> approvalWaitings = new ArrayList<>();
 
-    public static Car from(String number) {
-        Car car = new Car();
-        car.number = number;
+    private Car(String number, String carModel) {
+        this.number = number;
+        this.carModel = carModel;
+    }
 
-        return car;
+    public static Car of(String number, String carModel) {
+        return new Car(number, carModel);
     }
 
     public void setOwner(MobiUser mobiUser) {

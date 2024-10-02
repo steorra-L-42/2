@@ -45,7 +45,8 @@ import org.springframework.web.context.WebApplicationContext;
 public class InvitationDecideTest {
 
     private static final Logger log = LoggerFactory.getLogger(InvitationDecideTest.class);
-
+    @Mock
+    CustomOAuth2User customOAuth2User;
     @Autowired
     private WebApplicationContext context;
     @Autowired
@@ -58,9 +59,6 @@ public class InvitationDecideTest {
     private InvitationRepository invitationRepository;
     @Autowired
     private CarRepository carRepository;
-
-    @Mock
-    CustomOAuth2User customOAuth2User;
 
     // parameter : invitationId, approved
 
@@ -130,7 +128,7 @@ public class InvitationDecideTest {
         MobiUser invitee = mobiUserRepository.save(MobiUser.of(
                 "invitee@gmail.com", "invitee", "010-2222-2222", "inviteePicture"));
 
-        Car car = Car.from("123가4567");
+        Car car = Car.of("123가4567", "carModel");
         car.setOwner(owner);
         car = carRepository.save(car);
 
@@ -164,7 +162,7 @@ public class InvitationDecideTest {
         MobiUser invitee = mobiUserRepository.save(MobiUser.of(
                 "invitee@gmail.com", "invitee", "010-2222-2222", "inviteePicture"));
 
-        Car car = Car.from("123가4567");
+        Car car = Car.of("123가4567", "carModel");
         car.setOwner(owner);
         car = carRepository.save(car);
 
@@ -197,7 +195,7 @@ public class InvitationDecideTest {
         MobiUser invitee = mobiUserRepository.save(MobiUser.of(
                 "invitee@gmail.com", "invitee", "010-2222-2222", "inviteePicture"));
 
-        Car car = Car.from("123가4567");
+        Car car = Car.of("123가4567", "carModel");
         car.setOwner(owner);
         car = carRepository.save(car);
 
@@ -228,7 +226,7 @@ public class InvitationDecideTest {
         MobiUser invitee = mobiUserRepository.save(MobiUser.of(
                 "invitee@gmail.com", "invitee", "010-2222-2222", "inviteePicture"));
 
-        Car car = Car.from("123가4567");
+        Car car = Car.of("123가4567", "carModel");
         car.setOwner(owner);
         car = carRepository.save(car);
 
@@ -260,7 +258,7 @@ public class InvitationDecideTest {
         MobiUser invitee = mobiUserRepository.save(MobiUser.of(
                 "invitee@gmail.com", "invitee", "010-2222-2222", "inviteePicture"));
 
-        Car car = Car.from("123가4567");
+        Car car = Car.of("123가4567", "carModel");
         car.setOwner(owner);
         car = carRepository.save(car);
 
@@ -293,7 +291,7 @@ public class InvitationDecideTest {
         MobiUser notInvitee = mobiUserRepository.save(MobiUser.of(
                 "notInvitee@gmail.com", "notInvitee", "010-3333-3333", "notInviteePicture"));
 
-        Car car = Car.from("123가4567");
+        Car car = Car.of("123가4567", "carModel");
         car.setOwner(owner);
         car = carRepository.save(car);
 
@@ -390,7 +388,7 @@ public class InvitationDecideTest {
         MobiUser invitee = mobiUserRepository.save(MobiUser.of(
                 "invitee@gmail.com", "invitee", "010-2222-2222", "inviteePicture"));
 
-        Car car = Car.from("123가4567");
+        Car car = Car.of("123가4567", "carModel");
         car.setOwner(owner);
         car = carRepository.save(car);
 
@@ -422,7 +420,7 @@ public class InvitationDecideTest {
         MobiUser invitee = mobiUserRepository.save(MobiUser.of(
                 "invitee@gmail.com", "invitee", "010-2222-2222", "inviteePicture"));
 
-        Car car = Car.from("123가4567");
+        Car car = Car.of("123가4567", "carModel");
         car.setOwner(owner);
         car = carRepository.save(car);
 
