@@ -34,6 +34,10 @@ import com.kimnlee.vehiclemanagement.data.model.LicensePlateAnalyzer
 import com.kimnlee.vehiclemanagement.presentation.viewmodel.VehicleManagementViewModel
 import java.util.concurrent.Executors
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.ui.text.style.TextAlign
 import com.kimnlee.vehiclemanagement.R
 
 private const val TAG = "VehicleRegistrationScreen"
@@ -56,24 +60,24 @@ fun VehicleRegistrationScreen(
     var isAnalyzing by remember { mutableStateOf(true) }
 
     val brands = listOf(
-        "Audi", "Mercedes-Benz", "KGM", "HYUNDAI",
-        "BMW", "KIA", "CHEVROLET", "GENESIS",
-        "TESLA", "RENAULT"
+        "아우디", "Mercedes-Benz", "KGM 모터스", "현대",
+        "BMW", "기아", "쉐보레", "제네시스",
+        "테슬라", "르노"
     )
     var selectedBrand by remember { mutableStateOf("") }
     var expandedBrand by remember { mutableStateOf(false) }
 
     val vehicleTypesMap = mapOf(
-        "Audi" to listOf("A3", "A4", "A5", "A6", "A7", "A8", "Q2", "Q3", "Q5", "Q7", "Q8"),
-        "Mercedes-Benz" to listOf("A-Class", "C-Class", "CLA", "CLE", "E-Class", "GLC", "GLE", "S-Class"),
-        "KGM" to listOf("Actyon", "Corando", "Rexton", "Tivoli", "Torres"),
-        "HYUNDAI" to listOf("Avante", "Grandeur", "Ioniq5", "Ioniq6", "Kona", "Nexo", "Palisade", "SantaFe", "Sonata", "Tucson", "Venue"),
+        "아우디" to listOf("A3", "A4", "A5", "A6", "A7", "A8", "Q2", "Q3", "Q5", "Q7", "Q8"),
+        "Mercedes-Benz" to listOf("A-클래스", "C-클래스", "CLA", "CLE", "E-클래스", "GLC", "GLE", "S-클래스"),
+        "KGM 모터스" to listOf("액티언", "코란도", "렉스턴", "티볼리", "토레스"),
+        "현대" to listOf("아반떼", "그랜저", "아이오닉5", "아이오닉6", "코나", "넥쏘", "팰리세이드", "싼타페", "쏘나타", "투싼", "베뉴"),
         "BMW" to listOf("BMW3", "BMW5", "BMS7", "X3", "X5", "X6"),
-        "KIA" to listOf("Carnival", "EV3", "3V6", "EV9", "K5", "K8", "K9", "Mohave", "Morning", "Niro", "NiroEV", "Ray", "Seltos", "Sorento", "Sportage"),
-        "CHEVROLET" to listOf("Colorado", "Equinox", "Impala", "Malibu", "Spark", "Trailblazer", "Trax"),
-        "GENESIS" to listOf("G70", "G80", "GV60", "GV70", "GV80"),
-        "TESLA" to listOf("Model3", "ModelS", "ModelX", "ModelY"),
-        "RENAULT" to listOf("QM6", "SM6", "XM3")
+        "기아" to listOf("카니발", "EV3", "EV6", "EV9", "K5", "K8", "K9", "모하비", "모닝", "니로", "니로EV", "레이", "셀토스", "쏘렌토", "스포티지"),
+        "쉐보레" to listOf("콜로라도", "이쿼녹스", "임팔라", "말리부", "스파크", "트레일블레이저", "트랙스"),
+        "제네시스" to listOf("G70", "G80", "GV60", "GV70", "GV80"),
+        "테슬라" to listOf("모델3", "모델S", "모델X", "모델Y"),
+        "르노" to listOf("QM6", "SM6", "XM3")
     )
     var selectedVehicleType by remember { mutableStateOf("") }
     var expandedVehicleType by remember { mutableStateOf(false) }
@@ -91,6 +95,7 @@ fun VehicleRegistrationScreen(
     )
 
     val imageResId = when (selectedVehicleType) {
+        // Audi
         "A3" -> R.drawable.a3
         "A4" -> R.drawable.a4
         "A5" -> R.drawable.a5
@@ -102,32 +107,33 @@ fun VehicleRegistrationScreen(
         "Q5" -> R.drawable.q5
         "Q7" -> R.drawable.q7
         "Q8" -> R.drawable.q8
-        "A-Class" -> R.drawable.aclass
-        "C-Class" -> R.drawable.cclass
+        // Mercedes-Benz
+        "A-클래스" -> R.drawable.aclass
+        "C-클래스" -> R.drawable.cclass
         "CLA" -> R.drawable.cla
         "CLE" -> R.drawable.cle
-        "E-Class" -> R.drawable.eclass
+        "E-클래스" -> R.drawable.eclass
         "GLC" -> R.drawable.glc
         "GLE" -> R.drawable.gle
-        "S-Class" -> R.drawable.sclass
+        "S-클래스" -> R.drawable.sclass
         // KGM
-        "Actyon" -> R.drawable.actyon
-        "Corando" -> R.drawable.corando
-        "Rexton" -> R.drawable.rexton
-        "Tivoli" -> R.drawable.tivoli
-        "Torres" -> R.drawable.torres
+        "액티언" -> R.drawable.actyon
+        "코란도" -> R.drawable.corando
+        "렉스턴" -> R.drawable.rexton
+        "티볼리" -> R.drawable.tivoli
+        "토레스" -> R.drawable.torres
         // HYUNDAI
-        "Avante" -> R.drawable.avante
-        "Grandeur" -> R.drawable.grandeur
-        "Ioniq5" -> R.drawable.ioniq5
-        "Ioniq6" -> R.drawable.ioniq6
-        "Kona" -> R.drawable.kona
-        "Nexo" -> R.drawable.nexo
-        "Palisade" -> R.drawable.palisade
-        "SantaFe" -> R.drawable.santafe
-        "Sonata" -> R.drawable.sonata
-        "Tucson" -> R.drawable.tucson
-        "Venue" -> R.drawable.venue
+        "아반떼" -> R.drawable.avante
+        "그랜저" -> R.drawable.grandeur
+        "아이오닉5" -> R.drawable.ioniq5
+        "아이오닉6" -> R.drawable.ioniq6
+        "코나" -> R.drawable.kona
+        "넥쏘" -> R.drawable.nexo
+        "팰리세이드" -> R.drawable.palisade
+        "싼타페" -> R.drawable.santafe
+        "쏘나타" -> R.drawable.sonata
+        "투싼" -> R.drawable.tucson
+        "베뉴" -> R.drawable.venue
         // BMW
         "BMW3" -> R.drawable.bmw3
         "BMW5" -> R.drawable.bmw5
@@ -136,29 +142,29 @@ fun VehicleRegistrationScreen(
         "X5" -> R.drawable.x5
         "X6" -> R.drawable.x6
         // KIA
-        "Carnival" -> R.drawable.carnival
+        "카니발" -> R.drawable.carnival
         "EV3" -> R.drawable.ev3
         "EV6" -> R.drawable.ev6
         "EV9" -> R.drawable.ev9
         "K5" -> R.drawable.k5
         "K8" -> R.drawable.k8
         "K9" -> R.drawable.k9
-        "Mohave" -> R.drawable.mohave
-        "Morning" -> R.drawable.morning
-        "Niro" -> R.drawable.niro
-        "NiroEV" -> R.drawable.niroev
-        "Ray" -> R.drawable.ray
-        "Seltos" -> R.drawable.seltos
-        "Sorento" -> R.drawable.sorento
-        "Sportage" -> R.drawable.sportage
+        "모하비" -> R.drawable.mohave
+        "모닝" -> R.drawable.morning
+        "니로" -> R.drawable.niro
+        "니로EV" -> R.drawable.niroev
+        "레이" -> R.drawable.ray
+        "셀토스" -> R.drawable.seltos
+        "쏘렌토" -> R.drawable.sorento
+        "스포티지" -> R.drawable.sportage
         // CHEVROLET
-        "Colorado" -> R.drawable.colorado
-        "Equinox" -> R.drawable.equinox
-        "Impala" -> R.drawable.impala
-        "Malibu" -> R.drawable.malibu
-        "Spark" -> R.drawable.spark
-        "Trailblazer" -> R.drawable.trailblazer
-        "Trax" -> R.drawable.trax
+        "콜로라도" -> R.drawable.colorado
+        "이쿼녹스" -> R.drawable.equinox
+        "임팔라" -> R.drawable.impala
+        "말리부" -> R.drawable.malibu
+        "스파크" -> R.drawable.spark
+        "트레일블레이저" -> R.drawable.trailblazer
+        "트랙스" -> R.drawable.trax
         // GENESIS
         "G70" -> R.drawable.g70
         "G80" -> R.drawable.g80
@@ -166,25 +172,41 @@ fun VehicleRegistrationScreen(
         "GV70" -> R.drawable.gv70
         "GV80" -> R.drawable.gv80
         // TESLA
-        "Model3" -> R.drawable.model3
-        "ModelS" -> R.drawable.models
-        "ModelX" -> R.drawable.modelx
-        "ModelY" -> R.drawable.modely
+        "모델3" -> R.drawable.model3
+        "모델S" -> R.drawable.models
+        "모델X" -> R.drawable.modelx
+        "모델Y" -> R.drawable.modely
         // RENAULT
         "QM6" -> R.drawable.qm6
         "SM6" -> R.drawable.sm6
         "XM3" -> R.drawable.xm3
         else -> null
     }
+    val validPattern = Regex("^(\\d{3}[가-힣]\\d{4}|\\d{2}[가-힣]\\d{4})?$")
+    val isLicensePlateValid = validPattern.matches(licensePlate)
 
-    Column(
+    Box(
         modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
+            .fillMaxWidth()
+            .padding(bottom = 16.dp)
     ) {
+        IconButton(
+            onClick = onNavigateBack,
+            modifier = Modifier.align(Alignment.CenterStart)
+        ) {
+            Icon(
+                imageVector = Icons.Filled.ArrowBack,
+                contentDescription = "뒤로 가기",
+                modifier = Modifier.size(32.dp),
+                tint = Color.Black
+            )
+        }
+
         Text(
             text = "차량 등록",
-            style = MaterialTheme.typography.headlineMedium
+            style = MaterialTheme.typography.headlineSmall,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.align(Alignment.Center)
         )
     }
 
@@ -203,9 +225,19 @@ fun VehicleRegistrationScreen(
         ) {
             Button(
                 onClick = { expandedBrand = true },
-                modifier = Modifier.weight(1f)
+                modifier = Modifier
+                    .border(1.dp, Color.Black, RoundedCornerShape(8.dp))
+                    .weight(1f),
+                shape = RoundedCornerShape(8.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Transparent,
+                    contentColor = Color.Black
+                )
             ) {
-                Text(if (selectedBrand.isEmpty()) "차량 브랜드" else selectedBrand)
+                Text(
+                    text = if (selectedBrand.isEmpty()) "차량 브랜드" else selectedBrand,
+                    style = MaterialTheme.typography.bodyMedium.copy(fontSize = 16.sp)
+                )
             }
 
             DropdownMenu(
@@ -228,9 +260,20 @@ fun VehicleRegistrationScreen(
 
             Button(
                 onClick = { expandedVehicleType = true },
-                modifier = Modifier.weight(1f)
+                modifier = Modifier
+                    .border(1.dp, Color.Black, RoundedCornerShape(8.dp))
+                    .weight(1f),
+                shape = RoundedCornerShape(8.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Transparent,
+                    contentColor = Color.Black
+                ),
+                enabled = selectedBrand.isNotEmpty()
             ) {
-                Text(if (selectedVehicleType.isEmpty()) "차량 종류" else selectedVehicleType)
+                Text(
+                    text = if (selectedVehicleType.isEmpty()) "차량 종류" else selectedVehicleType,
+                    style = MaterialTheme.typography.bodyMedium.copy(fontSize = 16.sp)
+                )
             }
 
             DropdownMenu(
@@ -262,7 +305,14 @@ fun VehicleRegistrationScreen(
                     recognizedLicensePlate = ""
                     isAnalyzing = true
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .border(1.dp, Color.Black, RoundedCornerShape(8.dp))
+                    .fillMaxWidth(),
+                shape = RoundedCornerShape(8.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Transparent,
+                    contentColor = Color.Black
+                )
             ) {
                 Text("카메라로 차량 번호 인식하기")
             }
@@ -274,7 +324,11 @@ fun VehicleRegistrationScreen(
             ) {
                 TextField(
                     value = licensePlate,
-                    onValueChange = { licensePlate = it },
+                    onValueChange = { newValue ->
+                        if (newValue.all { it != ' '}) {
+                            licensePlate = newValue.trim()
+                        }
+                    },
                     label = { Text("차량 번호를 입력하세요") },
                     modifier = Modifier
                         .weight(1f)
@@ -284,7 +338,10 @@ fun VehicleRegistrationScreen(
                         focusedIndicatorColor = Color.Black,
                         unfocusedIndicatorColor = Color.Gray,
                         disabledIndicatorColor = Color.Transparent,
-                        errorIndicatorColor = Color.Red
+                        errorIndicatorColor = Color.Red,
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        disabledContainerColor = Color.Transparent
                     ),
                     singleLine = true
                 )
@@ -298,9 +355,14 @@ fun VehicleRegistrationScreen(
                     modifier = Modifier
                         .heightIn(min = 56.dp)
                         .weight(0.3f),
-                    shape = RoundedCornerShape(8.dp)
+                    shape = RoundedCornerShape(8.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Blue,
+                        contentColor = Color.White
+                    ),
+                    enabled = selectedVehicleType.isNotEmpty() && licensePlate.isNotEmpty() && isLicensePlateValid
                 ) {
-                    Text("확인")
+                    Text("확 인", fontSize = 20.sp)
                 }
             }
         } else {
@@ -389,12 +451,12 @@ fun VehicleRegistrationScreen(
         if (showDialog) {
             AlertDialog(
                 onDismissRequest = { showDialog = false },
-                title = { Text(licensePlate) },
-                text = { Text("이 차량 번호가 맞나요?.") },
+                title = { Text(text = "$licensePlate | $selectedVehicleType") },
+                text = { Text("입력하신 차량 정보가 맞나요?") },
                 confirmButton = {
                     Button(
                         onClick = {
-                            viewModel.registerVehicle(licensePlate)
+                            viewModel.registerVehicle(licensePlate, selectedVehicleType)
                             showDialog = false
                             onNavigateBack()
                         }

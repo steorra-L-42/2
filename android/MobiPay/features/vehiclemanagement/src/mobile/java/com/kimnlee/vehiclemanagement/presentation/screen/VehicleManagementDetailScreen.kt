@@ -80,13 +80,13 @@ fun VehicleManagementDetailScreen(
                     Text("차량 선택")
                 }
 
-                Image(
-                    painter = painterResource(id = it.imageResId),
-                    contentDescription = "Vehicle Image",
-                    modifier = Modifier
-                        .size(200.dp)
-                        .padding(bottom = 16.dp)
-                )
+//                Image(
+//                    painter = painterResource(id = it.vehicleId),
+//                    contentDescription = "Vehicle Image",
+//                    modifier = Modifier
+//                        .size(200.dp)
+//                        .padding(bottom = 16.dp)
+//                )
 
                 TextOnLP(formatLicensePlate(it.number))
 

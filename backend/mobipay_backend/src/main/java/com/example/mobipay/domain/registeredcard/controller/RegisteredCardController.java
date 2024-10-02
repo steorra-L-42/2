@@ -29,7 +29,7 @@ public class RegisteredCardController {
     @PostMapping
     public ResponseEntity<RegisteredCardResponse> registerCard(@RequestBody @Valid RegisteredCardRequest request,
                                                                @AuthenticationPrincipal CustomOAuth2User oauth2User) {
-        RegisteredCardResponse response = registeredCardService.registeredCard(request, oauth2User);
+        RegisteredCardResponse response = registeredCardService.registerCard(request, oauth2User);
         return ResponseEntity.ok(response);
     }
 
@@ -37,7 +37,7 @@ public class RegisteredCardController {
     public ResponseEntity<RegisteredCardListResponse> registerCardList(
             @AuthenticationPrincipal CustomOAuth2User oauth2User) {
 
-        RegisteredCardListResponse response = registeredCardService.registeredCardList(oauth2User);
+        RegisteredCardListResponse response = registeredCardService.registerCardList(oauth2User);
 
         return ResponseEntity.ok(response);
 
@@ -47,7 +47,7 @@ public class RegisteredCardController {
     public ResponseEntity<RegisteredCardAutoPayResponse> autoPayCard(
             @RequestBody @Valid RegisteredCardAutoPayRequest request,
             @AuthenticationPrincipal CustomOAuth2User oauth2User) {
-        RegisteredCardAutoPayResponse response = registeredCardService.registeredCardAutoPay(request, oauth2User);
+        RegisteredCardAutoPayResponse response = registeredCardService.registerCardAutoPay(request, oauth2User);
         return ResponseEntity.ok(response);
     }
 

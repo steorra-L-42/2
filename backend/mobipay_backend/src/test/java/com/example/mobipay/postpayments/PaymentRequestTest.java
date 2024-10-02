@@ -39,7 +39,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -95,8 +94,6 @@ public class PaymentRequestTest {
         ownedCardRepository.deleteAll();
         accountRepository.deleteAll();
         fcmTokenRepository.deleteAll();
-
-        Mockito.doReturn(true).when(fcmService).sendMessage(Mockito.any());
     }
 
     @AfterEach
@@ -123,7 +120,7 @@ public class PaymentRequestTest {
         mobiUser.setFcmToken(fcmToken);
         mobiUserRepository.save(mobiUser);
 
-        Car car = Car.from("11가1111");
+        Car car = Car.of("123가4567", "carModel");
         car.setOwner(mobiUser);
         carRepository.save(car);
 
@@ -153,7 +150,7 @@ public class PaymentRequestTest {
 
         final String url = "/api/v1/postpayments/request";
         final String requestBody = objectMapper.writeValueAsString(
-                new PaymentRequest("type", 5000L, "11가1111", "아메리카노 Tall 1개", 1911L));
+                new PaymentRequest("type", 5000L, "123가4567", "아메리카노 Tall 1개", 1911L));
 
         // when
         ResultActions result = mockMvc.perform(post(url).with(csrf())
@@ -177,7 +174,7 @@ public class PaymentRequestTest {
         mobiUser.setFcmToken(fcmToken);
         mobiUserRepository.save(mobiUser);
 
-        Car car = Car.from("11가1111");
+        Car car = Car.of("123가4567", "carModel");
         car.setOwner(mobiUser);
         carRepository.save(car);
 
@@ -233,7 +230,7 @@ public class PaymentRequestTest {
         mobiUser.setFcmToken(fcmToken);
         mobiUserRepository.save(mobiUser);
 
-        Car car = Car.from("11가1111");
+        Car car = Car.of("123가4567", "carModel");
         car.setOwner(mobiUser);
         carRepository.save(car);
 
@@ -289,7 +286,7 @@ public class PaymentRequestTest {
         mobiUser.setFcmToken(fcmToken);
         mobiUserRepository.save(mobiUser);
 
-        Car car = Car.from("11가1111");
+        Car car = Car.of("123가4567", "carModel");
         car.setOwner(mobiUser);
         carRepository.save(car);
 

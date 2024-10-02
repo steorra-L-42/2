@@ -1,6 +1,7 @@
 package com.example.mobipay.domain.car.dto;
 
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,6 +12,10 @@ import lombok.NoArgsConstructor;
 @Getter
 public class CarRegisterRequest {
 
-    @NotNull(message = "empty number")
+    @NotBlank(message = "empty number")
     private String number;
+
+    @NotBlank(message = "empty carModel")
+    @Size(max = 20, message = "too long carModel")
+    private String carModel;
 }

@@ -12,8 +12,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinColumns;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -57,11 +55,12 @@ public class MerchantTransaction {
     private Merchant merchant;
 
     private MerchantTransaction(ApprovalPaymentRequest request, ResponseEntity<CardTransactionResponse> response) {
-        this.transactionUniqueNo = response.getBody().getRec().getTransactionUniqueNo();
-        LocalDateTime now = LocalDateTime.now();
-        this.transactionDate = now.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-        this.transactionTime = now.format(DateTimeFormatter.ofPattern("HHmmss"));
-        this.paymentBalance = request.getPaymentBalance();
+        CardTransactionResponse.Rec rec = response.getBody().getRec();
+
+        this.transactionUniqueNo = rec.getTransactionUniqueNo();
+        this.transactionDate = rec.getTransactionDate();
+        this.transactionTime = rec.getTransactionTime();
+        this.paymentBalance = rec.getPaymentBalance();
         this.info = request.getInfo();
     }
 
