@@ -4,7 +4,6 @@ import android.content.ContentValues.TAG
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.kimnlee.common.auth.api.AuthService
 import com.kimnlee.common.network.ApiClient
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -64,7 +63,7 @@ class VehicleManagementViewModel(
                                 created = apiVehicle.created,
                                 autoPayStatus = apiVehicle.autoPayStatus,
                                 ownerId = apiVehicle.ownerId,
-                                imageResId = R.drawable.genesis_g90 // 임시 자동차 사진(나중에 사용자의 차사진으로 대체해야함)
+                                imageResId = R.drawable.a3 // 임시 자동차 사진(나중에 사용자의 차사진으로 대체해야함)
                             )
                         }
                     }
@@ -93,7 +92,7 @@ class VehicleManagementViewModel(
                             created = it.created,
                             autoPayStatus = it.autoPayStatus,
                             ownerId = it.ownerId,
-                            imageResId = R.drawable.genesis_g90
+                            imageResId = R.drawable.a3
                         )
                         _vehicles.value = _vehicles.value + newVehicle
                         _apiVehicles.value += VehicleItem(
