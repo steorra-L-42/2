@@ -125,7 +125,7 @@ fun ShowMoreScreen(
                     items = listOf(
                         MenuItem("결제 내역", { navController.navigate("paymenthistory") }, emoji = "💳"),
                         MenuItem("초대 대기", { navController.navigate("memberinvitation_invitationwaiting") }, emoji = "📩"),
-                        MenuItem("메뉴 1", { }),
+                        MenuItem("결제화면(임시)", { navController.navigate("payment_requestmanualpay") }),
                         MenuItem("메뉴 2", { }),
                         MenuItem("로그아웃", { loginViewModel.logout() })
                     )
