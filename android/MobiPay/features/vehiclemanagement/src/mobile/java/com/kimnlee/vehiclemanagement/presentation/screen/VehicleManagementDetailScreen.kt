@@ -19,11 +19,16 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.kimnlee.cardmanagement.presentation.screen.findCardCompany
+import com.kimnlee.cardmanagement.presentation.screen.maskCardNumber
+import com.kimnlee.cardmanagement.presentation.viewmodel.CardManagementViewModel
 import com.kimnlee.memberinvitation.presentation.components.MemberInvitationBottomSheet
 import com.kimnlee.memberinvitation.presentation.viewmodel.MemberInvitationViewModel
 import com.kimnlee.vehiclemanagement.R
@@ -37,12 +42,15 @@ fun VehicleManagementDetailScreen(
     onNavigateBack: () -> Unit,
     onNavigateToInvitePhone: (Int) -> Unit,
     onNavigateToNotification: () -> Unit,
-    viewModel: VehicleManagementViewModel,
+    vehicleManagementViewModel: VehicleManagementViewModel,
+    cardManagementViewModel: CardManagementViewModel,
     navController: NavController
 ) {
-    val vehicle = viewModel.getVehicleById(vehicleId)
-    val carMembers by viewModel.carMembers.collectAsState()
+    val vehicle = vehicleManagementViewModel.getVehicleById(vehicleId)
+    val carMembers by vehicleManagementViewModel.carMembers.collectAsState()
     var isCardEnabled by remember { mutableStateOf(false) }
+    val autoPaymentStatus by vehicleManagementViewModel.autoPaymentStatus.collectAsState()
+    val registeredCards by cardManagementViewModel.registeredCards.collectAsState()
 
     val memberViewModel: MemberInvitationViewModel = viewModel()
     val showBottomSheet by memberViewModel.showBottomSheet.collectAsState()
@@ -139,7 +147,7 @@ fun VehicleManagementDetailScreen(
     }
 
     LaunchedEffect(vehicleId) {
-        viewModel.requestCarMembers(vehicleId)
+        vehicleManagementViewModel.requestCarMembers(vehicleId)
     }
 
     Box(
@@ -148,49 +156,48 @@ fun VehicleManagementDetailScreen(
             .padding(16.dp)
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
+            modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            OutlinedButton(
+                onClick = onNavigateBack,
+                modifier = Modifier
+                    .width(200.dp)
+                    .height(50.dp),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    containerColor = MaterialTheme.colorScheme.background,
+                    contentColor = MaterialTheme.colorScheme.onBackground
+                ),
+                border = BorderStroke(2.dp, MaterialTheme.colorScheme.onBackground),
+                shape = MaterialTheme.shapes.medium
+            ) {
+                Text("차량 선택")
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // 차량 이미지 추가
+            Image(
+                painter = painterResource(id = imageResId),
+                contentDescription = "Vehicle Image",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(180.dp),
+                contentScale = ContentScale.Fit
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
             vehicle?.let {
-                Spacer(modifier = Modifier.height(8.dp))
-
-                OutlinedButton(
-                    onClick = onNavigateBack,
-                    modifier = Modifier
-                        .width(200.dp)
-                        .height(50.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        containerColor = MaterialTheme.colorScheme.background,
-                        contentColor = MaterialTheme.colorScheme.onBackground
-                    ),
-                    border = BorderStroke(2.dp, MaterialTheme.colorScheme.onBackground),
-                    shape = MaterialTheme.shapes.medium
-                ) {
-                    Text("차량 선택")
-                }
-
-                Image(
-                    painter = painterResource(id = imageResId),
-                    contentDescription = "Vehicle Image",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .size(180.dp)
-                        .padding(24.dp),
-                    contentScale = ContentScale.Fit
-                )
-
                 TextOnLP(formatLicensePlate(it.number))
+            }
 
-                Spacer(modifier = Modifier.height(28.dp))
+            Spacer(modifier = Modifier.height(28.dp))
 
-                CarMembersRow(
-                    carMembers = carMembers,
-                    onAddMember = { memberViewModel.openBottomSheet() }
-                )
-
-            } ?: Text("차량을 찾을 수 없습니다.")
+            CarMembersRow(
+                carMembers = carMembers,
+                onAddMember = { memberViewModel.openBottomSheet() }
+            )
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -202,27 +209,77 @@ fun VehicleManagementDetailScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Switch(
-                    checked = isCardEnabled,
-                    onCheckedChange = { isCardEnabled = it }
+                    checked = autoPaymentStatus,
+                    onCheckedChange = {
+                        vehicleManagementViewModel.toggleAutoPayment(vehicleId, it)
+                    }
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("내 카드로 자동결제")
             }
 
-            if (isCardEnabled) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp)
-                        .height(50.dp)
-                ) {
-                    Text("카드 이미지 공간", modifier = Modifier.align(Alignment.Center))
-                }
-                Button(onClick = { /*등록된 카드 목록 띄우기(페이지 및 API 기능 구현 필요)*/ }) {
-                    Text("바꾸기")
-                }
+            if (autoPaymentStatus) {
+                val autoPaymentCard = registeredCards.find { it.autoPayStatus }
+                autoPaymentCard?.let { card ->
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                            .height(250.dp)  // 카드 높이를 늘림
+                    ) {
+                        Image(
+                            painter = painterResource(id = findCardCompany(card.ownedCardId.toString())),
+                            contentDescription = "Card Image",
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Fit
+                        )
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(16.dp),
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = maskCardNumber(card.ownedCardId.toString()),
+                                color = Color.White,
+                                style = MaterialTheme.typography.titleLarge.copy(
+                                    shadow = Shadow(
+                                        color = Color.Black.copy(alpha = 0.6f),
+                                        offset = Offset(2f, 2f),
+                                        blurRadius = 4f
+                                    )
+                                )
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "일일 한도: ${card.oneDayLimit}원",
+                                color = Color.White,
+                                style = MaterialTheme.typography.bodyLarge.copy(
+                                    shadow = Shadow(
+                                        color = Color.Black.copy(alpha = 0.6f),
+                                        offset = Offset(1f, 1f),
+                                        blurRadius = 2f
+                                    )
+                                )
+                            )
+                            Text(
+                                text = "1회 한도: ${card.oneTimeLimit}원",
+                                color = Color.White,
+                                style = MaterialTheme.typography.bodyLarge.copy(
+                                    shadow = Shadow(
+                                        color = Color.Black.copy(alpha = 0.6f),
+                                        offset = Offset(1f, 1f),
+                                        blurRadius = 2f
+                                    )
+                                )
+                            )
+                        }
+                    }
+                } ?: Text("자동결제 카드가 설정되지 않았습니다.")
             }
         }
+
         if (showBottomSheet) {
             MemberInvitationBottomSheet(
                 context = context,
@@ -237,8 +294,7 @@ fun VehicleManagementDetailScreen(
 
         IconButton(
             onClick = onNavigateToNotification,
-            modifier = Modifier
-                .align(Alignment.TopEnd)
+            modifier = Modifier.align(Alignment.TopEnd)
         ) {
             Icon(
                 imageVector = Icons.Outlined.Notifications,

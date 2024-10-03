@@ -26,3 +26,16 @@ data class VehicleRegistrationResponse(
     val ownerId: Int,
     val carModel: String
 )
+
+data class AutoPaymentStatusRequest(
+    val carId: Int,
+    val autoPayStatus: Boolean
+)
+
+data class AutoPaymentStatusResponse(
+    val carId: Int,
+    val number: String,
+    val created: String,
+    val autoPayStatus: Boolean,
+    val ownerId: Int
+)
