@@ -241,6 +241,8 @@ public class ReceiptTest {
         Long merchantId = 1906L;
         String cardNo = "1234567890123456";
         Long paymentBalance = 50000L;
+        String transactionDate = "20241002";
+        String transactionTime = "160200";
         Long transactionUniqueNo = 1L;
 
         MobiUser mobiUser = MobiUser.of("bbam@gmail.com", "mobiuser", "010-1111-1111", "mobiUserPicture");
@@ -285,6 +287,9 @@ public class ReceiptTest {
         when(cardTransactionResponseMock.getRec()).thenReturn(recResponseMock);
         // 3. transactionUniqueNo 반환 값 설정
         when(recResponseMock.getTransactionUniqueNo()).thenReturn(transactionUniqueNo);
+        when(recResponseMock.getTransactionDate()).thenReturn(transactionDate);
+        when(recResponseMock.getTransactionTime()).thenReturn(transactionTime);
+        when(recResponseMock.getPaymentBalance()).thenReturn(paymentBalance);
         // 4. Mocking ResponseEntity
         ResponseEntity<CardTransactionResponse> responseMock = mock(ResponseEntity.class);
         when(responseMock.getBody()).thenReturn(cardTransactionResponseMock);
