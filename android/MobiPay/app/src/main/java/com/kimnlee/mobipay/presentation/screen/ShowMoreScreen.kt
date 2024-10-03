@@ -1,11 +1,8 @@
 package com.kimnlee.mobipay.presentation.screen
 
-import android.content.ContentValues.TAG
-import android.graphics.BitmapFactory
 import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
@@ -16,16 +13,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
@@ -35,160 +28,20 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import coil.compose.AsyncImagePainter
+import coil.compose.rememberAsyncImagePainter
+import coil.compose.rememberImagePainter
+import coil.request.ImageRequest
+import coil.transform.CircleCropTransformation
 import com.kimnlee.auth.presentation.viewmodel.LoginViewModel
 import com.kimnlee.common.R
 import com.kimnlee.common.ui.theme.MobiBgGray
 import com.kimnlee.common.ui.theme.MobiTextAlmostBlack
 import com.kimnlee.common.ui.theme.MobiTextDarkGray
 import com.kimnlee.mobipay.presentation.viewmodel.ShowMoreViewModel
-import java.io.File
-
 
 val ButtonColor = Color(0xFFF2F3F5)
 val SettingsIconColor = Color(0xFFB1B8C0)
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun ProfileSection(userName: String, userPicture: String) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        ProfileImage(userPicture)
-        Spacer(modifier = Modifier.width(16.dp))
-        Text(
-            text = userName,
-            style = MaterialTheme.typography.headlineMedium,
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold,
-            color = MobiTextAlmostBlack,
-        )
-    }
-}
-
-@Composable
-fun ProfileImage(userPicture: String) {
-    val imageBitmap = remember(userPicture) {
-        loadBitmapFromFile(userPicture)
-    }
-
-    val imageModifier = Modifier
-        .size(60.dp)
-        .clip(CircleShape)
-
-    if (imageBitmap != null) {
-        Image(
-            bitmap = imageBitmap,
-            contentDescription = "Profile Picture",
-            modifier = imageModifier,
-            contentScale = ContentScale.Crop
-        )
-    } else {
-        // 이미지 로딩 실패 시 기본 이미지 표시
-        Image(
-            painter = painterResource(id = R.drawable.default_profile),
-            contentDescription = "Default Profile Picture",
-            modifier = imageModifier,
-            contentScale = ContentScale.Crop
-        )
-    }
-}
-
-fun loadBitmapFromFile(filePath: String): ImageBitmap? {
-    return try {
-        val file = File(filePath)
-        if (file.exists()) {
-            val bitmap = BitmapFactory.decodeFile(file.absolutePath)
-            bitmap.asImageBitmap()
-        } else {
-            null
-        }
-    } catch (e: Exception) {
-        e.printStackTrace()
-        null
-    }
-}
-
-@Composable
-fun ProfileMenuButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    Button(
-        onClick = onClick,
-        colors = ButtonDefaults.buttonColors(
-            containerColor = ButtonColor,
-            contentColor = MobiTextDarkGray
-        ),
-        shape = RoundedCornerShape(8.dp),
-        modifier = modifier.height(40.dp)
-    ) {
-        Text(text, fontSize = 14.sp)
-    }
-}
-
-@Composable
-fun MenuSection(title: String, items: List<MenuItem>) {
-    Text(title, fontWeight = FontWeight.Bold, fontSize = 16.sp, color = MobiTextDarkGray)
-    Spacer(modifier = Modifier.height(8.dp))
-    items.forEach { item ->
-        MenuItemCard(item = item)
-        Spacer(modifier = Modifier.height(8.dp))
-    }
-}
-
-@Composable
-fun MenuItemCard(item: MenuItem) {
-    val isLogout = item.text == "로그아웃"
-    val cardColor = if (isLogout) Color.Transparent else Color.White
-    val textColor = if (isLogout) Color.Red else MobiTextDarkGray
-    val borderColor = if (isLogout) Color.LightGray else Color.Transparent
-
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(8.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = if (isLogout) 0.dp else 2.dp),
-        onClick = item.onClick,
-        colors = CardDefaults.cardColors(containerColor = cardColor),
-        border = if (isLogout) BorderStroke(1.dp, borderColor) else null
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 12.dp, horizontal = 16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = if (isLogout) Arrangement.Center else Arrangement.Start
-        ) {
-            if (item.emoji != null && !isLogout) {
-                Text(
-                    text = item.emoji,
-                    fontFamily = FontFamily(Font(R.font.emoji)),
-                    fontSize = 16.sp,
-                    style = TextStyle(
-                        platformStyle = PlatformTextStyle(
-                            includeFontPadding = false
-                        )
-                    ),
-                    modifier = Modifier
-                        .alignByBaseline()
-//                        .padding(top = 6.dp)
-//                        .padding(end = 8.dp)
-                )
-            }
-            Text(
-                text = item.text,
-                color = textColor,
-                fontSize = 17.sp,
-                textAlign = if (isLogout) TextAlign.Center else TextAlign.Start,
-                style = TextStyle(
-                    platformStyle = PlatformTextStyle(
-                        includeFontPadding = false
-                    )
-                ),
-                modifier = if (isLogout) Modifier
-                    .fillMaxWidth()
-                    .alignByBaseline() else Modifier.alignByBaseline()
-            )
-        }
-    }
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -278,6 +131,128 @@ fun ShowMoreScreen(
                     )
                 )
             }
+        }
+    }
+}
+
+@Composable
+fun ProfileSection(userName: String, userPicture: String) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        ProfileImage(userPicture)
+        Spacer(modifier = Modifier.width(16.dp))
+        Text(
+            text = userName,
+            style = MaterialTheme.typography.headlineMedium,
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold,
+            color = MobiTextAlmostBlack,
+        )
+    }
+}
+
+@Composable
+fun ProfileImage(userPicture: String?) {
+    val imageUrl = if (userPicture.isNullOrBlank()) {
+        R.drawable.default_profile // 기본 프로필 이미지 리소스
+    } else {
+        userPicture
+    }
+
+    Image(
+        painter = rememberAsyncImagePainter(
+            ImageRequest.Builder(LocalContext.current).data(data = imageUrl).apply(block = fun ImageRequest.Builder.() {
+                crossfade(true)
+                transformations(CircleCropTransformation())
+            }).build()
+        ),
+        contentDescription = "Profile Picture",
+        modifier = Modifier
+            .size(60.dp)
+            .clip(CircleShape),
+        contentScale = ContentScale.Crop
+    )
+}
+
+@Composable
+fun ProfileMenuButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    Button(
+        onClick = onClick,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = ButtonColor,
+            contentColor = MobiTextDarkGray
+        ),
+        shape = RoundedCornerShape(8.dp),
+        modifier = modifier.height(40.dp)
+    ) {
+        Text(text, fontSize = 14.sp)
+    }
+}
+
+@Composable
+fun MenuSection(title: String, items: List<MenuItem>) {
+    Text(title, fontWeight = FontWeight.Bold, fontSize = 16.sp, color = MobiTextDarkGray)
+    Spacer(modifier = Modifier.height(8.dp))
+    items.forEach { item ->
+        MenuItemCard(item = item)
+        Spacer(modifier = Modifier.height(8.dp))
+    }
+}
+
+@Composable
+fun MenuItemCard(item: MenuItem) {
+    val isLogout = item.text == "로그아웃"
+    val cardColor = if (isLogout) Color.Transparent else Color.White
+    val textColor = if (isLogout) Color.Red else MobiTextDarkGray
+    val borderColor = if (isLogout) Color.LightGray else Color.Transparent
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(8.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = if (isLogout) 0.dp else 2.dp),
+        onClick = item.onClick,
+        colors = CardDefaults.cardColors(containerColor = cardColor),
+        border = if (isLogout) BorderStroke(1.dp, borderColor) else null
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 12.dp, horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = if (isLogout) Arrangement.Center else Arrangement.Start
+        ) {
+            if (item.emoji != null && !isLogout) {
+                Text(
+                    text = item.emoji,
+                    fontFamily = FontFamily(Font(R.font.emoji)),
+                    fontSize = 16.sp,
+                    style = TextStyle(
+                        platformStyle = PlatformTextStyle(
+                            includeFontPadding = false
+                        )
+                    ),
+                    modifier = Modifier
+                        .alignByBaseline()
+//                        .padding(top = 6.dp)
+//                        .padding(end = 8.dp)
+                )
+            }
+            Text(
+                text = item.text,
+                color = textColor,
+                fontSize = 17.sp,
+                textAlign = if (isLogout) TextAlign.Center else TextAlign.Start,
+                style = TextStyle(
+                    platformStyle = PlatformTextStyle(
+                        includeFontPadding = false
+                    )
+                ),
+                modifier = if (isLogout) Modifier
+                    .fillMaxWidth()
+                    .alignByBaseline() else Modifier.alignByBaseline()
+            )
         }
     }
 }
