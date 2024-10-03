@@ -7,6 +7,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
+import com.kimnlee.cardmanagement.presentation.viewmodel.CardManagementViewModel
 import com.kimnlee.common.components.BottomNavigation
 import com.kimnlee.common.network.ApiClient
 import com.kimnlee.memberinvitation.presentation.viewmodel.MemberInvitationViewModel
@@ -20,7 +21,8 @@ fun NavGraphBuilder.vehicleManagementNavGraph(
     context: Context,
     apiClient: ApiClient,
     vehicleManagementViewModel: VehicleManagementViewModel,
-    memberInvitationViewModel: MemberInvitationViewModel
+    memberInvitationViewModel: MemberInvitationViewModel,
+    cardManagementViewModel: CardManagementViewModel
 ) {
     navigation(startDestination = "vehiclemanagement_main", route = "vehiclemanagement") {
         composable("vehiclemanagement_main",
@@ -50,6 +52,7 @@ fun NavGraphBuilder.vehicleManagementNavGraph(
                     onNavigateToInvitePhone = { navController.navigate("memberinvitation_phone/$vehicleId") },
                     onNavigateToNotification = { navController.navigate("notification_main") },
                     navController = navController,
+                    cardManagementViewModel = cardManagementViewModel,
                     viewModel = vehicleManagementViewModel,
                     memberInvitationViewModel = memberInvitationViewModel
                 )

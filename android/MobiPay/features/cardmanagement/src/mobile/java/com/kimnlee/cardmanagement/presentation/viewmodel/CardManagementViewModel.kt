@@ -12,6 +12,8 @@ import com.kimnlee.cardmanagement.data.model.RegisterCardRequest
 import com.kimnlee.cardmanagement.data.model.RegisteredCard
 import com.kimnlee.common.auth.AuthManager
 import com.kimnlee.common.network.ApiClient
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -55,6 +57,11 @@ class CardManagementViewModel(
 
     private val _registeredCards = MutableStateFlow<List<RegisteredCard>>(emptyList())
     val registeredCards: StateFlow<List<RegisteredCard>> = _registeredCards.asStateFlow()
+
+    private val _autoPaymentMessage = MutableStateFlow<String?>(null)
+    val autoPaymentMessage: StateFlow<String?> = _autoPaymentMessage.asStateFlow()
+
+    private var messageJob: Job? = null
 
     init {
         getOwnedCards()
@@ -161,16 +168,23 @@ class CardManagementViewModel(
                 val request = AutoPaymentCardRequest(ownedCardId, autoPayStatus)
                 val response = cardManagementService.registerAutoPaymentCard(request)
                 if (response.isSuccessful) {
-                    // 로컬 상태 업데이트
+                    val previousAutoPayCard = _registeredCards.value.find { it.autoPayStatus }
                     _registeredCards.update { cards ->
                         cards.map { card ->
-                            if (card.ownedCardId == ownedCardId) {
-                                card.copy(autoPayStatus = autoPayStatus)
-                            } else {
-                                card
-                            }
+                            card.copy(autoPayStatus = card.ownedCardId == ownedCardId && autoPayStatus)
                         }
                     }
+
+                    if (autoPayStatus) {
+                        if (previousAutoPayCard != null && previousAutoPayCard.ownedCardId != ownedCardId) {
+                            showAutoPaymentMessage("자동결제카드가 변경되었어요")
+                        } else {
+                            showAutoPaymentMessage("자동결제카드로 등록되었어요")
+                        }
+                    } else {
+                        showAutoPaymentMessage("자동결제가 해제되었어요")
+                    }
+
                     Log.d(TAG, "Auto payment card set successfully")
                 } else {
                     Log.e(TAG, "Failed to set auto payment card: ${response.code()}")
@@ -179,6 +193,21 @@ class CardManagementViewModel(
                 Log.e(TAG, "Exception while setting auto payment card: ${e.message}")
             }
         }
+    }
+
+    // 자동결제 등록을 했을 때 토스트 메세지 출력
+    private fun showAutoPaymentMessage(message: String) {
+        messageJob?.cancel()
+        messageJob = viewModelScope.launch {
+            _autoPaymentMessage.value = message
+            delay(3000)
+            _autoPaymentMessage.value = null
+        }
+    }
+
+    // 등록되어 있는 카드인지 확인
+    fun isCardRegistered(ownedCardId: Int): Boolean {
+        return registeredCards.value.any { it.ownedCardId == ownedCardId }
     }
 
     fun openBottomSheet() {
