@@ -93,7 +93,7 @@ fun AppNavGraph(
                 )
             }
         }
-        composable("payment",
+        composable("payment_requestmanualpay",
             enterTransition = { EnterTransition.None },
             exitTransition = { ExitTransition.None }
         ) {

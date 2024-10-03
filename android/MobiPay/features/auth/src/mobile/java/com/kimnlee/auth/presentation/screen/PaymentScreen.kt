@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
@@ -49,10 +51,6 @@ fun PaymentScreen(
     val keyguardManager = context.getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
     val bioAuth = viewModel.BIO_AUTH
 
-    println("context?????? $context")
-    println("authState????? $authState")
-    println("keyguardManager?????? $keyguardManager")
-
     LaunchedEffect(Unit) {
         viewModel.navigateToPaymentDetail.collect {
             navController.navigate("payment_detail")
@@ -61,66 +59,52 @@ fun PaymentScreen(
     }
 
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White)
+            .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween
     ) {
-        // 제목
-        Text(text = "결제 페이지")
-        // 코인 사진
+        // Top Icon (Coin)
         Image(
-            painter = painterResource(id = R.drawable.settings_24px),
-            contentDescription = "영수증 사진",
-            contentScale = ContentScale.Crop,
+            painter = painterResource(id = R.drawable.ic_mobipay),
+            contentDescription = "Coin Icon",
             modifier = Modifier
-                .fillMaxWidth()
-                .background(Color.Gray)
-                .weight(0.3f)
-                .padding(50.dp),
+                .size(100.dp)
+                .padding(top = 24.dp)
         )
 
+        // Store Information (Logo + Name)
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(0.1f)
-                .height(10.dp),
+            modifier = Modifier.padding(vertical = 16.dp),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
-
         ) {
             Image(
-                painter = painterResource(id = R.drawable.credit_card_24px),
-                contentDescription = "카드 사진",
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .fillMaxHeight()
-
-                    .background(Color.Gray)
+                painter = painterResource(id = R.drawable.ic_mobipay), // Replace with your actual McDonald's logo drawable
+                contentDescription = "McDonald's Logo",
+                modifier = Modifier.size(50.dp)
             )
-            Spacer(modifier = Modifier.padding(16.dp))
+            Spacer(modifier = Modifier.width(16.dp))
             Text(
                 text = "맥도날드 구미 인동점",
                 style = MaterialTheme.typography.headlineSmall,
+                color = Color.Black
             )
         }
-        // 가격
+
+        // Price
         Text(
-            text = "13,500원",
+            text = "13,500 원",
             style = MaterialTheme.typography.headlineLarge,
-            modifier = Modifier
-                .weight(0.1f)
-                .background(Color.Red)
-                .fillMaxHeight()
-                .wrapContentHeight(align = Alignment.CenterVertically),
+            color = Color.Black,
+            modifier = Modifier.padding(vertical = 16.dp)
         )
-        // 지문 박스
-        Box(
-            modifier = Modifier
-                .weight(0.2f)
-                .fillMaxSize()
-                .background(Color.Gray)
-        ) {
-            Button(onClick = {
+
+        // Fingerprint Authentication Button
+        Button(
+            onClick = {
                 if (viewModel.checkBiometricAvailability()) {
                     val intent = keyguardManager.createConfirmDeviceCredentialIntent(
                         "생체 인증",
@@ -130,32 +114,31 @@ fun PaymentScreen(
                         (context as ComponentActivity).startActivityForResult(
                             intent, bioAuth
                         )
-                        Log.e(TAG, "intent가 널이 아니다.")
                     } else {
                         viewModel.updateAuthenticationState(AuthenticationState.Error("생체 인증을 사용할 수 없습니다."))
                     }
                 } else {
                     viewModel.updateAuthenticationState(AuthenticationState.Error("생체 인증을 사용할 수 없습니다."))
                 }
-            }) {
-                Text("지문 인증 시작")
-            }
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 32.dp, vertical = 24.dp)
+                .height(60.dp)
+        ) {
+            Text(text = "지문 인증 시작", style = MaterialTheme.typography.bodyLarge)
         }
+
         when (authState) {
-            is AuthenticationState.Idle -> Text("인증 대기 중")
+            is AuthenticationState.Idle -> Text("인증 대기 중", style = MaterialTheme.typography.bodyMedium)
             is AuthenticationState.Success -> {
-                Text("인증 성공!")
-                Log.d(TAG, "AuthenticationState.Success 했음")
+                Text("인증 성공!", style = MaterialTheme.typography.bodyMedium)
             }
-
             is AuthenticationState.Failure -> {
-                Text("인증 실패!")
-                Log.d(TAG, "AuthenticationState.fail 했음")
+                Text("인증 실패!", style = MaterialTheme.typography.bodyMedium)
             }
-
             is AuthenticationState.Error -> {
-                Text("오류: ${(authState as AuthenticationState.Error).message}")
-                Log.d(TAG, "오류: ${(authState as AuthenticationState.Error).message}")
+                Text("오류: ${(authState as AuthenticationState.Error).message}", style = MaterialTheme.typography.bodyMedium)
             }
         }
     }
