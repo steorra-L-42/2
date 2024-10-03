@@ -1,12 +1,14 @@
 package com.kimnlee.cardmanagement.presentation.screen
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -17,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,12 +43,23 @@ fun CardManagementScreen(
 ) {
     val registeredCards by viewModel.registeredCards.collectAsState()
     val showBottomSheet by viewModel.showBottomSheet.collectAsState()
+    val autoPaymentMessage by viewModel.autoPaymentMessage.collectAsState()
 
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(Unit) {
         viewModel.getRegisteredCards()
+    }
+
+    LaunchedEffect(autoPaymentMessage) {
+        autoPaymentMessage?.let {
+            snackbarHostState.showSnackbar(
+                message = it,
+                duration = SnackbarDuration.Short
+            )
+        }
     }
 
     Scaffold(
@@ -56,7 +70,8 @@ fun CardManagementScreen(
                     containerColor = MaterialTheme.colorScheme.background
                 )
             )
-        }
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
@@ -137,11 +152,18 @@ fun CardItem(
                             style = MaterialTheme.typography.bodyMedium
                         )
                     }
-                    IconButton(onClick = onAutoPaymentToggle) {
+                    Box(
+                        modifier = Modifier
+                            .size(48.dp)
+                            .background(Color.Black.copy(alpha = 0.6f), CircleShape)
+                            .clickable(onClick = onAutoPaymentToggle),
+                        contentAlignment = Alignment.Center
+                    ) {
                         Icon(
                             imageVector = if (card.autoPayStatus) Icons.Filled.Star else Icons.Outlined.Star,
                             contentDescription = "Toggle Auto Payment",
-                            tint = if (card.autoPayStatus) Color.Yellow else Color.White
+                            tint = if (card.autoPayStatus) Color.Yellow else Color.White,
+                            modifier = Modifier.size(32.dp)
                         )
                     }
                 }
