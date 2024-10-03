@@ -4,14 +4,18 @@ import com.example.mobipay.domain.merchant.error.MerchantNotFoundException;
 import com.example.mobipay.domain.merchanttransaction.entity.MerchantTransaction;
 import com.example.mobipay.domain.merchanttransaction.error.MerchantTransactionNotFoundException;
 import com.example.mobipay.domain.merchanttransaction.repository.MerchantTransactionRepository;
+import com.example.mobipay.domain.mobiuser.error.MobiUserNotFoundException;
+import com.example.mobipay.domain.mobiuser.repository.MobiUserRepository;
 import com.example.mobipay.domain.ownedcard.entity.OwnedCard;
 import com.example.mobipay.domain.ownedcard.error.OwnedCardNotFoundException;
 import com.example.mobipay.domain.postpayments.dto.ReceiptResponse;
+import com.example.mobipay.domain.postpayments.dto.historyresponse.HistoryListResponse;
 import com.example.mobipay.domain.postpayments.error.ReceiptUserMismatchException;
 import com.example.mobipay.domain.postpayments.error.RegisteredCardNotFoundException;
 import com.example.mobipay.domain.registeredcard.entity.RegisteredCard;
 import com.example.mobipay.global.authentication.error.CardProductNotFoundException;
 import com.example.mobipay.oauth2.dto.CustomOAuth2User;
+import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class PostPaymentsUtilService {
 
     private final MerchantTransactionRepository merchantTransactionRepository;
+    private final MobiUserRepository mobiUserRepository;
 
     @Transactional(readOnly = true)
     public ReceiptResponse getReceipt(Long transactionUniqueNo, CustomOAuth2User oAuth2User) {
@@ -62,5 +67,17 @@ public class PostPaymentsUtilService {
                 .orElseThrow(MerchantNotFoundException::new);
 
         return ReceiptResponse.from(merchantTransaction);
+    }
+
+    @Transactional(readOnly = true)
+    public HistoryListResponse getHistories(CustomOAuth2User oAuth2User) {
+
+        mobiUserRepository.findById(oAuth2User.getMobiUserId())
+                .orElseThrow(MobiUserNotFoundException::new);
+
+        List<MerchantTransaction> mobiUserTransactions = merchantTransactionRepository.findByMobiUserId(
+                oAuth2User.getMobiUserId());
+
+        return HistoryListResponse.from(mobiUserTransactions);
     }
 }
