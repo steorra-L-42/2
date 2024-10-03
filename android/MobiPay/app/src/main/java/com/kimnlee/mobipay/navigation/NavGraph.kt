@@ -21,7 +21,6 @@ import com.kimnlee.cardmanagement.presentation.viewmodel.CardManagementViewModel
 import com.kimnlee.common.auth.AuthManager
 import com.kimnlee.common.components.BottomNavigation
 import com.kimnlee.common.network.ApiClient
-import com.kimnlee.firebase.FCMService
 import com.kimnlee.memberinvitation.navigation.memberInvitationNavGraph
 import com.kimnlee.memberinvitation.presentation.viewmodel.MemberInvitationViewModel
 import com.kimnlee.mobipay.presentation.screen.HomeScreen
@@ -108,7 +107,12 @@ fun AppNavGraph(
 
         authNavGraph(navController, authManager, loginViewModel)
         paymentNavGraph(navController)
-        cardManagementNavGraph(navController, authManager, cardManagementViewModel, apiClient)
+        cardManagementNavGraph(
+            navController,
+            authManager,
+            cardManagementViewModel,
+            apiClient
+        )
         vehicleManagementNavGraph(navController, context, apiClient, vehicleManagementViewModel)
         memberInvitationNavGraph(navController, context, memberInvitationViewModel)
 

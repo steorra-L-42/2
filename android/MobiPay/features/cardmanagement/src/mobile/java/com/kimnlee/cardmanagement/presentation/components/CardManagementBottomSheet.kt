@@ -59,7 +59,7 @@ fun CardManagementBottomSheet(
                 title = "새로운 카드 등록",
                 description = "새로운 카드를 등록할 수 있습니다.",
                 onItemClick = {
-                    onNavigateToRegistration()
+//                    onNavigateToRegistration() // 새로운 카드 등록은 카메라로 찍는 화면이라 이거 나중에
                     viewModel.closeBottomSheet()
                 })
         }

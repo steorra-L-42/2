@@ -1,25 +1,21 @@
 package com.kimnlee.cardmanagement.presentation.viewmodel
 
-import OwnedCard
-import Photos
-import RegisterCardRequest
-import RegisteredCard
 import android.content.ContentValues.TAG
 import android.util.Log
-import androidx.compose.material3.Card
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.kakao.sdk.user.model.User
 import com.kimnlee.cardmanagement.data.api.CardManagementApiService
-import com.kimnlee.cardmanagement.data.repository.CardManagementRepository
+import com.kimnlee.cardmanagement.data.model.AutoPaymentCardRequest
+import com.kimnlee.cardmanagement.data.model.CardDetailResponse
+import com.kimnlee.cardmanagement.data.model.OwnedCard
+import com.kimnlee.cardmanagement.data.model.RegisterCardRequest
+import com.kimnlee.cardmanagement.data.model.RegisteredCard
 import com.kimnlee.common.auth.AuthManager
 import com.kimnlee.common.network.ApiClient
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class CardManagementViewModel(
@@ -37,10 +33,6 @@ class CardManagementViewModel(
     private val _registrationStatus = MutableStateFlow<String?>(null)
     val registrationStatus: StateFlow<String?> = _registrationStatus
 
-    // 소유한 카드 리스트 에서 카드 등록하기
-    private val _registeredCards = MutableStateFlow<List<RegisteredCard>>(emptyList())
-        val registeredCards : StateFlow<List<RegisteredCard>> = _registeredCards
-
     // 다이어로그 보이기
     private val _showDialog = MutableStateFlow<Boolean>(false)
     val showDialog: StateFlow<Boolean> = _showDialog.asStateFlow()
@@ -50,20 +42,27 @@ class CardManagementViewModel(
     val ownedCardUiState: StateFlow<OwnedCardUiState> = _ownedCardUiState
 
     // 등록 카드 리스트 상태
-    private val _registratedCardState =
-        MutableStateFlow<RegistratedCardState>(RegistratedCardState.Loading)
-    val registratedCardState: StateFlow<RegistratedCardState> = _registratedCardState
+    private val _registeredCardState =
+        MutableStateFlow<RegisteredCardState>(RegisteredCardState.Loading)
+    val registratedCardState: StateFlow<RegisteredCardState> = _registeredCardState
 
     // 바텀 시트
     private val _showBottomSheet = MutableStateFlow(false)
     val showBottomSheet: StateFlow<Boolean> = _showBottomSheet.asStateFlow()
 
+    private val _cardDetail = MutableStateFlow<CardDetailResponse?>(null)
+    val cardDetail: StateFlow<CardDetailResponse?> = _cardDetail
+
+    private val _registeredCards = MutableStateFlow<List<RegisteredCard>>(emptyList())
+    val registeredCards: StateFlow<List<RegisteredCard>> = _registeredCards.asStateFlow()
+
     init {
-        requestOwnedCards()
-        requestRegistrationCards()
+        getOwnedCards()
+        getRegisteredCards()
     }
 
-    fun requestOwnedCards() {
+    // 내 소유의 카드 불러오기
+    fun getOwnedCards() {
         viewModelScope.launch {
             _ownedCardUiState.value = OwnedCardUiState.Loading
             try {
@@ -72,6 +71,7 @@ class CardManagementViewModel(
                     val cardList = response.body()?.items ?: emptyList()
                     _ownedCardUiState.value = OwnedCardUiState.Success(cardList)
                     Log.d(TAG, "카드 목록 받아오기 성공: ${cardList.size} 개의 카드")
+                    Log.d(TAG, "내 소유의 카드 목록 $cardList")
                 } else {
                     _ownedCardUiState.value =
                         OwnedCardUiState.Error("Failed to fetch cards: ${response.code()}")
@@ -83,46 +83,104 @@ class CardManagementViewModel(
         }
     }
 
-    fun requestRegistrationCards() {
+    // 등록된 카드 불러오기
+    fun getRegisteredCards() {
         viewModelScope.launch {
-            _registratedCardState.value = RegistratedCardState.Loading
+            _registeredCardState.value = RegisteredCardState.Loading
             try {
                 val response = cardManagementService.getRegistrationCards()
                 if (response.isSuccessful) {
                     val cardList = response.body()?.items ?: emptyList()
-                    _registratedCardState.value = RegistratedCardState.Success(cardList)
-                    Log.d(TAG, "카드 목록 받아오기 성공: ${cardList.size} 개의 카드")
+                    _registeredCards.value = cardList
+                    _registeredCardState.value = RegisteredCardState.Success(cardList)
+                    Log.d(TAG, "등록된 카드 목록 받아오기 성공: ${cardList.size} 개의 카드")
                 } else {
-                    _registratedCardState.value =
-                        RegistratedCardState.Error("Failed to fetch cards: ${response.code()}")
+                    _registeredCardState.value =
+                        RegisteredCardState.Error("Failed to fetch cards: ${response.code()}")
                 }
             } catch (e: Exception) {
-                _registratedCardState.value =
-                    RegistratedCardState.Error("Failed to fetch cards: ${e.message}")
+                _registeredCardState.value =
+                    RegisteredCardState.Error("Failed to fetch cards: ${e.message}")
             }
         }
     }
-    fun registerCard(ownedCardId: Long, oneDayLimit: Int, oneTimeLimit: Int, password: String, autoPayStatus : Boolean = false) {
+
+    // 등록된 카드가 있는지 확인
+    private fun shouldSetAutoPayment(): Boolean {
+        return registeredCards.value.isEmpty()
+    }
+
+    // 내 소유의 카드 중에서 사용할 카드 등록
+    fun registerCard(ownedCardId: Int, oneDayLimit: Int, oneTimeLimit: Int, password: String) {
         viewModelScope.launch {
             try {
                 val request = RegisterCardRequest(ownedCardId, oneDayLimit, oneTimeLimit, password)
                 val response = cardManagementService.registerCard(request)
-
-                // 등록된 카드 목록에 새로운 카드 추가
-                val newRegisteredCard = RegisteredCard(
-                    mobiUserId = response.mobiUserId,
-                    ownedCardId = response.ownedCardId,
-                    oneDayLimit = response.oneDayLimit,
-                    oneTimeLimit = response.oneTimeLimit,
-                    autoPayStatus = autoPayStatus
-                )
-                _registeredCards.value = _registeredCards.value + newRegisteredCard
-                _registrationStatus.value = "카드가 성공적으로 등록되었습니다."
+                if (response.isSuccessful) {
+                    val registeredCard = response.body()
+                    if (registeredCard != null) {
+                        _registrationStatus.value = "카드가 성공적으로 등록되었습니다."
+                        // 등록된 카드가 없을 경우에만 자동 결제 설정
+                        if (shouldSetAutoPayment()) {
+                            setAutoPaymentCard(ownedCardId, true)
+                        }
+                        // 등록 성공 후 등록된 카드 목록을 갱신
+                        getRegisteredCards()
+                    } else {
+                        _registrationStatus.value = "카드 등록 실패: 응답 데이터 없음"
+                    }
+                } else {
+                    _registrationStatus.value = "카드 등록 실패: ${response.code()}"
+                }
             } catch (e: Exception) {
                 _registrationStatus.value = "카드 등록 실패: ${e.message}"
             }
         }
     }
+
+    // 카드 정보 불러오기
+    fun loadCardDetail(cardId: Int) {
+        viewModelScope.launch {
+            try {
+                val response = cardManagementService.getCardDetail(cardId)
+                if (response.isSuccessful) {
+                    _cardDetail.value = response.body()
+                } else {
+                    Log.e(TAG, "Failed to load card detail: ${response.code()}")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Exception while loading card detail: ${e.message}")
+            }
+        }
+    }
+
+    // 자동 결제 등록
+    fun setAutoPaymentCard(ownedCardId: Int, autoPayStatus: Boolean) {
+        viewModelScope.launch {
+            try {
+                val request = AutoPaymentCardRequest(ownedCardId, autoPayStatus)
+                val response = cardManagementService.registerAutoPaymentCard(request)
+                if (response.isSuccessful) {
+                    // 로컬 상태 업데이트
+                    _registeredCards.update { cards ->
+                        cards.map { card ->
+                            if (card.ownedCardId == ownedCardId) {
+                                card.copy(autoPayStatus = autoPayStatus)
+                            } else {
+                                card
+                            }
+                        }
+                    }
+                    Log.d(TAG, "Auto payment card set successfully")
+                } else {
+                    Log.e(TAG, "Failed to set auto payment card: ${response.code()}")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Exception while setting auto payment card: ${e.message}")
+            }
+        }
+    }
+
     fun openBottomSheet() {
         _showBottomSheet.value = true
     }
@@ -146,8 +204,8 @@ sealed class OwnedCardUiState {
     data class Error(val message: String) : OwnedCardUiState()
 }
 
-sealed class RegistratedCardState {
-    object Loading : RegistratedCardState()
-    data class Success(val cards: List<RegisteredCard>) : RegistratedCardState()
-    data class Error(val message: String) : RegistratedCardState()
+sealed class RegisteredCardState {
+    object Loading : RegisteredCardState()
+    data class Success(val cards: List<RegisteredCard>) : RegisteredCardState()
+    data class Error(val message: String) : RegisteredCardState()
 }
