@@ -1,5 +1,6 @@
 package com.kimnlee.cardmanagement.presentation.screen
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -20,6 +21,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kimnlee.cardmanagement.data.model.RegisteredCard
@@ -35,8 +38,6 @@ fun CardManagementScreen(
     onNavigateToOwnedCards: () -> Unit,
     viewModel: CardManagementViewModel,
 ) {
-    val scrollState = rememberScrollState()
-    val registeredCardState by viewModel.registratedCardState.collectAsState()
     val registeredCards by viewModel.registeredCards.collectAsState()
     val showBottomSheet by viewModel.showBottomSheet.collectAsState()
 
@@ -44,61 +45,38 @@ fun CardManagementScreen(
     val sheetState = rememberModalBottomSheetState()
 
     LaunchedEffect(Unit) {
-        if (registeredCards.isEmpty()) {
-            viewModel.getRegisteredCards()
-        }
+        viewModel.getRegisteredCards()
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-            .verticalScroll(scrollState),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = "등록된 카드 확인",
-            style = MaterialTheme.typography.headlineMedium,
-        )
-        Spacer(modifier = Modifier.padding(16.dp))
-
-        when (registeredCardState) {
-            is RegisteredCardState.Loading -> {
-                CircularProgressIndicator()
-            }
-            is RegisteredCardState.Success -> {
-                if (registeredCards.isEmpty()) {
-                    Text("등록된 카드가 없습니다.")
-                } else {
-                    LazyColumn(
-                        verticalArrangement = Arrangement.spacedBy(16.dp),
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        items(registeredCards) { card ->
-                            CardItem(
-                                card = card,
-                                onAutoPaymentToggle = {
-                                    viewModel.setAutoPaymentCard(card.ownedCardId, !card.autoPayStatus)
-                                }
-                            )
-                        }
-                    }
-                }
-            }
-            is RegisteredCardState.Error -> {
-                Text(
-                    text = (registeredCardState as RegisteredCardState.Error).message,
-                    color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.padding(vertical = 16.dp)
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("등록된 카드") },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background
                 )
-                Button(onClick = { viewModel.getRegisteredCards() }) {
-                    Text("다시 시도")
-                }
+            )
+        }
+    ) { paddingValues ->
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            items(registeredCards) { card ->
+                CardItem(
+                    card = card,
+                    onAutoPaymentToggle = {
+                        viewModel.setAutoPaymentCard(card.ownedCardId, !card.autoPayStatus)
+                    }
+                )
+            }
+            item {
+                AddCardButton { viewModel.openBottomSheet() }
             }
         }
-
-        Spacer(modifier = Modifier.height(16.dp))
-        AddCardButton { viewModel.openBottomSheet() }
 
         if (showBottomSheet) {
             CardManagementBottomSheet(
@@ -119,28 +97,54 @@ fun CardItem(
 ) {
     Card(
         modifier = Modifier
-            .fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(4.dp)
+            .fillMaxWidth()
+            .height(200.dp),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(8.dp)
     ) {
-        Row(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text("카드 ID: ${card.ownedCardId}")
-                Text("일일 한도: ${card.oneDayLimit}원")
-                Text("1회 한도: ${card.oneTimeLimit}원")
-                Text("자동 결제: ${if (card.autoPayStatus) "활성화" else "비활성화"}")
-            }
-            IconButton(onClick = onAutoPaymentToggle) {
-                Icon(
-                    imageVector = if (card.autoPayStatus) Icons.Filled.Star else Icons.Outlined.Star,
-                    contentDescription = "Toggle Auto Payment",
-                    tint = if (card.autoPayStatus) Color.Yellow else Color.Gray
+        Box(modifier = Modifier.fillMaxSize()) {
+            Image(
+                painter = painterResource(id = findCardCompany(card.ownedCardId.toString())),
+                contentDescription = "Card Image",
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = maskCardNumber(card.ownedCardId.toString()),
+                    color = Color.White,
+                    style = MaterialTheme.typography.titleLarge
                 )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text(
+                            text = "일일 한도: ${card.oneDayLimit}원",
+                            color = Color.White,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        Text(
+                            text = "1회 한도: ${card.oneTimeLimit}원",
+                            color = Color.White,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                    IconButton(onClick = onAutoPaymentToggle) {
+                        Icon(
+                            imageVector = if (card.autoPayStatus) Icons.Filled.Star else Icons.Outlined.Star,
+                            contentDescription = "Toggle Auto Payment",
+                            tint = if (card.autoPayStatus) Color.Yellow else Color.White
+                        )
+                    }
+                }
             }
         }
     }
@@ -154,24 +158,29 @@ fun AddCardButton(openBottomSheet: () -> Unit) {
             .height(200.dp)
             .clickable(onClick = openBottomSheet),
         shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(4.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.LightGray)
+        elevation = CardDefaults.cardElevation(8.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
         ) {
-            Icon(
-                imageVector = Icons.Default.Add,
-                contentDescription = "Add Card",
-                tint = Color.Gray,
-                modifier = Modifier.size(40.dp)
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text("카드 추가", style = MaterialTheme.typography.bodyLarge)
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Add Card",
+                    modifier = Modifier.size(48.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    "카드 추가",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
     }
 }
