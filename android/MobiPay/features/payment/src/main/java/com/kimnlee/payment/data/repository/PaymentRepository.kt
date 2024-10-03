@@ -79,6 +79,10 @@ class PaymentRepository(
 
     override fun processPay(fcmData: FCMData, isAutoPay: Boolean){
 
+        val approvalWaitingId = fcmData.approvalWaitingId?.toLongOrNull()
+        val merchantId = fcmData.merchantId?.toLongOrNull()
+        val paymentBalance = fcmData.paymentBalance?.toLongOrNull()
+
         if (listOf(
                 fcmData.approvalWaitingId,
                 fcmData.merchantId,
@@ -87,27 +91,31 @@ class PaymentRepository(
                 fcmData.info
             ).any { it == null }) {
             Log.d(TAG, "processPay: NULL 값이 확인되어 결제 요청을 승인할 수 없습니다.")
+            if(fcmData != null){
+                Log.d(TAG, "processPay: $fcmData")
+            }
             return
         }
 
         val paymentApprovalData = PaymentApprovalData(
-            approvalWaitingId = fcmData.approvalWaitingId!!,
-            merchantId = fcmData.merchantId!!,
-            paymentBalance = fcmData.paymentBalance!!,
+            approvalWaitingId = approvalWaitingId!!,
+            merchantId = merchantId!!,
+            paymentBalance = paymentBalance!!,
             cardNo = fcmData.cardNo!!,
             info = fcmData.info!!,
             approved = true
         )
 
+        Log.d(TAG, "processPay: 서버에 결제요청. 이 정보로: ${paymentApprovalData.toString()}")
         val paymentApprovalDataJson = Gson().toJson(paymentApprovalData)
         // 서버로 Approval 전송
-        val call = authenticatedApi.approvePaymentRequest(paymentApprovalDataJson)
+        val call = authenticatedApi.approvePaymentRequest(paymentApprovalData)
 
         call.enqueue(object : Callback<Void> {
             override fun onResponse(call: Call<Void>, response: Response<Void>) {
 
 //                if (response.isSuccessful) { // 결제 성공
-                if (response.isSuccessful || 1 == 1) { // 임시 코드
+                if (response.isSuccessful) { // 임시 코드
                     Log.e(TAG, "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
                     Log.e(TAG, "@@@        임시 코드 사용중        @@")
                     Log.e(TAG, "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
