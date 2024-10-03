@@ -1,7 +1,6 @@
 package com.kimnlee.cardmanagement.presentation.screen
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -22,7 +21,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kimnlee.cardmanagement.R
 import com.kimnlee.cardmanagement.data.model.OwnedCard
 import com.kimnlee.cardmanagement.presentation.viewmodel.CardManagementViewModel
@@ -55,7 +53,9 @@ fun CardManagementOwnedCardListScreen(
                     selectedCards = if (isSelected) selectedCards + card else selectedCards - card
                 }
             )
-            is OwnedCardUiState.Error -> ErrorState(state.message, viewModel)
+            is OwnedCardUiState.Error -> {
+                // 에러 상태에서는 아무것도 표시하지 않음
+            }
         }
         Spacer(modifier = Modifier.weight(1f))
         Button(
