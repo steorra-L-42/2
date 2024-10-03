@@ -38,7 +38,7 @@ class MobiPayApplication : Application(), FCMDependencyProvider {
         authManagerInstance = AuthManager(this)
         apiClientInstance = ApiClient.getInstance { authManagerInstance.getAuthToken() }
 
-        val paymentApiService = apiClient.unAuthenticatedApi.create(PaymentApiService::class.java)
+        val paymentApiService = apiClient.authenticatedApi.create(PaymentApiService::class.java)
         paymentRepository = PaymentRepository(paymentApiService, mobiNotificationManager, applicationContext)
 
         // 카카오 SDK 초기화
