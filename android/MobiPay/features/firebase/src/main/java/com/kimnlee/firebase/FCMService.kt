@@ -98,7 +98,7 @@ class FCMService : FirebaseMessagingService() {
         if (remoteMessage.data.isNotEmpty()) {
             Log.d(TAG, "페이로드: ${remoteMessage.data}")
 
-            Log.d(TAG, "processAutoPay: 안드로이드 오토 화면 켜져있는지 = ${AAFocusManager.isAppInFocus}")
+            Log.d(TAG, "processMessage: 안드로이드 오토 화면 켜져있는지 = ${AAFocusManager.isAppInFocus}")
 
             val responseJsonString = Gson().toJson(remoteMessage.data)
 
