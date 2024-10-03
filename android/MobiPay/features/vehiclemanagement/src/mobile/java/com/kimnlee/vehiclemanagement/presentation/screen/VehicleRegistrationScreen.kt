@@ -41,6 +41,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import com.kimnlee.vehiclemanagement.R
 import androidx.compose.foundation.focusable
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 
 private const val TAG = "VehicleRegistrationScreen"
@@ -237,36 +238,42 @@ fun VehicleRegistrationScreen(
                 modifier = Modifier.align(Alignment.Start)
             )
             Spacer(modifier = Modifier.height(4.dp))
-            Button(
-                onClick = { expandedBrand = true },
-                modifier = Modifier
-                    .border(1.dp, Color.Black, RoundedCornerShape(8.dp))
-                    .fillMaxWidth(),
-                shape = RoundedCornerShape(8.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.Transparent,
-                    contentColor = Color.Black
-                )
+            Box(
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Text(
-                    text = if (selectedBrand.isEmpty()) "제조사를 선택해주세요" else selectedBrand,
-                    style = MaterialTheme.typography.bodyMedium.copy(fontSize = 16.sp)
-                )
-            }
-
-            DropdownMenu(
-                expanded = expandedBrand,
-                onDismissRequest = { expandedBrand = false },
-                modifier = Modifier.fillMaxWidth(0.925f)
-            ) {
-                brands.forEach { brand ->
-                    DropdownMenuItem(
-                        text = { Text(brand) },
-                        onClick = {
-                            selectedBrand = brand
-                            expandedBrand = false
-                        }
+                Button(
+                    onClick = { expandedBrand = true },
+                    modifier = Modifier
+                        .border(1.dp, Color.Black, RoundedCornerShape(8.dp))
+                        .fillMaxWidth(),
+                    shape = RoundedCornerShape(8.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Transparent,
+                        contentColor = Color.Black
                     )
+                ) {
+                    Text(
+                        text = if (selectedBrand.isEmpty()) "제조사를 선택해주세요" else selectedBrand,
+                        style = MaterialTheme.typography.bodyMedium.copy(fontSize = 16.sp)
+                    )
+                }
+
+                DropdownMenu(
+                    expanded = expandedBrand,
+                    onDismissRequest = { expandedBrand = false },
+                    modifier = Modifier
+                        .fillMaxWidth(0.925f)
+                        .background(Color.White)
+                ) {
+                    brands.forEach { brand ->
+                        DropdownMenuItem(
+                            text = { Text(brand) },
+                            onClick = {
+                                selectedBrand = brand
+                                expandedBrand = false
+                            }
+                        )
+                    }
                 }
             }
 
@@ -279,49 +286,55 @@ fun VehicleRegistrationScreen(
                 modifier = Modifier.align(Alignment.Start)
             )
             Spacer(modifier = Modifier.height(4.dp))
-            Surface(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .border(1.dp, Color.Black, RoundedCornerShape(8.dp)),
-                shape = RoundedCornerShape(8.dp),
-                color = if (selectedBrand.isNotEmpty()) Color.Transparent else Color.LightGray // 원하는 배경색으로 설정
+            Box(
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Button(
-                    onClick = { expandedVehicleType = true },
+                Surface(
                     modifier = Modifier
-                        .border(1.dp, Color.Black, RoundedCornerShape(8.dp))
-                        .fillMaxWidth(),
+                        .fillMaxWidth()
+                        .border(1.dp, Color.Black, RoundedCornerShape(8.dp)),
                     shape = RoundedCornerShape(8.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = if (selectedBrand.isNotEmpty()) Color.Transparent else Color.LightGray,
-                        contentColor = Color.Black,
-                        disabledContainerColor = Color.LightGray,
-                        disabledContentColor = Color.Gray
-                    ),
-                    enabled = selectedBrand.isNotEmpty()
+                    color = if (selectedBrand.isNotEmpty()) Color.Transparent else Color.LightGray // 원하는 배경색으로 설정
                 ) {
-                    Text(
-                        text = if (selectedVehicleType.isEmpty()) "차종을 선택해주세요" else selectedVehicleType,
-                        style = MaterialTheme.typography.bodyMedium.copy(fontSize = 16.sp)
-                    )
+                    Button(
+                        onClick = { expandedVehicleType = true },
+                        modifier = Modifier
+                            .border(1.dp, Color.Black, RoundedCornerShape(8.dp))
+                            .fillMaxWidth(),
+                        shape = RoundedCornerShape(8.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (selectedBrand.isNotEmpty()) Color.Transparent else Color.LightGray,
+                            contentColor = Color.Black,
+                            disabledContainerColor = Color.LightGray,
+                            disabledContentColor = Color.Gray
+                        ),
+                        enabled = selectedBrand.isNotEmpty()
+                    ) {
+                        Text(
+                            text = if (selectedVehicleType.isEmpty()) "차종을 선택해주세요" else selectedVehicleType,
+                            style = MaterialTheme.typography.bodyMedium.copy(fontSize = 16.sp)
+                        )
+                    }
                 }
-            }
 
-            DropdownMenu(
-                expanded = expandedVehicleType,
-                onDismissRequest = { expandedVehicleType = false },
-                modifier = Modifier.fillMaxWidth(0.925f)
-            ) {
-                val currentVehicleTypes = vehicleTypesMap[selectedBrand] ?: emptyList()
+                DropdownMenu(
+                    expanded = expandedVehicleType,
+                    onDismissRequest = { expandedVehicleType = false },
+                    modifier = Modifier
+                        .fillMaxWidth(0.925f)
+                        .background(Color.White)
+                ) {
+                    val currentVehicleTypes = vehicleTypesMap[selectedBrand] ?: emptyList()
 
-                currentVehicleTypes.forEach { type ->
-                    DropdownMenuItem(
-                        text = { Text(type) },
-                        onClick = {
-                            selectedVehicleType = type
-                            expandedVehicleType = false
-                        }
-                    )
+                    currentVehicleTypes.forEach { type ->
+                        DropdownMenuItem(
+                            text = { Text(type) },
+                            onClick = {
+                                selectedVehicleType = type
+                                expandedVehicleType = false
+                            }
+                        )
+                    }
                 }
             }
 
@@ -508,26 +521,42 @@ fun VehicleRegistrationScreen(
         if (showDialog) {
             AlertDialog(
                 onDismissRequest = { showDialog = false },
-                title = { Text(text = "$licensePlate | $selectedVehicleType") },
-                text = { Text("입력하신 차량 정보가 맞나요?") },
+                title = { Text("차량 정보를 확인해주세요") },
+                text = {
+                    Text(
+                        text = "차종 : $selectedVehicleType \n차량 번호 : $licensePlate",
+                        fontSize = 20.sp
+                    )
+               },
                 confirmButton = {
                     Button(
                         onClick = {
                             viewModel.registerVehicle(licensePlate, selectedVehicleType)
                             showDialog = false
                             onNavigateBack()
-                        }
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.Blue,
+                            contentColor = Color.White
+                        ),
+                        shape = RoundedCornerShape(8.dp)
                     ) {
-                        Text("확인")
+                        Text("확 인")
                     }
                     Button(
                         onClick = {
                             showDialog = false
-                        }
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.Gray,
+                            contentColor = Color.White
+                        ),
+                        shape = RoundedCornerShape(8.dp)
                     ) {
-                        Text("취소")
+                        Text("취 소")
                     }
-                }
+                },
+                containerColor = Color.White
             )
         }
     }
