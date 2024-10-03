@@ -99,7 +99,7 @@ public class PostPaymentsRequestService {
         carGroups.forEach(carGroup -> {
             // 차주인 경우
             if (isCarOwner(carGroup, owner)) {
-                sendFcmToOwner(request, approvalWaiting, merchant, owner);
+                sendFcmToOwner(request, approvalWaiting, merchant, owner, car);
                 return;
             }
             // 차주가 아닌 경우
@@ -114,18 +114,21 @@ public class PostPaymentsRequestService {
 
     // 차주에게 FCM 푸시
     private void sendFcmToOwner(PaymentRequest request, ApprovalWaiting approvalWaiting,
-                                Merchant merchant, MobiUser owner) {
-
-        Optional<RegisteredCard> optionalRegisteredCard = getRegisteredCard(owner.getId());
-        // 자동결제 등록 카드가 없다면 실패 FCM 푸시 -> 수동결제 요청 FCM 푸시
-        if (optionalRegisteredCard.isEmpty()) {
-            sendFcmNoRegisteredCard(owner);
-            sendFcmForManualPay(request, approvalWaiting, merchant, owner);
-            return;
+                                Merchant merchant, MobiUser owner, Car car) {
+        if (car.getAutoPayStatus()) {
+            Optional<RegisteredCard> optionalRegisteredCard = getRegisteredCard(owner.getId());
+            // 자동결제 등록 카드가 없다면 실패 FCM 푸시 -> 수동결제 요청 FCM 푸시
+            if (optionalRegisteredCard.isEmpty()) {
+                sendFcmNoRegisteredCard(owner);
+                sendFcmForManualPay(request, approvalWaiting, merchant, owner);
+                return;
+            }
+            // 자동결제 등록 카드가 있다면 자동결제 요청 FCM 푸시
+            RegisteredCard registeredCard = optionalRegisteredCard.get();
+            sendFcmForAutoPay(request, approvalWaiting, merchant, owner, registeredCard);
         }
-        // 자동결제 등록 카드가 있다면 자동결제 요청 FCM 푸시
-        RegisteredCard registeredCard = optionalRegisteredCard.get();
-        sendFcmForAutoPay(request, approvalWaiting, merchant, owner, registeredCard);
+        // 자동차 autoPay가 꺼져있으면 수동결제 요청 FCM 푸시
+        sendFcmForManualPay(request, approvalWaiting, merchant, owner);
     }
 
     // OwnerId로 RegisteredCard 가져오기

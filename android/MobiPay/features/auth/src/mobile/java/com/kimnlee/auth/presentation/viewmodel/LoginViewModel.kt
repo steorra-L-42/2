@@ -2,6 +2,7 @@ package com.kimnlee.auth.presentation.viewmodel
 
 import android.app.Activity
 import android.util.Log
+import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kakao.sdk.auth.model.OAuthToken
@@ -43,8 +44,8 @@ class LoginViewModel(
     private val _navigationEvent = MutableSharedFlow<String>()
     val navigationEvent = _navigationEvent.asSharedFlow()
 
-    private var _showTermsModal = MutableStateFlow(false)
-    val showTermsModal : StateFlow<Boolean> = _showTermsModal
+    private var _showPolicyModal = MutableStateFlow(false)
+    val showPolicyModal : StateFlow<Boolean> = _showPolicyModal
 
     private var _hasAgreed = MutableStateFlow(false)
     val hasAgreed : StateFlow<Boolean> = _hasAgreed
@@ -276,17 +277,13 @@ class LoginViewModel(
     }
 
     fun openPrivacyModal (){
-        _showTermsModal.value = true
+        _showPolicyModal.value = true
     }
     fun closePrivacyModal (){
-        _showTermsModal.value = false
+        _showPolicyModal.value = false
     }
-    fun agreePolicy (){
-        _showTermsModal.value = false
-        _hasAgreed.value = true
-    }
-    fun degreePolicy (){
-        _hasAgreed.value = false
-        _showTermsModal.value = false
+    fun tooglePolicy(){
+        if (!hasAgreed.value) _hasAgreed.value = true
+        else _hasAgreed.value = false
     }
 }

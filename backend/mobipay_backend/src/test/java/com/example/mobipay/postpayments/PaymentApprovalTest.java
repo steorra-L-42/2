@@ -263,28 +263,36 @@ public class PaymentApprovalTest {
                         approved)
         );
 
-        // when
-        // Mock CardTransactionResponse
-        CardTransactionResponse mockCardTransactionResponse = mock(CardTransactionResponse.class);
-        when(mockCardTransactionResponse.getRec()).thenReturn(
-                mock(CardTransactionResponse.Rec.class));
-        when(mockCardTransactionResponse.getRec().getTransactionUniqueNo()).thenReturn(1L);
+        /**
+         * CardTransactionResponse Mocking
+         */
+        // 1. CardTransactionResponse 객체를 mock 처리
+        CardTransactionResponse transactionResponseMock = mock(CardTransactionResponse.class);
 
-        // Mock ResponseEntity
-        ResponseEntity<CardTransactionResponse> mockResponseEntity = mock(ResponseEntity.class);
-        when(mockResponseEntity.getBody()).thenReturn(
-                mockCardTransactionResponse);
-        when(mockResponseEntity.getStatusCode()).thenReturn(HttpStatus.OK);
+        // 2. Rec 객체를 mock 처리
+        CardTransactionResponse.Rec recMock = mock(CardTransactionResponse.Rec.class);
 
-        // Mock restClientUtil
-        when(restClientUtil.processCardTransaction(any(CardTransactionRequest.class), any()))
-                .thenReturn(mockResponseEntity);
+        // 3. Rec 객체의 값 설정
+        when(recMock.getTransactionUniqueNo()).thenReturn(1L);
+        when(recMock.getTransactionDate()).thenReturn("20241003");
+        when(recMock.getTransactionTime()).thenReturn("174600");
+        when(recMock.getPaymentBalance()).thenReturn(paymentBalance);
 
+        // 4. CardTransactionResponse의 Rec 객체 설정
+        when(transactionResponseMock.getRec()).thenReturn(recMock);
+
+        // 5. ResponseEntity의 Body에 CardTransactionResponse 객체를 넣어줌
         ResponseEntity paymentResultResponseMock = mock(ResponseEntity.class);
         when(paymentResultResponseMock.getStatusCode()).thenReturn(HttpStatus.OK);
+        when(paymentResultResponseMock.getBody()).thenReturn(transactionResponseMock);
+
         when(restClientUtil.sendResultToMerchantServer(any(), any()))
                 .thenReturn(paymentResultResponseMock);
 
+        when(restClientUtil.processCardTransaction(any(CardTransactionRequest.class), any()))
+                .thenReturn(paymentResultResponseMock);
+
+        // when
         ResultActions result = mockMvc.perform(MockMvcRequestBuilders.post(url).with(csrf())
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
