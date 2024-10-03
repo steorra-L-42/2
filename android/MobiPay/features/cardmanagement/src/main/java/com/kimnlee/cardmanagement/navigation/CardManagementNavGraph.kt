@@ -68,7 +68,7 @@ fun NavGraphBuilder.cardManagementNavGraph(
                 CardRegistrationScreen(
                     viewModel = viewModel,
                     cardInfos = cardInfos,
-                    onNavigateBack = { navController.navigateUp() }
+                    onNavigateBack = { navController.navigate("cardmanagement_main") }
                 )
             }
         }
