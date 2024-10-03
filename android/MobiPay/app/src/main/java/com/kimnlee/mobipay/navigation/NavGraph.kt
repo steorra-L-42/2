@@ -113,7 +113,7 @@ fun AppNavGraph(
             cardManagementViewModel,
             apiClient
         )
-        vehicleManagementNavGraph(navController, context, apiClient, vehicleManagementViewModel)
+        vehicleManagementNavGraph(navController, context, apiClient, vehicleManagementViewModel, memberInvitationViewModel)
         memberInvitationNavGraph(navController, context, memberInvitationViewModel)
 
         notificationNavGraph(navController)

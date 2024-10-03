@@ -1,5 +1,6 @@
 package com.kimnlee.memberinvitation.presentation.components
 
+import android.content.Context
 import android.os.Build.VERSION.SDK_INT
 import android.util.Log
 import androidx.compose.animation.core.LinearEasing
@@ -40,12 +41,15 @@ import com.kimnlee.common.ui.theme.MobiBlue
 import com.kimnlee.common.ui.theme.MobiPayTheme
 import com.kimnlee.common.ui.theme.MobiTextAlmostBlack
 import com.kimnlee.memberinvitation.R
+import com.kimnlee.memberinvitation.data.repository.MemberInvitationRepository
 import com.kimnlee.memberinvitation.presentation.viewmodel.MemberInvitationViewModel
 import kotlinx.coroutines.delay
 
 private const val TAG = "MemberInvitationViaBLE"
 @Composable
 fun MemberInvitationViaBLE(
+    memberInvitationRepository: MemberInvitationRepository?,
+    vehicleId: Int,
     viewModel: MemberInvitationViewModel,
     onNavigateToConfirmation: () -> Unit
 ) {
@@ -61,7 +65,7 @@ fun MemberInvitationViaBLE(
             delay(2000)
             Log.d(TAG, "MemberInvitationViaBLE: 끄자 2초 지났다")
             viewModel.closeInvitationBLE()
-            shouldCloseBottomSheet = false // Reset the flag after closing the bottom sheet
+            shouldCloseBottomSheet = false
         }
     }
 
@@ -145,7 +149,12 @@ fun MemberInvitationViaBLE(
                 onClick = {
                     isScanning = false
                     if (discoveredPhoneNumbers.isNotEmpty()) {
-                        showCheckGif = true
+                        discoveredPhoneNumbers.forEach { phoneNumber ->
+                            if (memberInvitationRepository != null) {
+                                memberInvitationRepository.sendInvitation(phoneNumber, vehicleId)
+                            }
+                            showCheckGif = true
+                        }
                     } else {
                         showFailGif = true
                     }

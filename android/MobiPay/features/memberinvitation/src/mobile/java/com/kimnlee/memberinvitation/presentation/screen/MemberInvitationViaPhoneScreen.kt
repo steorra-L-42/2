@@ -34,6 +34,7 @@ fun MemberInvitationViaPhoneScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val phoneNumber by viewModel.phoneNumber.collectAsState()
+    //val vehicleId by viewModel.vehicleId.collectAsState()
 
     Column(
         modifier = Modifier
