@@ -2,6 +2,7 @@ package com.kimnlee.mobipay.presentation.screen
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.location.Geocoder
 import android.view.Gravity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -42,6 +43,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -56,6 +58,7 @@ import com.naver.maps.map.CameraUpdate
 import com.naver.maps.map.MapView
 import com.naver.maps.map.overlay.Marker
 import com.naver.maps.map.overlay.OverlayImage
+import java.util.Locale
 
 @Composable
 fun HomeScreen(
@@ -231,7 +234,7 @@ fun HomeScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(20.dp))
-                    .height(260.dp)
+                    .height(320.dp)
                     .background(MobiCardBgGray)
                     .padding(24.dp, 18.dp, 24.dp, 24.dp),
             ) {
@@ -282,11 +285,12 @@ fun NaverMapView(lastLocation: Pair<Double, Double>?) {
     val lastLocationLatLng = lastLocation?.let { LatLng(it.first, it.second) } ?: LatLng(
         37.526665, 126.927127)
 
-
+Column {
     AndroidView(
         factory = { mapView },
         modifier = Modifier
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .height(200.dp),
         update = { view ->
             view.getMapAsync { naverMap ->
 
@@ -311,6 +315,9 @@ fun NaverMapView(lastLocation: Pair<Double, Double>?) {
             }
         }
     )
+    Text(text = getCurrentAddress(context, lastLocationLatLng.latitude?: 0.0, lastLocationLatLng.longitude ?: 0.0), fontSize = 11.sp, letterSpacing = 0.1.sp, lineHeight = 13.sp)
+//    Text(text = getCurrentAddress(context, 36.104278,128.429193), fontSize = 11.sp, letterSpacing = 0.1.sp, lineHeight = 13.sp)//36.104278, 128.429193 인의동 인동 15길 42
+}
 }
 
 @Composable
@@ -412,4 +419,19 @@ private fun getLastLocation(context: Context): Pair<Double, Double>? {
     } else {
         null
     }
+}
+// 위도 경도로 주소 구하는 Reverse-GeoCoding (기존 코드 유지)
+private fun getCurrentAddress(context: Context, latitude: Double, longitude: Double): String {
+    try {
+        val geocoder = Geocoder(context, Locale.KOREA)
+        val addresses = geocoder.getFromLocation(latitude, longitude, 1)
+
+        if (!addresses.isNullOrEmpty()) {
+            val address = addresses[0]
+            return address.getAddressLine(0)
+        }
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
+    return ""
 }
