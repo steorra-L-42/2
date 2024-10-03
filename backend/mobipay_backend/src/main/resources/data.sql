@@ -40,8 +40,7 @@ INSERT ignore INTO card_product (card_unique_no, card_name, baseline_performance
                           card_issuer_code)
 VALUES ('1001-664f125022bf433', '슬기로운 국민카드', '700000', '130000', '생활20%할인, 교통10% 할인, 대형마트5% 할인', '1001'),
        ('1002-218c5933582e430', '삼성카드 taptap O', '700000', '130000', '통신10%할인, 교통10% 할인, 대형마트5% 할인', '1002'),
-       ('1005-dcf45d7885a1442', '하나카드 MULTI Oil', '200000', '1000000', '주유 10%할인, 생활 5% 할인', '1005');
---        ('1005-6d3da5e1ab334fc', '신한카드 SOL트래블', '700000', '130000', '주유7%할인, 교통10% 할인, 대형마트5% 할인', '1005');
+       ('1005-6d3da5e1ab334fc', '신한카드 SOL트래블', '700000', '130000', '주유7%할인, 교통10% 할인, 대형마트5% 할인', '1005');
 -- merchant
 INSERT ignore INTO merchant (merchant_id, category_id, merchant_name, lat, lng, mobi_api_key)
 VALUES (1906, 'CG-9ca85f66311a23d', '진평주차장', '36.108690', '128.419555', '9dX2hN4jLwT7vK8pYmQ5'),
