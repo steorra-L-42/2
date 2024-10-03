@@ -56,6 +56,9 @@ public class PostPaymentsApprovalService {
     @Value("${ssafy.api.key}")
     private String ssafyApiKey;
 
+    @Value("${mobi.mer.api.key}")
+    private String mobiToMerApiKey;
+
     // Android로부터 결제요청이 온 경우 결제 로직 시작
     @Transactional
     @Lock(LockModeType.PESSIMISTIC_WRITE)
@@ -91,14 +94,14 @@ public class PostPaymentsApprovalService {
             sendTransactionFailedResult(request, merchant);
             throw e;
         }
-        sendTransactionSuccessResult(request, merchant);
+        sendTransactionSuccessResult(request);
 
         return ApprovalPaymentResponse.from(request);
     }
 
     // 결제 성공 결과 요청
-    private void sendTransactionSuccessResult(ApprovalPaymentRequest request, Merchant merchant) {
-        Map<String, String> additionalHeaders = Map.of("merApiKey", merchant.getApiKey());
+    private void sendTransactionSuccessResult(ApprovalPaymentRequest request) {
+        Map<String, String> additionalHeaders = Map.of("merApiKey", mobiToMerApiKey);
         PaymentResultRequest paymentResultRequest = new PaymentResultRequest(
                 true, request.getMerchantId(), request.getPaymentBalance(), request.getInfo());
 
