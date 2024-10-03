@@ -1,5 +1,6 @@
 package com.kimnlee.memberinvitation.presentation.screen
 
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -16,9 +17,11 @@ import com.kimnlee.memberinvitation.presentation.components.MemberInvitationBott
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MemberInvitationScreen(
+    context: Context,
     vehicleId: Int,
     onNavigateBack: () -> Unit,
-    viewModel: MemberInvitationViewModel = viewModel(),
+//    viewModel: MemberInvitationViewModel = viewModel(),
+    viewModel: MemberInvitationViewModel,
     onNavigateToInvitePhone : () -> Unit,
     onNavigateToConfirmation : () -> Unit
 ) {
@@ -50,6 +53,7 @@ fun MemberInvitationScreen(
             }
             if (showBottomSheet) {
                 MemberInvitationBottomSheet(
+                    context = context,
                     vehicleId = vehicleId,
                     sheetState = sheetState,
                     scope = scope,

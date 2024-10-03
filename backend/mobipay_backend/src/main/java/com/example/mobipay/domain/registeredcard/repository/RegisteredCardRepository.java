@@ -17,4 +17,6 @@ public interface RegisteredCardRepository extends JpaRepository<RegisteredCard, 
     Optional<RegisteredCard> findByOwnedCardIdAndMobiUserId(Long ownedCardId, Long mobiUserId);
 
     List<RegisteredCard> findByMobiUserId(Long mobiUserId);
+
+    Optional<RegisteredCard> findByOwnedCardId(Long ownedCardId);
 }

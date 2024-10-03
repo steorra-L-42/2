@@ -1,5 +1,6 @@
 package com.example.mobipay.domain.registeredcard.dto;
 
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -27,4 +28,10 @@ public class RegisteredCardRequest {
 
     @NotNull(message = "empty password")
     private String password;
+
+    @AssertTrue(message = "oneDayLimit must be greater than or equal to oneTimeLimit")
+    public boolean isOneDayLimitValid() {
+        // oneDayLimit이 oneTimeLimit보다 크거나 같아야 함
+        return oneDayLimit == null || oneTimeLimit == null || oneDayLimit >= oneTimeLimit;
+    }
 }

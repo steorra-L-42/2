@@ -49,7 +49,6 @@ dependencies {
     implementation(project(":common"))
 
     implementation(libs.guava)
-    implementation(libs.coil.compose)
     implementation(libs.text.recognition)
     implementation(project(":features:memberinvitation"))
 

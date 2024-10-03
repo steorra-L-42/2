@@ -1,5 +1,8 @@
+package com.kimnlee.cardmanagement.data.model
+
+// 소유한 카드
 data class OwnedCard(
-    val id: Int,
+    val id: Int,                // 카드 pk
     val cardNo: String,         // 카드 번호
     val cvc: String,            // CVC 코드
     val withdrawalDate: String, // 출금일
@@ -10,27 +13,64 @@ data class OwnedCard(
     val cardUniqueNo: String       // 카드 고유 번호
 )
 
+// 소유한 카드 목록
 data class OwnedCardListResponse(
     val items: List<OwnedCard>       // 카드 목록
 )
-data class RegistrationCard(
-    val mobiUserId: Long,
-    val ownedCardId: Long,
+
+// 등록된 카드
+data class RegisteredCard(
+    val mobiUserId: Int,
+    val ownedCardId: Int,
     val oneDayLimit: Int,
     val oneTimeLimit: Int,
-    val cardName: String,
-    val autoPayStatus: Boolean,
+    val autoPayStatus: Boolean = false,
 )
 
-data class RegistrationCardListResponse(
-    val items: List<RegistrationCard>       // 카드 목록
+// 등록된 카드 목록
+data class RegisteredCardListResponse(
+    val items: List<RegisteredCard>       // 카드 목록
 )
 
-// 더미 데이터
-data class Photos(
-    val albumId: Int,
-    val id: Int,
-    val title : String,
-    val url : String,
-    val thumbnailUrl : String
+// 소유한 카드에서 등록하기
+data class RegisterCardRequest(
+    val ownedCardId : Int,
+    val oneDayLimit: Int,
+    val oneTimeLimit: Int,
+    val password : String
+)
+
+// 카드 정보 넘겨줄때 data
+data class CardInfo(
+    val cardId: Int,
+    val cardNo: String
+)
+
+// 카드 등록 후 응답
+data class RegisterCardResponse(
+    val mobiUserId : Int,
+    val ownedCardId : Int,
+    val oneDayLimit : Int,
+    val oneTimeLimit : Int,
+    val password : String,
+)
+
+// 카드 조회
+data class CardDetailResponse(
+    val cardNo: String,
+    val cvc: String,
+    val cardExpiryData: String
+)
+
+// 자동 결제 등록 요청
+data class AutoPaymentCardRequest(
+    val ownedCardId: Int,
+    val autoPayStatus: Boolean
+)
+
+// 자동 결제 등록 응답
+data class AutoPaymentCardResponse(
+    val mobiUserId: Int,
+    val ownedCardId: Int,
+    val autoPayStatus: Boolean
 )

@@ -1,7 +1,8 @@
 package com.kimnlee.mobipay.presentation.screen
 
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
@@ -10,10 +11,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
@@ -23,11 +28,17 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import coil.compose.AsyncImagePainter
+import coil.compose.rememberAsyncImagePainter
+import coil.compose.rememberImagePainter
+import coil.request.ImageRequest
+import coil.transform.CircleCropTransformation
 import com.kimnlee.auth.presentation.viewmodel.LoginViewModel
 import com.kimnlee.common.R
 import com.kimnlee.common.ui.theme.MobiBgGray
 import com.kimnlee.common.ui.theme.MobiTextAlmostBlack
 import com.kimnlee.common.ui.theme.MobiTextDarkGray
+import com.kimnlee.mobipay.presentation.viewmodel.ShowMoreViewModel
 
 val ButtonColor = Color(0xFFF2F3F5)
 val SettingsIconColor = Color(0xFFB1B8C0)
@@ -35,9 +46,14 @@ val SettingsIconColor = Color(0xFFB1B8C0)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ShowMoreScreen(
-    viewModel: LoginViewModel,
+    loginViewModel: LoginViewModel,
+    showMoreViewModel: ShowMoreViewModel,
     navController: NavController
 ) {
+
+    val userName by showMoreViewModel.userName.collectAsState()
+    val userPicture by showMoreViewModel.userPicture.collectAsState()
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -80,31 +96,7 @@ fun ShowMoreScreen(
                     colors = CardDefaults.cardColors(containerColor = Color.White)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(60.dp)
-                                    .clip(CircleShape)
-                                    .background(Color.LightGray)
-                            ) {
-                                Text(
-                                    "프사",
-                                    modifier = Modifier.align(Alignment.Center),
-                                    color = Color.White
-                                )
-                            }
-                            Spacer(modifier = Modifier.width(16.dp))
-                            Text(
-                                text = "김싸피",
-                                style = MaterialTheme.typography.headlineMedium,
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = MobiTextAlmostBlack,
-                            )
-                        }
+                        ProfileSection(userName, userPicture)
                         Spacer(modifier = Modifier.height(16.dp))
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -133,14 +125,55 @@ fun ShowMoreScreen(
                     items = listOf(
                         MenuItem("결제 내역", { navController.navigate("paymenthistory") }, emoji = "💳"),
                         MenuItem("초대 대기", { navController.navigate("memberinvitation_invitationwaiting") }, emoji = "📩"),
-                        MenuItem("메뉴 1", { }),
+                        MenuItem("결제화면(임시)", { navController.navigate("payment_requestmanualpay") }),
                         MenuItem("메뉴 2", { }),
-                        MenuItem("로그아웃", { viewModel.logout() })
+                        MenuItem("로그아웃", { loginViewModel.logout() })
                     )
                 )
             }
         }
     }
+}
+
+@Composable
+fun ProfileSection(userName: String, userPicture: String) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        ProfileImage(userPicture)
+        Spacer(modifier = Modifier.width(16.dp))
+        Text(
+            text = userName,
+            style = MaterialTheme.typography.headlineMedium,
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold,
+            color = MobiTextAlmostBlack,
+        )
+    }
+}
+
+@Composable
+fun ProfileImage(userPicture: String?) {
+    val imageUrl = if (userPicture.isNullOrBlank()) {
+        R.drawable.default_profile // 기본 프로필 이미지 리소스
+    } else {
+        userPicture
+    }
+
+    Image(
+        painter = rememberAsyncImagePainter(
+            ImageRequest.Builder(LocalContext.current).data(data = imageUrl).apply(block = fun ImageRequest.Builder.() {
+                crossfade(true)
+                transformations(CircleCropTransformation())
+            }).build()
+        ),
+        contentDescription = "Profile Picture",
+        modifier = Modifier
+            .size(60.dp)
+            .clip(CircleShape),
+        contentScale = ContentScale.Crop
+    )
 }
 
 @Composable
@@ -216,7 +249,9 @@ fun MenuItemCard(item: MenuItem) {
                         includeFontPadding = false
                     )
                 ),
-                modifier = if (isLogout) Modifier.fillMaxWidth().alignByBaseline() else Modifier.alignByBaseline()
+                modifier = if (isLogout) Modifier
+                    .fillMaxWidth()
+                    .alignByBaseline() else Modifier.alignByBaseline()
             )
         }
     }

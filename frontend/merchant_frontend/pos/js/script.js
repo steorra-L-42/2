@@ -1,4 +1,7 @@
 let lpnumber = null;
+const url = "https://merchant.mobipay.kr/api/v1";
+const MERCHANT_TYPE = 'FOOD';
+const MER_API_KEY = 'Da19J03F6g7H8iB2c54e';
 
 async function loadDatabase() {
   const db = await idb.openDB("mobi_merchant_fnb", 1, {
@@ -113,8 +116,8 @@ function initApp() {
 
     getTotalPrice() {
       return this.cart.reduce(
-        (total, item) => total + item.qty * item.price,
-        0
+          (total, item) => total + item.qty * item.price,
+          0
       );
     },
 
@@ -175,11 +178,74 @@ function initApp() {
       sound.onended = () => delete(sound);
     },
 
+
+
     requestPayMobi() {
 
-      // TODO 모비페이 서버로 결제요청
+      // websocket 연결
+      const socket = new WebSocket('wss://merchant.mobipay.kr/api/v1/merchants/websocket');
 
-      this.clear();
+      let sessionId; // 세션 ID를 저장할 변수
+
+      socket.onopen = function(event) {
+        console.log('WebSocket is open now.');
+        // TODO 모비페이 서버로 결제요청
+        const api = '/merchants/payments/request';
+        let info = JSON.stringify(this.cart);
+
+        const paymentRequest = {
+          "type": MERCHANT_TYPE, // 가맹점 종류
+          "paymentBalance": 3000,
+          "carNumber": "230루6662",
+          "info": "빅맥런치세트 3천원" // 결제 정보
+        };
+
+        postRequest(api, paymentRequest).then((data) => {
+          // 요청 성청 시 결제 결과가 전달될 때까지 대기
+          if(data.status === '200'){
+            console.log(data);
+            console.log('결제 요청 성공, 결제 결과 대기 중...');
+          }else{
+            console.error(data);
+            alert('결제 요청 실패' + data?.error);
+            // 웹소켓 연결 해제
+            socket.close();
+          }
+        });
+      };
+
+      socket.onclose = function(event) {
+        console.log('WebSocket is closed now.');
+      };
+
+      socket.onerror = function(error) {
+        console.log('WebSocket error:', error);
+      };
+
+      socket.onmessage = function(event) {
+        const message = JSON.parse(event.data); // 메시지를 JSON 객체로 파싱
+        if (message.sessionId) {
+          sessionId = message.sessionId; // 세션 ID 저장
+          console.log('Session ID:', sessionId);
+          socket.send(JSON.stringify({ // 가맹점 정보를 서버로 전송
+            "type" : MERCHANT_TYPE // 가맹점 타입 전송
+          }));
+        } else {
+          console.log('Received message:', message);
+          // 수신한 메시지에 따른 행동을 수행
+          // {
+          // 	"success": true, // 결제 성공 실패
+          // 	"type": "PARKING", // 가맹점 종류
+          // 	"paymentBalance": 5000, // 결제 금액
+          // 	"info": "입차시간 1:34, 출차시간 5:45"// 결제 정보
+          // }
+
+          if(message.success){
+            this.clear();
+            socket.close(); // success가 true일 때만 socket close
+          }
+        }
+      };
     },
 
     startCamera(facingMode) {
@@ -310,6 +376,23 @@ function initApp() {
       }
     }
   };
+
+  async function postRequest(api, data = {}) {
+    console.log(data);
+    const response = await fetch(`${url}${api}`, {
+      method: 'POST',
+      mode: 'cors',
+      cache: 'no-cache',
+      headers: {
+        'Content-Type': 'application/json',
+        'merApikey': MER_API_KEY,
+      },
+      redirect: 'follow',
+      referrerPolicy: 'no-referrer',
+      body: JSON.stringify(data)
+    });
+    return response.json();
+  }
 
   app.initANPR();
   return app;

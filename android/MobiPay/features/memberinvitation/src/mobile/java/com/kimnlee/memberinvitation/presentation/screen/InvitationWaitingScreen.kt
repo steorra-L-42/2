@@ -11,6 +11,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -25,8 +26,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.kimnlee.common.R
+import com.kimnlee.memberinvitation.presentation.viewmodel.MemberInvitationViewModel
 import kotlinx.coroutines.delay
 
 val BackgroundColor = Color(0xFFF2F4F6)
@@ -37,14 +40,24 @@ val ButtonColor = Color(0xFFF2F3F5)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun InvitationWaitingScreen(navController: NavController) {
+fun InvitationWaitingScreen(
+    memberInvitationViewModel: MemberInvitationViewModel = viewModel(),
+    navController: NavController
+) {
     var isLoading by remember { mutableStateOf(true) }
     var showInvitation by remember { mutableStateOf(false) }
 
     LaunchedEffect(key1 = true) {
+        memberInvitationViewModel.startAdvertising()
         delay(5000) // 5초 대기
         isLoading = false
         showInvitation = true
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            memberInvitationViewModel.stopAdvertising()
+        }
     }
 
     Scaffold(

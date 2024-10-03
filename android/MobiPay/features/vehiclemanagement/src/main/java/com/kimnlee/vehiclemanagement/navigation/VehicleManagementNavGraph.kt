@@ -1,5 +1,6 @@
 package com.kimnlee.vehiclemanagement.navigation
 
+import android.content.Context
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.navigation.NavGraphBuilder
@@ -15,6 +16,7 @@ import com.kimnlee.vehiclemanagement.presentation.viewmodel.VehicleManagementVie
 
 fun NavGraphBuilder.vehicleManagementNavGraph(
     navController: NavHostController,
+    context: Context,
     apiClient: ApiClient,
     vehicleManagementViewModel: VehicleManagementViewModel
 ) {
@@ -40,6 +42,7 @@ fun NavGraphBuilder.vehicleManagementNavGraph(
             val vehicleId = backStackEntry.arguments?.getString("vehicleId")?.toIntOrNull() ?: -1
             BottomNavigation(navController) {
                 VehicleManagementDetailScreen(
+                    context = context,
                     vehicleId = vehicleId,
                     onNavigateBack = { navController.navigateUp() },
                     onNavigateToInvitePhone = { navController.navigate("memberinvitation_phone/$vehicleId") },

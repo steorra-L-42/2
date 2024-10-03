@@ -2,6 +2,7 @@ package com.kimnlee.auth.presentation.viewmodel
 
 import android.app.Activity
 import android.util.Log
+import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kakao.sdk.auth.model.OAuthToken
@@ -12,7 +13,6 @@ import com.kimnlee.common.auth.model.RegistrationRequest
 import com.kimnlee.common.auth.model.SendTokenRequest
 import com.kimnlee.common.network.ApiClient
 import com.kimnlee.firebase.FCMService
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -38,8 +38,17 @@ class LoginViewModel(
     private val _registrationResult = MutableStateFlow<Boolean?>(null)
     val registrationResult: StateFlow<Boolean?> = _registrationResult
 
+    private val _registrationError = MutableStateFlow<String?>(null)
+    val registrationError: StateFlow<String?> = _registrationError
+
     private val _navigationEvent = MutableSharedFlow<String>()
     val navigationEvent = _navigationEvent.asSharedFlow()
+
+    private var _showPolicyModal = MutableStateFlow(false)
+    val showPolicyModal : StateFlow<Boolean> = _showPolicyModal
+
+    private var _hasAgreed = MutableStateFlow(false)
+    val hasAgreed : StateFlow<Boolean> = _hasAgreed
 
     private var email: String = ""
     private var picture: String = ""
@@ -152,6 +161,8 @@ class LoginViewModel(
                     Log.d(TAG, "About to call sendTokens from register")
                     sendTokens()
                     Log.d("KakaoLogin", "로그인 성공 AuthToken: ${authManager.getAuthToken()}, RefreshToken: ${authManager.getRefreshToken()}")
+                } else if (response.code() == 500) {
+                    _registrationError.value = "이미 가입된 전화번호에요."
                 }
             } catch (e: HttpException) {
                 _registrationResult.value = false
@@ -189,6 +200,7 @@ class LoginViewModel(
                     Log.d(TAG, "FCM token sent successfully")
                     // isLoggedIn true로 만들고 나머지 상태 원상복구
                     authManager.setLoggedIn(true)
+                    authManager.saveUserInfoFromToken() // 저장된 authToken에서 사용자 정보 파싱하고 저장
                     _isLoggedIn.value = true
                     _navigationEvent.emit("home")
                     Log.d(TAG, "Login process completed, navigating to home")
@@ -257,8 +269,21 @@ class LoginViewModel(
             authManager.setLoggedIn(false)
             _isLoggedIn.value = false
             authManager.clearTokens()
+            authManager.clearUserInfo()
             _registrationResult.value = null
             _needsRegistration.value = false
+            _hasAgreed.value = false
         }
+    }
+
+    fun openPrivacyModal (){
+        _showPolicyModal.value = true
+    }
+    fun closePrivacyModal (){
+        _showPolicyModal.value = false
+    }
+    fun tooglePolicy(){
+        if (!hasAgreed.value) _hasAgreed.value = true
+        else _hasAgreed.value = false
     }
 }
