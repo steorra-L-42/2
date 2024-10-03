@@ -12,7 +12,6 @@ import com.kimnlee.common.auth.model.RegistrationRequest
 import com.kimnlee.common.auth.model.SendTokenRequest
 import com.kimnlee.common.network.ApiClient
 import com.kimnlee.firebase.FCMService
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -43,6 +42,12 @@ class LoginViewModel(
 
     private val _navigationEvent = MutableSharedFlow<String>()
     val navigationEvent = _navigationEvent.asSharedFlow()
+
+    private var _showTermsModal = MutableStateFlow(false)
+    val showTermsModal : StateFlow<Boolean> = _showTermsModal
+
+    private var _hasAgreed = MutableStateFlow(false)
+    val hasAgreed : StateFlow<Boolean> = _hasAgreed
 
     private var email: String = ""
     private var picture: String = ""
@@ -266,6 +271,22 @@ class LoginViewModel(
             authManager.clearUserInfo()
             _registrationResult.value = null
             _needsRegistration.value = false
+            _hasAgreed.value = false
         }
+    }
+
+    fun openPrivacyModal (){
+        _showTermsModal.value = true
+    }
+    fun closePrivacyModal (){
+        _showTermsModal.value = false
+    }
+    fun agreePolicy (){
+        _showTermsModal.value = false
+        _hasAgreed.value = true
+    }
+    fun degreePolicy (){
+        _hasAgreed.value = false
+        _showTermsModal.value = false
     }
 }

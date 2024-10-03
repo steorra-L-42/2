@@ -13,10 +13,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.DefaultTintColor
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.kimnlee.auth.presentation.components.PrivacyPolicyModal
 import com.kimnlee.auth.presentation.viewmodel.LoginViewModel
 import com.kimnlee.common.ui.theme.MobiBgGray
 import com.kimnlee.common.ui.theme.MobiTextDarkGray
@@ -39,6 +41,10 @@ fun RegistrationScreen(
 
     val focusRequesterLast = remember { FocusRequester() }
     val focusRequesterName = remember { FocusRequester() }
+
+    val showTermsModal by viewModel.showTermsModal.collectAsState()
+    val hasAgreed by viewModel.hasAgreed.collectAsState()
+    var hasAgreedError by remember { mutableStateOf("") }
 
     fun validatePhoneNumber(): Boolean {
         return phoneMiddle.length == 4 && phoneLast.length == 4
@@ -162,7 +168,23 @@ fun RegistrationScreen(
         )
 
         Spacer(modifier = Modifier.weight(1f))
-
+        Button(
+            onClick = { viewModel.openPrivacyModal() },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = if (hasAgreed) Color(0xFF31A8F6) else MobiBgGray
+            ),
+            shape = RoundedCornerShape(8.dp)
+        ) {
+            if (hasAgreed) {
+                Text(text = "이용약관에 동의하셨습니다.", color = Color.White)
+            } else {
+                Text(text = "이용약관 보기", color = Color(0xFF3182F6))
+            }
+        }
+        Spacer(modifier = Modifier.padding(8.dp))
         Button(
             onClick = {
                 if (!validatePhoneNumber()) {
@@ -172,12 +194,15 @@ fun RegistrationScreen(
                     viewModel.register(name, fullPhoneNumber)
                 }
             },
+            enabled = hasAgreed,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
-            colors = ButtonDefaults.buttonColors(
+            colors =
+            ButtonDefaults.buttonColors(
                 containerColor = Color(0xFF3182F6)
             ),
+
             shape = RoundedCornerShape(8.dp)
         ) {
             Text("확인", fontSize = 16.sp)
@@ -207,5 +232,8 @@ fun RegistrationScreen(
         }
 
         Spacer(modifier = Modifier.height(40.dp))
+        if (showTermsModal) {
+            PrivacyPolicyModal(viewModel = viewModel)
+        }
     }
 }
