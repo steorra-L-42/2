@@ -43,6 +43,7 @@ import com.kimnlee.vehiclemanagement.R
 import androidx.compose.foundation.focusable
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
+import com.kimnlee.common.ui.theme.*
 
 private const val TAG = "VehicleRegistrationScreen"
 
@@ -440,7 +441,7 @@ fun VehicleRegistrationScreen(
                     .fillMaxWidth(),
                 shape = RoundedCornerShape(8.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.Blue,
+                    containerColor = MobiBlue,
                     contentColor = Color.White
                 ),
                 enabled = selectedVehicleType.isNotEmpty() && licensePlate.isNotEmpty() && isLicensePlateValid
@@ -537,7 +538,7 @@ fun VehicleRegistrationScreen(
                             onNavigateBack()
                         },
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color.Blue,
+                            containerColor = MobiBlue,
                             contentColor = Color.White
                         ),
                         shape = RoundedCornerShape(8.dp)
