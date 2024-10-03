@@ -53,7 +53,8 @@ public class SignUpServiceImpl implements SignUpService {
     private static final String ACCOUNT_DEPOSIT_UPDATE_API_NAME = "updateDemandDepositAccountDeposit";
     private static final String ACCOUNT_TYPE_UNIQUE_NO = "004-1-c880da59551a4e";
     private static final String[] CARD_UNIQUE_NO =
-            new String[]{"1001-664f125022bf433", "1002-218c5933582e430", "1005-dcf45d7885a1442"};
+            new String[]{"1001-664f125022bf433", "1002-218c5933582e430", "1005-6d3da5e1ab334fc",
+                    "1005-dcf45d7885a1442"};
     private static final String FAILED_TO_SIGNUP = "외부 API 에러로 인해 회원 가입이 실패했습니다.";
 
     private final MobiUserRepository mobiUserRepository;
