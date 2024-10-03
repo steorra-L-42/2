@@ -200,7 +200,7 @@ fun VehicleItem(vehicle: Vehicle, onClick: () -> Unit) {
                 contentDescription = "차량 이미지",
                 modifier = Modifier
                     .fillMaxWidth()
-                    .size(160.dp)
+                    .size(96.dp)
                     .clip(RoundedCornerShape(8.dp)),
                 contentScale = ContentScale.Fit
             )
