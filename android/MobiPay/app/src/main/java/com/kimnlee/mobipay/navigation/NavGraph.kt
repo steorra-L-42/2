@@ -21,7 +21,6 @@ import com.kimnlee.cardmanagement.presentation.viewmodel.CardManagementViewModel
 import com.kimnlee.common.auth.AuthManager
 import com.kimnlee.common.components.BottomNavigation
 import com.kimnlee.common.network.ApiClient
-import com.kimnlee.firebase.FCMService
 import com.kimnlee.memberinvitation.navigation.memberInvitationNavGraph
 import com.kimnlee.memberinvitation.presentation.viewmodel.MemberInvitationViewModel
 import com.kimnlee.mobipay.presentation.screen.HomeScreen
@@ -94,7 +93,7 @@ fun AppNavGraph(
                 )
             }
         }
-        composable("payment",
+        composable("payment_requestmanualpay",
             enterTransition = { EnterTransition.None },
             exitTransition = { ExitTransition.None }
         ) {

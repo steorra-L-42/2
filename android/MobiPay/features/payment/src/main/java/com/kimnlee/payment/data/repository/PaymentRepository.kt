@@ -108,9 +108,9 @@ class PaymentRepository(
 
 //                if (response.isSuccessful) { // 결제 성공
                 if (response.isSuccessful || 1 == 1) { // 임시 코드
-//                    Log.e(TAG, "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
-//                    Log.e(TAG, "@@@        임시 코드 사용중        @@")
-//                    Log.e(TAG, "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+                    Log.e(TAG, "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+                    Log.e(TAG, "@@@        임시 코드 사용중        @@")
+                    Log.e(TAG, "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
 
                     Log.d(TAG, "processPay: 결제 성공")
                     // 모바일에 알림 표시
@@ -118,7 +118,7 @@ class PaymentRepository(
 
                     val deepLinkUri = "mobipay://paymentsucceed"
                     val intent = Intent(Intent.ACTION_VIEW, Uri.parse(deepLinkUri)).apply {
-                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK
                         putExtra("fcmData", Gson().toJson(fcmData))
                     }
 
@@ -177,10 +177,9 @@ class PaymentRepository(
                 fcmData.approvalWaitingId,
                 fcmData.merchantId,
                 fcmData.paymentBalance,
-                fcmData.cardNo,
                 fcmData.info
             ).any { it == null }) {
-            Log.d(TAG, "processManualPay: NULL 값이 확인되어 결제 요청을 승인할 수 없습니다.")
+            Log.d(TAG, "processManualPay: NULL 값이 확인되어 결제 요청을 승인할 수 없습니다. NULL인 새키 ${fcmData.toString()}")
             return
         }
 
