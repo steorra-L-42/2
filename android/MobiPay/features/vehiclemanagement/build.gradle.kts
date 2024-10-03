@@ -47,10 +47,11 @@ android {
 dependencies {
 
     implementation(project(":common"))
+    implementation(project(":features:cardmanagement"))
+    implementation(project(":features:memberinvitation"))
 
     implementation(libs.guava)
     implementation(libs.text.recognition)
-    implementation(project(":features:memberinvitation"))
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

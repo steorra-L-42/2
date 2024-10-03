@@ -10,9 +10,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import com.kimnlee.vehiclemanagement.R
 import com.kimnlee.vehiclemanagement.data.api.VehicleApiService
+import com.kimnlee.vehiclemanagement.data.model.AutoPaymentStatusRequest
 import com.kimnlee.vehiclemanagement.data.model.CarMember
 import com.kimnlee.vehiclemanagement.data.model.VehicleItem
 import com.kimnlee.vehiclemanagement.data.model.VehicleRegistrationRequest
+import kotlinx.coroutines.flow.update
 
 data class Vehicle(
     val carId: Int,
@@ -40,6 +42,9 @@ class VehicleManagementViewModel(
 
     private val _carMembers = MutableStateFlow<List<CarMember>>(emptyList())
     val carMembers: StateFlow<List<CarMember>> = _carMembers
+
+    private val _autoPaymentStatus = MutableStateFlow<Boolean>(false)
+    val autoPaymentStatus: StateFlow<Boolean> = _autoPaymentStatus
 
     init {
         getUserVehicles()
@@ -77,6 +82,7 @@ class VehicleManagementViewModel(
         }
     }
 
+    // 차량 등록
     fun registerVehicle(number: String, carModel: String) {
         viewModelScope.launch {
             _registrationStatus.value = RegistrationStatus.Loading
@@ -117,6 +123,7 @@ class VehicleManagementViewModel(
         }
     }
 
+    // 차량에 포함된 멤버 등록
     fun requestCarMembers(carId: Int) {
         viewModelScope.launch {
             try {
@@ -136,6 +143,36 @@ class VehicleManagementViewModel(
 
     fun getVehicleById(id: Int): Vehicle? {
         return _vehicles.value.find { it.carId == id }
+    }
+
+    // 차량 자동결제 사용 토글
+    fun toggleAutoPayment(carId: Int, autoPayStatus: Boolean) {
+        viewModelScope.launch {
+            try {
+                val request = AutoPaymentStatusRequest(carId, autoPayStatus)
+                val response = vehicleService.updateAutoPaymentStatus(request)
+                if (response.isSuccessful) {
+                    val updatedVehicle = response.body()
+                    updatedVehicle?.let {
+                        _vehicles.update { vehicles ->
+                            vehicles.map { vehicle ->
+                                if (vehicle.carId == carId) {
+                                    vehicle.copy(autoPayStatus = it.autoPayStatus)
+                                } else {
+                                    vehicle
+                                }
+                            }
+                        }
+                        _autoPaymentStatus.value = it.autoPayStatus
+                    }
+                    Log.d(TAG, "Auto payment status updated successfully")
+                } else {
+                    Log.e(TAG, "Failed to update auto payment status: ${response.code()}")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error updating auto payment status", e)
+            }
+        }
     }
 }
 

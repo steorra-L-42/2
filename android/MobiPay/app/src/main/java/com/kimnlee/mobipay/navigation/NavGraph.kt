@@ -108,12 +108,18 @@ fun AppNavGraph(
         authNavGraph(navController, authManager, loginViewModel)
         paymentNavGraph(navController)
         cardManagementNavGraph(
-            navController,
-            authManager,
-            cardManagementViewModel,
-            apiClient
+            navController = navController,
+            authManager = authManager,
+            viewModel = cardManagementViewModel,
+            apiClient = apiClient
         )
-        vehicleManagementNavGraph(navController, context, apiClient, vehicleManagementViewModel)
+        vehicleManagementNavGraph(
+            navController = navController,
+            context = context,
+            apiClient = apiClient,
+            vehicleManagementViewModel = vehicleManagementViewModel,
+            cardManagementViewModel = cardManagementViewModel
+        )
         memberInvitationNavGraph(navController, context, memberInvitationViewModel)
 
         notificationNavGraph(navController)
