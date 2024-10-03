@@ -524,8 +524,9 @@ fun VehicleRegistrationScreen(
                 title = { Text("차량 정보를 확인해주세요") },
                 text = {
                     Text(
-                        text = "차종 : $selectedVehicleType \n차량 번호 : $licensePlate",
-                        fontSize = 20.sp
+                        text = "차종 : $selectedVehicleType \n\n차량 번호 : $licensePlate",
+                        fontSize = 20.sp,
+                        modifier = Modifier.offset(x=4.dp)
                     )
                },
                 confirmButton = {
