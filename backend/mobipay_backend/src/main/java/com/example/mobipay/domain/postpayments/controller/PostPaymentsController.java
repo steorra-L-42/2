@@ -5,6 +5,7 @@ import com.example.mobipay.domain.postpayments.dto.ApprovalPaymentResponse;
 import com.example.mobipay.domain.postpayments.dto.PaymentRequest;
 import com.example.mobipay.domain.postpayments.dto.PaymentResponse;
 import com.example.mobipay.domain.postpayments.dto.ReceiptResponse;
+import com.example.mobipay.domain.postpayments.dto.historyresponse.HistoryListResponse;
 import com.example.mobipay.domain.postpayments.service.PostPaymentsApprovalService;
 import com.example.mobipay.domain.postpayments.service.PostPaymentsRequestService;
 import com.example.mobipay.domain.postpayments.service.PostPaymentsUtilService;
@@ -57,6 +58,17 @@ public class PostPaymentsController {
             @AuthenticationPrincipal CustomOAuth2User oAuth2User) {
 
         ReceiptResponse response = postPaymentsUtilService.getReceipt(transactionUniqueNo, oAuth2User);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/history")
+    public ResponseEntity<HistoryListResponse> getHistories(@AuthenticationPrincipal CustomOAuth2User oAuth2User) {
+
+        HistoryListResponse response = postPaymentsUtilService.getHistories(oAuth2User);
+
+        if (response.getItems().isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
         return ResponseEntity.ok(response);
     }
 }
