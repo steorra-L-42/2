@@ -115,7 +115,6 @@ public class RegisteredCardService {
     }
 
     private MobiUser findMobiUser(Long mobiUserId) {
-
         return mobiUserRepository.findById(mobiUserId)
                 .orElseThrow(MobiUserNotFoundException::new);
     }
