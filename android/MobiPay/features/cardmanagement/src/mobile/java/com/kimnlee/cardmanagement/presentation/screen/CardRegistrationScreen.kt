@@ -7,6 +7,8 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -16,10 +18,14 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.kimnlee.common.R
 import com.kimnlee.cardmanagement.data.model.CardInfo
 import com.kimnlee.cardmanagement.presentation.viewmodel.CardManagementViewModel
 import com.kimnlee.common.ui.theme.MobiBgGray
@@ -55,16 +61,32 @@ fun CardRegistrationScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(
-                        text = "카드 등록",
-                        style = MaterialTheme.typography.headlineMedium,
-                        color = MobiTextAlmostBlack,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "💳",
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontFamily = FontFamily(Font(R.font.emoji)),
+                            fontSize = 24.sp,
+                            modifier = Modifier
+                                .padding(top = 10.dp)
+                                .padding(end = 8.dp)
+                        )
+                        Text(
+                            text = "카드 등록",
+                            style = MaterialTheme.typography.headlineMedium,
+                            color = MobiTextAlmostBlack,
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                },
+                navigationIcon = {
+                    IconButton(onClick = onNavigateBack) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                    }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MobiBgGray,
-                    titleContentColor = MobiTextDarkGray
+                    containerColor = MaterialTheme.colorScheme.background
                 )
             )
         }
