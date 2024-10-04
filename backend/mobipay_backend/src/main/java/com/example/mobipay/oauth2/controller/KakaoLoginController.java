@@ -43,7 +43,8 @@ public class KakaoLoginController {
 
 
     @PostMapping("/login")
-    public ResponseEntity<?> receiveKakaoToken(@Valid @RequestBody KakaoTokenResponseDto kakaoTokenResponseDto) {
+    public ResponseEntity<?> receiveKakaoToken(@Valid @RequestBody KakaoTokenResponseDto kakaoTokenResponseDto,
+                                               HttpServletResponse response) {
         try {
             // 액세스, 리프레시 토큰 받기
             String accessToken = kakaoTokenResponseDto.getAccessToken();
@@ -55,11 +56,13 @@ public class KakaoLoginController {
             String picture = kakaoUserInfoResponseDto.getKakaoAccount().getProfile().getPicture();
 
             Boolean existEmail = userService.checkEmailInMobipay(email);
-
+            System.out.println(email + picture);
             if (!existEmail) {
+                System.out.println(email + picture);
                 return sendUserDetailRequest(email, picture);
 
             }
+            System.out.println(email + picture);
             // existEmail이 true면 이미 가입된 유저이므로
             MobiUser mobiUser = mobiUserRepository.findByEmail(email)
                     .orElseThrow(MobiUserNotFoundException::new);
@@ -67,10 +70,13 @@ public class KakaoLoginController {
             kakaoTokenService.saveOrUpdateKakaoToken(accessToken, refreshToken, mobiUser);
 
             String jwtAccessToken = userService.generateJwtAccessToken(mobiUser);
+            Cookie jwtRefreshToken = userService.generateJwtRefreshToken(mobiUser);
+            response.addCookie(jwtRefreshToken);
 
             // 헤더 생성 후, 헤더에 JWT 토큰 추가
             HttpHeaders headers = new HttpHeaders();
             headers.add(ACCESS.getType(), BEARER.getType() + jwtAccessToken);
+            headers.add(HttpHeaders.SET_COOKIE, jwtRefreshToken.toString());
 
             UserResponseDto responseBody = userService.getUserDetail(email, mobiUser.getName(),
                     mobiUser.getPhoneNumber(), jwtAccessToken);
@@ -107,9 +113,9 @@ public class KakaoLoginController {
 
         HttpHeaders headers = new HttpHeaders();
         headers.add(ACCESS.getType(), BEARER.getType() + jwtAccessToken);  // 헤더에 JWT 토큰 추가
+        headers.add(HttpHeaders.SET_COOKIE, jwtRefreshToken.toString());
 
         UserResponseDto responseBody = userService.getUserDetail(email, name, phoneNumber, jwtAccessToken);
-        headers.add(HttpHeaders.SET_COOKIE, jwtRefreshToken.toString());
 
         return ResponseEntity.ok().headers(headers).body(responseBody);
     }
