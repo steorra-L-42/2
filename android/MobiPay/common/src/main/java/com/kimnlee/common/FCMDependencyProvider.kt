@@ -22,6 +22,7 @@ interface PaymentOperations {
 interface MemberInvitationOperations{
     fun sendInvitation(phoneNumber:String, vehicleId: Int)
     fun processFCM(fcmDataForInvitation: FCMDataForInvitation)
+    fun acceptInvitation(invitationId: Int)
 }
 
 interface FCMDependencyProvider : ApiClientProvider, AuthManagerProvider {
