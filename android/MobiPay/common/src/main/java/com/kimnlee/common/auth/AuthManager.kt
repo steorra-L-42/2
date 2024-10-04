@@ -66,12 +66,11 @@ class AuthManager(private val context: Context) {
     }
 
     fun saveAuthToken(token: String) {
-        Log.d(TAG, "authToken 저장 호출: $token")
+        Log.d(TAG, "JWT 토큰 정상적으로 저장됨: $token")
         encryptedSharedPreferences.edit().putString(KEY_AUTH_TOKEN, token).apply()
     }
 
     fun getAuthToken(): String? {
-        Log.d(TAG, "authToken 반환 호출: ${encryptedSharedPreferences.getString(KEY_AUTH_TOKEN, null)}")
         return encryptedSharedPreferences.getString(KEY_AUTH_TOKEN, null)
     }
 
@@ -108,9 +107,9 @@ class AuthManager(private val context: Context) {
             // 현재 picture와 phoneNumber가 거꾸로 담겨있어서 반대로 가져와서 담음(백에서 수정되면 여기도 바꿔야됨)
 
             saveUserInfo(name, phoneNumber, picture)
-            Log.d(TAG, "User info saved from JWT token")
+            Log.d(TAG, "유저정보 JWT토큰으로 부터 저장 됨")
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to parse JWT token", e)
+            Log.e(TAG, "유저정보 JWT토큰으로 부터 저장 실패", e)
         }
     }
 
@@ -120,14 +119,13 @@ class AuthManager(private val context: Context) {
             .putString(KEY_USER_PHONE_NUMBER, phoneNumber)
             .putString(KEY_USER_PICTURE, picture)
             .apply()
-        Log.d(TAG, "User info saved: name=$name, phoneNumber=$phoneNumber, picture=${picture.take(10)}...")
+        Log.d(TAG, "유저정보 다음과 같이 저장 됨: name=$name, phoneNumber=$phoneNumber, picture=$picture")
     }
 
     fun getUserInfo(): UserInfo {
         val name = encryptedSharedPreferences.getString(KEY_USER_NAME, "") ?: ""
         val phoneNumber = encryptedSharedPreferences.getString(KEY_USER_PHONE_NUMBER, "") ?: ""
         val picture = encryptedSharedPreferences.getString(KEY_USER_PICTURE, "") ?: ""
-        Log.d(TAG, "User info retrieved: name=$name, phoneNumber=$phoneNumber, picture=${picture.take(10)}...")
         return UserInfo(name, phoneNumber, picture)
     }
 
@@ -137,16 +135,16 @@ class AuthManager(private val context: Context) {
             .remove(KEY_USER_PHONE_NUMBER)
             .remove(KEY_USER_PICTURE)
             .apply()
-        Log.d(TAG, "User info cleared")
+        Log.d(TAG, "유저 정보 전부 지워짐")
     }
 
     suspend fun loginWithKakao(activity: Activity): Result<OAuthToken> = suspendCancellableCoroutine { continuation ->
         val callback: (OAuthToken?, Throwable?) -> Unit = { token, error ->
             if (error != null) {
-                Log.d("KakaoLogin", "카카오 로그인 실패")
+                Log.d(TAG, "카카오 로그인 실패", error)
                 continuation.resume(Result.failure(error))
             } else if (token != null) {
-                Log.d("KakaoLogin", "카카오 로그인 진입")
+                Log.d(TAG, "카카오 로그인 성공")
                 continuation.resume(Result.success(token))
             }
         }
