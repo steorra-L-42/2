@@ -22,6 +22,7 @@ import com.kimnlee.auth.presentation.viewmodel.LoginViewModel
 import com.kimnlee.memberinvitation.presentation.viewmodel.MemberInvitationViewModel
 import com.kimnlee.common.FCMData
 import com.kimnlee.common.ui.theme.MobiPayTheme
+import com.kimnlee.memberinvitation.data.repository.MemberInvitationRepository
 import com.kimnlee.mobipay.navigation.AppNavGraph
 import com.kimnlee.payment.PaymentApprovalReceiver
 
@@ -47,10 +48,8 @@ class MainActivity : ComponentActivity() {
 
         loginViewModel = LoginViewModel(authManager, apiClient, fcmService)
 
-        memberInvitationViewModel = MemberInvitationViewModel()
-        val bluetoothManager = this.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
-        val bluetoothAdapter = bluetoothManager.adapter
-        memberInvitationViewModel.initBluetoothAdapter(bluetoothAdapter)
+        val app = application as MobiPayApplication
+        memberInvitationViewModel = app.aMemberInvitationViewModel
 
         requestPermissions()
 

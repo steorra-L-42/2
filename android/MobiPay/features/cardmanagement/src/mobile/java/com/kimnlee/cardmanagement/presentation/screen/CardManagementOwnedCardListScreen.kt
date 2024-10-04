@@ -1,7 +1,6 @@
 package com.kimnlee.cardmanagement.presentation.screen
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -17,12 +16,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kimnlee.cardmanagement.R
 import com.kimnlee.cardmanagement.data.model.OwnedCard
 import com.kimnlee.cardmanagement.presentation.viewmodel.CardManagementViewModel
@@ -42,7 +41,11 @@ fun CardManagementOwnedCardListScreen(
         TopBar(onNavigateBack)
         Spacer(modifier = Modifier.height(16.dp))
         SelectionButtons(
-            onSelectAll = { selectedCards = (ownedCardUiState as? OwnedCardUiState.Success)?.cards?.toSet() ?: emptySet() },
+            onSelectAll = {
+                selectedCards = (ownedCardUiState as? OwnedCardUiState.Success)?.cards
+                    ?.filter { !viewModel.isCardRegistered(it.id) }
+                    ?.toSet() ?: emptySet()
+            },
             onDeselectAll = { selectedCards = emptySet() }
         )
         Spacer(modifier = Modifier.height(16.dp))
@@ -52,10 +55,15 @@ fun CardManagementOwnedCardListScreen(
                 cards = state.cards,
                 selectedCards = selectedCards,
                 onCardSelected = { card, isSelected ->
-                    selectedCards = if (isSelected) selectedCards + card else selectedCards - card
-                }
+                    if (!viewModel.isCardRegistered(card.id)) {
+                        selectedCards = if (isSelected) selectedCards + card else selectedCards - card
+                    }
+                },
+                isCardRegistered = { viewModel.isCardRegistered(it.id) }
             )
-            is OwnedCardUiState.Error -> ErrorState(state.message, viewModel)
+            is OwnedCardUiState.Error -> {
+                // 에러 상태에서는 아무것도 표시하지 않음
+            }
         }
         Spacer(modifier = Modifier.weight(1f))
         Button(
@@ -111,48 +119,72 @@ fun SelectionButtons(onSelectAll: () -> Unit, onDeselectAll: () -> Unit) {
 fun CardList(
     cards: List<OwnedCard>,
     selectedCards: Set<OwnedCard>,
-    onCardSelected: (OwnedCard, Boolean) -> Unit
+    onCardSelected: (OwnedCard, Boolean) -> Unit,
+    isCardRegistered: (OwnedCard) -> Boolean
 ) {
     LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         items(cards) { card ->
             CardItem(
                 card = card,
                 isSelected = card in selectedCards,
-                onSelected = { isSelected -> onCardSelected(card, isSelected) }
+                onSelected = { isSelected -> onCardSelected(card, isSelected) },
+                isRegistered = isCardRegistered(card)
             )
         }
     }
 }
 
 @Composable
-fun CardItem(card: OwnedCard, isSelected: Boolean, onSelected: (Boolean) -> Unit) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(8.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
+fun CardItem(
+    card: OwnedCard,
+    isSelected: Boolean,
+    onSelected: (Boolean) -> Unit,
+    isRegistered: Boolean
+) {
+    Box(modifier = Modifier.fillMaxWidth()) {
+        if (isRegistered) {
+            Text(
+                "이미 등록되었어요",
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(top = 4.dp),
+                color = Color.Red
+            )
+        }
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(8.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
         ) {
-            Image(
-                painter = painterResource(id = findCardCompany(card.cardNo)),
-                contentDescription = "Card Image",
-                modifier = Modifier.size(60.dp),
-                contentScale = ContentScale.Fit
-            )
-            Spacer(modifier = Modifier.width(16.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(text = maskCardNumber(card.cardNo), fontWeight = FontWeight.Bold)
-                Text(text = "만료일: ${formatExpiryDate(card.cardExpiryDate)}")
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Image(
+                    painter = painterResource(id = findCardCompany(card.cardNo)),
+                    contentDescription = "Card Image",
+                    modifier = Modifier.size(60.dp),
+                    contentScale = ContentScale.Fit
+                )
+                Spacer(modifier = Modifier.width(16.dp))
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .alpha(if (isRegistered) 0.5f else 1f)
+                ) {
+                    Text(text = maskCardNumber(card.cardNo), fontWeight = FontWeight.Bold)
+                    Text(text = "만료일: ${formatExpiryDate(card.cardExpiryDate)}")
+                }
+                if (!isRegistered) {
+                    Checkbox(
+                        checked = isSelected,
+                        onCheckedChange = onSelected,
+                        colors = CheckboxDefaults.colors(checkedColor = Color(0xFF3182F6))
+                    )
+                }
             }
-            Checkbox(
-                checked = isSelected,
-                onCheckedChange = onSelected,
-                colors = CheckboxDefaults.colors(checkedColor = Color(0xFF3182F6))
-            )
         }
     }
 }
@@ -164,28 +196,6 @@ fun LoadingState() {
         contentAlignment = Alignment.Center
     ) {
         CircularProgressIndicator(color = Color(0xFF3182F6))
-    }
-}
-
-@Composable
-fun ErrorState(message: String, viewModel: CardManagementViewModel) {
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = message,
-            color = MaterialTheme.colorScheme.error,
-            style = MaterialTheme.typography.bodyLarge
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        Button(
-            onClick = { viewModel.getOwnedCards() },
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3182F6))
-        ) {
-            Text("다시 시도")
-        }
     }
 }
 

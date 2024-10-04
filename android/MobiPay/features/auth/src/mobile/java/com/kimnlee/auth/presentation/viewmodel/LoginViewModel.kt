@@ -130,6 +130,7 @@ class LoginViewModel(
     }
 
     fun register(name: String, phoneNumber: String) {
+        Log.d(TAG, "register 메서드 호출: name($name), phoneNumber($phoneNumber)")
         viewModelScope.launch {
             val registrationRequest = RegistrationRequest(
                 email = email,
@@ -139,11 +140,12 @@ class LoginViewModel(
                 accessToken = kakaoAccessToken,
                 refreshToken = kakaoRefreshToken
             )
-
+            Log.d(TAG, "회원가입 요청 json내용: $registrationRequest")
             try {
                 val response = unAuthService.register(registrationRequest)
-
+                Log.d(TAG, "register 메서드 요청 후 응답 받음: response($response)")
                 if (response.isSuccessful) {
+                    Log.d(TAG, "response.isSuccessful 됨")
                     val authTokenFromHeaders = response.headers()["Authorization"]?.split(" ")?.getOrNull(1)
                     authTokenFromHeaders?.let {
                         Log.d(TAG, "Calling saveAuthToken from register")
@@ -162,6 +164,7 @@ class LoginViewModel(
                     sendTokens()
                     Log.d("KakaoLogin", "로그인 성공 AuthToken: ${authManager.getAuthToken()}, RefreshToken: ${authManager.getRefreshToken()}")
                 } else if (response.code() == 500) {
+                    Log.d(TAG, "response http code 500")
                     _registrationError.value = "이미 가입된 전화번호에요."
                 }
             } catch (e: HttpException) {
