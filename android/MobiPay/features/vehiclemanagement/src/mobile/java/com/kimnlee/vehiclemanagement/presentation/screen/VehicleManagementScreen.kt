@@ -32,8 +32,12 @@ import com.kimnlee.common.utils.CarModelImageProvider
 fun VehicleManagementScreen(
     onNavigateToDetail: (Int) -> Unit,
     onNavigateToRegistration: () -> Unit,
-    viewModel: VehicleManagementViewModel
+    viewModel: VehicleManagementViewModel = viewModel()
 ) {
+    LaunchedEffect(Unit) {
+        viewModel.getUserVehicles()
+    }
+
     val vehicles by viewModel.vehicles.collectAsState()
 
     Column(

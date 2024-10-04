@@ -49,12 +49,8 @@ class VehicleManagementViewModel(
     private val _autoPaymentStatus = MutableStateFlow<Boolean>(sharedPreferences.getBoolean("auto_payment_status", false)) // 초기값 설정
     val autoPaymentStatus: StateFlow<Boolean> = _autoPaymentStatus
 
-    init {
-        getUserVehicles()
-    }
-
     // 사용자가 소속된 차량의 목록 불러오기
-    private fun getUserVehicles() {
+    fun getUserVehicles() {
         viewModelScope.launch {
             try {
                 val response = vehicleService.getUserVehicleList()
