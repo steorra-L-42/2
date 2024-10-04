@@ -49,6 +49,7 @@ playServicesMaps = "19.0.0"
 jjwtApi = "0.12.6"
 jjwtImpl = "0.12.6"
 jjwtJackson = "0.12.6"
+okhttpUrlconnection = "5.0.0-alpha.14"
 
 [libraries]
 androidx-biometric = { module = "androidx.biometric:biometric", version.ref = "biometric" }
@@ -104,6 +105,7 @@ play-services-maps = { group = "com.google.android.gms", name = "play-services-m
 jjwt-api = { group = "io.jsonwebtoken", name = "jjwt-api", version.ref = "jjwtApi" }
 jjwt-impl = { group = "io.jsonwebtoken", name = "jjwt-impl", version.ref = "jjwtImpl" }
 jjwt-jackson = { group = "io.jsonwebtoken", name = "jjwt-jackson", version.ref = "jjwtJackson" }
+okhttp-urlconnection = { group = "com.squareup.okhttp3", name = "okhttp-urlconnection", version.ref = "okhttpUrlconnection" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
