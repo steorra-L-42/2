@@ -2,9 +2,10 @@ package com.example.mobipay.oauth2.jwt;
 
 import static com.example.mobipay.oauth2.enums.TokenType.REFRESH;
 
+import com.example.mobipay.domain.fcmtoken.repository.FcmTokenRepository;
 import com.example.mobipay.domain.mobiuser.entity.MobiUser;
 import com.example.mobipay.domain.mobiuser.repository.MobiUserRepository;
-import com.example.mobipay.domain.refreshtoken.entity.repository.RefreshTokenRepository;
+import com.example.mobipay.domain.refreshtoken.repository.RefreshTokenRepository;
 import com.example.mobipay.oauth2.util.CookieMethods;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
@@ -29,6 +30,7 @@ public class CustomLogoutFilter extends GenericFilterBean {
 
     private final JWTUtil jwtUtil;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final FcmTokenRepository fcmTokenRepository;
     private final MobiUserRepository mobiUserRepository;
     private final CookieMethods cookieMethods;
 
@@ -91,12 +93,14 @@ public class CustomLogoutFilter extends GenericFilterBean {
         return !refreshTokenRepository.existsByValue(refreshToken);
     }
 
-    @org.springframework.transaction.annotation.Transactional
+    @Transactional
     protected void processLogout(HttpServletResponse response, String refreshToken) {
         MobiUser mobiUser = findUserByRefreshToken(refreshToken);
 
         clearUserRefreshToken(mobiUser); // User에서 리프레시 토큰 삭제
         refreshTokenRepository.revokeByValue(refreshToken); // refresh Token revoke 처리
+
+        clearUserFcmToken(mobiUser);
 
         // 쿠키 삭제
         cookieMethods.clearRefreshTokenCookie(response);
@@ -108,6 +112,15 @@ public class CustomLogoutFilter extends GenericFilterBean {
         mobiUser.deleteRefreshToken();
         mobiUserRepository.save(mobiUser); // User 변경
     }
+
+    protected void clearUserFcmToken(MobiUser mobiUser) {
+        if (mobiUser.getFcmToken() != null) {
+            fcmTokenRepository.deleteByValue(mobiUser.getFcmToken().getValue());
+            mobiUser.deleteFcmToken();
+            mobiUserRepository.save(mobiUser);
+        }
+    }
+
 
     private MobiUser findUserByRefreshToken(String refreshToken) {
         String email = jwtUtil.getEmail(refreshToken);

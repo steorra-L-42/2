@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 public class CookieMethods {
 
     public Cookie createCookie(String key, String value) {
-
         Cookie cookie = new Cookie(key, value);
         cookie.setMaxAge(REFRESH.getExpiration());
         cookie.setSecure(true);

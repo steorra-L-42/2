@@ -3,6 +3,7 @@ package com.example.mobipay.oauth2.controller;
 import static com.example.mobipay.oauth2.enums.TokenType.ACCESS;
 import static com.example.mobipay.oauth2.enums.TokenType.BEARER;
 
+import com.example.mobipay.domain.kakaotoken.service.KakaoTokenService;
 import com.example.mobipay.domain.mobiuser.entity.MobiUser;
 import com.example.mobipay.domain.mobiuser.error.MobiUserNotFoundException;
 import com.example.mobipay.domain.mobiuser.repository.MobiUserRepository;
@@ -10,7 +11,7 @@ import com.example.mobipay.global.authentication.service.SignUpServiceImpl;
 import com.example.mobipay.oauth2.dto.KakaoTokenResponseDto;
 import com.example.mobipay.oauth2.dto.KakaoUserInfoResponseDto;
 import com.example.mobipay.oauth2.dto.UserRequestDto;
-import com.example.mobipay.oauth2.service.KakaoTokenService;
+import com.example.mobipay.oauth2.dto.UserResponseDto;
 import com.example.mobipay.oauth2.service.UserService;
 import com.example.mobipay.oauth2.util.CookieMethods;
 import jakarta.servlet.http.Cookie;
@@ -18,16 +19,15 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientResponseException;
 
 @RestController
 @RequiredArgsConstructor
@@ -68,13 +68,16 @@ public class KakaoLoginController {
 
             kakaoTokenService.saveOrUpdateKakaoToken(accessToken, refreshToken, mobiUser);
 
-            String jwtaccessToken = userService.generateJwtAccessToken(mobiUser);
+            String jwtAccessToken = userService.generateJwtAccessToken(mobiUser);
 
             // 헤더 생성 후, 헤더에 JWT 토큰 추가
             HttpHeaders headers = new HttpHeaders();
-            headers.add(ACCESS.getType(), BEARER.getType() + jwtaccessToken);
+            headers.add(ACCESS.getType(), BEARER.getType() + jwtAccessToken);
 
-            return ResponseEntity.ok().headers(headers).build();
+            UserResponseDto responseBody = userService.getUserDetail(email, mobiUser.getName(),
+                    mobiUser.getPhoneNumber(), jwtAccessToken);
+
+            return ResponseEntity.ok().headers(headers).body(responseBody);
 
 
         } catch (Exception e) {
@@ -84,8 +87,8 @@ public class KakaoLoginController {
 
 
     @PostMapping("/detail")
-    public ResponseEntity<String> requestUserDetails(@RequestBody UserRequestDto userRequestDto,
-                                                     HttpServletResponse response) {
+    public ResponseEntity<UserResponseDto> requestUserDetails(@RequestBody UserRequestDto userRequestDto,
+                                                              HttpServletResponse response) {
         // 여기서 토큰은 유저의 카카오 Token, DB에 저장하기 위해 다시 값을 받음
         String email = userRequestDto.getEmail();
         String name = userRequestDto.getName();
@@ -105,11 +108,8 @@ public class KakaoLoginController {
         response.addCookie(jwtRefreshToken);
         HttpHeaders headers = new HttpHeaders();
         headers.add(ACCESS.getType(), BEARER.getType() + jwtAccessToken);  // 헤더에 JWT 토큰 추가
-        // 응답 바디에 JSON 형태의 데이터를 포함
-        String responseBody = String.format(
-                "{ \"email\": \"%s\", \"name\": \"%s\", \"phoneNumber\": \"%s\", \"jwtAccessToken\": \"%s\" }",
-                email, name, phoneNumber, jwtAccessToken
-        );
+
+        UserResponseDto responseBody = userService.getUserDetail(email, name, phoneNumber, jwtAccessToken);
 
         headers.add(HttpHeaders.SET_COOKIE, jwtRefreshToken.toString());
 
@@ -123,19 +123,22 @@ public class KakaoLoginController {
     }
 
     public KakaoUserInfoResponseDto getUserInfo(String accessToken) {
-        RestTemplate restTemplate = new RestTemplate();
-        // 추후에 RestClient 라고 더 좋은게 있는데 리팩토링 고려 해볼 것
-        // HTTP 요청 헤더 설정
-        HttpHeaders headers = new HttpHeaders();
-        headers.add(ACCESS.getType(), BEARER.getType() + accessToken);
+        RestClient client = RestClient.builder()
+                .baseUrl(UserInfoUri)  // 기본 URL 설정
+                .build();
 
-        HttpEntity<String> request = new HttpEntity<>(headers);
-        ResponseEntity<KakaoUserInfoResponseDto> response = restTemplate.exchange(
-                UserInfoUri,
-                HttpMethod.GET,
-                request,
-                KakaoUserInfoResponseDto.class
-        );
-        return response.getBody();  // 사용자 정보 반환
+        try {
+            KakaoUserInfoResponseDto response = client.get()
+                    .uri("/") // 특정 경로를 추가로 설정하지 않으면 기본 URL을 사용
+                    .header(ACCESS.getType(), BEARER.getType() + accessToken) // 헤더 추가
+                    .retrieve()  // 요청 수행
+                    .body(KakaoUserInfoResponseDto.class);  // 응답 바디를 원하는 DTO로 매핑
+
+            return response;  // 사용자 정보 반환
+
+        } catch (RestClientResponseException ex) {
+            // 예외 처리 (예: API 호출 실패 등)
+            throw new RuntimeException("Failed to fetch user info from Kakao API", ex);
+        }
     }
 }
