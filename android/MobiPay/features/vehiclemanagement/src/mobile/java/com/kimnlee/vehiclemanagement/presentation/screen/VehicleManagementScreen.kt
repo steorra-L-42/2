@@ -26,31 +26,61 @@ import androidx.compose.ui.unit.sp
 import com.kimnlee.common.ui.theme.MobiCardBgGray
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.ui.text.font.FontWeight
+import com.kimnlee.common.ui.theme.MobiTextAlmostBlack
 import com.kimnlee.common.utils.CarModelImageProvider
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VehicleManagementScreen(
     onNavigateToDetail: (Int) -> Unit,
     onNavigateToRegistration: () -> Unit,
-    viewModel: VehicleManagementViewModel
+    viewModel: VehicleManagementViewModel = viewModel()
 ) {
+    LaunchedEffect(Unit) {
+        viewModel.getUserVehicles()
+    }
+
     val vehicles by viewModel.vehicles.collectAsState()
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        Text(
-            text = "차량 관리",
-            style = MaterialTheme.typography.headlineMedium
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-
-        LazyColumn {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "🚗",
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontFamily = FontFamily(Font(com.kimnlee.common.R.font.emoji)),
+                            fontSize = 24.sp,
+                            modifier = Modifier
+                                .padding(top = 10.dp)
+                                .padding(end = 8.dp)
+                        )
+                        Text(
+                            text = "차량 관리",
+                            style = MaterialTheme.typography.headlineMedium,
+                            color = MobiTextAlmostBlack,
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background
+                )
+            )
+        }
+    ) { innerPadding ->
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
             items(vehicles) { vehicle ->
                 VehicleItem(vehicle, onClick = { onNavigateToDetail(vehicle.carId) })
-                Spacer(modifier = Modifier.height(16.dp))
             }
 
             item {
@@ -62,30 +92,36 @@ fun VehicleManagementScreen(
 
 @Composable
 fun AddVehicleCard(onClick: () -> Unit) {
+    Spacer(modifier = Modifier.height(8.dp))
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .height(200.dp)
             .clickable(onClick = onClick),
-        shape = RoundedCornerShape(8.dp),
-        colors = CardDefaults.cardColors(containerColor = MobiCardBgGray),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(8.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
         ) {
-            Icon(
-                imageVector = Icons.Filled.AddCircle,
-                contentDescription = "차량 등록하러 가기",
-                modifier = Modifier.size(48.dp),
-                tint = Color.Black
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text("차량 등록하러 가기", style = MaterialTheme.typography.bodyLarge)
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.AddCircle,
+                    contentDescription = "차량 등록하러 가기",
+                    modifier = Modifier.size(48.dp),
+                    tint = MobiTextAlmostBlack
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    "차량 등록하러 가기",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MobiTextAlmostBlack
+                )
+            }
         }
     }
 }

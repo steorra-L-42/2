@@ -11,4 +11,6 @@ public interface CarGroupRepository extends JpaRepository<CarGroup, CarGroupId> 
     Boolean existsByMobiUserIdAndCarId(Long mobiUserId, Long carId);
 
     List<CarGroup> findByCarId(Long carId);
+
+    List<CarGroup> findByMobiUserId(Long mobiUserId);
 }

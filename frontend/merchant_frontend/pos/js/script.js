@@ -183,8 +183,8 @@ function initApp() {
 
 
     requestPayMobi() {
-      this.closeModalReceipt();  // Close the receipt modal
-      this.isLoading = true;     // Show the loading image
+      this.closeModalReceipt();
+      this.isLoading = true;
 
       // websocket 연결
       const socket = new WebSocket('wss://merchant.mobipay.kr/api/v1/merchants/websocket');
@@ -239,10 +239,10 @@ function initApp() {
           socket.send(JSON.stringify({ "type": MERCHANT_TYPE }));
         } else {
           if (message.success) {
-            this.isLoading = false; // Hide loading image
-            this.isShowModalSuccess = true; // Show success modal
+            this.isLoading = false;
+            this.isShowModalSuccess = true;
           } else {
-            this.isLoading = false; // Hide loading image
+            this.isLoading = false;
             alert('결제 실패');
           }
           socket.close();
@@ -282,7 +282,7 @@ function initApp() {
 
               context.drawImage(this.video, x, y, width, height, 0, 0, width, height);
 
-              const self = this; // Store reference to 'this'
+              const self = this;
 
               canvas.toBlob(async (blob) => {
                 const formData = new FormData();
@@ -319,7 +319,7 @@ function initApp() {
         });
 
         if (!this.car_present) {
-          // Handle case when no car is present
+          // 차량 감지 안 된 경우 처리
         }
 
         setTimeout(() => {

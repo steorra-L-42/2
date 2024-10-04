@@ -4,26 +4,21 @@ import static com.example.mobipay.domain.fcmtoken.enums.FcmTokenType.AUTO_PAY_FA
 import static com.example.mobipay.domain.fcmtoken.enums.FcmTokenType.TRANSACTION_REQUEST;
 
 import com.example.mobipay.domain.approvalwaiting.entity.ApprovalWaiting;
-import com.example.mobipay.domain.approvalwaiting.repository.ApprovalWaitingRepository;
+import com.example.mobipay.domain.approvalwaiting.service.ApprovalWaitingService;
 import com.example.mobipay.domain.car.entity.Car;
-import com.example.mobipay.domain.car.error.CarNotFoundException;
-import com.example.mobipay.domain.car.repository.CarRepository;
 import com.example.mobipay.domain.cargroup.entity.CarGroup;
 import com.example.mobipay.domain.cargroup.repository.CarGroupRepository;
 import com.example.mobipay.domain.fcmtoken.dto.FcmSendDto;
 import com.example.mobipay.domain.fcmtoken.error.FCMException;
 import com.example.mobipay.domain.fcmtoken.service.FcmService;
 import com.example.mobipay.domain.merchant.entity.Merchant;
-import com.example.mobipay.domain.merchant.error.MerchantNotFoundException;
-import com.example.mobipay.domain.merchant.repository.MerchantRepository;
 import com.example.mobipay.domain.mobiuser.entity.MobiUser;
+import com.example.mobipay.domain.postpayments.dto.ApprovalWaitingResponse;
 import com.example.mobipay.domain.postpayments.dto.PaymentRequest;
 import com.example.mobipay.domain.postpayments.dto.PaymentResponse;
-import com.example.mobipay.domain.postpayments.error.InvalidMobiApiKeyException;
 import com.example.mobipay.domain.registeredcard.entity.RegisteredCard;
 import com.example.mobipay.domain.registeredcard.repository.RegisteredCardRepository;
 import com.google.firebase.FirebaseException;
-import jakarta.persistence.EntityManager;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -38,23 +33,18 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class PostPaymentsRequestService {
 
-    private final MerchantRepository merchantRepository;
-    private final CarRepository carRepository;
+    private final ApprovalWaitingService approvalWaitingService;
     private final CarGroupRepository carGroupRepository;
     private final RegisteredCardRepository registeredCardRepository;
-    private final ApprovalWaitingRepository approvalWaitingRepository;
     private final FcmService fcmService;
-    private final EntityManager em;
 
     public PaymentResponse sendRequestToCarGroup(PaymentRequest request, String mobiApiKey) {
 
-        // mobiApiKey 검증
-        Merchant merchant = validateApiKey(request.getMerchantId(), mobiApiKey);
-
-        // Approval_Waiting 생성 및 저장
-        ApprovalWaiting approvalWaiting = createApprovalWaiting(request.getPaymentBalance(),
-                request.getCarNumber(),
-                merchant);
+        // ApprovalWaiting 생성
+        ApprovalWaitingResponse approvalWaitingResponse = approvalWaitingService.getApprovalWaiting(request,
+                mobiApiKey);
+        ApprovalWaiting approvalWaiting = approvalWaitingResponse.getApprovalWaiting();
+        Merchant merchant = approvalWaitingResponse.getMerchant();
 
         // carGroup 구성원에게 FCM 전송
         Car car = approvalWaiting.getCar();
@@ -62,35 +52,7 @@ public class PostPaymentsRequestService {
 
         return PaymentResponse.of(approvalWaiting, car, merchant, request);
     }
-
-    // Approval_Waiting 생성 및 관계 추가
-    private ApprovalWaiting createApprovalWaiting(Long paymentBalance, String carNumber, Merchant merchant) {
-        ApprovalWaiting approvalWaiting = ApprovalWaiting.from(paymentBalance);
-        Car car = getCarByNumber(carNumber);
-        approvalWaiting.addRelations(car, merchant);
-
-        approvalWaitingRepository.save(approvalWaiting);
-        em.flush();
-        return approvalWaiting;
-    }
-
-    // carNumber로 CAR 조회
-    private Car getCarByNumber(String carNumber) {
-        return carRepository.findByNumber(carNumber)
-                .orElseThrow(CarNotFoundException::new);
-    }
-
-    // 가맹점이 올바른 mobiApiKey를 가지고 있는지 검증
-    private Merchant validateApiKey(Long merchantId, String mobiApiKey) {
-        Merchant merchant = merchantRepository.findById(merchantId)
-                .orElseThrow(MerchantNotFoundException::new);
-
-        if (!merchant.getApiKey().equals(mobiApiKey)) {
-            throw new InvalidMobiApiKeyException();
-        }
-        return merchant;
-    }
-
+    
     // 그룹 멤버에게 FCM 푸시
     private void sendFcmToCarGroupMembers(PaymentRequest request, ApprovalWaiting approvalWaiting, Merchant merchant,
                                           Car car) {

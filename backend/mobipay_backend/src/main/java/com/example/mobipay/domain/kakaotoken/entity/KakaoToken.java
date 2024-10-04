@@ -1,4 +1,4 @@
-package com.example.mobipay.domain.kakaotoken.entity.entity;
+package com.example.mobipay.domain.kakaotoken.entity;
 
 import com.example.mobipay.domain.mobiuser.entity.MobiUser;
 import jakarta.persistence.Column;

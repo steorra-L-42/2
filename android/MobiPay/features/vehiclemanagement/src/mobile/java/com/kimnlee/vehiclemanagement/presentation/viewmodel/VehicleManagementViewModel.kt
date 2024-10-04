@@ -49,12 +49,11 @@ class VehicleManagementViewModel(
     private val _autoPaymentStatus = MutableStateFlow<Boolean>(sharedPreferences.getBoolean("auto_payment_status", false)) // 초기값 설정
     val autoPaymentStatus: StateFlow<Boolean> = _autoPaymentStatus
 
-    init {
-        getUserVehicles()
-    }
+    private val _hasNewNotifications = MutableStateFlow<Boolean>(false)
+    val hasNewNotifications: StateFlow<Boolean> = _hasNewNotifications
 
     // 사용자가 소속된 차량의 목록 불러오기
-    private fun getUserVehicles() {
+    fun getUserVehicles() {
         viewModelScope.launch {
             try {
                 val response = vehicleService.getUserVehicleList()
@@ -178,6 +177,15 @@ class VehicleManagementViewModel(
                 Log.e(TAG, "Error updating auto payment status", e)
             }
         }
+    }
+    // 알림 상태 업데이트
+    fun updateNotificationStatus(hasNew: Boolean) {
+        _hasNewNotifications.value = hasNew
+    }
+
+    // 알림을 읽으면 호출
+    fun markNotificationsAsRead() {
+        updateNotificationStatus(false)
     }
 }
 
