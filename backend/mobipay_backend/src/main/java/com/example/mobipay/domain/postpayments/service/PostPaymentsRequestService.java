@@ -23,7 +23,7 @@ import com.example.mobipay.domain.postpayments.error.InvalidMobiApiKeyException;
 import com.example.mobipay.domain.registeredcard.entity.RegisteredCard;
 import com.example.mobipay.domain.registeredcard.repository.RegisteredCardRepository;
 import com.google.firebase.FirebaseException;
-import jakarta.transaction.Transactional;
+import jakarta.persistence.EntityManager;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -44,8 +44,8 @@ public class PostPaymentsRequestService {
     private final RegisteredCardRepository registeredCardRepository;
     private final ApprovalWaitingRepository approvalWaitingRepository;
     private final FcmService fcmService;
+    private final EntityManager em;
 
-    @Transactional
     public PaymentResponse sendRequestToCarGroup(PaymentRequest request, String mobiApiKey) {
 
         // mobiApiKey 검증
@@ -70,6 +70,7 @@ public class PostPaymentsRequestService {
         approvalWaiting.addRelations(car, merchant);
 
         approvalWaitingRepository.save(approvalWaiting);
+        em.flush();
         return approvalWaiting;
     }
 
