@@ -1,5 +1,6 @@
 package com.kimnlee.common
 
+import androidx.navigation.NavController
 import com.google.android.gms.maps.model.LatLng
 import com.kimnlee.common.auth.AuthManager
 import com.kimnlee.common.network.ApiClient

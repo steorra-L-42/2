@@ -13,8 +13,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.kimnlee.auth.navigation.authNavGraph
-import com.kimnlee.auth.presentation.screen.PaymentScreen
-import com.kimnlee.auth.presentation.viewmodel.BiometricViewModel
+import com.kimnlee.payment.presentation.viewmodel.BiometricViewModel
 import com.kimnlee.auth.presentation.viewmodel.LoginViewModel
 import com.kimnlee.cardmanagement.navigation.cardManagementNavGraph
 import com.kimnlee.cardmanagement.presentation.viewmodel.CardManagementViewModel
@@ -28,6 +27,7 @@ import com.kimnlee.mobipay.presentation.screen.ShowMoreScreen
 import com.kimnlee.mobipay.presentation.viewmodel.ShowMoreViewModel
 import com.kimnlee.notification.navigation.notificationNavGraph
 import com.kimnlee.payment.navigation.paymentNavGraph
+import com.kimnlee.payment.presentation.screen.ManualPaymentScreen
 import com.kimnlee.vehiclemanagement.navigation.vehicleManagementNavGraph
 import com.kimnlee.vehiclemanagement.presentation.viewmodel.VehicleManagementViewModel
 
@@ -93,20 +93,9 @@ fun AppNavGraph(
                 )
             }
         }
-        composable("payment_requestmanualpay",
-            enterTransition = { EnterTransition.None },
-            exitTransition = { ExitTransition.None }
-        ) {
-            BottomNavigation(navController) {
-                PaymentScreen(
-                    navController = navController,
-                    viewModel = biometricViewModel
-                )
-            }
-        }
 
         authNavGraph(navController, authManager, loginViewModel)
-        paymentNavGraph(navController)
+        paymentNavGraph(navController, biometricViewModel)
         cardManagementNavGraph(
             navController = navController,
             authManager = authManager,
