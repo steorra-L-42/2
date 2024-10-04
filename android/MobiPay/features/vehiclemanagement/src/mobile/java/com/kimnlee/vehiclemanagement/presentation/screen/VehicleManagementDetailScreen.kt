@@ -62,6 +62,8 @@ fun VehicleManagementDetailScreen(
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
+    val hasNewNotifications by viewModel.hasNewNotifications.collectAsState()
+
     if(vehicle?.carModel == null){
         Log.d(TAG, "VehicleManagementDetailScreen: 차량 모델 NULL! return 하겠음!!!!")
         return
@@ -96,7 +98,7 @@ fun VehicleManagementDetailScreen(
                 Text("차량 선택")
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(40.dp))
 
             // 차량 이미지 추가
             Image(
@@ -104,7 +106,7 @@ fun VehicleManagementDetailScreen(
                 contentDescription = "Vehicle Image",
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(180.dp),
+                    .size(120.dp),
                 contentScale = ContentScale.Fit
             )
 
@@ -222,14 +224,27 @@ fun VehicleManagementDetailScreen(
         }
 
         IconButton(
-            onClick = onNavigateToNotification,
+            onClick = {
+                onNavigateToNotification()
+                viewModel.markNotificationsAsRead()
+            },
             modifier = Modifier.align(Alignment.TopEnd)
         ) {
-            Icon(
-                imageVector = Icons.Outlined.Notifications,
-                contentDescription = "알림",
-                modifier = Modifier.size(30.dp)
-            )
+            Box {
+                Icon(
+                    imageVector = Icons.Outlined.Notifications,
+                    contentDescription = "알림",
+                    modifier = Modifier.size(30.dp)
+                )
+                if (hasNewNotifications) {
+                    Box(
+                        modifier = Modifier
+                            .size(8.dp)
+                            .background(Color.Red, shape = CircleShape)
+                            .align(Alignment.TopEnd)
+                    )
+                }
+            }
         }
     }
 }
