@@ -22,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.ui.text.style.TextAlign
+import com.kimnlee.common.ui.theme.*
 
 @Composable
 fun NotificationScreen(
@@ -202,7 +203,8 @@ fun NotificationItem(notification: Notification) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp)
-            .background(Color(0xFF222629), RoundedCornerShape(16.dp))
+            .background(Color.White, RoundedCornerShape(16.dp))
+            .border(1.dp, Color.Black, RoundedCornerShape(16.dp))
             .padding(16.dp)
     ) {
         Text(
@@ -224,7 +226,7 @@ fun NotificationItem(notification: Notification) {
         Icon(
             imageVector = icon,
             contentDescription = "아이콘",
-            tint = Color.White,
+            tint = MobiTextAlmostBlack,
             modifier = Modifier
                 .align(Alignment.TopStart)
                 .size(20.dp)
@@ -242,7 +244,7 @@ fun NotificationItem(notification: Notification) {
                 Text(
                     text = type,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = Color.LightGray,
+                    color = MobiTextAlmostBlack,
                     maxLines = 1,
                     fontWeight = FontWeight.SemiBold,
                 )
@@ -250,7 +252,7 @@ fun NotificationItem(notification: Notification) {
                 Text(
                     text = notification.message,
                     style = MaterialTheme.typography.bodyLarge,
-                    color = Color.White,
+                    color = MobiTextDarkGray,
                     maxLines = 3,
                     overflow = TextOverflow.Ellipsis
                 )

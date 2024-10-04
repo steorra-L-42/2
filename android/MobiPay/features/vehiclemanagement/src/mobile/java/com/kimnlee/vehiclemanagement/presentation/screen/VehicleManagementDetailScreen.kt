@@ -98,7 +98,7 @@ fun VehicleManagementDetailScreen(
                 Text("차량 선택")
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(40.dp))
 
             // 차량 이미지 추가
             Image(
@@ -106,7 +106,7 @@ fun VehicleManagementDetailScreen(
                 contentDescription = "Vehicle Image",
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(180.dp),
+                    .size(120.dp),
                 contentScale = ContentScale.Fit
             )
 
