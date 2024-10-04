@@ -108,15 +108,20 @@ fun VehicleItem(vehicle: Vehicle, onClick: () -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Image(
-                painter = painterResource(id = imageResId),
-                contentDescription = "차량 이미지",
+            Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .size(96.dp)
-                    .clip(RoundedCornerShape(8.dp)),
-                contentScale = ContentScale.Fit
-            )
+                    .padding(top = 4.dp, bottom = 20.dp)
+            ) {
+                Image(
+                    painter = painterResource(id = imageResId),
+                    contentDescription = "차량 이미지",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .size(96.dp)
+                        .clip(RoundedCornerShape(8.dp)),
+                    contentScale = ContentScale.Fit
+                )
+            }
             Spacer(modifier = Modifier.height(8.dp))
 
             TextOnLP(formatLicensePlate(vehicle.number))
