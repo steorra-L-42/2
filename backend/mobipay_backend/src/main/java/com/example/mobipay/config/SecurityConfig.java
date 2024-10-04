@@ -1,8 +1,7 @@
 package com.example.mobipay.config;
 
-import com.example.mobipay.domain.fcmtoken.repository.FcmTokenRepository;
 import com.example.mobipay.domain.mobiuser.repository.MobiUserRepository;
-import com.example.mobipay.domain.refreshtoken.repository.RefreshTokenRepository;
+import com.example.mobipay.domain.refreshtoken.entity.repository.RefreshTokenRepository;
 import com.example.mobipay.oauth2.jwt.CustomLogoutFilter;
 import com.example.mobipay.oauth2.jwt.JWTFilter;
 import com.example.mobipay.oauth2.jwt.JWTUtil;
@@ -30,17 +29,13 @@ public class SecurityConfig {
     private final JWTUtil jwtUtil;
     private final RefreshTokenRepository refreshTokenRepository;
     private final CookieMethods cookieMethods;
-    private final FcmTokenRepository fcmTokenRepository;
     private final MobiUserRepository mobiUserRepository;
     private final UserService userService;
 
     String[] whitelist_post = {
-            "/api/v1/user/reissue"
             // 논의 후 추가 필요
     };
     String[] whitelist_get = {
-            "/",
-            "/api/v1/user/login/**"
             // 논의 후 추가 필요
     };
 
@@ -95,8 +90,7 @@ public class SecurityConfig {
 
         http
                 .addFilterBefore(
-                        new CustomLogoutFilter(jwtUtil, refreshTokenRepository, fcmTokenRepository, mobiUserRepository,
-                                cookieMethods),
+                        new CustomLogoutFilter(jwtUtil, refreshTokenRepository, mobiUserRepository, cookieMethods),
                         LogoutFilter.class);
 
         http

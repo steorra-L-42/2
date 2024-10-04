@@ -1,4 +1,4 @@
-package com.example.mobipay.domain.refreshtoken.entity;
+package com.example.mobipay.domain.refreshtoken.entity.entity;
 
 import com.example.mobipay.domain.mobiuser.entity.MobiUser;
 import jakarta.persistence.Column;

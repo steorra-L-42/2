@@ -1,4 +1,4 @@
-package com.example.mobipay.domain.kakaotoken.entity;
+package com.example.mobipay.domain.kakaotoken.entity.entity;
 
 import com.example.mobipay.domain.mobiuser.entity.MobiUser;
 import jakarta.persistence.Column;
@@ -17,6 +17,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @Table(name = "kakao_token")
+
 @NoArgsConstructor(access = AccessLevel.PUBLIC)
 public class KakaoToken {
 

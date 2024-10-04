@@ -1,7 +1,7 @@
-package com.example.mobipay.domain.kakaotoken.service;
+package com.example.mobipay.oauth2.service;
 
-import com.example.mobipay.domain.kakaotoken.entity.KakaoToken;
-import com.example.mobipay.domain.kakaotoken.repository.KakaoTokenRepository;
+import com.example.mobipay.domain.kakaotoken.entity.entity.KakaoToken;
+import com.example.mobipay.domain.kakaotoken.entity.repository.KakaoTokenRepository;
 import com.example.mobipay.domain.mobiuser.entity.MobiUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

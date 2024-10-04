@@ -8,6 +8,4 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface FcmTokenRepository extends JpaRepository<FcmToken, Long> {
     Optional<FcmToken> findByValue(String fcmTokenValue);
-
-    void deleteByValue(String fcmTokenValue);
 }
