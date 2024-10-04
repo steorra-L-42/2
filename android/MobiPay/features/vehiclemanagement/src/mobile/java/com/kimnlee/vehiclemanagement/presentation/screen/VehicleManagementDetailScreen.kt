@@ -28,6 +28,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -53,6 +54,7 @@ import coil.compose.AsyncImage
 import com.kimnlee.cardmanagement.presentation.screen.findCardCompany
 import com.kimnlee.cardmanagement.presentation.screen.maskCardNumber
 import com.kimnlee.cardmanagement.presentation.viewmodel.CardManagementViewModel
+import com.kimnlee.common.ui.theme.MobiBlue
 import com.kimnlee.common.utils.CarModelImageProvider
 import com.kimnlee.memberinvitation.presentation.components.MemberInvitationBottomSheet
 import com.kimnlee.memberinvitation.presentation.viewmodel.MemberInvitationViewModel
@@ -156,7 +158,13 @@ fun VehicleManagementDetailScreen(
                     checked = autoPaymentStatus,
                     onCheckedChange = {
                         viewModel.toggleAutoPayment(vehicleId, it)
-                    }
+                    },
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = MobiBlue,
+                        uncheckedThumbColor = Color.DarkGray,
+                        checkedTrackColor = Color.LightGray,
+                        uncheckedTrackColor = Color.LightGray
+                    )
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("내 카드로 자동결제")
