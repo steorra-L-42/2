@@ -122,6 +122,8 @@ class LoginViewModel(
                 kakaoAccessToken = token.accessToken
                 kakaoRefreshToken = token.refreshToken
                 _navigationEvent.emit("registration")
+            } else {
+                Log.d(TAG, "sendLoginRequest에서 회원가입(404) 이외의 에러코드 확인 : ${response.code()}")
             }
         } catch (e: Exception) {
             Log.e(TAG, "로그인 실패", e)
