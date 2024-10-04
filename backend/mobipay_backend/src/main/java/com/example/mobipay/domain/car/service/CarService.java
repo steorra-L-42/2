@@ -19,6 +19,7 @@ import com.example.mobipay.domain.mobiuser.error.MobiUserNotFoundException;
 import com.example.mobipay.domain.mobiuser.repository.MobiUserRepository;
 import com.example.mobipay.oauth2.dto.CustomOAuth2User;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -91,7 +92,11 @@ public class CarService {
     @Transactional(readOnly = true)
     public CarListResponse getCars(CustomOAuth2User oauth2User) {
         MobiUser mobiUser = findMobiUser(oauth2User.getMobiUserId());
-        List<Car> cars = carRepository.findAllByOwner(mobiUser);
+
+        List<CarGroup> carGroups = carGroupRepository.findByMobiUserId(mobiUser.getId());
+        List<Car> cars = carGroups.stream()
+                .map(CarGroup::getCar)
+                .collect(Collectors.toList());
 
         return CarListResponse.from(cars);
     }
