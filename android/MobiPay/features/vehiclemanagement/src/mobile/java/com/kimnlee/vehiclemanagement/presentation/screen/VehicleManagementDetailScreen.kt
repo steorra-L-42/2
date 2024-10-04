@@ -62,6 +62,8 @@ fun VehicleManagementDetailScreen(
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
+    val hasNewNotifications by viewModel.hasNewNotifications.collectAsState()
+
     if(vehicle?.carModel == null){
         Log.d(TAG, "VehicleManagementDetailScreen: 차량 모델 NULL! return 하겠음!!!!")
         return
@@ -222,14 +224,27 @@ fun VehicleManagementDetailScreen(
         }
 
         IconButton(
-            onClick = onNavigateToNotification,
+            onClick = {
+                onNavigateToNotification()
+                viewModel.markNotificationsAsRead()
+            },
             modifier = Modifier.align(Alignment.TopEnd)
         ) {
-            Icon(
-                imageVector = Icons.Outlined.Notifications,
-                contentDescription = "알림",
-                modifier = Modifier.size(30.dp)
-            )
+            Box {
+                Icon(
+                    imageVector = Icons.Outlined.Notifications,
+                    contentDescription = "알림",
+                    modifier = Modifier.size(30.dp)
+                )
+                if (hasNewNotifications) {
+                    Box(
+                        modifier = Modifier
+                            .size(8.dp)
+                            .background(Color.Red, shape = CircleShape)
+                            .align(Alignment.TopEnd)
+                    )
+                }
+            }
         }
     }
 }
