@@ -18,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -70,7 +71,8 @@ fun CardManagementOwnedCardListScreen(
             onClick = { onNavigateToRegistration(selectedCards.toList()) },
             modifier = Modifier.fillMaxWidth().height(56.dp),
             enabled = selectedCards.isNotEmpty(),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3182F6))
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3182F6)),
+            shape = RectangleShape
         ) {
             Text("등록하기", color = Color.White)
         }
@@ -98,17 +100,20 @@ fun TopBar(onNavigateBack: () -> Unit) {
 fun SelectionButtons(onSelectAll: () -> Unit, onDeselectAll: () -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
+        horizontalArrangement = Arrangement.End
     ) {
         Button(
             onClick = onSelectAll,
-            colors = ButtonDefaults.buttonColors(containerColor = Color.LightGray)
+            colors = ButtonDefaults.buttonColors(containerColor = Color.LightGray),
+            shape = RectangleShape,
+            modifier = Modifier.padding(end = 8.dp)
         ) {
             Text("전체 선택", color = Color.Black)
         }
         Button(
             onClick = onDeselectAll,
-            colors = ButtonDefaults.buttonColors(containerColor = Color.LightGray)
+            colors = ButtonDefaults.buttonColors(containerColor = Color.LightGray),
+            shape = RectangleShape
         ) {
             Text("전체 선택 해제", color = Color.Black)
         }
@@ -154,7 +159,8 @@ fun CardItem(
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(8.dp),
-            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White)
         ) {
             Row(
                 modifier = Modifier

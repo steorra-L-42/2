@@ -17,8 +17,12 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.kimnlee.cardmanagement.data.model.CardInfo
 import com.kimnlee.cardmanagement.presentation.viewmodel.CardManagementViewModel
+import com.kimnlee.common.ui.theme.MobiBgGray
+import com.kimnlee.common.ui.theme.MobiTextAlmostBlack
+import com.kimnlee.common.ui.theme.MobiTextDarkGray
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CardRegistrationScreen(
     viewModel: CardManagementViewModel,
@@ -37,100 +41,136 @@ fun CardRegistrationScreen(
 
     val isAnyLimitExceeded = oneDayLimitErrors.any { it.isNotEmpty() } || oneTimeLimitErrors.any { it.isNotEmpty() }
 
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        Text("카드 등록", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-        Spacer(modifier = Modifier.height(16.dp))
-
-        HorizontalPager(
-            state = pagerState,
-            modifier = Modifier
-                .weight(0.5f)
-                .fillMaxWidth(),
-            pageSpacing = 16.dp,
-            contentPadding = PaddingValues(horizontal = 48.dp)
-        ) { page ->
-            CardImage(cardInfo = cardInfos[page])
-        }
-
-        if (cardInfos.size > 1) {
-            Text(
-                text = "${pagerState.currentPage + 1}/${cardInfos.size}",
-                modifier = Modifier.align(Alignment.CenterHorizontally)
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        text = "카드 등록",
+                        style = MaterialTheme.typography.headlineMedium,
+                        color = MobiTextAlmostBlack,
+                        fontWeight = FontWeight.Bold
+                    )
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MobiBgGray,
+                    titleContentColor = MobiTextDarkGray
+                )
             )
         }
+    ) { innerPadding ->
+        Column(modifier = Modifier
+            .fillMaxSize()
+            .padding(innerPadding)
+            .padding(16.dp)) {
 
-        Spacer(modifier = Modifier.height(16.dp))
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier
+                    .weight(0.5f)
+                    .fillMaxWidth(),
+                pageSpacing = 16.dp,
+                contentPadding = PaddingValues(horizontal = 48.dp)
+            ) { page ->
+                CardImage(cardInfo = cardInfos[page])
+            }
 
-        // Input fields
-        OutlinedTextField(
-            value = oneDayLimits[pagerState.currentPage],
-            onValueChange = {
-                val newValue = it.filter { char -> char.isDigit() }
-                oneDayLimits = oneDayLimits.toMutableList().apply { this[pagerState.currentPage] = newValue }
-                val (oneDayError, oneTimeError) = validateLimits(newValue, oneTimeLimits[pagerState.currentPage])
-                oneDayLimitErrors = oneDayLimitErrors.toMutableList().apply { this[pagerState.currentPage] = oneDayError }
-                oneTimeLimitErrors = oneTimeLimitErrors.toMutableList().apply { this[pagerState.currentPage] = oneTimeError }
-            },
-            label = { Text("일일 결제 한도") },
-            modifier = Modifier.fillMaxWidth(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            isError = oneDayLimitErrors[pagerState.currentPage].isNotEmpty()
-        )
-        if (oneDayLimitErrors[pagerState.currentPage].isNotEmpty()) {
-            Text(oneDayLimitErrors[pagerState.currentPage], color = Color.Red)
-        }
+            if (cardInfos.size > 1) {
+                Text(
+                    text = "${pagerState.currentPage + 1}/${cardInfos.size}",
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                )
+            }
 
-        Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-        OutlinedTextField(
-            value = oneTimeLimits[pagerState.currentPage],
-            onValueChange = {
-                val newValue = it.filter { char -> char.isDigit() }
-                oneTimeLimits = oneTimeLimits.toMutableList().apply { this[pagerState.currentPage] = newValue }
-                val (oneDayError, oneTimeError) = validateLimits(oneDayLimits[pagerState.currentPage], newValue)
-                oneDayLimitErrors = oneDayLimitErrors.toMutableList().apply { this[pagerState.currentPage] = oneDayError }
-                oneTimeLimitErrors = oneTimeLimitErrors.toMutableList().apply { this[pagerState.currentPage] = oneTimeError }
-            },
-            label = { Text("1회 결제 한도") },
-            modifier = Modifier.fillMaxWidth(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            isError = oneTimeLimitErrors[pagerState.currentPage].isNotEmpty()
-        )
-        if (oneTimeLimitErrors[pagerState.currentPage].isNotEmpty()) {
-            Text(oneTimeLimitErrors[pagerState.currentPage], color = Color.Red)
-        }
+            // Input fields
+            OutlinedTextField(
+                value = oneDayLimits[pagerState.currentPage],
+                onValueChange = {
+                    val newValue = it.filter { char -> char.isDigit() }
+                    oneDayLimits = oneDayLimits.toMutableList().apply { this[pagerState.currentPage] = newValue }
+                    val (oneDayError, oneTimeError) = validateLimits(newValue, oneTimeLimits[pagerState.currentPage])
+                    oneDayLimitErrors = oneDayLimitErrors.toMutableList().apply { this[pagerState.currentPage] = oneDayError }
+                    oneTimeLimitErrors = oneTimeLimitErrors.toMutableList().apply { this[pagerState.currentPage] = oneTimeError }
+                },
+                label = { Text(
+                    text = "일일 결제 한도",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MobiTextDarkGray
+                ) },
+                modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                isError = oneDayLimitErrors[pagerState.currentPage].isNotEmpty()
+            )
+            if (oneDayLimitErrors[pagerState.currentPage].isNotEmpty()) {
+                Text(oneDayLimitErrors[pagerState.currentPage], color = Color.Red)
+            }
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
-        OutlinedTextField(
-            value = password,
-            onValueChange = { password = it },
-            label = { Text("비밀번호") },
-            modifier = Modifier.fillMaxWidth()
-        )
+            OutlinedTextField(
+                value = oneTimeLimits[pagerState.currentPage],
+                onValueChange = {
+                    val newValue = it.filter { char -> char.isDigit() }
+                    oneTimeLimits = oneTimeLimits.toMutableList().apply { this[pagerState.currentPage] = newValue }
+                    val (oneDayError, oneTimeError) = validateLimits(oneDayLimits[pagerState.currentPage], newValue)
+                    oneDayLimitErrors = oneDayLimitErrors.toMutableList().apply { this[pagerState.currentPage] = oneDayError }
+                    oneTimeLimitErrors = oneTimeLimitErrors.toMutableList().apply { this[pagerState.currentPage] = oneTimeError }
+                },
+                label = { Text(
+                    text = "1회 결제 한도",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MobiTextDarkGray
+                ) },
+                modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                isError = oneTimeLimitErrors[pagerState.currentPage].isNotEmpty()
+            )
+            if (oneTimeLimitErrors[pagerState.currentPage].isNotEmpty()) {
+                Text(oneTimeLimitErrors[pagerState.currentPage], color = Color.Red)
+            }
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-        Button(
-            onClick = {
-                cardInfos.forEachIndexed { index, cardInfo ->
-                    viewModel.registerCard(
-                        ownedCardId = cardInfo.cardId,
-                        oneDayLimit = oneDayLimits[index].toIntOrNull() ?: 0,
-                        oneTimeLimit = oneTimeLimits[index].toIntOrNull() ?: 0,
-                        password = password
-                    )
-                }
-                onNavigateBack()
-            },
-            modifier = Modifier.fillMaxWidth().height(56.dp),
-            enabled = oneDayLimits.all { it.isNotEmpty() } &&
-                    oneTimeLimits.all { it.isNotEmpty() } &&
-                    password.isNotEmpty() &&
-                    !isAnyLimitExceeded,
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3182F6))
-        ) {
-            Text("등록하기", color = Color.White)
+            OutlinedTextField(
+                value = password,
+                onValueChange = { password = it },
+                label = { Text(
+                    text = "비밀번호",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MobiTextDarkGray
+                ) },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(
+                onClick = {
+                    cardInfos.forEachIndexed { index, cardInfo ->
+                        viewModel.registerCard(
+                            ownedCardId = cardInfo.cardId,
+                            oneDayLimit = oneDayLimits[index].toIntOrNull() ?: 0,
+                            oneTimeLimit = oneTimeLimits[index].toIntOrNull() ?: 0,
+                            password = password
+                        )
+                    }
+                    onNavigateBack()
+                },
+                modifier = Modifier.fillMaxWidth().height(56.dp),
+                enabled = oneDayLimits.all { it.isNotEmpty() } &&
+                        oneTimeLimits.all { it.isNotEmpty() } &&
+                        password.isNotEmpty() &&
+                        !isAnyLimitExceeded,
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3182F6))
+            ) {
+                Text(
+                    text = "등록하기",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = Color.White
+                )
+            }
         }
     }
 
