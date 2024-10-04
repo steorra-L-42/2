@@ -9,6 +9,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.example.mobipay.MobiPayApplication;
 import com.example.mobipay.domain.car.entity.Car;
 import com.example.mobipay.domain.car.repository.CarRepository;
+import com.example.mobipay.domain.cargroup.entity.CarGroup;
+import com.example.mobipay.domain.cargroup.repository.CarGroupRepository;
 import com.example.mobipay.domain.mobiuser.entity.MobiUser;
 import com.example.mobipay.domain.mobiuser.repository.MobiUserRepository;
 import com.example.mobipay.oauth2.dto.CustomOAuth2User;
@@ -35,10 +37,6 @@ import org.springframework.web.filter.CharacterEncodingFilter;
 @AutoConfigureMockMvc
 public class CarListTest {
 
-    private static final Integer TEST_CAR_COUNT = 5;
-    private static final String TEST_CAR_PREFIX = "testCar";
-    private static final String TEST_CAR_MODEL = "carModel";
-
     @Autowired
     private MockMvc mockMvc;
     @Autowired
@@ -47,11 +45,12 @@ public class CarListTest {
     private CarRepository carRepository;
     @Autowired
     private MobiUserRepository mobiUserRepository;
+    @Autowired
+    private CarGroupRepository carGroupRepository;
 
     @Mock
     private CustomOAuth2User customOAuth2User;
     private MobiUser testUser;
-    private Long[] carIds;
 
     @BeforeEach()
     void EncodingSetUp() {
@@ -64,6 +63,7 @@ public class CarListTest {
     @Transactional
     @BeforeEach
     void mockMvcSetUp() {
+        carGroupRepository.deleteAll();
         carRepository.deleteAll();
         mobiUserRepository.deleteAll();
         mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
@@ -77,6 +77,7 @@ public class CarListTest {
 
     @AfterEach
     void cleanUp() {
+        carGroupRepository.deleteAll();
         carRepository.deleteAll();
         mobiUserRepository.deleteAll();
     }
@@ -85,25 +86,52 @@ public class CarListTest {
     @DisplayName("[OK] car list : 자동차 조회")
     void 올바른_차량_조회_테스트() throws Exception {
         SecurityTestUtil.setUpMockUser(customOAuth2User, testUser.getId());
-        createCars();
+
+        // testUser의 차량
+        Car testUserCar = Car.of("11가1111", "carModel1");
+        testUserCar.setOwner(testUser);
+        carRepository.save(testUserCar);
+
+        CarGroup testUserCarGroup1 = CarGroup.of(testUserCar, testUser);
+        carGroupRepository.save(testUserCarGroup1);
+
+        // mobiUser의 차량
+        MobiUser mobiUser = MobiUser.of("email2", "name2", "phoneNumber2", "picture2");
+        mobiUserRepository.save(mobiUser);
+
+        Car mobiUserCar = Car.of("22나2222", "carModel2");
+        mobiUserCar.setOwner(mobiUser);
+        carRepository.save(mobiUserCar);
+
+        CarGroup mobiUserCarGroup = CarGroup.of(mobiUserCar, mobiUser);
+        carGroupRepository.save(mobiUserCarGroup);
+        /**
+         * testUser가 mobiUser의 차량그룹에 추가된 경우
+         */
+        CarGroup testUserCarGroup2 = CarGroup.of(mobiUserCar, testUser);
+        carGroupRepository.save(testUserCarGroup2);
 
         // when
         ResultActions result = performViewCarList();
 
-        Car createdCar = carRepository.findByNumber(TEST_CAR_PREFIX + TEST_CAR_COUNT).get();
-        Long ownerId = createdCar.getOwner().getId();
         // then
         result.andExpect(status().isOk())
-                .andExpect(jsonPath("$.items.length()").value(TEST_CAR_COUNT)); // 차량 개수 테스트
+                .andExpect(jsonPath("$.items.length()").value(2)); // 차량 개수 테스트
 
         // carId, number, autoPayStatus, ownerId 테스트
-        for (int i = 0; i < TEST_CAR_COUNT; i++) {
-            result.andExpect(jsonPath("$.items[" + i + "].carId").value(carIds[i]))
-                    .andExpect(jsonPath("$.items[" + i + "].number").value(TEST_CAR_PREFIX + (i + 1)))
-                    .andExpect(jsonPath("$.items[" + i + "].autoPayStatus").value(false))
-                    .andExpect(jsonPath("$.items[" + i + "].ownerId").value(ownerId))
-                    .andExpect(jsonPath("$.items[" + i + "].carModel").value(TEST_CAR_MODEL + (i + 1)));
-        }
+        result.andExpect(jsonPath("$.items[0].carId").value(testUserCar.getId()))
+                .andExpect(jsonPath("$.items[0].number").value("11가1111"))
+                .andExpect(jsonPath("$.items[0].autoPayStatus").value(false))
+                .andExpect(jsonPath("$.items[0].ownerId").value(testUser.getId()))
+                .andExpect(jsonPath("$.items[0].carModel").value("carModel1"))
+
+                // testUser가 mobiUser의 차량에 초대받은 경우
+                .andExpect(jsonPath("$.items[1].carId").value(mobiUserCar.getId()))
+                .andExpect(jsonPath("$.items[1].number").value("22나2222"))
+                .andExpect(jsonPath("$.items[1].autoPayStatus").value(false))
+                .andExpect(jsonPath("$.items[1].ownerId").value(mobiUser.getId()))
+                .andExpect(jsonPath("$.items[1].carModel").value("carModel2"));
+
     }
 
     @Test
@@ -127,17 +155,6 @@ public class CarListTest {
         // then
         result.andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value(MOBI_USER_NOT_FOUND.getMessage()));
-    }
-
-    private void createCars() {
-        carIds = new Long[TEST_CAR_COUNT];
-
-        for (int i = 0; i < TEST_CAR_COUNT; i++) {
-            Car testCar = Car.of(TEST_CAR_PREFIX + (i + 1), TEST_CAR_MODEL + (i + 1));
-            testCar.setOwner(testUser);
-            carRepository.save(testCar);
-            carIds[i] = testCar.getId();
-        }
     }
 
     private ResultActions performViewCarList() throws Exception {
