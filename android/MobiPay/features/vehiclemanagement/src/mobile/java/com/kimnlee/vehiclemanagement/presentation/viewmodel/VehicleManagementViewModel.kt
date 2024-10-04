@@ -1,6 +1,7 @@
 package com.kimnlee.vehiclemanagement.presentation.viewmodel
 
 import android.content.ContentValues.TAG
+import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -26,7 +27,8 @@ data class Vehicle(
 )
 
 class VehicleManagementViewModel(
-    private val apiClient: ApiClient
+    private val apiClient: ApiClient,
+    private val context: Context
 ) : ViewModel() {
 
     private val vehicleService: VehicleApiService = apiClient.authenticatedApi.create(VehicleApiService::class.java)
@@ -43,15 +45,15 @@ class VehicleManagementViewModel(
     private val _carMembers = MutableStateFlow<List<CarMember>>(emptyList())
     val carMembers: StateFlow<List<CarMember>> = _carMembers
 
-    private val _autoPaymentStatus = MutableStateFlow<Boolean>(false)
+    private val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
+    private val _autoPaymentStatus = MutableStateFlow<Boolean>(sharedPreferences.getBoolean("auto_payment_status", false)) // 초기값 설정
     val autoPaymentStatus: StateFlow<Boolean> = _autoPaymentStatus
 
-    init {
-        getUserVehicles()
-    }
+    private val _hasNewNotifications = MutableStateFlow<Boolean>(false)
+    val hasNewNotifications: StateFlow<Boolean> = _hasNewNotifications
 
     // 사용자가 소속된 차량의 목록 불러오기
-    private fun getUserVehicles() {
+    fun getUserVehicles() {
         viewModelScope.launch {
             try {
                 val response = vehicleService.getUserVehicleList()
@@ -164,6 +166,8 @@ class VehicleManagementViewModel(
                             }
                         }
                         _autoPaymentStatus.value = it.autoPayStatus
+
+                        sharedPreferences.edit().putBoolean("auto_payment_status", it.autoPayStatus).apply()
                     }
                     Log.d(TAG, "Auto payment status updated successfully")
                 } else {
@@ -173,6 +177,15 @@ class VehicleManagementViewModel(
                 Log.e(TAG, "Error updating auto payment status", e)
             }
         }
+    }
+    // 알림 상태 업데이트
+    fun updateNotificationStatus(hasNew: Boolean) {
+        _hasNewNotifications.value = hasNew
+    }
+
+    // 알림을 읽으면 호출
+    fun markNotificationsAsRead() {
+        updateNotificationStatus(false)
     }
 }
 

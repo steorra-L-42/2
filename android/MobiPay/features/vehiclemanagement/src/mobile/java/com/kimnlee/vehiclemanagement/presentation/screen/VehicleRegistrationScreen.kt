@@ -47,6 +47,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.zIndex
 import com.kimnlee.common.ui.theme.*
 import com.kimnlee.common.utils.CarModelImageProvider
 
@@ -116,9 +117,11 @@ fun VehicleRegistrationScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 8.dp, start = 20.dp, end = 20.dp, bottom = 24.dp)
+                .zIndex(1f)
         ) {
             IconButton(
                 onClick = {
+                    Log.d(TAG, "뒤로가기 버튼 클릭")
                     if (hasCameraPermission) {
                         hasCameraPermission = false
                         recognizedLicensePlate = ""
@@ -127,7 +130,9 @@ fun VehicleRegistrationScreen(
                         onNavigateBack()
                     }
                 },
-                modifier = Modifier.align(Alignment.CenterStart)
+                modifier = Modifier
+                    .align(Alignment.CenterStart)
+                    .padding(8.dp)
             ) {
                 Icon(
                     imageVector = Icons.Filled.ArrowBack,

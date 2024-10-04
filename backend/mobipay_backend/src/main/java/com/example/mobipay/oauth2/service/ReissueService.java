@@ -6,7 +6,7 @@ import static com.example.mobipay.oauth2.enums.ReissueStatus.REFRESH_NULL;
 import static com.example.mobipay.oauth2.enums.TokenType.BEARER;
 import static com.example.mobipay.oauth2.enums.TokenType.REFRESH;
 
-import com.example.mobipay.domain.refreshtoken.entity.repository.RefreshTokenRepository;
+import com.example.mobipay.domain.refreshtoken.repository.RefreshTokenRepository;
 import com.example.mobipay.oauth2.jwt.JWTUtil;
 import com.example.mobipay.oauth2.util.CookieMethods;
 import io.jsonwebtoken.ExpiredJwtException;

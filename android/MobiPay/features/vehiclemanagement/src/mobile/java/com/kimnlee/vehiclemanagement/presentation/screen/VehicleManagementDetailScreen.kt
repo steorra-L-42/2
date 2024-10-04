@@ -6,44 +6,20 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.outlined.Notifications
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Switch
-import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -53,9 +29,11 @@ import coil.compose.AsyncImage
 import com.kimnlee.cardmanagement.presentation.screen.findCardCompany
 import com.kimnlee.cardmanagement.presentation.screen.maskCardNumber
 import com.kimnlee.cardmanagement.presentation.viewmodel.CardManagementViewModel
+import com.kimnlee.common.ui.theme.MobiBlue
 import com.kimnlee.common.utils.CarModelImageProvider
 import com.kimnlee.memberinvitation.presentation.components.MemberInvitationBottomSheet
 import com.kimnlee.memberinvitation.presentation.viewmodel.MemberInvitationViewModel
+import com.kimnlee.vehiclemanagement.R
 import com.kimnlee.vehiclemanagement.data.model.CarMember
 import com.kimnlee.vehiclemanagement.presentation.viewmodel.VehicleManagementViewModel
 
@@ -83,6 +61,8 @@ fun VehicleManagementDetailScreen(
     val showBottomSheet by memberInvitationViewModel.showBottomSheet.collectAsState()
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+    val hasNewNotifications by viewModel.hasNewNotifications.collectAsState()
 
     if(vehicle?.carModel == null){
         Log.d(TAG, "VehicleManagementDetailScreen: 차량 모델 NULL! return 하겠음!!!!")
@@ -118,7 +98,7 @@ fun VehicleManagementDetailScreen(
                 Text("차량 선택")
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(40.dp))
 
             // 차량 이미지 추가
             Image(
@@ -126,7 +106,7 @@ fun VehicleManagementDetailScreen(
                 contentDescription = "Vehicle Image",
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(180.dp),
+                    .size(120.dp),
                 contentScale = ContentScale.Fit
             )
 
@@ -156,7 +136,13 @@ fun VehicleManagementDetailScreen(
                     checked = autoPaymentStatus,
                     onCheckedChange = {
                         viewModel.toggleAutoPayment(vehicleId, it)
-                    }
+                    },
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = MobiBlue,
+                        uncheckedThumbColor = Color.DarkGray,
+                        checkedTrackColor = Color.LightGray,
+                        uncheckedTrackColor = Color.LightGray
+                    )
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("내 카드로 자동결제")
@@ -238,14 +224,27 @@ fun VehicleManagementDetailScreen(
         }
 
         IconButton(
-            onClick = onNavigateToNotification,
+            onClick = {
+                onNavigateToNotification()
+                viewModel.markNotificationsAsRead()
+            },
             modifier = Modifier.align(Alignment.TopEnd)
         ) {
-            Icon(
-                imageVector = Icons.Outlined.Notifications,
-                contentDescription = "알림",
-                modifier = Modifier.size(30.dp)
-            )
+            Box {
+                Icon(
+                    imageVector = Icons.Outlined.Notifications,
+                    contentDescription = "알림",
+                    modifier = Modifier.size(30.dp)
+                )
+                if (hasNewNotifications) {
+                    Box(
+                        modifier = Modifier
+                            .size(8.dp)
+                            .background(Color.Red, shape = CircleShape)
+                            .align(Alignment.TopEnd)
+                    )
+                }
+            }
         }
     }
 }
@@ -262,18 +261,31 @@ fun CarMembersRow(
             .padding(horizontal = 16.dp),
         horizontalArrangement = Arrangement.Center
     ) {
-        carMembers.take(3).forEach { member ->
+        carMembers.take(3).forEachIndexed { index, member ->
             Box(
                 modifier = Modifier
                     .size(44.dp)
-                    .clip(CircleShape)
+                    .background(Color.Transparent)
             ) {
                 AsyncImage(
                     model = member.picture,
                     contentDescription = member.name,
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .fillMaxSize(),
                     contentScale = ContentScale.Crop
                 )
+                if (index == 0) {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_crown),
+                        contentDescription = "오너",
+                        modifier = Modifier
+                            .size(24.dp)
+                            .align(Alignment.TopStart)
+                            .offset(x = (-10).dp, y = (-10).dp)
+                            .graphicsLayer(rotationZ = -45f)
+                    )
+                }
             }
             Spacer(modifier = Modifier.width(8.dp))
         }
