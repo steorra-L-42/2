@@ -17,6 +17,7 @@ import com.example.mobipay.domain.merchant.entity.Merchant;
 import com.example.mobipay.domain.merchant.error.MerchantNotFoundException;
 import com.example.mobipay.domain.merchant.repository.MerchantRepository;
 import com.example.mobipay.domain.mobiuser.entity.MobiUser;
+import com.example.mobipay.domain.postpayments.dto.ApprovalWaitingResponse;
 import com.example.mobipay.domain.postpayments.dto.PaymentRequest;
 import com.example.mobipay.domain.postpayments.dto.PaymentResponse;
 import com.example.mobipay.domain.postpayments.error.InvalidMobiApiKeyException;
@@ -32,11 +33,15 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class PostPaymentsRequestService {
+
+    private static final String APPROVAL_WAITING = "approval_waiting";
+    private static final String MERCHANT = "merchant";
 
     private final MerchantRepository merchantRepository;
     private final CarRepository carRepository;
@@ -48,6 +53,20 @@ public class PostPaymentsRequestService {
 
     public PaymentResponse sendRequestToCarGroup(PaymentRequest request, String mobiApiKey) {
 
+        // ApprovalWaiting 생성
+        ApprovalWaitingResponse approvalWaitingResponse = getApprovalWaiting(request, mobiApiKey);
+        ApprovalWaiting approvalWaiting = approvalWaitingResponse.getApprovalWaiting();
+        Merchant merchant = approvalWaitingResponse.getMerchant();
+
+        // carGroup 구성원에게 FCM 전송
+        Car car = approvalWaiting.getCar();
+        sendFcmToCarGroupMembers(request, approvalWaiting, merchant, car);
+
+        return PaymentResponse.of(approvalWaiting, car, merchant, request);
+    }
+
+    @Transactional
+    protected ApprovalWaitingResponse getApprovalWaiting(PaymentRequest request, String mobiApiKey) {
         // mobiApiKey 검증
         Merchant merchant = validateApiKey(request.getMerchantId(), mobiApiKey);
 
@@ -56,11 +75,7 @@ public class PostPaymentsRequestService {
                 request.getCarNumber(),
                 merchant);
 
-        // carGroup 구성원에게 FCM 전송
-        Car car = approvalWaiting.getCar();
-        sendFcmToCarGroupMembers(request, approvalWaiting, merchant, car);
-
-        return PaymentResponse.of(approvalWaiting, car, merchant, request);
+        return ApprovalWaitingResponse.of(merchant, approvalWaiting);
     }
 
     // Approval_Waiting 생성 및 관계 추가
