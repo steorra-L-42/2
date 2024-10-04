@@ -55,7 +55,7 @@ public class InvitationService {
         Invitation invitation = invitationRepository.save(Invitation.of(car, invitedMobiUser));
 
         Map<String, String> data = Map.of(
-                "type,", INVITATION.getValue(),
+                "type", INVITATION.getValue(),
                 "title", "새로운 카풀 초대",
                 "body", "카풀에 초대되었습니다.",
                 "invitationId", invitation.getId().toString(),
