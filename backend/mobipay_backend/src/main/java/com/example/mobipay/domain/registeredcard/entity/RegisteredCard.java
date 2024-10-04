@@ -67,11 +67,10 @@ public class RegisteredCard {
         return new RegisteredCard(password);
     }
 
-    public static RegisteredCard of(Integer oneDayLimit, Integer oneTimeLimit, String password, Boolean autoPayStatus) {
+    public static RegisteredCard of(Integer oneDayLimit, Integer oneTimeLimit, Boolean autoPayStatus) {
         RegisteredCard registeredCard = new RegisteredCard();
         registeredCard.oneDayLimit = oneDayLimit;
         registeredCard.oneTimeLimit = oneTimeLimit;
-        registeredCard.password = password;
         registeredCard.autoPayStatus = autoPayStatus;
 
         return registeredCard;
@@ -92,6 +91,23 @@ public class RegisteredCard {
         this.ownedCardId = ownedCard.getId();
         ownedCard.getRegisteredCards().add(this);
     }
+
+    public void addCardDetailInfo(MobiUser mobiUser, OwnedCard ownedCard) {
+        if (this.mobiUser != null) {
+            this.mobiUser.getRegisteredCards().remove(this);
+        }
+        this.mobiUser = mobiUser;
+        this.mobiUserId = mobiUser.getId();
+        mobiUser.getRegisteredCards().add(this);
+
+        if (this.ownedCard != null) {
+            this.ownedCard.getRegisteredCards().remove(this);
+        }
+        this.ownedCard = ownedCard;
+        this.ownedCardId = ownedCard.getId();
+        ownedCard.getRegisteredCards().add(this);
+    }
+
 
     public void setAutoPayStatus(Boolean autoPayStatus) {
         this.autoPayStatus = autoPayStatus;
