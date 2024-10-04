@@ -20,6 +20,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavController
+import com.kimnlee.common.FCMDataForInvitation
+import com.kimnlee.common.auth.AuthManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -32,7 +35,7 @@ import javax.crypto.SecretKey
 import javax.crypto.spec.SecretKeySpec
 
 private const val TAG = "MemberInvitationViewMod"
-class MemberInvitationViewModel : ViewModel() {
+class MemberInvitationViewModel(private val authManager: AuthManager) : ViewModel() {
 
     private var secretKey1 by mutableStateOf("GSp4rEgkhZG4pzQF9Gyq/Fv0YZjPKsbjd4Ep3s7YWpVw/KfGomCBEArDI6ngwNjiwvcmLZMc+F/KwcWX5ublISQsN/Cs4o7dx8tH620pPTVyjSB2U08GRJM9OXITJ6GQvBfPvuHskVDqrjwNsI65YxlE1/1TZZ24lVkthLQoEebbIUfSkQH7ghKzUnniinrG") // Default username
 
@@ -48,6 +51,9 @@ class MemberInvitationViewModel : ViewModel() {
 
     private var isAdvertising by mutableStateOf(false)
 
+    private val _vehicleId = MutableStateFlow(-1)
+    val vehicleId: StateFlow<Int> = _vehicleId.asStateFlow()
+
     private val _uiState = MutableStateFlow<UiState>(UiState.Initial)
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
@@ -59,6 +65,19 @@ class MemberInvitationViewModel : ViewModel() {
 
     private val _showBottomSheet = MutableStateFlow(false)
     val showBottomSheet: StateFlow<Boolean> = _showBottomSheet.asStateFlow()
+
+    private val _navigateEvent = MutableStateFlow(false)
+    val navigateEvent: StateFlow<Boolean> = _navigateEvent.asStateFlow()
+
+    private lateinit var fcmDataForInvitation : FCMDataForInvitation
+
+    fun triggerNavigate() {
+        Log.d(TAG, "triggerNavigate: Navigate 지시함")
+        _navigateEvent.value = true
+    }
+    fun onNavigateHandled() {
+        _navigateEvent.value = false
+    }
 
     private val _showInvitationWaitingScreen = MutableStateFlow(false)
     val showInvitationWaitingScreen: StateFlow<Boolean> = _showInvitationWaitingScreen.asStateFlow()
@@ -85,7 +104,9 @@ class MemberInvitationViewModel : ViewModel() {
         _showBottomSheet.value = false
     }
 
-    fun openInvitationBLE(){
+    fun openInvitationBLE(vehicleId: Int){
+        _vehicleId.value = vehicleId
+        Log.d(TAG, "openInvitationBLE: 차량 ID: ${vehicleId} // _vehicleId: ${_vehicleId.value}")
         Log.d(TAG, "openInvitationBLE: 주변 확인 시작")
         startScanning()
         _showInvitationBLE.value = true
@@ -114,7 +135,7 @@ class MemberInvitationViewModel : ViewModel() {
     }
 
     private suspend fun sendInvitation(phoneNumber: String) {
-        // 초대 알림 전송
+
     }
 
     private suspend fun bleAdvertise(phoneNumber: String) {
@@ -125,7 +146,7 @@ class MemberInvitationViewModel : ViewModel() {
     fun startAdvertising() {
         if (!bluetoothAdapter.isEnabled) {
             // Handle Bluetooth not enabled
-            // You can prompt the user to enable Bluetooth
+            // 사용자에게 블루투스 켜라고 해야함
             return
         }
 
@@ -141,7 +162,10 @@ class MemberInvitationViewModel : ViewModel() {
             .setConnectable(false)
             .build()
 
-        val username = "11122223333" // Replace with the actual username
+//        val userinfo = authManager.getUserInfo().phoneNumber
+//        val username = authManager.getUserInfo().phoneNumber
+        updatePhoneNumber(authManager.getUserInfo().phoneNumber)
+        val username = _phoneNumber.value
 //        val usernameBytes = username.toByteArray(StandardCharsets.UTF_8)
         Log.d(TAG, "startAdvertising: 암호화 전: ${username}")
         val usernameEnc = encrypt(username, generateKey())
@@ -161,7 +185,19 @@ class MemberInvitationViewModel : ViewModel() {
 
     @SuppressLint("MissingPermission")
     fun stopAdvertising() {
+        Log.d(TAG, "stopAdvertising: 멈춰!!!")
         advertiser?.stopAdvertising(advertiseCallback)
+    }
+
+    fun handleInvitation(fcmDataForInvitation: FCMDataForInvitation){
+        this.fcmDataForInvitation = fcmDataForInvitation
+        stopAdvertising()
+        triggerNavigate()
+    }
+
+    fun triggerNavigateToInvitedScreen(navController: NavController) {
+        navController.currentBackStackEntry?.savedStateHandle?.set("invitationData", this.fcmDataForInvitation)
+        navController.navigate("memberinvitation_invited")
     }
 
     private val advertiseCallback = object : AdvertiseCallback() {

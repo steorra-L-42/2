@@ -7,7 +7,9 @@ import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.google.gson.Gson
 import com.kimnlee.common.FCMData
+import com.kimnlee.common.FCMDataForInvitation
 import com.kimnlee.common.FCMDependencyProvider
+import com.kimnlee.common.MemberInvitationOperations
 import com.kimnlee.common.PaymentOperations
 import com.kimnlee.common.auth.AuthManager
 import com.kimnlee.common.network.ApiClient
@@ -30,6 +32,7 @@ class FCMService : FirebaseMessagingService() {
     private var apiClient: ApiClient? = null
     private var authManager: AuthManager? = null
     private var paymentOperations: PaymentOperations? = null
+    private var memberInvitationOperations: MemberInvitationOperations? = null
     private lateinit var mNotificationManager: NotificationManagerCompat
 
     private lateinit var notificationManager: MobiNotificationManager
@@ -53,6 +56,7 @@ class FCMService : FirebaseMessagingService() {
         apiClient = dependencyProvider.apiClient
         authManager = dependencyProvider.authManager
         paymentOperations = dependencyProvider.paymentOperations
+        memberInvitationOperations = dependencyProvider.memberInvitationOperations
 
         mNotificationManager = NotificationManagerCompat.from(applicationContext)
 
@@ -93,7 +97,6 @@ class FCMService : FirebaseMessagingService() {
 
     }
 
-
     fun processMessage(remoteMessage: RemoteMessage){
         if (remoteMessage.data.isNotEmpty()) {
             Log.d(TAG, "페이로드: ${remoteMessage.data}")
@@ -114,13 +117,26 @@ class FCMService : FirebaseMessagingService() {
                     }
                 }
                 FCM_TYPE_MEMBER_INVITATION -> {
-//                    memberInvitation()
+                    val rjs = Gson().toJson(remoteMessage.data)
+                    val fcmDataForInvitation = Gson().fromJson(rjs, FCMDataForInvitation::class.java)
+                    memberInvitationOperations?.processFCM(fcmDataForInvitation)
                 }
                 FCM_TYPE_AUTO_PAY_FAILURE -> {
 
                 }
                 else -> {
+//                    Log.d(TAG, "processMessage: 이것은 ELSE에 속한다.")
+                    try{
+                        val rjs = Gson().toJson(remoteMessage.data)
+                        val fcmDataForInvitation = Gson().fromJson(rjs, FCMDataForInvitation::class.java)
 
+                        if (fcmDataForInvitation.title?.contains("초대") == true){
+                            memberInvitationOperations?.processFCM(fcmDataForInvitation)
+                        }
+
+                    }catch (e: Exception){
+                        e.printStackTrace()
+                    }
                 }
             }
 

@@ -3,17 +3,23 @@ package com.kimnlee.mobipay
 import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.bluetooth.BluetoothManager
+import android.content.Context
 import android.media.AudioAttributes
 import android.media.RingtoneManager
 import android.util.Log
 import com.google.firebase.FirebaseApp
 import com.kimnlee.common.FCMDependencyProvider
+import com.kimnlee.common.MemberInvitationOperations
 import com.kimnlee.common.PaymentOperations
 import com.kimnlee.common.auth.AuthManager
 import com.kimnlee.firebase.FCMService
 import com.kimnlee.common.auth.KakaoSdkInitializer
 import com.kimnlee.common.network.ApiClient
 import com.kimnlee.common.utils.MobiNotificationManager
+import com.kimnlee.memberinvitation.data.api.MemberInvitationApiService
+import com.kimnlee.memberinvitation.data.repository.MemberInvitationRepository
+import com.kimnlee.memberinvitation.presentation.viewmodel.MemberInvitationViewModel
 import com.kimnlee.payment.data.api.PaymentApiService
 import com.kimnlee.payment.data.repository.PaymentRepository
 import com.mapbox.navigation.base.options.NavigationOptions
@@ -28,8 +34,17 @@ class MobiPayApplication : Application(), FCMDependencyProvider {
     private lateinit var apiClientInstance: ApiClient
     lateinit var fcmService: FCMService
     private lateinit var paymentRepository: PaymentRepository
+    private lateinit var memberInvitationViewModel: MemberInvitationViewModel
+    private lateinit var memberInvitationRepository: MemberInvitationRepository
+
+    val aMemberInvitationViewModel: MemberInvitationViewModel
+        get() = memberInvitationViewModel
+
     override val paymentOperations: PaymentOperations
         get() = paymentRepository
+
+    override val memberInvitationOperations: MemberInvitationOperations
+        get() = memberInvitationRepository
 
     override fun onCreate() {
         super.onCreate()
@@ -40,6 +55,17 @@ class MobiPayApplication : Application(), FCMDependencyProvider {
 
         val paymentApiService = apiClient.authenticatedApi.create(PaymentApiService::class.java)
         paymentRepository = PaymentRepository(paymentApiService, mobiNotificationManager, applicationContext)
+
+
+        memberInvitationViewModel = MemberInvitationViewModel(authManager)
+        val bluetoothManager = this.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+        val bluetoothAdapter = bluetoothManager.adapter
+
+
+        memberInvitationViewModel.initBluetoothAdapter(bluetoothAdapter)
+
+        val memberInvitationApiService = apiClient.authenticatedApi.create(MemberInvitationApiService::class.java)
+        memberInvitationRepository = MemberInvitationRepository(memberInvitationApiService, mobiNotificationManager, applicationContext, memberInvitationViewModel)
 
         // 카카오 SDK 초기화
         KakaoSdkInitializer.initialize(this)
@@ -95,4 +121,5 @@ class MobiPayApplication : Application(), FCMDependencyProvider {
 
     override val authManager: AuthManager
         get() = authManagerInstance
+
 }
