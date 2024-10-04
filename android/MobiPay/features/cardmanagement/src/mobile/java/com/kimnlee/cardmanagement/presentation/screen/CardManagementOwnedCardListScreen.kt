@@ -35,33 +35,47 @@ fun CardManagementOwnedCardListScreen(
     onNavigateBack: () -> Unit,
     onNavigateToRegistration: (List<OwnedCard>) -> Unit
 ) {
+
     val ownedCardUiState by viewModel.ownedCardUiState.collectAsState()
     var selectedCards by remember { mutableStateOf(setOf<OwnedCard>()) }
+    var isAllSelected by remember { mutableStateOf(false) }
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         TopBar(onNavigateBack)
         Spacer(modifier = Modifier.height(16.dp))
-        SelectionButtons(
-            onSelectAll = {
-                selectedCards = (ownedCardUiState as? OwnedCardUiState.Success)?.cards
-                    ?.filter { !viewModel.isCardRegistered(it.id) }
-                    ?.toSet() ?: emptySet()
-            },
-            onDeselectAll = { selectedCards = emptySet() }
-        )
-        Spacer(modifier = Modifier.height(16.dp))
+
         when (val state = ownedCardUiState) {
             is OwnedCardUiState.Loading -> LoadingState()
-            is OwnedCardUiState.Success -> CardList(
-                cards = state.cards,
-                selectedCards = selectedCards,
-                onCardSelected = { card, isSelected ->
-                    if (!viewModel.isCardRegistered(card.id)) {
-                        selectedCards = if (isSelected) selectedCards + card else selectedCards - card
-                    }
-                },
-                isCardRegistered = { viewModel.isCardRegistered(it.id) }
-            )
+            is OwnedCardUiState.Success -> {
+                val selectableCards = state.cards.filter { !viewModel.isCardRegistered(it.id) }
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                ) {
+                    Checkbox(
+                        checked = isAllSelected,
+                        onCheckedChange = { isChecked ->
+                            isAllSelected = isChecked
+                            selectedCards = if (isChecked) selectableCards.toSet() else emptySet()
+                        },
+                        colors = CheckboxDefaults.colors(checkedColor = Color(0xFF3182F6))
+                    )
+                    Text("전체 선택", style = MaterialTheme.typography.bodyMedium)
+                }
+
+                CardList(
+                    cards = state.cards,
+                    selectedCards = selectedCards,
+                    onCardSelected = { card, isSelected ->
+                        if (!viewModel.isCardRegistered(card.id)) {
+                            selectedCards = if (isSelected) selectedCards + card else selectedCards - card
+                            isAllSelected = selectedCards.size == selectableCards.size
+                        }
+                    },
+                    isCardRegistered = { viewModel.isCardRegistered(it.id) }
+                )
+            }
             is OwnedCardUiState.Error -> {
                 // 에러 상태에서는 아무것도 표시하지 않음
             }
@@ -72,7 +86,7 @@ fun CardManagementOwnedCardListScreen(
             modifier = Modifier.fillMaxWidth().height(56.dp),
             enabled = selectedCards.isNotEmpty(),
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3182F6)),
-            shape = RectangleShape
+            shape = RoundedCornerShape(8.dp)
         ) {
             Text("등록하기", color = Color.White)
         }

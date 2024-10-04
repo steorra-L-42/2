@@ -155,43 +155,40 @@ fun CardItem(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.SpaceBetween
+                .padding(end = 150.dp, bottom = 30.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             TextWithShadow(
                 text = maskCardNumber(card.ownedCardId.toString()),
                 style = MaterialTheme.typography.titleLarge
             )
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column {
-                    TextWithShadow(
-                        text = "일일 한도: ${card.oneDayLimit}원",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                    TextWithShadow(
-                        text = "1회 한도: ${card.oneTimeLimit}원",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
-                Box(
-                    modifier = Modifier
-                        .size(48.dp)
-                        .background(Color.Black.copy(alpha = 0.6f), CircleShape)
-                        .clickable(onClick = onAutoPaymentToggle),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = if (card.autoPayStatus) Icons.Filled.Star else Icons.Outlined.Star,
-                        contentDescription = "Toggle Auto Payment",
-                        tint = if (card.autoPayStatus) Color.Yellow else Color.White,
-                        modifier = Modifier.size(32.dp)
-                    )
-                }
-            }
+            Spacer(modifier = Modifier.height(50.dp))
+            TextWithShadow(
+                text = "일일 한도: ${card.oneDayLimit}원",
+                style = MaterialTheme.typography.bodyMedium
+            )
+            Spacer(modifier = Modifier.height(25.dp))
+            TextWithShadow(
+                text = "1회 한도: ${card.oneTimeLimit}원",
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(16.dp)
+                .size(48.dp)
+                .background(Color.Black.copy(alpha = 0.6f), CircleShape)
+                .clickable(onClick = onAutoPaymentToggle),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = if (card.autoPayStatus) Icons.Filled.Star else Icons.Outlined.Star,
+                contentDescription = "Toggle Auto Payment",
+                tint = if (card.autoPayStatus) Color.Yellow else Color.White,
+                modifier = Modifier.size(32.dp)
+            )
         }
     }
 }
