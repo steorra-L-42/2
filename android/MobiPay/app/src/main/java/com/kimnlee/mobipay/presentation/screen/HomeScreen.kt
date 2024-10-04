@@ -49,7 +49,11 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavController
 import com.kimnlee.auth.presentation.viewmodel.LoginViewModel
+import com.kimnlee.common.BuildConfig
 import com.kimnlee.common.R
+import com.kimnlee.common.auth.repository.NaverMapRepository
+import com.kimnlee.common.network.ApiClient
+import com.kimnlee.common.network.NaverMapService
 import com.kimnlee.common.ui.theme.MobiCardBgGray
 import com.kimnlee.common.ui.theme.MobiPayTheme
 import com.kimnlee.common.ui.theme.MobiTextAlmostBlack
@@ -58,7 +62,11 @@ import com.naver.maps.map.CameraUpdate
 import com.naver.maps.map.MapView
 import com.naver.maps.map.overlay.Marker
 import com.naver.maps.map.overlay.OverlayImage
+import kotlinx.coroutines.runBlocking
+import retrofit2.Retrofit
 import java.util.Locale
+
+private val YOUR_CLIENT_SECRET = BuildConfig.NAVER_MAP_CLIENT_SECRET
 
 @Composable
 fun HomeScreen(
@@ -66,9 +74,10 @@ fun HomeScreen(
     navController: NavController,
     context: Context
 ) {
+
     val isLoggedIn by viewModel.isLoggedIn.collectAsState()
     var lastLocation by remember { mutableStateOf<Pair<Double, Double>?>(null) }
-
+    val naverMapService by viewModel.naverMapService.collectAsState()
 
     LaunchedEffect(isLoggedIn) {
         if (!isLoggedIn) {
@@ -265,25 +274,28 @@ fun HomeScreen(
                         modifier = Modifier
                             .clip(RoundedCornerShape(6.dp))
                     ){
-                        NaverMapView(lastLocation)
+                        NaverMapView(lastLocation, naverMapService)
                     }
                 }
             }
-
         }
     }
-
 }
 
 @Composable
-fun NaverMapView(lastLocation: Pair<Double, Double>?) {
+fun NaverMapView(lastLocation: Pair<Double, Double>?, naverMapService: NaverMapService?) {
 
     val context = LocalContext.current
     var mapView = remember { MapView(context) }
 
+    lateinit var address : String
     // 주차 정보가 없으면 기본 위치 표시
     val lastLocationLatLng = lastLocation?.let { LatLng(it.first, it.second) } ?: LatLng(
-        37.526665, 126.927127)
+        36.107368, 128.425046) // 37.526665, 126.927127
+    runBlocking {
+        val repository = NaverMapRepository("z9pdjednkz", YOUR_CLIENT_SECRET, naverMapService)
+        address = repository.getAddressFromCoords(lastLocationLatLng)
+    }
 
 Column {
     AndroidView(
@@ -315,7 +327,9 @@ Column {
             }
         }
     )
-    Text(text = getCurrentAddress(context, lastLocationLatLng.latitude?: 0.0, lastLocationLatLng.longitude ?: 0.0), fontSize = 11.sp, letterSpacing = 0.1.sp, lineHeight = 13.sp)
+
+    Text(text = address, fontSize = 11.sp, letterSpacing = 0.1.sp, lineHeight = 13.sp)
+//    Text(text = getCurrentAddress(context, lastLocationLatLng.latitude?: 0.0, lastLocationLatLng.longitude ?: 0.0), fontSize = 11.sp, letterSpacing = 0.1.sp, lineHeight = 13.sp)
 //    Text(text = getCurrentAddress(context, 36.104278,128.429193), fontSize = 11.sp, letterSpacing = 0.1.sp, lineHeight = 13.sp)//36.104278, 128.429193 인의동 인동 15길 42
 }
 }
@@ -403,7 +417,6 @@ fun TextOnLP() {
                         .align(Alignment.Center)
                 )
             }
-
         }
     }
 }

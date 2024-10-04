@@ -4,11 +4,15 @@ import android.content.ContentValues.TAG
 import android.util.Log
 import com.kimnlee.common.BuildConfig
 import com.kimnlee.common.auth.AuthManager
+import com.kimnlee.common.auth.model.ReverseGeocodeResponse
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.http.GET
+import retrofit2.http.Header
+import retrofit2.http.Query
 
 class ApiClient private constructor(private val tokenProvider: () -> String?) {
 
@@ -65,7 +69,13 @@ class ApiClient private constructor(private val tokenProvider: () -> String?) {
             .build()
             .create(OCRService::class.java)
     }
-
+     val naverMapService : NaverMapService by lazy {
+         Retrofit.Builder()
+        .baseUrl("https://naveropenapi.apigw.ntruss.com/")
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
+        .create(NaverMapService::class.java)
+     }
     companion object {
         @Volatile
         private var instance: ApiClient? = null

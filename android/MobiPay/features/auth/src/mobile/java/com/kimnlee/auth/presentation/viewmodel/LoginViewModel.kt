@@ -3,6 +3,7 @@ package com.kimnlee.auth.presentation.viewmodel
 import android.app.Activity
 import android.util.Log
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kakao.sdk.auth.model.OAuthToken
@@ -12,11 +13,14 @@ import com.kimnlee.common.auth.model.LoginRequest
 import com.kimnlee.common.auth.model.RegistrationRequest
 import com.kimnlee.common.auth.model.SendTokenRequest
 import com.kimnlee.common.network.ApiClient
+import com.kimnlee.common.network.NaverMapService
 import com.kimnlee.firebase.FCMService
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import retrofit2.HttpException
+import retrofit2.http.Header
+import retrofit2.http.Query
 import kotlin.coroutines.resume
 
 private const val TAG = "LoginViewModel"
@@ -26,8 +30,12 @@ class LoginViewModel(
     private val fcmService: FCMService
 ) : ViewModel() {
 
-    private val unAuthService: AuthService = apiClient.unAuthenticatedApi.create(AuthService::class.java)
-    private val authService: AuthService = apiClient.authenticatedApi.create(AuthService::class.java)
+    private val unAuthService: AuthService =
+        apiClient.unAuthenticatedApi.create(AuthService::class.java)
+    private val authService: AuthService =
+        apiClient.authenticatedApi.create(AuthService::class.java)
+    private val _naverMapService = MutableStateFlow<NaverMapService?>(apiClient.naverMapService)
+    val naverMapService: StateFlow<NaverMapService?> = _naverMapService
 
     private val _isLoggedIn = MutableStateFlow(false)
     val isLoggedIn: StateFlow<Boolean> = _isLoggedIn
@@ -45,10 +53,10 @@ class LoginViewModel(
     val navigationEvent = _navigationEvent.asSharedFlow()
 
     private var _showPolicyModal = MutableStateFlow(false)
-    val showPolicyModal : StateFlow<Boolean> = _showPolicyModal
+    val showPolicyModal: StateFlow<Boolean> = _showPolicyModal
 
     private var _hasAgreed = MutableStateFlow(false)
-    val hasAgreed : StateFlow<Boolean> = _hasAgreed
+    val hasAgreed: StateFlow<Boolean> = _hasAgreed
 
     private var email: String = ""
     private var picture: String = ""
@@ -96,7 +104,8 @@ class LoginViewModel(
             val response = unAuthService.login(loginRequest)
 
             if (response.isSuccessful) {
-                val authTokenFromHeaders = response.headers()["Authorization"]?.split(" ")?.getOrNull(1)
+                val authTokenFromHeaders =
+                    response.headers()["Authorization"]?.split(" ")?.getOrNull(1)
                 authTokenFromHeaders?.let {
                     Log.d(TAG, "Calling saveAuthToken from sendLoginRequest")
                     authManager.saveAuthToken(it)
@@ -146,14 +155,16 @@ class LoginViewModel(
                 Log.d(TAG, "register 메서드 요청 후 응답 받음: response($response)")
                 if (response.isSuccessful) {
                     Log.d(TAG, "response.isSuccessful 됨")
-                    val authTokenFromHeaders = response.headers()["Authorization"]?.split(" ")?.getOrNull(1)
+                    val authTokenFromHeaders =
+                        response.headers()["Authorization"]?.split(" ")?.getOrNull(1)
                     authTokenFromHeaders?.let {
                         Log.d(TAG, "Calling saveAuthToken from register")
                         authManager.saveAuthToken(it)
                         Log.d(TAG, "Auth token saved in register")
                     }
                     val refreshToken = response.headers()["Set-Cookie"]?.let { setCookie ->
-                        setCookie.split(";").firstOrNull { it.trimStart().startsWith("refreshToken=") }
+                        setCookie.split(";")
+                            .firstOrNull { it.trimStart().startsWith("refreshToken=") }
                             ?.substringAfter("refreshToken=")
                             ?.trim()
                     }
@@ -162,7 +173,10 @@ class LoginViewModel(
                     _registrationResult.value = true
                     Log.d(TAG, "About to call sendTokens from register")
                     sendTokens()
-                    Log.d("KakaoLogin", "로그인 성공 AuthToken: ${authManager.getAuthToken()}, RefreshToken: ${authManager.getRefreshToken()}")
+                    Log.d(
+                        "KakaoLogin",
+                        "로그인 성공 AuthToken: ${authManager.getAuthToken()}, RefreshToken: ${authManager.getRefreshToken()}"
+                    )
                 } else if (response.code() == 500) {
                     Log.d(TAG, "response http code 500")
                     _registrationError.value = "이미 가입된 전화번호에요."
@@ -279,13 +293,15 @@ class LoginViewModel(
         }
     }
 
-    fun openPrivacyModal (){
+    fun openPrivacyModal() {
         _showPolicyModal.value = true
     }
-    fun closePrivacyModal (){
+
+    fun closePrivacyModal() {
         _showPolicyModal.value = false
     }
-    fun tooglePolicy(){
+
+    fun tooglePolicy() {
         if (!hasAgreed.value) _hasAgreed.value = true
         else _hasAgreed.value = false
     }
