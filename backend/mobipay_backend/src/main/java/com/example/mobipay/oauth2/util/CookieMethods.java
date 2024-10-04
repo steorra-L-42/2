@@ -11,10 +11,10 @@ public class CookieMethods {
 
     public Cookie createCookie(String key, String value) {
 
-        jakarta.servlet.http.Cookie cookie = new jakarta.servlet.http.Cookie(key, value);
+        Cookie cookie = new Cookie(key, value);
         cookie.setMaxAge(REFRESH.getExpiration());
         cookie.setSecure(true);
-        cookie.setHttpOnly(false);
+        cookie.setHttpOnly(true);
         cookie.setPath("/");
 
         return cookie;
@@ -24,7 +24,8 @@ public class CookieMethods {
         Cookie cookie = new Cookie(REFRESH.getType(), null);
         cookie.setMaxAge(0);
         cookie.setPath("/");
-        cookie.setHttpOnly(false);
+        cookie.setSecure(true);
+        cookie.setHttpOnly(true);
         response.addCookie(cookie);
     }
 }
