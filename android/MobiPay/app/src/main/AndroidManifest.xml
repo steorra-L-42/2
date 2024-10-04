@@ -49,9 +49,10 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data
-                    android:scheme="mobipay"
-                    android:host="paymentsucceed" />
+                <data android:scheme="mobipay"/>
+                <data android:host="paymentsucceed"/>
+                <data android:scheme="mobipay"/>
+                <data android:host="youvegotinvited"/>
             </intent-filter>
         </activity>
 

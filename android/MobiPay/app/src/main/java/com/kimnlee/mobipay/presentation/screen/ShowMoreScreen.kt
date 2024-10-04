@@ -234,10 +234,10 @@ fun MenuItemCard(item: MenuItem) {
                         )
                     ),
                     modifier = Modifier
-                        .alignByBaseline()
-//                        .padding(top = 6.dp)
+                        .padding(top = 6.dp)
 //                        .padding(end = 8.dp)
                 )
+                Spacer(modifier = Modifier.width(8.dp))
             }
             Text(
                 text = item.text,
@@ -251,7 +251,9 @@ fun MenuItemCard(item: MenuItem) {
                 ),
                 modifier = if (isLogout) Modifier
                     .fillMaxWidth()
-                    .alignByBaseline() else Modifier.alignByBaseline()
+                else
+                    Modifier
+
             )
         }
     }

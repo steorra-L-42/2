@@ -52,6 +52,7 @@ dependencies {
 
     implementation(libs.guava)
     implementation(libs.text.recognition)
+    implementation(project(":features:cardmanagement"))
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

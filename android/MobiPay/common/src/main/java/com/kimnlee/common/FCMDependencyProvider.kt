@@ -19,6 +19,12 @@ interface PaymentOperations {
     fun processPay(fcmData: FCMData, isAutoPay: Boolean)
 }
 
+interface MemberInvitationOperations{
+    fun sendInvitation(phoneNumber:String, vehicleId: Int)
+    fun processFCM(fcmDataForInvitation: FCMDataForInvitation)
+}
+
 interface FCMDependencyProvider : ApiClientProvider, AuthManagerProvider {
     val paymentOperations: PaymentOperations
+    val memberInvitationOperations: MemberInvitationOperations
 }
