@@ -145,7 +145,7 @@ public class ReceiptTest {
         ownedCard.addRelation(mobiUser, account, cardProduct);
         ownedCardRepository.save(ownedCard);
 
-        RegisteredCard registeredCard = RegisteredCard.from("123456");
+        RegisteredCard registeredCard = RegisteredCard.from();
         registeredCard.addRelations(mobiUser, ownedCard);
         registeredCardRepository.save(registeredCard);
 
@@ -268,7 +268,7 @@ public class ReceiptTest {
         ownedCard.addRelation(mobiUser, account, cardProduct);
         ownedCardRepository.save(ownedCard);
 
-        RegisteredCard registeredCard = RegisteredCard.from("123456");
+        RegisteredCard registeredCard = RegisteredCard.from();
         registeredCard.addRelations(mobiUser, ownedCard);
         registeredCardRepository.save(registeredCard);
 

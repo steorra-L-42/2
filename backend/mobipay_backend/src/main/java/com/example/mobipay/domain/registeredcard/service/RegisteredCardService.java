@@ -48,7 +48,7 @@ public class RegisteredCardService {
                 request.getOneTimeLimit(),
                 false);
 
-        registeredCard.addRelations(mobiUser, ownedCard);
+        registeredCard.addCardDetailInfo(mobiUser, ownedCard);
 
         registeredCardRepository.save(registeredCard);
 
