@@ -72,12 +72,11 @@ public class PostPaymentsApprovalService {
             return ApprovalPaymentResponse.from(request);
         }
 
-        Merchant merchant = null;
         try {
             // approvalWaiting 검증
             ApprovalWaiting approvalWaiting = validateApprovalWaiting(request);
             // merchant 검증
-            merchant = validateMerchant(request);
+            Merchant merchant = validateMerchant(request);
             // cardNo 및 registeredCard 검증
             OwnedCard ownedCard = validateCardNo(request);
             RegisteredCard registeredCard = validateRegisteredCard(mobiUser, ownedCard);
@@ -91,7 +90,7 @@ public class PostPaymentsApprovalService {
             throw e;
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            sendTransactionFailedResult(request, merchant);
+            sendTransactionFailedResult(request);
             throw e;
         }
         sendTransactionSuccessResult(request);
@@ -111,8 +110,8 @@ public class PostPaymentsApprovalService {
     }
 
     // 결제 실패 결과 요청
-    private void sendTransactionFailedResult(ApprovalPaymentRequest request, Merchant merchant) {
-        Map<String, String> additionalHeaders = Map.of("merApiKey", merchant.getApiKey());
+    private void sendTransactionFailedResult(ApprovalPaymentRequest request) {
+        Map<String, String> additionalHeaders = Map.of("merApiKey", mobiToMerApiKey);
         PaymentResultRequest paymentResultRequest = new PaymentResultRequest(
                 false, request.getMerchantId(), request.getPaymentBalance(), request.getInfo());
 
@@ -130,6 +129,8 @@ public class PostPaymentsApprovalService {
 
     // approvalWaiting검증
     private ApprovalWaiting validateApprovalWaiting(ApprovalPaymentRequest request) {
+        log.info("ApprovalPaymentRequest.getApprovalWaitingId(): {}", request.getApprovalWaitingId());
+        
         ApprovalWaiting approvalWaiting = approvalWaitingRepository.findById(
                         request.getApprovalWaitingId())
                 .orElseThrow(ApprovalWaitingNotFoundException::new);
