@@ -11,6 +11,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.example.mobipay.MobiPayApplication;
 import com.example.mobipay.domain.car.entity.Car;
 import com.example.mobipay.domain.car.repository.CarRepository;
+import com.example.mobipay.domain.cargroup.entity.CarGroup;
+import com.example.mobipay.domain.cargroup.repository.CarGroupRepository;
 import com.example.mobipay.domain.invitation.dto.InvitationDecisionRequest;
 import com.example.mobipay.domain.invitation.entity.Invitation;
 import com.example.mobipay.domain.invitation.enums.ApproveStatus;
@@ -59,11 +61,14 @@ public class InvitationDecideTest {
     private InvitationRepository invitationRepository;
     @Autowired
     private CarRepository carRepository;
+    @Autowired
+    private CarGroupRepository carGroupRepository;
 
     // parameter : invitationId, approved
 
     @BeforeEach
     void setUp() {
+        carGroupRepository.deleteAll();
         invitationRepository.deleteAll();
         carRepository.deleteAll();
         mobiUserRepository.deleteAll();
@@ -71,6 +76,7 @@ public class InvitationDecideTest {
 
     @AfterEach
     void tearDown() {
+        carGroupRepository.deleteAll();
         invitationRepository.deleteAll();
         carRepository.deleteAll();
         mobiUserRepository.deleteAll();
@@ -95,6 +101,7 @@ public class InvitationDecideTest {
 
         // then
         result.andExpect(status().isBadRequest());
+        assertThat(carGroupRepository.findAll()).isEmpty();
     }
 
     @Test
@@ -116,6 +123,7 @@ public class InvitationDecideTest {
 
         // then
         result.andExpect(status().isBadRequest());
+        assertThat(carGroupRepository.findAll()).isEmpty();
     }
 
     @ParameterizedTest
@@ -131,10 +139,12 @@ public class InvitationDecideTest {
         Car car = Car.of("123가4567", "carModel");
         car.setOwner(owner);
         car = carRepository.save(car);
+        carGroupRepository.save(CarGroup.of(car, owner));
 
         Invitation invitation = Invitation.of(car, invitee);
         invitation.approve();
         invitationRepository.save(invitation);
+        carGroupRepository.save(CarGroup.of(car, invitee));
 
         SecurityTestUtil.setUpMockUser(customOAuth2User, invitee.getId());
         final String url = "/api/v1/invitations/" + invitation.getId() + "/response";
@@ -150,6 +160,7 @@ public class InvitationDecideTest {
         result.andExpect(status().isBadRequest());
         invitationRepository.findById(invitation.getId())
                 .ifPresent(storedInvitation -> assertThat(storedInvitation.getApproved()).isEqualTo(APPROVED));
+        assertThat(carGroupRepository.findAll().size()).isEqualTo(2);
     }
 
     @ParameterizedTest
@@ -165,6 +176,7 @@ public class InvitationDecideTest {
         Car car = Car.of("123가4567", "carModel");
         car.setOwner(owner);
         car = carRepository.save(car);
+        carGroupRepository.save(CarGroup.of(car, owner));
 
         Invitation invitation = Invitation.of(car, invitee);
         invitation.reject();
@@ -184,6 +196,7 @@ public class InvitationDecideTest {
         result.andExpect(status().isBadRequest());
         invitationRepository.findById(invitation.getId())
                 .ifPresent(storedInvitation -> assertThat(storedInvitation.getApproved()).isEqualTo(REJECTED));
+        assertThat(carGroupRepository.findAll().size()).isOne();
     }
 
     @Test
@@ -198,6 +211,7 @@ public class InvitationDecideTest {
         Car car = Car.of("123가4567", "carModel");
         car.setOwner(owner);
         car = carRepository.save(car);
+        carGroupRepository.save(CarGroup.of(car, owner));
 
         Invitation invitation = invitationRepository.save(Invitation.of(car, invitee));
 
@@ -215,6 +229,7 @@ public class InvitationDecideTest {
         result.andExpect(status().isBadRequest());
         invitationRepository.findById(invitation.getId())
                 .ifPresent(storedInvitation -> assertThat(storedInvitation.getApproved()).isEqualTo(WAITING));
+        assertThat(carGroupRepository.findAll().size()).isOne();
     }
 
     @Test
@@ -229,6 +244,7 @@ public class InvitationDecideTest {
         Car car = Car.of("123가4567", "carModel");
         car.setOwner(owner);
         car = carRepository.save(car);
+        carGroupRepository.save(CarGroup.of(car, owner));
 
         Invitation invitation = invitationRepository.save(Invitation.of(car, invitee));
 
@@ -246,6 +262,7 @@ public class InvitationDecideTest {
         result.andExpect(status().isBadRequest());
         invitationRepository.findById(invitation.getId())
                 .ifPresent(storedInvitation -> assertThat(storedInvitation.getApproved()).isEqualTo(WAITING));
+        assertThat(carGroupRepository.findAll().size()).isOne();
     }
 
     @ParameterizedTest
@@ -261,6 +278,7 @@ public class InvitationDecideTest {
         Car car = Car.of("123가4567", "carModel");
         car.setOwner(owner);
         car = carRepository.save(car);
+        carGroupRepository.save(CarGroup.of(car, owner));
 
         Invitation invitation = invitationRepository.save(Invitation.of(car, invitee));
 
@@ -278,6 +296,7 @@ public class InvitationDecideTest {
         result.andExpect(status().isBadRequest());
         invitationRepository.findById(invitation.getId())
                 .ifPresent(storedInvitation -> assertThat(storedInvitation.getApproved()).isEqualTo(WAITING));
+        assertThat(carGroupRepository.findAll().size()).isOne();
     }
 
     @Test
@@ -294,6 +313,7 @@ public class InvitationDecideTest {
         Car car = Car.of("123가4567", "carModel");
         car.setOwner(owner);
         car = carRepository.save(car);
+        carGroupRepository.save(CarGroup.of(car, owner));
 
         Invitation invitation = invitationRepository.save(Invitation.of(car, invitee));
 
@@ -311,6 +331,7 @@ public class InvitationDecideTest {
         result.andExpect(status().isForbidden());
         invitationRepository.findById(invitation.getId())
                 .ifPresent(storedInvitation -> assertThat(storedInvitation.getApproved()).isEqualTo(WAITING));
+        assertThat(carGroupRepository.findAll().size()).isOne();
     }
 
     @Test
@@ -391,6 +412,7 @@ public class InvitationDecideTest {
         Car car = Car.of("123가4567", "carModel");
         car.setOwner(owner);
         car = carRepository.save(car);
+        carGroupRepository.save(CarGroup.of(car, owner));
 
         Invitation invitation = invitationRepository.save(Invitation.of(car, invitee));
 
@@ -408,6 +430,7 @@ public class InvitationDecideTest {
         result.andExpect(status().isOk());
         invitationRepository.findById(invitation.getId())
                 .ifPresent(storedInvitation -> assertThat(storedInvitation.getApproved()).isEqualTo(APPROVED));
+        assertThat(carGroupRepository.findAll().size()).isEqualTo(2);
     }
 
 
@@ -423,6 +446,7 @@ public class InvitationDecideTest {
         Car car = Car.of("123가4567", "carModel");
         car.setOwner(owner);
         car = carRepository.save(car);
+        carGroupRepository.save(CarGroup.of(car, owner));
 
         Invitation invitation = invitationRepository.save(Invitation.of(car, invitee));
 
@@ -440,5 +464,6 @@ public class InvitationDecideTest {
         result.andExpect(status().isOk());
         invitationRepository.findById(invitation.getId())
                 .ifPresent(storedInvitation -> assertThat(storedInvitation.getApproved()).isEqualTo(REJECTED));
+        assertThat(carGroupRepository.findAll().size()).isOne();
     }
 }
