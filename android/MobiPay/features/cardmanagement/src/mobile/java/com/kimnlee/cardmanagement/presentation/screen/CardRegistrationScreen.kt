@@ -30,6 +30,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.kimnlee.common.R
 import com.kimnlee.cardmanagement.data.model.CardInfo
+import com.kimnlee.cardmanagement.data.model.RegisterCardRequest
 import com.kimnlee.cardmanagement.presentation.viewmodel.CardManagementViewModel
 import com.kimnlee.common.ui.theme.MobiTextAlmostBlack
 import com.kimnlee.common.ui.theme.MobiTextDarkGray
@@ -240,14 +241,15 @@ fun CardRegistrationScreen(
 
             Button(
                 onClick = {
-                    cardInfos.forEachIndexed { index, cardInfo ->
-                        viewModel.registerCard(
+                    val cardsToRegister = cardInfos.mapIndexed { index, cardInfo ->
+                        RegisterCardRequest(
                             ownedCardId = cardInfo.cardId,
                             oneDayLimit = oneDayLimits[index].toIntOrNull() ?: 0,
                             oneTimeLimit = oneTimeLimits[index].toIntOrNull() ?: 0,
-                            password = "123" // 비밀번호 빠질 예정이므로 화면에서만 안보여주기 위해 하드코딩
+                            password = "123" // 임시로 비밀번호 적용, 나중에 없어짐
                         )
                     }
+                    viewModel.registerCards(cardsToRegister)
                     onNavigateBack()
                 },
                 modifier = Modifier.fillMaxWidth().height(56.dp),
