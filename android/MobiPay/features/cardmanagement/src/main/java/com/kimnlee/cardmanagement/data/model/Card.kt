@@ -59,7 +59,7 @@ data class RegisterCardResponse(
 data class CardDetailResponse(
     val cardNo: String,
     val cvc: String,
-    val cardExpiryData: String
+    val cardExpiryDate: String
 )
 
 // 자동 결제 등록 요청
