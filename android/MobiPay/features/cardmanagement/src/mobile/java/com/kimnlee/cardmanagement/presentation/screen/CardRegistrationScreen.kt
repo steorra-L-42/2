@@ -1,5 +1,6 @@
 package com.kimnlee.cardmanagement.presentation.screen
 
+import com.kimnlee.common.utils.MoneyFormat
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
@@ -27,16 +28,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.kimnlee.common.R
 import com.kimnlee.cardmanagement.data.model.CardInfo
 import com.kimnlee.cardmanagement.presentation.viewmodel.CardManagementViewModel
-import com.kimnlee.common.ui.theme.MobiBgGray
 import com.kimnlee.common.ui.theme.MobiTextAlmostBlack
 import com.kimnlee.common.ui.theme.MobiTextDarkGray
-import kotlinx.coroutines.launch
-import moneyFormat
 import java.math.BigInteger
+import com.kimnlee.common.utils.moneyFormat
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -166,7 +164,7 @@ fun CardRegistrationScreen(
             }
 
             OutlinedTextField(
-                value = formatMoney(oneDayLimits[pagerState.currentPage]),
+                value = oneDayLimits[pagerState.currentPage],
                 onValueChange = { newValue ->
                     val filteredValue = newValue.filter { it.isDigit() }
                     if (isApplyToAll) {
@@ -178,11 +176,13 @@ fun CardRegistrationScreen(
                         oneTimeLimitErrors = oneTimeLimitErrors.toMutableList().apply { this[pagerState.currentPage] = oneTimeError }
                     }
                 },
-                label = { Text(
-                    text = "일일 결제 한도",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MobiTextDarkGray
-                ) },
+                label = {
+                    Text(
+                        text = "1일 결제 한도",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MobiTextDarkGray
+                    )
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .focusRequester(oneDayLimitFocusRequester),
@@ -192,8 +192,10 @@ fun CardRegistrationScreen(
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = Color.Black,
                     unfocusedBorderColor = Color.Gray
-                )
+                ),
+                visualTransformation = MoneyFormat(),
             )
+
             if (oneDayLimitErrors[pagerState.currentPage].isNotEmpty()) {
                 Text(oneDayLimitErrors[pagerState.currentPage], color = Color.Red)
             }
@@ -201,7 +203,7 @@ fun CardRegistrationScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             OutlinedTextField(
-                value = formatMoney(oneTimeLimits[pagerState.currentPage]),
+                value = oneTimeLimits[pagerState.currentPage],
                 onValueChange = { newValue ->
                     val filteredValue = newValue.filter { it.isDigit() }
                     if (isApplyToAll) {
@@ -227,7 +229,8 @@ fun CardRegistrationScreen(
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = Color.Black,
                     unfocusedBorderColor = Color.Gray
-                )
+                ),
+                visualTransformation = MoneyFormat()
             )
             if (oneTimeLimitErrors[pagerState.currentPage].isNotEmpty()) {
                 Text(oneTimeLimitErrors[pagerState.currentPage], color = Color.Red)
@@ -293,17 +296,17 @@ fun CardImage(cardInfo: CardInfo) {
 }
 
 private fun validateLimits(oneDayLimit: String, oneTimeLimit: String): Pair<String, String> {
-    val oneDayValue = oneDayLimit.toIntOrNull() ?: 0
-    val oneTimeValue = oneTimeLimit.toIntOrNull() ?: 0
+    val oneDayValue = oneDayLimit.toLongOrNull() ?: 0L
+    val oneTimeValue = oneTimeLimit.toLongOrNull() ?: 0L
 
     val oneDayError = when {
-        oneDayValue > 10000000 -> "일일 결제 한도는 천만원을 초과할 수 없어요."
+        oneDayValue > 10_000_000L -> "1일 결제 한도는 1,000만원을 초과할 수 없어요."
         else -> ""
     }
 
     val oneTimeError = when {
-        oneTimeValue > 1000000 -> "1회 결제 한도는 백만원을 초과할 수 없어요."
-        oneTimeValue > oneDayValue && oneDayValue != 0 -> "1회 결제 한도는 일일 결제 한도를 초과할 수 없어요."
+        oneTimeValue > 1_000_000L -> "1회 결제 한도는 100만원을 초과할 수 없어요."
+        oneTimeValue > oneDayValue && oneDayValue != 0L -> "1회 결제 한도는 1일 결제 한도를 초과할 수 없어요."
         else -> ""
     }
 

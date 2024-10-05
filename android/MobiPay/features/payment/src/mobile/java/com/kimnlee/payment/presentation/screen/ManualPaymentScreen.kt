@@ -35,11 +35,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.kimnlee.common.FCMData
 import com.kimnlee.common.R
+import com.kimnlee.common.utils.moneyFormat
 import com.kimnlee.payment.presentation.viewmodel.AuthenticationState
 import com.kimnlee.payment.presentation.viewmodel.BiometricViewModel
-import java.math.BigInteger
-import java.text.NumberFormat
-import java.util.Locale
 
 private const val TAG = "ManualPaymentScreen"
 
@@ -159,13 +157,6 @@ fun ManualPaymentScreen(
         }
     }
 }
-
-
-fun moneyFormat(amount: BigInteger): String {
-    val numberFormat = NumberFormat.getInstance(Locale.KOREA)
-    return numberFormat.format(amount) + "원"
-}
-
 private fun isAnyFieldNull(fcmData: FCMData): Boolean {
     return with(fcmData) {
         listOf(autoPay, cardNo, approvalWaitingId, merchantId, paymentBalance, merchantName, info, lat, lng, type)
