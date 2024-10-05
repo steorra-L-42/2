@@ -267,6 +267,7 @@ fun AddCardButton(openBottomSheet: () -> Unit) {
             }
         }
     }
+    Spacer(modifier = Modifier.height(24.dp))
 }
 
 fun maskCardNumber(cardNumber: String): String {
