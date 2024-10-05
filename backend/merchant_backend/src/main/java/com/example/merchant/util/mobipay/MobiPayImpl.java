@@ -52,11 +52,15 @@ public class MobiPayImpl implements MobiPay{
     @Override
     public ResponseEntity<CancelTransactionResponse> cancelTransaction(MerchantType merchantType, Long transactionUniqueNo,
                                                                        Class<CancelTransactionResponse> responseClass) {
-//        final String url = MOBI_PAY_URL + "/merchants/" + request.getMerchantId() + "/cancelled-transactions/" + request.getTransactionUniqueNo();";
-        return null;
+        final String url = MOBI_PAY_URL + "/merchants/" + credentialUtil.getMerchantIdByType(merchantType)
+                + "/cancelled-transactions/" + transactionUniqueNo;
+        ResponseEntity<CancelTransactionResponse> responseEntity = patch(merchantType, url, responseClass);
+        validate(responseEntity);
+
+        return responseEntity;
     }
 
-    private <T, R> ResponseEntity<R> get(MerchantType merchantType, String url, Class<R> responseClass) {
+    private <R> ResponseEntity<R> get(MerchantType merchantType, String url, Class<R> responseClass) {
         return restClient.get()
                 .uri(url)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -79,6 +83,23 @@ public class MobiPayImpl implements MobiPay{
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .header("mobiApiKey", credentialUtil.getMobiApiKeyByType(merchantType))
                 .body(requestBody)
+                .retrieve()
+                .onStatus(
+                        HttpStatusCode::is4xxClientError,
+                        (request, response) -> ResponseEntity.status(response.getStatusCode()).build()
+                )
+                .onStatus(
+                        HttpStatusCode::is5xxServerError,
+                        (request, response) -> ResponseEntity.status(response.getStatusCode()).build()
+                )
+                .toEntity(responseClass);
+    }
+
+    private <R> ResponseEntity<R> patch(MerchantType merchantType, String url, Class<R> responseClass) {
+        return restClient.patch()
+                .uri(url)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .header("mobiApiKey", credentialUtil.getMobiApiKeyByType(merchantType))
                 .retrieve()
                 .onStatus(
                         HttpStatusCode::is4xxClientError,

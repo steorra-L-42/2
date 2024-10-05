@@ -19,6 +19,12 @@ public class CancelController {
 
     private final CancelSerivce cancelService;
 
+    /**
+     * 가맹점 거래내역 조회
+     * @param merApiKey
+     * @param merchantType
+     * @return ResponseEntity<MerchantTranscactionResponse>
+     */
     @GetMapping("/{merchantType}/transactions")
     public ResponseEntity<MerchantTranscactionResponse> getTransactions(@RequestHeader("merApiKey") String merApiKey,
                                                                         @PathVariable("merchantType") String merchantType) {
@@ -26,13 +32,18 @@ public class CancelController {
         return cancelService.getTransactions(merApiKey, merchantType);
     }
 
+    /**
+     * 거래 취소
+     * @param merApiKey
+     * @param merchantType
+     * @param transactionUniqueNo
+     * @return ResponseEntity<CancelTransactionResponse>
+     */
     @PatchMapping("/{merchantType}/cancelled-transactions/{transactionUniqueNo}")
     public ResponseEntity<CancelTransactionResponse> cancelTransaction(@RequestHeader("merApiKey") String merApiKey,
                                                                       @PathVariable("merchantType") String merchantType,
                                                                       @PathVariable("transactionUniqueNo") String transactionUniqueNo) {
 
-       CancelTransactionResponse response = cancelService.cancelTransaction(merApiKey, merchantType, transactionUniqueNo);
-
-        return null;
+       return cancelService.cancelTransaction(merApiKey, merchantType, transactionUniqueNo);
     }
 }
