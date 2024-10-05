@@ -19,13 +19,16 @@ import com.kimnlee.common.PaymentOperations
 import com.kimnlee.common.utils.AAFocusManager
 import com.kimnlee.common.utils.MobiNotificationManager
 import com.kimnlee.memberinvitation.data.api.MemberInvitationApiService
+import com.kimnlee.memberinvitation.data.model.MemberInvitationAcceptData
 import com.kimnlee.memberinvitation.data.model.MemberInvitationData
+import com.kimnlee.memberinvitation.data.model.MemberInvitationResponse
 import com.kimnlee.memberinvitation.presentation.viewmodel.MemberInvitationViewModel
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.text.NumberFormat
 import java.util.Locale
+import kotlin.math.log
 
 private const val TAG = "MemberInvitationReposit"
 class MemberInvitationRepository(
@@ -69,6 +72,42 @@ class MemberInvitationRepository(
 
     }
 
+    override fun acceptInvitation(invitationId: Int){
+
+        val apiClient = (context.applicationContext as? FCMDependencyProvider)?.apiClient
+        if(apiClient != null){
+            val call = authenticatedApi.acceptInvitation(invitationId, MemberInvitationAcceptData("APPROVED"))
+            call.enqueue(object : Callback<MemberInvitationResponse> {
+                override fun onResponse(
+                    call: Call<MemberInvitationResponse>,
+                    response: Response<MemberInvitationResponse>
+                ) {
+
+                    if (response.isSuccessful) { // 초대요청 성공
+                        Log.d(TAG, "acceptInvitation onResponse: 초대 수락 성공")
+                        Log.d(TAG, "onResponse: ${response.code()} / ${response.message()} / ${response.message()}")
+
+                    } else {
+                        // 서버에서 결과는 받았으나 오류 발생
+                        Log.d(TAG, "acceptInvitation: 초대 수락 실패 - 서버 메세지: ${response.code()} : ${response.message()}")
+
+                        // TODO 인 앱 알림목록에 추가
+
+                        // 모바일에 알림 표시
+                        mobiNotificationManager.showPlainNotification("초대 요청 성공", "초대를 수락하여 차량이 추가되었어요.")
+                    }
+                }
+
+                override fun onFailure(call: Call<MemberInvitationResponse>, t: Throwable) {
+                    Log.d(TAG, "acceptInvitation: 초대 요청 실패 - 네트워크 오류: ${t.localizedMessage}")
+                    // 네트워크 오류 처리
+                    mobiNotificationManager.showPlainNotification("초대 수락 실패", "네트워크 오류로 초대 수락에 실패했어요.")
+                    // TODO 인 앱 알림 목록에 추가
+                }
+            })
+        }
+    }
+
 
     override fun processFCM(fcmDataForInvitation: FCMDataForInvitation) {
 
@@ -101,14 +140,14 @@ class MemberInvitationRepository(
     }
 
     private fun isAnyFieldNull(fcmData: FCMDataForInvitation): Boolean {
-        return  fcmData.title == null ||
+        return  fcmData.type == null ||
+                fcmData.title == null ||
                 fcmData.body == null ||
                 fcmData.invitationId == null ||
                 fcmData.created == null ||
                 fcmData.inviterName == null ||
                 fcmData.inviterPicture == null ||
                 fcmData.carNumber == null ||
-//                fcmData.type == null ||
                 fcmData.carModel == null
     }
 

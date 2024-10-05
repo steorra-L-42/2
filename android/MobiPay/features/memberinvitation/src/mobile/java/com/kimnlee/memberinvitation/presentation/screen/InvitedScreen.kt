@@ -43,8 +43,11 @@ import androidx.navigation.NavController
 import com.google.gson.Gson
 import com.kimnlee.common.FCMData
 import com.kimnlee.common.FCMDataForInvitation
+import com.kimnlee.common.FCMDependencyProvider
+import com.kimnlee.common.MemberInvitationOperations
 import com.kimnlee.common.R
 import com.kimnlee.common.utils.CarModelImageProvider
+import com.kimnlee.memberinvitation.data.repository.MemberInvitationRepository
 import com.kimnlee.memberinvitation.presentation.viewmodel.MemberInvitationViewModel
 
 private const val TAG = "InvitedScreen"
@@ -68,9 +71,13 @@ fun InvitedScreen(
 //        return
 //    }
 
-    if (fcmDataForInvitation == null || isAnyFieldNull(fcmDataForInvitation)){
+    val memberInvitationRepository = (context.applicationContext as FCMDependencyProvider).memberInvitationOperations
+
+    if (fcmDataForInvitation == null || isAnyFieldNull(fcmDataForInvitation)) {
         Log.d(TAG, "InvitedScreen: NULL 발견되어 종료!! $fcmDataForInvitation")
         return
+    }else{
+        Log.d(TAG, "InvitedScreen: NULL 아니므로 화면 표시!")
     }
 
     val imageResId = CarModelImageProvider.getImageResId(fcmDataForInvitation.carModel!!)
@@ -98,13 +105,13 @@ fun InvitedScreen(
                 .padding(innerPadding)
         ) {
 //            SingleInvitationCard(fcmDataForInvitationExtra, imageResId)
-            SingleInvitationCard(navController, fcmDataForInvitation, imageResId)
+            SingleInvitationCard(navController, fcmDataForInvitation!!, imageResId, memberInvitationRepository)
         }
     }
 }
 
 @Composable
-fun SingleInvitationCard(navController: NavController, fcmDataForInvitationExtra: FCMDataForInvitation, imageResId: Int) {
+fun SingleInvitationCard(navController: NavController, fcmDataForInvitation: FCMDataForInvitation, imageResId: Int, memberInvitationRepository: MemberInvitationOperations) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -134,7 +141,7 @@ fun SingleInvitationCard(navController: NavController, fcmDataForInvitationExtra
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                formatLicensePlate(fcmDataForInvitationExtra.carNumber!!),
+                formatLicensePlate(fcmDataForInvitation.carNumber!!),
                 fontSize = 18.sp,
                 color = TextColor,
                 textAlign = TextAlign.Center
@@ -161,7 +168,12 @@ fun SingleInvitationCard(navController: NavController, fcmDataForInvitationExtra
                 Text("거절", color = TextColor)
             }
             Button(
-                onClick = { navController.popBackStack() },
+                onClick = {
+                                navController.popBackStack()
+                                // 초대 수락 로직
+                                memberInvitationRepository.acceptInvitation(fcmDataForInvitation.invitationId!!)
+
+                          },
                 modifier = Modifier.weight(1f),
                 colors = ButtonDefaults.buttonColors(containerColor = PrimaryColor),
                 shape = RoundedCornerShape(8.dp)
@@ -179,13 +191,13 @@ fun formatLicensePlate(number: String): String {
 }
 
 private fun isAnyFieldNull(fcmData: FCMDataForInvitation): Boolean {
-    return fcmData.title == null ||
+    return fcmData.type == null ||
+            fcmData.title == null ||
             fcmData.body == null ||
             fcmData.invitationId == null ||
             fcmData.created == null ||
             fcmData.inviterName == null ||
             fcmData.inviterPicture == null ||
             fcmData.carNumber == null ||
-//            fcmData.type == null ||
             fcmData.carModel == null
 }

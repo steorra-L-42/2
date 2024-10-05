@@ -1,7 +1,8 @@
 package com.kimnlee.memberinvitation.data.api
 
+import com.kimnlee.memberinvitation.data.model.MemberInvitationAcceptData
 import com.kimnlee.memberinvitation.data.model.MemberInvitationData
-import com.kimnlee.memberinvitation.data.model.MemberInvitationResponseData
+import com.kimnlee.memberinvitation.data.model.MemberInvitationResponse
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.Headers
@@ -19,8 +20,8 @@ interface MemberInvitationApiService {
 
     @Headers("Content-Type: application/json")
     @POST("/api/v1/invitations/{invitationId}/response")
-    fun respondToInvitation(
+    fun acceptInvitation(
         @Path("invitationId") invitationId: Int,
-        @Body invitationResponseData: MemberInvitationResponseData
-    ): Call<Void>
+        @Body invitationResponseData: MemberInvitationAcceptData
+    ): Call<MemberInvitationResponse>
 }

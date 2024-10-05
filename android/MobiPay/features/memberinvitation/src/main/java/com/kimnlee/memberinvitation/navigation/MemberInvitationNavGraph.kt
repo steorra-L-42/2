@@ -71,7 +71,6 @@ fun NavGraphBuilder.memberInvitationNavGraph(navController: NavHostController, c
             "memberinvitation_invited",
             enterTransition = { EnterTransition.None },
             exitTransition = { ExitTransition.None },
-            deepLinks = listOf(navDeepLink { uriPattern = "mobipay://youvegotinvited" })
         ) {
             InvitedScreen(
                 memberInvitationViewModel = memberInvitationViewModel,

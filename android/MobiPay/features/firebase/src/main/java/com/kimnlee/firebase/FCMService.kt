@@ -126,17 +126,17 @@ class FCMService : FirebaseMessagingService() {
                 }
                 else -> {
 //                    Log.d(TAG, "processMessage: 이것은 ELSE에 속한다.")
-                    try{
-                        val rjs = Gson().toJson(remoteMessage.data)
-                        val fcmDataForInvitation = Gson().fromJson(rjs, FCMDataForInvitation::class.java)
-
-                        if (fcmDataForInvitation.title?.contains("초대") == true){
-                            memberInvitationOperations?.processFCM(fcmDataForInvitation)
-                        }
-
-                    }catch (e: Exception){
-                        e.printStackTrace()
-                    }
+//                    try{
+//                        val rjs = Gson().toJson(remoteMessage.data)
+//                        val fcmDataForInvitation = Gson().fromJson(rjs, FCMDataForInvitation::class.java)
+//
+//                        if (fcmDataForInvitation.title?.contains("초대") == true){
+//                            memberInvitationOperations?.processFCM(fcmDataForInvitation)
+//                        }
+//
+//                    }catch (e: Exception){
+//                        e.printStackTrace()
+//                    }
                 }
             }
 
