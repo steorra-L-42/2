@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.kimnlee.cardmanagement.data.api.CardManagementApiService
 import com.kimnlee.cardmanagement.data.model.AutoPaymentCardRequest
 import com.kimnlee.cardmanagement.data.model.CardDetailResponse
+import com.kimnlee.cardmanagement.data.model.CardInfo
 import com.kimnlee.cardmanagement.data.model.OwnedCard
 import com.kimnlee.cardmanagement.data.model.RegisterCardRequest
 import com.kimnlee.cardmanagement.data.model.RegisteredCard
@@ -63,6 +64,8 @@ class CardManagementViewModel(
 
     private var messageJob: Job? = null
 
+    private var isFirstCardRegistration = true
+
     init {
         getOwnedCards()
         getRegisteredCards()
@@ -118,30 +121,32 @@ class CardManagementViewModel(
     }
 
     // 내 소유의 카드 중에서 사용할 카드 등록
-    fun registerCard(ownedCardId: Int, oneDayLimit: Int, oneTimeLimit: Int, password: String) {
+    fun registerCards(cards: List<RegisterCardRequest>) {
         viewModelScope.launch {
-            try {
-                val request = RegisterCardRequest(ownedCardId, oneDayLimit, oneTimeLimit, password)
-                val response = cardManagementService.registerCard(request)
-                if (response.isSuccessful) {
-                    val registeredCard = response.body()
-                    if (registeredCard != null) {
-                        _registrationStatus.value = "카드가 성공적으로 등록되었습니다."
-                        // 등록된 카드가 없을 경우에만 자동 결제 설정
-                        if (shouldSetAutoPayment()) {
-                            setAutoPaymentCard(ownedCardId, true)
+            cards.forEachIndexed { index, cardInfo ->
+                try {
+                    val request = RegisterCardRequest(cardInfo.ownedCardId, cardInfo.oneDayLimit, cardInfo.oneTimeLimit, cardInfo.password)
+                    val response = cardManagementService.registerCard(request)
+                    if (response.isSuccessful) {
+                        val registeredCard = response.body()
+                        if (registeredCard != null) {
+                            if (isFirstCardRegistration && index == 0) {
+                                setAutoPaymentCard(cardInfo.ownedCardId, true)
+                                isFirstCardRegistration = false
+                            }
+                        } else {
+                            _registrationStatus.value = "카드 등록 실패: 응답 데이터 없음"
                         }
-                        // 등록 성공 후 등록된 카드 목록을 갱신
-                        getRegisteredCards()
                     } else {
-                        _registrationStatus.value = "카드 등록 실패: 응답 데이터 없음"
+                        _registrationStatus.value = "카드 등록 실패: ${response.code()}"
                     }
-                } else {
-                    _registrationStatus.value = "카드 등록 실패: ${response.code()}"
+                } catch (e: Exception) {
+                    _registrationStatus.value = "카드 등록 실패: ${e.message}"
                 }
-            } catch (e: Exception) {
-                _registrationStatus.value = "카드 등록 실패: ${e.message}"
             }
+            // 모든 카드 등록 후 등록된 카드 목록을 갱신
+            getRegisteredCards()
+            _registrationStatus.value = "카드가 성공적으로 등록되었습니다."
         }
     }
 
