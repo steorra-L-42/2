@@ -1,9 +1,8 @@
 package com.example.merchant.util.mobipay;
 
-import com.example.merchant.util.mobipay.dto.CancelTransactionRequest;
-import com.example.merchant.util.mobipay.dto.CancelTransactionResponse;
-import com.example.merchant.util.mobipay.dto.MerchantTransactionRequest;
-import com.example.merchant.util.mobipay.dto.MerchantTransactionResponse;
+import com.example.merchant.domain.cancel.dto.CancelTransactionResponse;
+import com.example.merchant.domain.cancel.dto.MerchantTranscactionResponse;
+import com.example.merchant.global.enums.MerchantType;
 import com.example.merchant.util.mobipay.dto.MobiPaymentRequest;
 import com.example.merchant.util.mobipay.dto.MobiPaymentResponse;
 import org.springframework.http.ResponseEntity;
@@ -17,12 +16,12 @@ public interface MobiPay {
 
     // 2. 결제 내역 조회
     // GET /api/v1/merchants/{merchant_id}/transactions
-    // MerchantTransactionRequest, MerchantTransactionResponse
-    public ResponseEntity<MerchantTransactionResponse> getTransactionList(MerchantTransactionRequest request, Class<MerchantTransactionResponse> responseClass);
+    // MerchantTransactionResponse
+    public ResponseEntity<MerchantTranscactionResponse> getTransactionList(MerchantType type, Class<MerchantTranscactionResponse> responseClass);
 
     // 3. 결제 취소 요청
     // PATCH /api/v1/merchants/{merchant_id}/cancelled-transactions/{transactionUniqueNo}
-    // CancelTransactionRequest, CancelTransactionResponse
-    public ResponseEntity<CancelTransactionResponse> cancelTransaction(CancelTransactionRequest request, Class<CancelTransactionResponse> responseClass);
+    // CancelTransactionResponse
+    public ResponseEntity<CancelTransactionResponse> cancelTransaction(MerchantType type, Long transactionUniqueNo, Class<CancelTransactionResponse> responseClass);
 
 }

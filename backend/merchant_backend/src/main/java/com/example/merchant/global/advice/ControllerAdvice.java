@@ -1,9 +1,11 @@
 package com.example.merchant.global.advice;
 
+import com.example.merchant.domain.cancel.error.InvalidTransactionUniqueNoException;
 import com.example.merchant.domain.parking.error.DuplicatedParkingException;
 import com.example.merchant.domain.parking.error.InvalidMerApiKeyException;
 import com.example.merchant.domain.parking.error.MultipleNotPaidException;
 import com.example.merchant.domain.parking.error.NotExistParkingException;
+import com.example.merchant.domain.payment.error.InvalidMerchantTypeException;
 import com.example.merchant.global.error.ErrorCode;
 import com.example.merchant.global.error.ErrorResponseDto;
 import com.example.merchant.util.credential.error.UnknownMerchantIdException;
@@ -51,6 +53,18 @@ public class ControllerAdvice {
     public ResponseEntity<ErrorResponseDto> handleUnknownMerchantIdException  (UnknownMerchantIdException e) {
         log.error("UnknownMerchantIdException: " + e.getMessage());
         return getResponse(ErrorCode.UNKNOWN_MERCHANTID);
+    }
+
+    @ExceptionHandler(InvalidTransactionUniqueNoException.class)
+    public ResponseEntity<ErrorResponseDto> handleInvalidTransactionUniqueNoException  (InvalidTransactionUniqueNoException e) {
+        log.error("InvalidTransactionUniqueNoException: " + e.getMessage());
+        return getResponse(ErrorCode.INVALID_TRANSACTION_UNIQUE_NO);
+    }
+
+    @ExceptionHandler(InvalidMerchantTypeException.class)
+    public ResponseEntity<ErrorResponseDto> handleInvalidMerchantTypeException  (InvalidMerchantTypeException e) {
+        log.error("InvalidMerchantTypeException: " + e.getMessage());
+        return getResponse(ErrorCode.INVALID_MERCHANT_TYPE);
     }
 
     private ResponseEntity<ErrorResponseDto> getResponse(ErrorCode errorCode) {
