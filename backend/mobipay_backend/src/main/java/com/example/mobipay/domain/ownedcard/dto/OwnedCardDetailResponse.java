@@ -1,6 +1,7 @@
 package com.example.mobipay.domain.ownedcard.dto;
 
 import com.example.mobipay.domain.ownedcard.entity.OwnedCard;
+import com.example.mobipay.domain.registeredcard.entity.RegisteredCard;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import java.time.LocalDateTime;
 import lombok.Builder;
@@ -18,6 +19,8 @@ public class OwnedCardDetailResponse {
     private LocalDateTime created;
     private Long mobiUserId;
     private Long accountId;
+    private Integer oneDayLimit;
+    private Integer oneTimeLimit;
     private String cardUniqueNo;
 
     public static OwnedCardDetailResponse from(OwnedCard ownedCard) {
@@ -34,11 +37,13 @@ public class OwnedCardDetailResponse {
                 .build();
     }
 
-    public static OwnedCardDetailResponse fromDetailInfo(OwnedCard ownedCard) {
+    public static OwnedCardDetailResponse fromDetailInfo(OwnedCard ownedCard, RegisteredCard registeredCard) {
         return OwnedCardDetailResponse.builder()
                 .cardNo(ownedCard.getCardNo())
                 .cvc(ownedCard.getCvc())
                 .cardExpiryDate(ownedCard.getCardExpiryDate())
+                .oneDayLimit(registeredCard.getOneDayLimit())
+                .oneTimeLimit(registeredCard.getOneTimeLimit())
                 .build();
     }
 }

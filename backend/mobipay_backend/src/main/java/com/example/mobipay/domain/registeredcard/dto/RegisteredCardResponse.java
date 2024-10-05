@@ -10,6 +10,7 @@ public class RegisteredCardResponse {
     private Long mobiUserId;
     private Long ownedCardId;
     private String cardNo;
+    private String cardExpriyDate;
     private Integer oneDayLimit;
     private Integer oneTimeLimit;
 
@@ -18,6 +19,7 @@ public class RegisteredCardResponse {
                 .mobiUserId(registeredCard.getMobiUserId())
                 .ownedCardId(registeredCard.getOwnedCardId())
                 .cardNo(registeredCard.getOwnedCard().getCardNo())
+                .cardExpriyDate(registeredCard.getOwnedCard().getCardExpiryDate())
                 .oneDayLimit(registeredCard.getOneDayLimit())
                 .oneTimeLimit(registeredCard.getOneTimeLimit())
                 .build();
