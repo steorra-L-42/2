@@ -87,17 +87,13 @@ fun CardManagementScreen(
                             text = "💳",
                             style = MaterialTheme.typography.headlineMedium,
                             fontFamily = FontFamily(Font(R.font.emoji)),
-                            fontSize = 24.sp,
                             modifier = Modifier
-                                .padding(top = 10.dp)
                                 .padding(end = 8.dp)
                         )
                         Text(
                             text = "등록된 카드",
                             style = MaterialTheme.typography.headlineMedium,
                             color = MobiTextAlmostBlack,
-                            fontSize = 24.sp,
-                            fontFamily = FontFamily(Font(R.font.pbold))
                         )
                     }
                 },
@@ -266,8 +262,7 @@ fun AddCardButton(openBottomSheet: () -> Unit) {
                 Text(
                     "카드 추가",
                     style = MaterialTheme.typography.titleMedium,
-                    color = MobiTextAlmostBlack,
-                    fontFamily = FontFamily(Font(R.font.pmedium))
+                    color = MobiTextAlmostBlack
                 )
             }
         }

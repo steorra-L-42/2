@@ -48,14 +48,12 @@ fun CardManagementOptionItem(icon: ImageVector, title: String, description: Stri
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleLarge,
-                color = MobiTextAlmostBlack,
-                fontFamily = FontFamily(Font(R.font.psemibold))
+                color = MobiTextAlmostBlack
             )
             Text(
                 text = description,
                 style = MaterialTheme.typography.bodyMedium,
-                color = MobiTextDarkGray,
-                fontFamily = FontFamily(Font(R.font.pregular))
+                color = MobiTextDarkGray
             )
         }
     }

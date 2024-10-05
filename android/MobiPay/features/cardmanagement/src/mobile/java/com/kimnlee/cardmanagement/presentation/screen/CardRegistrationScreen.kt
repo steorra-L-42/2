@@ -73,17 +73,13 @@ fun CardRegistrationScreen(
                             text = "💳",
                             style = MaterialTheme.typography.headlineMedium,
                             fontFamily = FontFamily(Font(R.font.emoji)),
-                            fontSize = 24.sp,
                             modifier = Modifier
-                                .padding(top = 10.dp)
                                 .padding(end = 8.dp)
                         )
                         Text(
                             text = "카드 등록",
                             style = MaterialTheme.typography.headlineMedium,
-                            color = MobiTextAlmostBlack,
-                            fontSize = 24.sp,
-                            fontFamily = FontFamily(Font(R.font.pbold))
+                            color = MobiTextAlmostBlack
                         )
                     }
                 },
@@ -118,8 +114,7 @@ fun CardRegistrationScreen(
                 Text(
                     text = "${pagerState.currentPage + 1}/${cardInfos.size}",
                     modifier = Modifier.align(Alignment.CenterHorizontally),
-                    fontSize = 16.sp,
-                    fontFamily = FontFamily(Font(R.font.pregular)),
+                    style = MaterialTheme.typography.titleMedium,
                     color = MobiTextAlmostBlack
                 )
             }
@@ -144,9 +139,8 @@ fun CardRegistrationScreen(
                     )
                     Text(
                         text = "한도 일괄 적용",
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = MaterialTheme.typography.titleMedium,
                         fontFamily = FontFamily(Font(R.font.pbold)),
-                        fontSize = 16.sp,
                         color = MobiTextAlmostBlack
                     )
                 }
@@ -168,9 +162,7 @@ fun CardRegistrationScreen(
                 label = { Text(
                     text = "일일 결제 한도",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MobiTextDarkGray,
-                    fontSize = 12.sp,
-                    fontFamily = FontFamily(Font(R.font.pregular))
+                    color = MobiTextDarkGray
                 ) },
                 modifier = Modifier.fillMaxWidth().focusRequester(oneDayLimitFocusRequester),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next),
@@ -203,9 +195,7 @@ fun CardRegistrationScreen(
                 label = { Text(
                     text = "1회 결제 한도",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MobiTextDarkGray,
-                    fontSize = 12.sp,
-                    fontFamily = FontFamily(Font(R.font.pregular))
+                    color = MobiTextDarkGray
                 ) },
                 modifier = Modifier.fillMaxWidth().focusRequester(oneTimeLimitFocusRequester),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
@@ -243,10 +233,8 @@ fun CardRegistrationScreen(
             ) {
                 Text(
                     text = "등록하기",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = Color.White,
-                    fontSize = 16.sp,
-                    fontFamily = FontFamily(Font(R.font.pbold))
+                    style = MaterialTheme.typography.titleLarge,
+                    color = Color.White
                 )
             }
         }

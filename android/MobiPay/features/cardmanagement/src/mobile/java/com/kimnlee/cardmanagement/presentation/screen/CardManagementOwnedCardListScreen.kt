@@ -31,6 +31,7 @@ import com.kimnlee.cardmanagement.data.model.OwnedCard
 import com.kimnlee.cardmanagement.presentation.viewmodel.CardManagementViewModel
 import com.kimnlee.cardmanagement.presentation.viewmodel.OwnedCardUiState
 import com.kimnlee.common.ui.theme.MobiTextAlmostBlack
+import com.kimnlee.common.ui.theme.MobiTextDarkGray
 import formatCardNumber
 
 // 소유한 카드 리스트에서 모비페이에 등록할 카드를 등록하는 페이지
@@ -54,17 +55,13 @@ fun CardManagementOwnedCardListScreen(
                             text = "💳",
                             style = MaterialTheme.typography.headlineMedium,
                             fontFamily = FontFamily(Font(CommonR.font.emoji)),
-                            fontSize = 24.sp,
                             modifier = Modifier
-                                .padding(top = 10.dp)
                                 .padding(end = 8.dp)
                         )
                         Text(
                             text = "카드 등록",
                             style = MaterialTheme.typography.headlineMedium,
                             color = MobiTextAlmostBlack,
-                            fontSize = 24.sp,
-                            fontWeight = FontWeight.Bold
                         )
                     }
                 },
@@ -103,9 +100,8 @@ fun CardManagementOwnedCardListScreen(
                         )
                         Text(
                             text = "전체 선택",
-                            style = MaterialTheme.typography.bodyMedium,
+                            style = MaterialTheme.typography.titleMedium,
                             color = MobiTextAlmostBlack,
-                            fontSize = 16.sp,
                             fontFamily = FontFamily(Font(CommonR.font.pbold))
                         )
                     }
@@ -137,29 +133,10 @@ fun CardManagementOwnedCardListScreen(
                 Text(
                     text = "등록하기",
                     color = Color.White,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontSize = 16.sp,
-                    fontFamily = FontFamily(Font(CommonR.font.pbold))
+                    style = MaterialTheme.typography.titleLarge
                 )
             }
         }
-    }
-}
-
-@Composable
-fun TopBar(onNavigateBack: () -> Unit) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        IconButton(onClick = onNavigateBack) {
-            Icon(Icons.Default.ArrowBack, contentDescription = "Back")
-        }
-        Text(
-            text = "카드 등록",
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold
-        )
     }
 }
 
@@ -190,15 +167,6 @@ fun CardItem(
     isRegistered: Boolean
 ) {
     Box(modifier = Modifier.fillMaxWidth()) {
-        if (isRegistered) {
-            Text(
-                "이미 등록되었어요",
-                modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .padding(top = 4.dp),
-                color = Color.Red
-            )
-        }
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(8.dp),
@@ -223,8 +191,17 @@ fun CardItem(
                         .weight(1f)
                         .alpha(if (isRegistered) 0.5f else 1f)
                 ) {
-                    Text(text = formatCardNumber(card.cardNo), fontWeight = FontWeight.Bold)
-                    Text(text = "만료일: ${formatExpiryDate(card.cardExpiryDate)}")
+                    Text(
+                        text = formatCardNumber(card.cardNo),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontFamily = FontFamily(Font(CommonR.font.pbold)),
+                        color = MobiTextAlmostBlack
+                    )
+                    Text(
+                        text = "만료일: ${formatExpiryDate(card.cardExpiryDate)}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MobiTextDarkGray
+                    )
                 }
                 if (!isRegistered) {
                     Checkbox(
