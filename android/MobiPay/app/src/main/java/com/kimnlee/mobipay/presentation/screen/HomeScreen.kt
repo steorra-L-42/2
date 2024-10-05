@@ -57,6 +57,7 @@ import com.kimnlee.common.network.NaverMapService
 import com.kimnlee.common.ui.theme.MobiCardBgGray
 import com.kimnlee.common.ui.theme.MobiPayTheme
 import com.kimnlee.common.ui.theme.MobiTextAlmostBlack
+import com.kimnlee.mobipay.presentation.viewmodel.HomeViewModel
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.CameraUpdate
 import com.naver.maps.map.MapView
@@ -70,13 +71,14 @@ private val YOUR_CLIENT_SECRET = BuildConfig.NAVER_MAP_CLIENT_SECRET
 
 @Composable
 fun HomeScreen(
-    viewModel: LoginViewModel,
+    loginViewModel: LoginViewModel,
+    homeViewModel: HomeViewModel,
     navController: NavController,
     context: Context
 ) {
-    val isLoggedIn by viewModel.isLoggedIn.collectAsState()
+    val isLoggedIn by loginViewModel.isLoggedIn.collectAsState()
     var lastLocation by remember { mutableStateOf<Pair<Double, Double>?>(null) }
-    val naverMapService by viewModel.naverMapService.collectAsState()
+    val naverMapService by homeViewModel.naverMapService.collectAsState()
 
     LaunchedEffect(isLoggedIn) {
         if (!isLoggedIn) {
@@ -427,19 +429,4 @@ private fun getLastLocation(context: Context): Pair<Double, Double>? {
     } else {
         null
     }
-}
-// 위도 경도로 주소 구하는 Reverse-GeoCoding (기존 코드 유지)
-private fun getCurrentAddress(context: Context, latitude: Double, longitude: Double): String {
-    try {
-        val geocoder = Geocoder(context, Locale.KOREA)
-        val addresses = geocoder.getFromLocation(latitude, longitude, 1)
-
-        if (!addresses.isNullOrEmpty()) {
-            val address = addresses[0]
-            return address.getAddressLine(0)
-        }
-    } catch (e: Exception) {
-        e.printStackTrace()
-    }
-    return ""
 }
