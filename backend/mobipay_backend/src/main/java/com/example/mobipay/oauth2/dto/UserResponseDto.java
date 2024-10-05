@@ -9,5 +9,5 @@ public class UserResponseDto {
     private String email;
     private String name;
     private String phoneNumber;
-    private String jwtAccessToken;
+    private String picture;
 }

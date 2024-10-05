@@ -62,12 +62,12 @@ public class UserService {
         return cookieMethods.createCookie(REFRESH.getType(), refreshToken);
     }
 
-    public UserResponseDto getUserDetail(String email, String name, String phoneNumber, String jwtAccessToken) {
+    public UserResponseDto getUserDetail(String email, String name, String phoneNumber, String picture) {
         return UserResponseDto.builder()
                 .email(email)
                 .name(name)
                 .phoneNumber(phoneNumber)
-                .jwtAccessToken(jwtAccessToken)
+                .picture(picture)
                 .build();
     }
 }
