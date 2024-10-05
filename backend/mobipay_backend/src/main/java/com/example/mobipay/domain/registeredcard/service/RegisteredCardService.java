@@ -41,6 +41,11 @@ public class RegisteredCardService {
         OwnedCard ownedCard = ownedCardRepository.findOwnedCardById(request.getOwnedCardId())
                 .orElseThrow(OwnedCardNotFoundException::new);
 
+        //찾은 카드의 사용자와 요청하는 사용자가 일치하는지 확인(본인카드가 맞는지)
+        if (!ownedCard.getMobiUser().getId().equals(mobiUser.getId())) {
+            throw new OwnedCardNotFoundException();
+        }
+
         registeredCardRepository.findByOwnedCardId(ownedCard.getId())
                 .ifPresent(card -> {
                     throw new AlreadyRegisteredCard();
