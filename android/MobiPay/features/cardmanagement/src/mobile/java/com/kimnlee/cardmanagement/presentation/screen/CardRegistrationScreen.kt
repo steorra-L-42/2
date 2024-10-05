@@ -35,6 +35,8 @@ import com.kimnlee.common.ui.theme.MobiBgGray
 import com.kimnlee.common.ui.theme.MobiTextAlmostBlack
 import com.kimnlee.common.ui.theme.MobiTextDarkGray
 import kotlinx.coroutines.launch
+import moneyFormat
+import java.math.BigInteger
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -58,6 +60,15 @@ fun CardRegistrationScreen(
 
     val oneDayLimitFocusRequester = remember { FocusRequester() }
     val oneTimeLimitFocusRequester = remember { FocusRequester() }
+
+    fun formatMoney(input: String): String {
+        return try {
+            val amount = BigInteger(input.replace(Regex("[^0-9]"), ""))
+            moneyFormat(amount)
+        } catch (e: NumberFormatException) {
+            ""
+        }
+    }
 
     fun applyToAllCards(oneDayValue: String, oneTimeValue: String) {
         oneDayLimits = List(cardInfos.size) { oneDayValue }
@@ -155,7 +166,7 @@ fun CardRegistrationScreen(
             }
 
             OutlinedTextField(
-                value = oneDayLimits[pagerState.currentPage],
+                value = formatMoney(oneDayLimits[pagerState.currentPage]),
                 onValueChange = { newValue ->
                     val filteredValue = newValue.filter { it.isDigit() }
                     if (isApplyToAll) {
@@ -190,7 +201,7 @@ fun CardRegistrationScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             OutlinedTextField(
-                value = oneTimeLimits[pagerState.currentPage],
+                value = formatMoney(oneTimeLimits[pagerState.currentPage]),
                 onValueChange = { newValue ->
                     val filteredValue = newValue.filter { it.isDigit() }
                     if (isApplyToAll) {
