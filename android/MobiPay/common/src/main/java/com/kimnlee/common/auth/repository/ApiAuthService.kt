@@ -1,11 +1,10 @@
 package com.kimnlee.common.auth.repository
 
-import com.kimnlee.common.auth.AuthManager
 import com.kimnlee.common.auth.api.AuthService
 import com.kimnlee.common.auth.model.LoginRequest
 import com.kimnlee.common.auth.model.LoginResponse
-import com.kimnlee.common.auth.model.RegisterResponse
 import com.kimnlee.common.auth.model.RegistrationRequest
+import com.kimnlee.common.auth.model.RegistrationResponse
 import com.kimnlee.common.auth.model.SendTokenRequest
 import com.kimnlee.common.auth.model.SendTokenResponse
 import com.kimnlee.common.network.ApiClient
@@ -20,7 +19,7 @@ class ApiAuthService(
         return unAuthenticatedApi.login(loginRequest)
     }
 
-    override suspend fun register(registrationRequest: RegistrationRequest): Response<RegisterResponse> {
+    override suspend fun register(registrationRequest: RegistrationRequest): Response<RegistrationResponse> {
         return unAuthenticatedApi.register(registrationRequest)
     }
 

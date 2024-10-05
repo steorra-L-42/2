@@ -56,13 +56,10 @@ public class KakaoLoginController {
             String picture = kakaoUserInfoResponseDto.getKakaoAccount().getProfile().getPicture();
 
             Boolean existEmail = userService.checkEmailInMobipay(email);
-            System.out.println(email + picture);
             if (!existEmail) {
-                System.out.println(email + picture);
                 return sendUserDetailRequest(email, picture);
 
             }
-            System.out.println(email + picture);
             // existEmail이 true면 이미 가입된 유저이므로
             MobiUser mobiUser = mobiUserRepository.findByEmail(email)
                     .orElseThrow(MobiUserNotFoundException::new);
@@ -115,7 +112,7 @@ public class KakaoLoginController {
         headers.add(ACCESS.getType(), BEARER.getType() + jwtAccessToken);  // 헤더에 JWT 토큰 추가
         headers.add(HttpHeaders.SET_COOKIE, jwtRefreshToken.toString());
 
-        UserResponseDto responseBody = userService.getUserDetail(email, name, phoneNumber, jwtAccessToken);
+        UserResponseDto responseBody = userService.getUserDetail(email, name, phoneNumber, picture);
 
         return ResponseEntity.ok().headers(headers).body(responseBody);
     }

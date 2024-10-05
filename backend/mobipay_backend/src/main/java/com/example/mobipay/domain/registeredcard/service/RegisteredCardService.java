@@ -6,13 +6,17 @@ import com.example.mobipay.domain.mobiuser.repository.MobiUserRepository;
 import com.example.mobipay.domain.ownedcard.entity.OwnedCard;
 import com.example.mobipay.domain.ownedcard.error.OwnedCardNotFoundException;
 import com.example.mobipay.domain.ownedcard.repository.OwnedCardRepository;
+import com.example.mobipay.domain.postpayments.error.RegisteredCardNotFoundException;
 import com.example.mobipay.domain.registeredcard.dto.RegisteredCardAutoPayRequest;
 import com.example.mobipay.domain.registeredcard.dto.RegisteredCardAutoPayResponse;
+import com.example.mobipay.domain.registeredcard.dto.RegisteredCardDetailResponse;
 import com.example.mobipay.domain.registeredcard.dto.RegisteredCardListResponse;
 import com.example.mobipay.domain.registeredcard.dto.RegisteredCardRequest;
 import com.example.mobipay.domain.registeredcard.dto.RegisteredCardResponse;
 import com.example.mobipay.domain.registeredcard.entity.RegisteredCard;
+import com.example.mobipay.domain.registeredcard.entity.RegisteredCardId;
 import com.example.mobipay.domain.registeredcard.error.AlreadyRegisteredCard;
+import com.example.mobipay.domain.registeredcard.error.CardUserMismatch;
 import com.example.mobipay.domain.registeredcard.repository.RegisteredCardRepository;
 import com.example.mobipay.oauth2.dto.CustomOAuth2User;
 import java.util.List;
@@ -38,6 +42,11 @@ public class RegisteredCardService {
         OwnedCard ownedCard = ownedCardRepository.findOwnedCardById(request.getOwnedCardId())
                 .orElseThrow(OwnedCardNotFoundException::new);
 
+        //찾은 카드의 사용자와 요청하는 사용자가 일치하는지 확인(본인카드가 맞는지)
+        if (!ownedCard.getMobiUser().getId().equals(mobiUser.getId())) {
+            throw new CardUserMismatch();
+        }
+
         registeredCardRepository.findByOwnedCardId(ownedCard.getId())
                 .ifPresent(card -> {
                     throw new AlreadyRegisteredCard();
@@ -45,9 +54,7 @@ public class RegisteredCardService {
 
         RegisteredCard registeredCard = RegisteredCard.of(
                 request.getOneDayLimit(),
-                request.getOneTimeLimit(),
-                request.getPassword(),
-                false);
+                request.getOneTimeLimit());
 
         registeredCard.addRelations(mobiUser, ownedCard);
 
@@ -115,8 +122,19 @@ public class RegisteredCardService {
         return RegisteredCardAutoPayResponse.from(registeredCard);
     }
 
-    private MobiUser findMobiUser(Long mobiUserId) {
+    public RegisteredCardDetailResponse getRegisteredCardDetails(Long cardId, CustomOAuth2User oauth2User) {
+        // 사용자 정보 찾기
+        MobiUser mobiUser = findMobiUser(oauth2User.getMobiUserId());
 
+        RegisteredCardId registeredCardId = RegisteredCardId.of(mobiUser.getId(), cardId);
+
+        RegisteredCard registeredCard = registeredCardRepository.findById(registeredCardId)
+                .orElseThrow(RegisteredCardNotFoundException::new);
+
+        return RegisteredCardDetailResponse.from(registeredCard);
+    }
+
+    private MobiUser findMobiUser(Long mobiUserId) {
         return mobiUserRepository.findById(mobiUserId)
                 .orElseThrow(MobiUserNotFoundException::new);
     }

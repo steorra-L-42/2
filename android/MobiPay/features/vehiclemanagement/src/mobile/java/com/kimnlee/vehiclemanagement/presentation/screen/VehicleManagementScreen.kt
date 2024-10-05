@@ -124,6 +124,7 @@ fun AddVehicleCard(onClick: () -> Unit) {
             }
         }
     }
+    Spacer(modifier = Modifier.height(24.dp))
 }
 
 @Composable

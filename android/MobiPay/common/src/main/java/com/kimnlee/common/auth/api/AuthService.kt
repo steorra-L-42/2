@@ -3,8 +3,8 @@ package com.kimnlee.common.auth.api
 
 import com.kimnlee.common.auth.model.LoginRequest
 import com.kimnlee.common.auth.model.LoginResponse
-import com.kimnlee.common.auth.model.RegisterResponse
 import com.kimnlee.common.auth.model.RegistrationRequest
+import com.kimnlee.common.auth.model.RegistrationResponse
 import com.kimnlee.common.auth.model.SendTokenRequest
 import com.kimnlee.common.auth.model.SendTokenResponse
 import retrofit2.Response
@@ -17,7 +17,7 @@ interface AuthService {
     suspend fun login(@Body loginRequest: LoginRequest): Response<LoginResponse>
 
     @POST("api/v1/users/detail")
-    suspend fun register(@Body registrationRequest: RegistrationRequest): Response<RegisterResponse>
+    suspend fun register(@Body registrationRequest: RegistrationRequest): Response<RegistrationResponse>
 
     @POST("api/v1/fcm/registertoken")
     suspend fun sendTokens(@Body sendTokenRequest: SendTokenRequest): Response<SendTokenResponse>

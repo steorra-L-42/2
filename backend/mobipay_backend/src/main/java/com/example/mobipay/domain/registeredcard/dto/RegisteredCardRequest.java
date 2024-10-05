@@ -26,9 +26,6 @@ public class RegisteredCardRequest {
     @NotNull(message = "empty oneTimeLimit")
     private Integer oneTimeLimit;
 
-    @NotNull(message = "empty password")
-    private String password;
-
     @AssertTrue(message = "oneDayLimit must be greater than or equal to oneTimeLimit")
     public boolean isOneDayLimitValid() {
         // oneDayLimit이 oneTimeLimit보다 크거나 같아야 함

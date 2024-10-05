@@ -25,7 +25,7 @@ data class RegistrationRequest(
     val refreshToken: String,
 )
 
-data class RegisterResponse(
+data class RegistrationResponse(
     val email: String,
     val name: String,
     val phoneNumber: String,
