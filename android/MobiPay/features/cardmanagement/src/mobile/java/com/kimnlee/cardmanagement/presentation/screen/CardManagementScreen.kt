@@ -68,16 +68,12 @@ import com.kimnlee.common.utils.moneyFormat
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CardManagementScreen(
-    onNavigateToRegistration: () -> Unit,
     onNavigateToOwnedCards: () -> Unit,
     viewModel: CardManagementViewModel,
 ) {
     val registeredCards by viewModel.registeredCards.collectAsState()
-    val showBottomSheet by viewModel.showBottomSheet.collectAsState()
     val autoPaymentMessage by viewModel.autoPaymentMessage.collectAsState()
 
-    val scope = rememberCoroutineScope()
-    val sheetState = rememberModalBottomSheetState()
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(Unit) {
@@ -135,18 +131,8 @@ fun CardManagementScreen(
                 )
             }
             item {
-                AddCardButton { viewModel.openBottomSheet() }
+                AddCardButton { onNavigateToOwnedCards() }
             }
-        }
-
-        if (showBottomSheet) {
-            CardManagementBottomSheet(
-                sheetState = sheetState,
-                scope = scope,
-                viewModel = viewModel,
-                onNavigateToRegistration = onNavigateToRegistration,
-                onNavigateToOwnedCards = onNavigateToOwnedCards
-            )
         }
     }
 }
@@ -249,13 +235,13 @@ fun TextWithShadow(
 }
 
 @Composable
-fun AddCardButton(openBottomSheet: () -> Unit) {
+fun AddCardButton(onNavigateToOwnedCards: () -> Unit) {
     Spacer(modifier = Modifier.height(8.dp))
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .height(200.dp)
-            .clickable(onClick = openBottomSheet),
+            .clickable(onClick = onNavigateToOwnedCards),
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(8.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White)
