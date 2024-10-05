@@ -60,11 +60,10 @@ public class RegisteredCard {
         return new RegisteredCard();
     }
 
-    public static RegisteredCard of(Integer oneDayLimit, Integer oneTimeLimit, Boolean autoPayStatus) {
+    public static RegisteredCard of(Integer oneDayLimit, Integer oneTimeLimit) {
         RegisteredCard registeredCard = new RegisteredCard();
         registeredCard.oneDayLimit = oneDayLimit;
         registeredCard.oneTimeLimit = oneTimeLimit;
-        registeredCard.autoPayStatus = autoPayStatus;
 
         return registeredCard;
     }
