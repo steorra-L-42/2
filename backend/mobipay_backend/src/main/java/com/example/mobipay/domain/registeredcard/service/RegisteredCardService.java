@@ -45,9 +45,7 @@ public class RegisteredCardService {
 
         RegisteredCard registeredCard = RegisteredCard.of(
                 request.getOneDayLimit(),
-                request.getOneTimeLimit(),
-                request.getPassword(),
-                false);
+                request.getOneTimeLimit());
 
         registeredCard.addRelations(mobiUser, ownedCard);
 
@@ -116,7 +114,6 @@ public class RegisteredCardService {
     }
 
     private MobiUser findMobiUser(Long mobiUserId) {
-
         return mobiUserRepository.findById(mobiUserId)
                 .orElseThrow(MobiUserNotFoundException::new);
     }
