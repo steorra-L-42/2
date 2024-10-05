@@ -1,9 +1,6 @@
 package com.kimnlee.freedrive.presentation.screen
 
 import android.Manifest
-import android.annotation.SuppressLint
-import android.app.Notification
-import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
@@ -16,14 +13,28 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.os.Build
 import android.util.Log
+import androidx.car.app.AppManager
 import androidx.car.app.Screen
 import androidx.car.app.Session
+import androidx.car.app.model.Action
+import androidx.car.app.model.Alert
+import androidx.car.app.model.CarIcon
+import androidx.car.app.model.CarText
+import androidx.car.app.model.OnClickListener
+import androidx.car.app.notification.CarAppExtender
+import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.IconCompat
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.kimnlee.common.FCMData
+import com.kimnlee.common.utils.moneyFormat
+import com.kimnlee.freedrive.R
 import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.androidauto.MapboxCarContext
 import com.mapbox.androidauto.deeplink.GeoDeeplinkNavigateAction
@@ -32,6 +43,7 @@ import com.mapbox.androidauto.map.compass.CarCompassRenderer
 import com.mapbox.androidauto.map.logo.CarLogoRenderer
 import com.mapbox.androidauto.screenmanager.MapboxScreen
 import com.mapbox.androidauto.screenmanager.MapboxScreenManager
+import com.mapbox.androidauto.search.PlaceRecord
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.Point
 import com.mapbox.maps.MapboxExperimental
@@ -46,25 +58,8 @@ import com.mapbox.maps.logE
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.lifecycle.requireMapboxNavigation
 import com.mapbox.navigation.core.trip.session.TripSessionState
-import com.kimnlee.freedrive.R
 import kotlinx.coroutines.launch
-import androidx.car.app.AppManager
-import androidx.car.app.model.Action
-import androidx.car.app.model.Alert
-import androidx.car.app.model.CarIcon
-import androidx.car.app.model.CarText
-import androidx.car.app.model.OnClickListener
-import androidx.car.app.notification.CarAppExtender
-import androidx.core.app.ActivityCompat
-import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
-import androidx.core.graphics.drawable.IconCompat
-import com.kimnlee.common.FCMData
-import com.mapbox.androidauto.search.PlaceRecord
 import java.math.BigInteger
-import java.text.NumberFormat
-import java.util.Locale
-import kotlin.math.log
 
 private const val TAG = "MainCarSession"
 private val customStyleUrl = "mapbox://styles/harveyl/cm163kfgg019r01q1a4nc9hm3"
@@ -145,11 +140,6 @@ class MainCarSession : Session() {
                 }
             }
         }
-    }
-
-    fun moneyFormat(amount: BigInteger): String {
-        val numberFormat = NumberFormat.getInstance(Locale.KOREA)
-        return numberFormat.format(amount) + "원"
     }
 
     private fun processAlert(intentType: String, fcmData: FCMData){

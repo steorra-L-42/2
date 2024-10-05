@@ -31,6 +31,7 @@ import java.text.NumberFormat
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import com.kimnlee.common.utils.moneyFormat
 
 // Custom Font Family
 val pRegularFontFamily = FontFamily(Font(R.font.pregular))
@@ -102,11 +103,6 @@ fun taxCalc(originalAmount: BigInteger, tenOrOne: Int): BigInteger {
         1 -> originalAmount / BigInteger("11")
         else -> BigInteger.ZERO
     }
-}
-
-fun moneyFormat(amount: BigInteger): String {
-    val numberFormat = NumberFormat.getInstance(Locale.KOREA)
-    return numberFormat.format(amount) + "원"
 }
 
 @Composable
