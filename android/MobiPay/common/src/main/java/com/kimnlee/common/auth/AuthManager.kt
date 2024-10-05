@@ -105,29 +105,31 @@ class AuthManager(private val context: Context) {
             val name = claims["name"] as? String ?: ""
             val phoneNumber = claims["phoneNumber"] as? String ?: ""
             val picture = claims["picture"] as? String ?: ""
-            // 현재 picture와 phoneNumber가 거꾸로 담겨있어서 반대로 가져와서 담음(백에서 수정되면 여기도 바꿔야됨)
+            val email = claims["email"] as? String ?: ""
 
-            saveUserInfo(name, phoneNumber, picture)
+            saveUserInfo(name, phoneNumber, picture, email)
             Log.d(TAG, "유저정보 JWT토큰으로 부터 저장 됨")
         } catch (e: Exception) {
             Log.e(TAG, "유저정보 JWT토큰으로 부터 저장 실패", e)
         }
     }
 
-    private fun saveUserInfo(name: String, phoneNumber: String, picture: String) {
+    private fun saveUserInfo(name: String, phoneNumber: String, picture: String, email: String) {
         encryptedSharedPreferences.edit()
             .putString(KEY_USER_NAME, name)
             .putString(KEY_USER_PHONE_NUMBER, phoneNumber)
             .putString(KEY_USER_PICTURE, picture)
+            .putString(KEY_USER_EMAIL, email)
             .apply()
-        Log.d(TAG, "유저정보 다음과 같이 저장 됨: name=$name, phoneNumber=$phoneNumber, picture=$picture")
+        Log.d(TAG, "유저정보 다음과 같이 저장 됨: name=$name, phoneNumber=$phoneNumber, picture=$picture, email=$email")
     }
 
     fun getUserInfo(): UserInfo {
         val name = encryptedSharedPreferences.getString(KEY_USER_NAME, "") ?: ""
         val phoneNumber = encryptedSharedPreferences.getString(KEY_USER_PHONE_NUMBER, "") ?: ""
         val picture = encryptedSharedPreferences.getString(KEY_USER_PICTURE, "") ?: ""
-        return UserInfo(name, phoneNumber, picture)
+        val email = encryptedSharedPreferences.getString(KEY_USER_EMAIL, "") ?: ""
+        return UserInfo(name, phoneNumber, picture, email)
     }
 
     fun clearUserInfo() {
@@ -135,6 +137,7 @@ class AuthManager(private val context: Context) {
             .remove(KEY_USER_NAME)
             .remove(KEY_USER_PHONE_NUMBER)
             .remove(KEY_USER_PICTURE)
+            .remove(KEY_USER_EMAIL)
             .apply()
         Log.d(TAG, "유저 정보 전부 지워짐")
     }
@@ -175,5 +178,6 @@ class AuthManager(private val context: Context) {
         private const val KEY_USER_NAME = "user_name"
         private const val KEY_USER_PHONE_NUMBER = "user_phone_number"
         private const val KEY_USER_PICTURE = "user_picture"
+        private const val KEY_USER_EMAIL = "user_email"
     }
 }
