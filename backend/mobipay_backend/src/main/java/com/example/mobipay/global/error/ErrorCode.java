@@ -33,7 +33,9 @@ public enum ErrorCode {
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 에러입니다."),
     NOT_FOUND_CARD(HttpStatus.FORBIDDEN, "해당 카드에 대한 권한이 없습니다."),
     FCM_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "FCM 전송 에러입니다."),
-    ALREADY_REGISTERED_CARD(HttpStatus.CONFLICT, "이미 등록된 카드입니다.");
+    ALREADY_REGISTERED_CARD(HttpStatus.CONFLICT, "이미 등록된 카드입니다."),
+    CARD_USER_MISMATCH(HttpStatus.FORBIDDEN, "카드를 찾을 수 없습니다.");
+
 
     private final HttpStatus status;
     private final String message;

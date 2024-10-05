@@ -16,6 +16,7 @@ import com.example.mobipay.domain.registeredcard.dto.RegisteredCardResponse;
 import com.example.mobipay.domain.registeredcard.entity.RegisteredCard;
 import com.example.mobipay.domain.registeredcard.entity.RegisteredCardId;
 import com.example.mobipay.domain.registeredcard.error.AlreadyRegisteredCard;
+import com.example.mobipay.domain.registeredcard.error.CardUserMismatch;
 import com.example.mobipay.domain.registeredcard.repository.RegisteredCardRepository;
 import com.example.mobipay.oauth2.dto.CustomOAuth2User;
 import java.util.List;
@@ -43,7 +44,7 @@ public class RegisteredCardService {
 
         //찾은 카드의 사용자와 요청하는 사용자가 일치하는지 확인(본인카드가 맞는지)
         if (!ownedCard.getMobiUser().getId().equals(mobiUser.getId())) {
-            throw new OwnedCardNotFoundException();
+            throw new CardUserMismatch();
         }
 
         registeredCardRepository.findByOwnedCardId(ownedCard.getId())
