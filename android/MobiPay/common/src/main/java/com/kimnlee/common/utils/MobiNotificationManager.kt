@@ -19,6 +19,7 @@ import androidx.core.app.RemoteInput
 import androidx.core.graphics.drawable.IconCompat
 import com.kimnlee.common.FCMData
 import com.kimnlee.common.R
+import kotlin.random.Random
 
 private const val TAG = "MobiNotificationManager"
 class MobiNotificationManager private constructor(private val applicationContext: Context) {
@@ -223,7 +224,7 @@ class MobiNotificationManager private constructor(private val applicationContext
             .setAutoCancel(true)
             .build()
 
-        NotificationManagerCompat.from(applicationContext).notify(123, notification) // Unique ID for the notification
+        NotificationManagerCompat.from(applicationContext).notify(Random.nextInt(), notification) // Unique ID for the notification
     }
 
     fun showPlainNotification(title: String, message: String) {
@@ -237,6 +238,6 @@ class MobiNotificationManager private constructor(private val applicationContext
             .setAutoCancel(true)
             .build()
 
-        NotificationManagerCompat.from(applicationContext).notify(222, notification) // Unique ID for the notification
+        NotificationManagerCompat.from(applicationContext).notify(Random.nextInt(), notification) // Unique ID for the notification
     }
 }

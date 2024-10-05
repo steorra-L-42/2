@@ -104,6 +104,7 @@ class CardManagementViewModel(
                     _registeredCards.value = cardList
                     _registeredCardState.value = RegisteredCardState.Success(cardList)
                     Log.d(TAG, "등록된 카드 목록 받아오기 성공: ${cardList.size} 개의 카드")
+                    Log.d(TAG, "등록된 카드 목록: ${response.body()}")
                 } else {
                     _registeredCardState.value =
                         RegisteredCardState.Error("Failed to fetch cards: ${response.code()}")
