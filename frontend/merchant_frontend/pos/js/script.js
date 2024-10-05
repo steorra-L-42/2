@@ -40,6 +40,8 @@ function initApp() {
     keyword: "",
     cart: [],
     isShowModalReceipt: false,
+    isShowModalSuccess: false,
+    isLoading: false,
     receiptNo: null,
     receiptDate: null,
     lpno: null,
@@ -181,71 +183,72 @@ function initApp() {
 
 
     requestPayMobi() {
+      this.closeModalReceipt();
+      this.isLoading = true;
 
       // websocket 연결
       const socket = new WebSocket('wss://merchant.mobipay.kr/api/v1/merchants/websocket');
 
       let sessionId; // 세션 ID를 저장할 변수
 
-      socket.onopen = function(event) {
-        console.log('WebSocket is open now.');
-        // TODO 모비페이 서버로 결제요청
-        const api = '/merchants/payments/request';
-        let info = JSON.stringify(this.cart);
 
+      socket.onopen = async (event) => {
+        console.log('WebSocket is open now.');
+
+        let info = this.cart.map(item => `${item.name} x ${item.qty}`).join(', ');
+        let paymentBalance = this.getTotalPrice();
+        let carNumber = this.lpno || "번호 인식 실패";
+
+        if(carNumber == null) {
+          console.log("차량번호 없음");
+           return;
+        }
+
+        // 결제 요청
         const paymentRequest = {
           "type": MERCHANT_TYPE, // 가맹점 종류
-          "paymentBalance": 3000,
-          "carNumber": "230루6662",
-          "info": "빅맥런치세트 3천원" // 결제 정보
+          "paymentBalance": paymentBalance,
+          "carNumber": carNumber,
+          "info": info // 결제 정보
         };
 
-        postRequest(api, paymentRequest).then((data) => {
-          // 요청 성청 시 결제 결과가 전달될 때까지 대기
-          if(data.status === '200'){
-            console.log(data);
-            console.log('결제 요청 성공, 결제 결과 대기 중...');
-          }else{
-            console.error(data);
-            alert('결제 요청 실패' + data?.error);
-            // 웹소켓 연결 해제
-            socket.close();
-          }
-        });
+        try {
+          const response = await postRequest('/merchants/payments/request', paymentRequest);
+          console.log('결제 요청 성공, 결제 결과 대기 중...');
+        } catch (error) {
+          console.error('결제 요청 실패:', error);
+          // 웹소켓 연결 해제
+          socket.close();
+          alert('결제 요청 실패');
+        }
       };
 
-      socket.onclose = function(event) {
+      socket.onclose = (event) => {
         console.log('WebSocket is closed now.');
       };
 
-      socket.onerror = function(error) {
+      socket.onerror = (error) => {
         console.log('WebSocket error:', error);
       };
 
-      socket.onmessage = function(event) {
-        const message = JSON.parse(event.data); // 메시지를 JSON 객체로 파싱
-        if (message.sessionId) {
-          sessionId = message.sessionId; // 세션 ID 저장
-          console.log('Session ID:', sessionId);
-          socket.send(JSON.stringify({ // 가맹점 정보를 서버로 전송
-            "type" : MERCHANT_TYPE // 가맹점 타입 전송
-          }));
-        } else {
-          console.log('Received message:', message);
-          // 수신한 메시지에 따른 행동을 수행
-          // {
-          // 	"success": true, // 결제 성공 실패
-          // 	"type": "PARKING", // 가맹점 종류
-          // 	"paymentBalance": 5000, // 결제 금액
-          // 	"info": "입차시간 1:34, 출차시간 5:45"// 결제 정보
-          // }
+      socket.onmessage = (event) => {
+        const message = JSON.parse(event.data);
 
-          if(message.success){
-            this.clear();
-            socket.close(); // success가 true일 때만 socket close
+        if (message.sessionId) {
+          sessionId = message.sessionId;
+          socket.send(JSON.stringify({ "type": MERCHANT_TYPE }));
+        } else {
+          if (message.success) {
+            this.isLoading = false;
+            this.isShowModalSuccess = true;
+          } else {
+            this.isLoading = false;
+            alert('결제 실패');
           }
+          socket.close();
         }
       };
+
     },
 
     startCamera(facingMode) {
@@ -279,7 +282,7 @@ function initApp() {
 
               context.drawImage(this.video, x, y, width, height, 0, 0, width, height);
 
-              const self = this; // Store reference to 'this'
+              const self = this;
 
               canvas.toBlob(async (blob) => {
                 const formData = new FormData();
@@ -316,7 +319,7 @@ function initApp() {
         });
 
         if (!this.car_present) {
-          // Handle case when no car is present
+          // 차량 감지 안 된 경우 처리
         }
 
         setTimeout(() => {
@@ -391,7 +394,7 @@ function initApp() {
       referrerPolicy: 'no-referrer',
       body: JSON.stringify(data)
     });
-    return response.json();
+    return response;
   }
 
   app.initANPR();

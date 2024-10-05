@@ -75,6 +75,7 @@ class AuthManager(private val context: Context) {
     }
 
     fun saveRefreshToken(token: String) {
+        Log.d(TAG, "리프레시 토큰 정상적으로 저장됨: $token")
         encryptedSharedPreferences.edit().putString(KEY_REFRESH_TOKEN, token).apply()
     }
 
@@ -102,8 +103,8 @@ class AuthManager(private val context: Context) {
                 .payload
 
             val name = claims["name"] as? String ?: ""
-            val phoneNumber = claims["picture"] as? String ?: ""
-            val picture = claims["phoneNumber"] as? String ?: ""
+            val phoneNumber = claims["phoneNumber"] as? String ?: ""
+            val picture = claims["picture"] as? String ?: ""
             // 현재 picture와 phoneNumber가 거꾸로 담겨있어서 반대로 가져와서 담음(백에서 수정되면 여기도 바꿔야됨)
 
             saveUserInfo(name, phoneNumber, picture)

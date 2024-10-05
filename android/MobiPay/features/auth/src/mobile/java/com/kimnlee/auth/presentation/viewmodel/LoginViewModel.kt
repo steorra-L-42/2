@@ -101,13 +101,12 @@ class LoginViewModel(
                     authManager.saveAuthToken(it)
                     Log.d(TAG, "sendLoginRequest에서 authManager.saveAuthToken 호출")
                 }
-                val refreshToken = response.headers()["Set-Cookie"]?.let { setCookie ->
-                    setCookie.split(";").firstOrNull { it.trimStart().startsWith("refreshToken=") }
-                        ?.substringAfter("refreshToken=")
-                        ?.trim()
-                }
+                // 쿠키 처리
+                val cookies = apiClient.getCookieManager().cookieStore.cookies
+                val refreshToken = cookies.find { it.name == "refresh" }?.value
+
                 refreshToken?.let { authManager.saveRefreshToken(it) }
-                Log.d(TAG, "sendLoginRequest에서 authManager.saveRefreshToken 호출")
+
                 sendTokens()
             } else if (response.code() == 404) {
                 val errorBody = response.errorBody()?.string()
@@ -122,6 +121,8 @@ class LoginViewModel(
                 kakaoAccessToken = token.accessToken
                 kakaoRefreshToken = token.refreshToken
                 _navigationEvent.emit("registration")
+            } else {
+                Log.d(TAG, "sendLoginRequest에서 회원가입(404) 이외의 에러코드 확인 : ${response.code()}")
             }
         } catch (e: Exception) {
             Log.e(TAG, "로그인 실패", e)
@@ -147,14 +148,12 @@ class LoginViewModel(
                         authManager.saveAuthToken(it)
                         Log.d(TAG, "AuthToken 저장 완료")
                     }
-                    val refreshToken = response.headers()["Set-Cookie"]?.let { setCookie ->
-                        setCookie.split(";").firstOrNull { it.trimStart().startsWith("refreshToken=") }
-                            ?.substringAfter("refreshToken=")
-                            ?.trim()
-                    }
+                    // 쿠키 처리
+                    val cookies = apiClient.getCookieManager().cookieStore.cookies
+                    val refreshToken = cookies.find { it.name == "refresh" }?.value
+
                     refreshToken?.let { authManager.saveRefreshToken(it) }
-                    _needsRegistration.value = false
-                    _registrationResult.value = true
+
                     sendTokens()
                     Log.d(TAG, "회원가입 성공 AuthToken: ${authManager.getAuthToken()}, RefreshToken: ${authManager.getRefreshToken()}")
                 } else if (response.code() == 500) {
@@ -235,18 +234,6 @@ class LoginViewModel(
             val testToken = "test_auth_token_${System.currentTimeMillis()}"
             authManager.saveAuthToken(testToken)
             Log.i(TAG, "테스트 로그인으로 진행, 로그아웃은 TestLogout으로만 로그아웃 가능")
-        }
-    }
-
-    // 카카오 로그인 안될시에 디버깅 번거로우므로 임시로 남겨놓고 나중에 지울 예정
-    fun testLogout() {
-        viewModelScope.launch {
-            authManager.setLoggedIn(false)
-            _isLoggedIn.value = false
-            authManager.clearTokens()
-            _registrationResult.value = null
-            Log.i(TAG, "테스트 로그아웃 완료")
-            _navigationEvent.emit("auth")
         }
     }
 
