@@ -18,7 +18,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
@@ -32,6 +31,7 @@ import com.kimnlee.cardmanagement.data.model.OwnedCard
 import com.kimnlee.cardmanagement.presentation.viewmodel.CardManagementViewModel
 import com.kimnlee.cardmanagement.presentation.viewmodel.OwnedCardUiState
 import com.kimnlee.common.ui.theme.MobiTextAlmostBlack
+import formatCardNumber
 
 // 소유한 카드 리스트에서 모비페이에 등록할 카드를 등록하는 페이지
 @OptIn(ExperimentalMaterial3Api::class)
@@ -101,7 +101,13 @@ fun CardManagementOwnedCardListScreen(
                             },
                             colors = CheckboxDefaults.colors(checkedColor = Color(0xFF3182F6))
                         )
-                        Text("전체 선택", style = MaterialTheme.typography.bodyMedium)
+                        Text(
+                            text = "전체 선택",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MobiTextAlmostBlack,
+                            fontSize = 16.sp,
+                            fontFamily = FontFamily(Font(CommonR.font.pbold))
+                        )
                     }
 
                     CardList(
@@ -128,7 +134,13 @@ fun CardManagementOwnedCardListScreen(
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3182F6)),
                 shape = RoundedCornerShape(8.dp)
             ) {
-                Text("등록하기", color = Color.White)
+                Text(
+                    text = "등록하기",
+                    color = Color.White,
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontSize = 16.sp,
+                    fontFamily = FontFamily(Font(CommonR.font.pbold))
+                )
             }
         }
     }
@@ -148,30 +160,6 @@ fun TopBar(onNavigateBack: () -> Unit) {
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold
         )
-    }
-}
-
-@Composable
-fun SelectionButtons(onSelectAll: () -> Unit, onDeselectAll: () -> Unit) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.End
-    ) {
-        Button(
-            onClick = onSelectAll,
-            colors = ButtonDefaults.buttonColors(containerColor = Color.LightGray),
-            shape = RectangleShape,
-            modifier = Modifier.padding(end = 8.dp)
-        ) {
-            Text("전체 선택", color = Color.Black)
-        }
-        Button(
-            onClick = onDeselectAll,
-            colors = ButtonDefaults.buttonColors(containerColor = Color.LightGray),
-            shape = RectangleShape
-        ) {
-            Text("전체 선택 해제", color = Color.Black)
-        }
     }
 }
 
@@ -235,7 +223,7 @@ fun CardItem(
                         .weight(1f)
                         .alpha(if (isRegistered) 0.5f else 1f)
                 ) {
-                    Text(text = maskCardNumber(card.cardNo), fontWeight = FontWeight.Bold)
+                    Text(text = formatCardNumber(card.cardNo), fontWeight = FontWeight.Bold)
                     Text(text = "만료일: ${formatExpiryDate(card.cardExpiryDate)}")
                 }
                 if (!isRegistered) {
@@ -274,13 +262,6 @@ fun findCardCompany(cardNumber: String): Int {
         "1010" -> CardManagementR.drawable.ibk_daily_happy
         else -> CardManagementR.drawable.card_example
     }
-}
-
-fun maskCardNumber(cardNumber: String): String {
-    val visiblePart = cardNumber.take(6)
-    val maskedPart = "******"
-    val lastFour = cardNumber.takeLast(4)
-    return "$visiblePart$maskedPart$lastFour"
 }
 
 fun formatExpiryDate(date: String): String {

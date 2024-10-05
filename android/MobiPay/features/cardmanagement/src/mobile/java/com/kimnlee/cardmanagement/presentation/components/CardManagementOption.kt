@@ -18,7 +18,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
+import com.kimnlee.common.R
+import com.kimnlee.common.ui.theme.MobiTextAlmostBlack
+import com.kimnlee.common.ui.theme.MobiTextDarkGray
 
 
 @Composable
@@ -43,12 +48,14 @@ fun CardManagementOptionItem(icon: ImageVector, title: String, description: Stri
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleLarge,
-                color = Color(0xFF505967)
+                color = MobiTextAlmostBlack,
+                fontFamily = FontFamily(Font(R.font.psemibold))
             )
             Text(
                 text = description,
                 style = MaterialTheme.typography.bodyMedium,
-                color = Color(0xFF505967)
+                color = MobiTextDarkGray,
+                fontFamily = FontFamily(Font(R.font.pregular))
             )
         }
     }

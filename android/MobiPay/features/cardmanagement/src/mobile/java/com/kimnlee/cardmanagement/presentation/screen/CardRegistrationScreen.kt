@@ -50,12 +50,19 @@ fun CardRegistrationScreen(
     var oneTimeLimitErrors by remember { mutableStateOf(List(cardInfos.size) { "" }) }
 
     var isApplyToAll by remember { mutableStateOf(false) }
-    var lastAppliedValue by remember { mutableStateOf("") }
 
     val isAnyLimitExceeded = oneDayLimitErrors.any { it.isNotEmpty() } || oneTimeLimitErrors.any { it.isNotEmpty() }
 
     val oneDayLimitFocusRequester = remember { FocusRequester() }
     val oneTimeLimitFocusRequester = remember { FocusRequester() }
+
+    fun applyToAllCards(oneDayValue: String, oneTimeValue: String) {
+        oneDayLimits = List(cardInfos.size) { oneDayValue }
+        oneTimeLimits = List(cardInfos.size) { oneTimeValue }
+        val errors = cardInfos.indices.map { validateLimits(oneDayValue, oneTimeValue) }
+        oneDayLimitErrors = errors.map { it.first }
+        oneTimeLimitErrors = errors.map { it.second }
+    }
 
     Scaffold(
         topBar = {
@@ -76,7 +83,7 @@ fun CardRegistrationScreen(
                             style = MaterialTheme.typography.headlineMedium,
                             color = MobiTextAlmostBlack,
                             fontSize = 24.sp,
-                            fontWeight = FontWeight.Bold
+                            fontFamily = FontFamily(Font(R.font.pbold))
                         )
                     }
                 },
@@ -110,7 +117,10 @@ fun CardRegistrationScreen(
             if (cardInfos.size > 1) {
                 Text(
                     text = "${pagerState.currentPage + 1}/${cardInfos.size}",
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                    fontSize = 16.sp,
+                    fontFamily = FontFamily(Font(R.font.pregular)),
+                    color = MobiTextAlmostBlack
                 )
             }
 
@@ -123,41 +133,44 @@ fun CardRegistrationScreen(
                 ) {
                     Checkbox(
                         checked = isApplyToAll,
-                        onCheckedChange = {
-                            isApplyToAll = it
-                            if (it) {
-                                val currentValue = oneDayLimits[pagerState.currentPage]
-                                if (currentValue.isNotEmpty()) {
-                                    oneDayLimits = List(cardInfos.size) { currentValue }
-                                    lastAppliedValue = currentValue
-                                }
+                        onCheckedChange = { newValue ->
+                            isApplyToAll = newValue
+                            if (newValue) {
+                                val currentPage = pagerState.currentPage
+                                applyToAllCards(oneDayLimits[currentPage], oneTimeLimits[currentPage])
                             }
                         },
                         colors = CheckboxDefaults.colors(checkedColor = Color(0xFF3182F6))
                     )
-                    Text("한도 일괄 적용", style = MaterialTheme.typography.bodyMedium)
+                    Text(
+                        text = "한도 일괄 적용",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontFamily = FontFamily(Font(R.font.pbold)),
+                        fontSize = 16.sp,
+                        color = MobiTextAlmostBlack
+                    )
                 }
             }
 
-            // Input fields
             OutlinedTextField(
                 value = oneDayLimits[pagerState.currentPage],
-                onValueChange = {
-                    val newValue = it.filter { char -> char.isDigit() }
+                onValueChange = { newValue ->
+                    val filteredValue = newValue.filter { it.isDigit() }
                     if (isApplyToAll) {
-                        oneDayLimits = List(cardInfos.size) { newValue }
-                        lastAppliedValue = newValue
+                        applyToAllCards(filteredValue, oneTimeLimits[pagerState.currentPage])
                     } else {
-                        oneDayLimits = oneDayLimits.toMutableList().apply { this[pagerState.currentPage] = newValue }
+                        oneDayLimits = oneDayLimits.toMutableList().apply { this[pagerState.currentPage] = filteredValue }
+                        val (oneDayError, oneTimeError) = validateLimits(filteredValue, oneTimeLimits[pagerState.currentPage])
+                        oneDayLimitErrors = oneDayLimitErrors.toMutableList().apply { this[pagerState.currentPage] = oneDayError }
+                        oneTimeLimitErrors = oneTimeLimitErrors.toMutableList().apply { this[pagerState.currentPage] = oneTimeError }
                     }
-                    val (oneDayError, oneTimeError) = validateLimits(newValue, oneTimeLimits[pagerState.currentPage])
-                    oneDayLimitErrors = oneDayLimitErrors.toMutableList().apply { this[pagerState.currentPage] = oneDayError }
-                    oneTimeLimitErrors = oneTimeLimitErrors.toMutableList().apply { this[pagerState.currentPage] = oneTimeError }
                 },
                 label = { Text(
                     text = "일일 결제 한도",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MobiTextDarkGray
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MobiTextDarkGray,
+                    fontSize = 12.sp,
+                    fontFamily = FontFamily(Font(R.font.pregular))
                 ) },
                 modifier = Modifier.fillMaxWidth().focusRequester(oneDayLimitFocusRequester),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next),
@@ -176,22 +189,23 @@ fun CardRegistrationScreen(
 
             OutlinedTextField(
                 value = oneTimeLimits[pagerState.currentPage],
-                onValueChange = {
-                    val newValue = it.filter { char -> char.isDigit() }
+                onValueChange = { newValue ->
+                    val filteredValue = newValue.filter { it.isDigit() }
                     if (isApplyToAll) {
-                        oneTimeLimits = List(cardInfos.size) { newValue }
-                        lastAppliedValue = newValue
+                        applyToAllCards(oneDayLimits[pagerState.currentPage], filteredValue)
                     } else {
-                        oneTimeLimits = oneTimeLimits.toMutableList().apply { this[pagerState.currentPage] = newValue }
+                        oneTimeLimits = oneTimeLimits.toMutableList().apply { this[pagerState.currentPage] = filteredValue }
+                        val (oneDayError, oneTimeError) = validateLimits(oneDayLimits[pagerState.currentPage], filteredValue)
+                        oneDayLimitErrors = oneDayLimitErrors.toMutableList().apply { this[pagerState.currentPage] = oneDayError }
+                        oneTimeLimitErrors = oneTimeLimitErrors.toMutableList().apply { this[pagerState.currentPage] = oneTimeError }
                     }
-                    val (oneDayError, oneTimeError) = validateLimits(oneDayLimits[pagerState.currentPage], newValue)
-                    oneDayLimitErrors = oneDayLimitErrors.toMutableList().apply { this[pagerState.currentPage] = oneDayError }
-                    oneTimeLimitErrors = oneTimeLimitErrors.toMutableList().apply { this[pagerState.currentPage] = oneTimeError }
                 },
                 label = { Text(
                     text = "1회 결제 한도",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MobiTextDarkGray
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MobiTextDarkGray,
+                    fontSize = 12.sp,
+                    fontFamily = FontFamily(Font(R.font.pregular))
                 ) },
                 modifier = Modifier.fillMaxWidth().focusRequester(oneTimeLimitFocusRequester),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
@@ -230,17 +244,17 @@ fun CardRegistrationScreen(
                 Text(
                     text = "등록하기",
                     style = MaterialTheme.typography.bodyLarge,
-                    color = Color.White
+                    color = Color.White,
+                    fontSize = 16.sp,
+                    fontFamily = FontFamily(Font(R.font.pbold))
                 )
             }
         }
     }
 
-    LaunchedEffect(pagerState) {
-        snapshotFlow { pagerState.currentPage }.collect { page ->
-            coroutineScope.launch {
-                pagerState.animateScrollToPage(page)
-            }
+    LaunchedEffect(pagerState.currentPage, isApplyToAll) {
+        if (isApplyToAll) {
+            applyToAllCards(oneDayLimits[pagerState.currentPage], oneTimeLimits[pagerState.currentPage])
         }
     }
 }
