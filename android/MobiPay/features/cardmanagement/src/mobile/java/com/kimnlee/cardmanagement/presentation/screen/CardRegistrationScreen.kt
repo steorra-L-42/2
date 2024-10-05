@@ -1,6 +1,7 @@
 package com.kimnlee.cardmanagement.presentation.screen
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -16,7 +17,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -41,7 +44,7 @@ fun CardRegistrationScreen(
     onNavigateBack: () -> Unit
 ) {
     val pagerState = rememberPagerState(pageCount = { cardInfos.size })
-    val coroutineScope = rememberCoroutineScope()
+    val focusManager = LocalFocusManager.current
 
     var oneDayLimits by remember { mutableStateOf(List(cardInfos.size) { "" }) }
     var oneTimeLimits by remember { mutableStateOf(List(cardInfos.size) { "" }) }
@@ -73,8 +76,7 @@ fun CardRegistrationScreen(
                             text = "💳",
                             style = MaterialTheme.typography.headlineMedium,
                             fontFamily = FontFamily(Font(R.font.emoji)),
-                            modifier = Modifier
-                                .padding(end = 8.dp)
+                            modifier = Modifier.padding(end = 8.dp)
                         )
                         Text(
                             text = "카드 등록",
@@ -94,11 +96,17 @@ fun CardRegistrationScreen(
             )
         }
     ) { innerPadding ->
-        Column(modifier = Modifier
-            .fillMaxSize()
-            .padding(innerPadding)
-            .padding(16.dp)) {
-
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .padding(16.dp)
+                .pointerInput(Unit) {
+                    detectTapGestures(onTap = {
+                        focusManager.clearFocus()
+                    })
+                }
+        ) {
             HorizontalPager(
                 state = pagerState,
                 modifier = Modifier
@@ -164,7 +172,9 @@ fun CardRegistrationScreen(
                     style = MaterialTheme.typography.bodyMedium,
                     color = MobiTextDarkGray
                 ) },
-                modifier = Modifier.fillMaxWidth().focusRequester(oneDayLimitFocusRequester),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .focusRequester(oneDayLimitFocusRequester),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next),
                 keyboardActions = KeyboardActions(onNext = { oneTimeLimitFocusRequester.requestFocus() }),
                 isError = oneDayLimitErrors[pagerState.currentPage].isNotEmpty(),
@@ -197,9 +207,11 @@ fun CardRegistrationScreen(
                     style = MaterialTheme.typography.bodyMedium,
                     color = MobiTextDarkGray
                 ) },
-                modifier = Modifier.fillMaxWidth().focusRequester(oneTimeLimitFocusRequester),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .focusRequester(oneTimeLimitFocusRequester),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
-                keyboardActions = KeyboardActions(onDone = { /* 키보드 내리기 */ }),
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 isError = oneTimeLimitErrors[pagerState.currentPage].isNotEmpty(),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = Color.Black,
