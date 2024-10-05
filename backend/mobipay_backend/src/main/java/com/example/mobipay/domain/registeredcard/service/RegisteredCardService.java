@@ -6,12 +6,15 @@ import com.example.mobipay.domain.mobiuser.repository.MobiUserRepository;
 import com.example.mobipay.domain.ownedcard.entity.OwnedCard;
 import com.example.mobipay.domain.ownedcard.error.OwnedCardNotFoundException;
 import com.example.mobipay.domain.ownedcard.repository.OwnedCardRepository;
+import com.example.mobipay.domain.postpayments.error.RegisteredCardNotFoundException;
 import com.example.mobipay.domain.registeredcard.dto.RegisteredCardAutoPayRequest;
 import com.example.mobipay.domain.registeredcard.dto.RegisteredCardAutoPayResponse;
+import com.example.mobipay.domain.registeredcard.dto.RegisteredCardDetailResponse;
 import com.example.mobipay.domain.registeredcard.dto.RegisteredCardListResponse;
 import com.example.mobipay.domain.registeredcard.dto.RegisteredCardRequest;
 import com.example.mobipay.domain.registeredcard.dto.RegisteredCardResponse;
 import com.example.mobipay.domain.registeredcard.entity.RegisteredCard;
+import com.example.mobipay.domain.registeredcard.entity.RegisteredCardId;
 import com.example.mobipay.domain.registeredcard.error.AlreadyRegisteredCard;
 import com.example.mobipay.domain.registeredcard.repository.RegisteredCardRepository;
 import com.example.mobipay.oauth2.dto.CustomOAuth2User;
@@ -111,6 +114,18 @@ public class RegisteredCardService {
         registeredCardRepository.save(registeredCard);
 
         return RegisteredCardAutoPayResponse.from(registeredCard);
+    }
+
+    public RegisteredCardDetailResponse getRegisteredCardDetails(Long cardId, CustomOAuth2User oauth2User) {
+        // 사용자 정보 찾기
+        MobiUser mobiUser = findMobiUser(oauth2User.getMobiUserId());
+
+        RegisteredCardId registeredCardId = RegisteredCardId.of(mobiUser.getId(), cardId);
+
+        RegisteredCard registeredCard = registeredCardRepository.findById(registeredCardId)
+                .orElseThrow(RegisteredCardNotFoundException::new);
+
+        return RegisteredCardDetailResponse.from(registeredCard);
     }
 
     private MobiUser findMobiUser(Long mobiUserId) {

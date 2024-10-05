@@ -6,20 +6,20 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class RegisteredCardResponse {
-    private Long mobiUserId;
+public class RegisteredCardDetailResponse {
     private Long ownedCardId;
     private String cardNo;
-    private String cardExpriyDate;
+    private String cvc;
+    private String cardExpiryDate;
     private Integer oneDayLimit;
     private Integer oneTimeLimit;
 
-    public static RegisteredCardResponse of(RegisteredCard registeredCard) {
-        return RegisteredCardResponse.builder()
-                .mobiUserId(registeredCard.getMobiUserId())
+    public static RegisteredCardDetailResponse from(RegisteredCard registeredCard) {
+        return RegisteredCardDetailResponse.builder()
                 .ownedCardId(registeredCard.getOwnedCardId())
                 .cardNo(registeredCard.getOwnedCard().getCardNo())
-                .cardExpriyDate(registeredCard.getOwnedCard().getCardExpiryDate())
+                .cvc(registeredCard.getOwnedCard().getCvc())
+                .cardExpiryDate(registeredCard.getOwnedCard().getCardExpiryDate())
                 .oneDayLimit(registeredCard.getOneDayLimit())
                 .oneTimeLimit(registeredCard.getOneTimeLimit())
                 .build();

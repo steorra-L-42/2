@@ -15,4 +15,6 @@ public interface OwnedCardRepository extends JpaRepository<OwnedCard, String> {
     List<OwnedCard> findAllByMobiUser(MobiUser mobiUser);
 
     Optional<OwnedCard> findOwnedCardById(Long cardId);
+
+
 }
