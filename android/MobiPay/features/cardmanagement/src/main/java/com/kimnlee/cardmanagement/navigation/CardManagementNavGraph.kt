@@ -19,13 +19,11 @@ import com.kimnlee.cardmanagement.presentation.screen.CardRegistrationScreen
 import com.kimnlee.cardmanagement.presentation.viewmodel.CardManagementViewModel
 import com.kimnlee.common.auth.AuthManager
 import com.kimnlee.common.components.BottomNavigation
-import com.kimnlee.common.network.ApiClient
 
 fun NavGraphBuilder.cardManagementNavGraph(
     navController: NavHostController,
     authManager: AuthManager,
-    viewModel: CardManagementViewModel,
-    apiClient: ApiClient
+    viewModel: CardManagementViewModel
 ) {
     navigation(startDestination = "cardmanagement_main", route = "cardmanagement") {
         composable("cardmanagement_main",
@@ -35,7 +33,6 @@ fun NavGraphBuilder.cardManagementNavGraph(
             BottomNavigation(navController) {
                 CardManagementScreen(
                     viewModel = viewModel,
-                    onNavigateToRegistration = { navController.navigate("cardmanagement_registration") },
                     onNavigateToOwnedCards = { navController.navigate("cardmanagement_owned") },
                 )
             }
