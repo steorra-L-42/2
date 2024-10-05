@@ -24,6 +24,7 @@ import com.kimnlee.memberinvitation.navigation.memberInvitationNavGraph
 import com.kimnlee.memberinvitation.presentation.viewmodel.MemberInvitationViewModel
 import com.kimnlee.mobipay.presentation.screen.HomeScreen
 import com.kimnlee.mobipay.presentation.screen.ShowMoreScreen
+import com.kimnlee.mobipay.presentation.viewmodel.HomeViewModel
 import com.kimnlee.mobipay.presentation.viewmodel.ShowMoreViewModel
 import com.kimnlee.notification.navigation.notificationNavGraph
 import com.kimnlee.payment.navigation.paymentNavGraph
@@ -46,6 +47,7 @@ fun AppNavGraph(
     val vehicleManagementViewModel = VehicleManagementViewModel(apiClient, context)
     val showMoreViewModel = ShowMoreViewModel(authManager)
     val isLoggedIn by loginViewModel.isLoggedIn.collectAsState()
+    val homeViewModel = HomeViewModel(apiClient)
 
     LaunchedEffect(loginViewModel) {
         val bluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
@@ -75,7 +77,8 @@ fun AppNavGraph(
         ) {
             BottomNavigation(navController) {
                 HomeScreen(
-                    viewModel = loginViewModel,
+                    loginViewModel = loginViewModel,
+                    homeViewModel = homeViewModel,
                     navController = navController,
                     context = context
                 )
