@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @AllArgsConstructor
 @Getter
-public class MerchantTranscactionResponse {
+public class MerchantTransactionResponse {
 
     private List<MerchantTransaction> items;
 
