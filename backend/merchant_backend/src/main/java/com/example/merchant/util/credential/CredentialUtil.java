@@ -44,6 +44,9 @@ public class CredentialUtil {
     private String STREET_MOBI_API_KEY; // STREET -> MOBI
 
     public void validatePosMerApiKey(String posMerApiKey) {
+        if(posMerApiKey == null) {
+            throw new InvalidMerApiKeyException();
+        }
         if (POS_MER_API_KEY.equals(posMerApiKey)) {
             return;
         }
@@ -51,6 +54,9 @@ public class CredentialUtil {
     }
 
     public void validateMobiMerApiKey(String mobiMerApiKey) {
+        if(mobiMerApiKey == null) {
+            throw new InvalidMerApiKeyException();
+        }
         if(MOBI_MER_API_KEY.equals(mobiMerApiKey)) {
             return;
         }
@@ -101,5 +107,17 @@ public class CredentialUtil {
             throw new UnknownMerchantIdException();
         }
         return type;
+    }
+
+    public MerchantType getMerchantTypeLowerCaseString(String merchantType) {
+        return switch (merchantType) {
+            case "parking" -> MerchantType.PARKING;
+            case "oil" -> MerchantType.OIL;
+            case "food" -> MerchantType.FOOD;
+            case "washing" -> MerchantType.WASHING;
+            case "motel" -> MerchantType.MOTEL;
+            case "street" -> MerchantType.STREET;
+            default -> throw new InvalidMerchantTypeException();
+        };
     }
 }

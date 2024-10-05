@@ -11,7 +11,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Star
@@ -26,11 +25,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Paint
-import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
@@ -39,11 +38,16 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.res.ResourcesCompat
 import com.kimnlee.common.R
 import com.kimnlee.cardmanagement.data.model.RegisteredCard
 import com.kimnlee.cardmanagement.presentation.components.CardManagementBottomSheet
 import com.kimnlee.cardmanagement.presentation.viewmodel.CardManagementViewModel
 import com.kimnlee.common.ui.theme.MobiTextAlmostBlack
+import moneyFormat
+import java.math.BigInteger
+import java.text.NumberFormat
+import java.util.Locale
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -83,17 +87,13 @@ fun CardManagementScreen(
                             text = "💳",
                             style = MaterialTheme.typography.headlineMedium,
                             fontFamily = FontFamily(Font(R.font.emoji)),
-                            fontSize = 24.sp,
                             modifier = Modifier
-                                .padding(top = 10.dp)
                                 .padding(end = 8.dp)
                         )
                         Text(
                             text = "등록된 카드",
                             style = MaterialTheme.typography.headlineMedium,
                             color = MobiTextAlmostBlack,
-                            fontSize = 24.sp,
-                            fontWeight = FontWeight.Bold
                         )
                     }
                 },
@@ -165,12 +165,12 @@ fun CardItem(
             )
             Spacer(modifier = Modifier.height(50.dp))
             TextWithShadow(
-                text = "일일 한도: ${card.oneDayLimit}원",
+                text = "일일 한도: ${moneyFormat(card.oneDayLimit.toBigInteger())}",
                 style = MaterialTheme.typography.bodyMedium
             )
             Spacer(modifier = Modifier.height(25.dp))
             TextWithShadow(
-                text = "1회 한도: ${card.oneTimeLimit}원",
+                text = "1회 한도: ${moneyFormat(card.oneTimeLimit.toBigInteger())}",
                 style = MaterialTheme.typography.bodyMedium
             )
         }
@@ -206,16 +206,16 @@ fun TextWithShadow(
     val textColor = Color.White
     val textColorArgb = textColor.toArgb()
 
+    val context = LocalContext.current
+    val typeface = remember {
+        ResourcesCompat.getFont(context, R.font.psemibold)
+    }
+
     Canvas(modifier = Modifier) {
         val paint = Paint()
         val frameworkPaint = paint.asFrameworkPaint()
         frameworkPaint.color = shadowColorArgb
         frameworkPaint.textSize = style.fontSize.toPx()
-        val typeface = when {
-            style.fontWeight == FontWeight.Bold -> Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
-            style.fontStyle == FontStyle.Italic -> Typeface.create(Typeface.DEFAULT, Typeface.ITALIC)
-            else -> Typeface.create(Typeface.DEFAULT, Typeface.NORMAL)
-        }
         frameworkPaint.typeface = typeface
 
         frameworkPaint.setShadowLayer(blurRadius, offsetX, offsetY, shadowColorArgb)
@@ -267,4 +267,11 @@ fun AddCardButton(openBottomSheet: () -> Unit) {
             }
         }
     }
+}
+
+fun maskCardNumber(cardNumber: String): String {
+    val visiblePart = cardNumber.take(6)
+    val maskedPart = "******"
+    val lastFour = cardNumber.takeLast(4)
+    return "$visiblePart$maskedPart$lastFour"
 }
