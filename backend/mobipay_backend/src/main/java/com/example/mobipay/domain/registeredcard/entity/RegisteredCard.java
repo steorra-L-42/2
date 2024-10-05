@@ -42,9 +42,6 @@ public class RegisteredCard {
     @Column(name = "one_time_limit", nullable = false)
     private Integer oneTimeLimit = ONE_TIME_LIMIT;
 
-    @Column(name = "password", nullable = false, length = 6)
-    private String password;
-
     @Column(name = "auto_pay_status", nullable = false)
     private Boolean autoPayStatus = false;
 
@@ -59,20 +56,14 @@ public class RegisteredCard {
     @JoinColumn(name = "owned_card_id", insertable = false, updatable = false)
     private OwnedCard ownedCard;
 
-    private RegisteredCard(String password) {
-        this.password = password;
+    public static RegisteredCard from() {
+        return new RegisteredCard();
     }
 
-    public static RegisteredCard from(String password) {
-        return new RegisteredCard(password);
-    }
-
-    public static RegisteredCard of(Integer oneDayLimit, Integer oneTimeLimit, String password, Boolean autoPayStatus) {
+    public static RegisteredCard of(Integer oneDayLimit, Integer oneTimeLimit) {
         RegisteredCard registeredCard = new RegisteredCard();
         registeredCard.oneDayLimit = oneDayLimit;
         registeredCard.oneTimeLimit = oneTimeLimit;
-        registeredCard.password = password;
-        registeredCard.autoPayStatus = autoPayStatus;
 
         return registeredCard;
     }

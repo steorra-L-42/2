@@ -1,9 +1,10 @@
 package com.kimnlee.common.auth.repository
 
-import com.kimnlee.common.auth.AuthManager
 import com.kimnlee.common.auth.api.AuthService
 import com.kimnlee.common.auth.model.LoginRequest
+import com.kimnlee.common.auth.model.LoginResponse
 import com.kimnlee.common.auth.model.RegistrationRequest
+import com.kimnlee.common.auth.model.RegistrationResponse
 import com.kimnlee.common.auth.model.SendTokenRequest
 import com.kimnlee.common.auth.model.SendTokenResponse
 import com.kimnlee.common.network.ApiClient
@@ -14,11 +15,11 @@ class ApiAuthService(
     private val authenticatedApi: AuthService
 ) : AuthService {
 
-    override suspend fun login(loginRequest: LoginRequest): Response<Void> {
+    override suspend fun login(loginRequest: LoginRequest): Response<LoginResponse> {
         return unAuthenticatedApi.login(loginRequest)
     }
 
-    override suspend fun register(registrationRequest: RegistrationRequest): Response<Void> {
+    override suspend fun register(registrationRequest: RegistrationRequest): Response<RegistrationResponse> {
         return unAuthenticatedApi.register(registrationRequest)
     }
 
