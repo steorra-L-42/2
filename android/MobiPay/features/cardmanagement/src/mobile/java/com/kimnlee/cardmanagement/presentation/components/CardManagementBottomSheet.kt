@@ -45,8 +45,8 @@ fun CardManagementBottomSheet(
         Column(modifier = Modifier.padding(16.dp)) {
             CardManagementOptionItem(
                 icon = ImageVector.vectorResource(id = R.drawable.baseline_credit_card_24),
-                title = "소유한 카드 중 고르기",
-                description = "소유중인 카드 중 고를 수 있습니다.",
+                title = "소유한 카드 중에서 고르기",
+                description = "소유중인 카드 중에서 고를 수 있어요.",
                 onItemClick = {
                     // 소유중인 카드 리스트 목록으로 가는 기능
                     onNavigateToOwnedCards()
@@ -57,7 +57,7 @@ fun CardManagementBottomSheet(
             CardManagementOptionItem(
                 icon = ImageVector.vectorResource(id = R.drawable.baseline_add_card_24),
                 title = "새로운 카드 등록",
-                description = "새로운 카드를 등록할 수 있습니다.",
+                description = "새로운 카드를 등록할 수 있어요.",
                 onItemClick = {
 //                    onNavigateToRegistration() // 새로운 카드 등록은 카메라로 찍는 화면이라 이거 나중에
                     viewModel.closeBottomSheet()
