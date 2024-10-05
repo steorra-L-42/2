@@ -9,14 +9,13 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class OwnedCardListResponse {
 
-    private final List<OwnedCardDetailResponse> items;
+    private final List<OwnedCardResponse> items;
 
     public static OwnedCardListResponse from(List<OwnedCard> ownedCards) {
-        List<OwnedCardDetailResponse> items = ownedCards.stream()
-                .map(OwnedCardDetailResponse::from)
+        List<OwnedCardResponse> items = ownedCards.stream()
+                .map(OwnedCardResponse::from)
                 .toList();
 
         return new OwnedCardListResponse(items);
     }
-
 }
