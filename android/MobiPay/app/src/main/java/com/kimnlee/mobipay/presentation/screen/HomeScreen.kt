@@ -74,7 +74,6 @@ fun HomeScreen(
     navController: NavController,
     context: Context
 ) {
-
     val isLoggedIn by viewModel.isLoggedIn.collectAsState()
     var lastLocation by remember { mutableStateOf<Pair<Double, Double>?>(null) }
     val naverMapService by viewModel.naverMapService.collectAsState()
@@ -174,7 +173,7 @@ fun HomeScreen(
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(20.dp))
                     .background(MobiCardBgGray)
-                    .padding(24.dp, 18.dp, 24.dp, 18.dp),
+                    .padding(24.dp, 18.dp, 24.dp, 24.dp),
             ) {
                 Column(
                     modifier = Modifier
@@ -243,9 +242,9 @@ fun HomeScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(20.dp))
-                    .height(320.dp)
+                    .height(300.dp)
                     .background(MobiCardBgGray)
-                    .padding(24.dp, 18.dp, 24.dp, 24.dp),
+                    .padding(24.dp, 18.dp, 24.dp, 12.dp),
             ) {
                 Column(
                     modifier = Modifier
@@ -293,7 +292,7 @@ fun NaverMapView(lastLocation: Pair<Double, Double>?, naverMapService: NaverMapS
     val lastLocationLatLng = lastLocation?.let { LatLng(it.first, it.second) } ?: LatLng(
         36.107368, 128.425046) // 37.526665, 126.927127
     runBlocking {
-        val repository = NaverMapRepository("z9pdjednkz", YOUR_CLIENT_SECRET, naverMapService)
+        val repository = NaverMapRepository("81dn8nvzim", YOUR_CLIENT_SECRET, naverMapService)
         address = repository.getAddressFromCoords(lastLocationLatLng)
     }
 
@@ -328,9 +327,7 @@ Column {
         }
     )
 
-    Text(text = address, fontSize = 11.sp, letterSpacing = 0.1.sp, lineHeight = 13.sp)
-//    Text(text = getCurrentAddress(context, lastLocationLatLng.latitude?: 0.0, lastLocationLatLng.longitude ?: 0.0), fontSize = 11.sp, letterSpacing = 0.1.sp, lineHeight = 13.sp)
-//    Text(text = getCurrentAddress(context, 36.104278,128.429193), fontSize = 11.sp, letterSpacing = 0.1.sp, lineHeight = 13.sp)//36.104278, 128.429193 인의동 인동 15길 42
+    Text(text = address, fontSize = 16.sp, letterSpacing = 0.1.sp, lineHeight = 13.sp)
 }
 }
 
@@ -401,7 +398,6 @@ fun TextOnLP() {
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.matchParentSize()
             )
-
             Box(
                 modifier = Modifier
                     .width(160.dp)
@@ -420,7 +416,6 @@ fun TextOnLP() {
         }
     }
 }
-
 
 private fun getLastLocation(context: Context): Pair<Double, Double>? {
     val sharedPreferences: SharedPreferences = context.getSharedPreferences("last_location", Context.MODE_PRIVATE)

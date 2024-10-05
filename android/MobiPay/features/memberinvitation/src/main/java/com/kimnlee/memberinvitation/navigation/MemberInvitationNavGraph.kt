@@ -6,11 +6,13 @@ import androidx.compose.animation.ExitTransition
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
+import androidx.navigation.navDeepLink
 import androidx.navigation.navigation
 import com.kimnlee.common.components.BottomNavigation
 import com.kimnlee.memberinvitation.presentation.screen.InvitationWaitingScreen
-import com.kimnlee.memberinvitation.presentation.screen.MemberInvitationScreen
+import com.kimnlee.memberinvitation.presentation.screen.InvitedScreen
 import com.kimnlee.memberinvitation.presentation.screen.MemberInvitationConfirmationScreen
+import com.kimnlee.memberinvitation.presentation.screen.MemberInvitationScreen
 import com.kimnlee.memberinvitation.presentation.screen.MemberInvitationViaPhoneScreen
 import com.kimnlee.memberinvitation.presentation.viewmodel.MemberInvitationViewModel
 
@@ -61,6 +63,16 @@ fun NavGraphBuilder.memberInvitationNavGraph(navController: NavHostController, c
             exitTransition = { ExitTransition.None }
         ) {
             InvitationWaitingScreen(
+                memberInvitationViewModel = memberInvitationViewModel,
+                navController = navController
+            )
+        }
+        composable(
+            "memberinvitation_invited",
+            enterTransition = { EnterTransition.None },
+            exitTransition = { ExitTransition.None },
+        ) {
+            InvitedScreen(
                 memberInvitationViewModel = memberInvitationViewModel,
                 navController = navController
             )

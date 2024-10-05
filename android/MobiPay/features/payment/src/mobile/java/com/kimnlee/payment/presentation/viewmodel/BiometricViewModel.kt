@@ -1,4 +1,4 @@
-package com.kimnlee.auth.presentation.viewmodel
+package com.kimnlee.payment.presentation.viewmodel
 
 import android.app.Application
 import android.util.Log
@@ -29,7 +29,6 @@ class BiometricViewModel(application: Application) : AndroidViewModel(applicatio
                 _navigateToPaymentDetail.emit(Unit)
             }
         }
-        // 디버깅을 위한 로그 추가
         Log.d(TAG, "Authentication state updated: $state")
     }
 

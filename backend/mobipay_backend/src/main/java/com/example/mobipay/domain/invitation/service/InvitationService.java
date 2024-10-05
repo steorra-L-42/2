@@ -6,6 +6,7 @@ import com.example.mobipay.domain.car.entity.Car;
 import com.example.mobipay.domain.car.error.CarNotFoundException;
 import com.example.mobipay.domain.car.error.NotOwnerException;
 import com.example.mobipay.domain.car.repository.CarRepository;
+import com.example.mobipay.domain.cargroup.entity.CarGroup;
 import com.example.mobipay.domain.cargroup.repository.CarGroupRepository;
 import com.example.mobipay.domain.fcmtoken.dto.FcmSendDto;
 import com.example.mobipay.domain.fcmtoken.error.FCMException;
@@ -55,7 +56,7 @@ public class InvitationService {
         Invitation invitation = invitationRepository.save(Invitation.of(car, invitedMobiUser));
 
         Map<String, String> data = Map.of(
-                "type,", INVITATION.getValue(),
+                "type", INVITATION.getValue(),
                 "title", "새로운 카풀 초대",
                 "body", "카풀에 초대되었습니다.",
                 "invitationId", invitation.getId().toString(),
@@ -85,6 +86,7 @@ public class InvitationService {
         switch (decision) {
             case APPROVED:
                 invitation.approve();
+                carGroupRepository.save(CarGroup.of(invitation.getCar(), invitation.getMobiUser()));
                 break;
             case REJECTED:
                 invitation.reject();

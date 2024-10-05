@@ -23,6 +23,7 @@ import com.example.mobipay.domain.postpayments.error.ReceiptUserMismatchExceptio
 import com.example.mobipay.domain.postpayments.error.RegisteredCardNotFoundException;
 import com.example.mobipay.domain.postpayments.error.TransactionAlreadyApprovedException;
 import com.example.mobipay.domain.registeredcard.error.AlreadyRegisteredCard;
+import com.example.mobipay.domain.registeredcard.error.CardUserMismatch;
 import com.example.mobipay.global.authentication.error.AccountProductNotFoundException;
 import com.example.mobipay.global.authentication.error.CardProductNotFoundException;
 import com.example.mobipay.global.error.ErrorCode;
@@ -187,6 +188,12 @@ public class ControllerAdvice {
     public ResponseEntity<ErrorResponseDto> handleAlreadyRegisteredCard(AlreadyRegisteredCard e) {
         log.info(e.getMessage());
         return getResponse(ErrorCode.ALREADY_REGISTERED_CARD);
+    }
+
+    @ExceptionHandler(CardUserMismatch.class)
+    public ResponseEntity<ErrorResponseDto> handleCard(CardUserMismatch e) {
+        log.info(e.getMessage());
+        return getResponse(ErrorCode.CARD_USER_MISMATCH);
     }
 
     private ResponseEntity<ErrorResponseDto> getResponse(ErrorCode errorCode) {

@@ -4,7 +4,9 @@ import static com.example.mobipay.oauth2.enums.TokenType.REFRESH;
 
 import com.example.mobipay.domain.mobiuser.entity.MobiUser;
 import com.example.mobipay.domain.mobiuser.repository.MobiUserRepository;
-import com.example.mobipay.domain.refreshtoken.entity.repository.RefreshTokenRepository;
+import com.example.mobipay.domain.refreshtoken.repository.RefreshTokenRepository;
+import com.example.mobipay.domain.refreshtoken.service.RefreshTokenService;
+import com.example.mobipay.oauth2.dto.UserResponseDto;
 import com.example.mobipay.oauth2.jwt.JWTUtil;
 import com.example.mobipay.oauth2.util.CookieMethods;
 import jakarta.servlet.http.Cookie;
@@ -42,8 +44,8 @@ public class UserService {
                 mobiUser.getId(),
                 mobiUser.getEmail(),
                 mobiUser.getName(),
-                mobiUser.getPicture(),
-                mobiUser.getPhoneNumber()
+                mobiUser.getPhoneNumber(),
+                mobiUser.getPicture()
         );
     }
 
@@ -58,5 +60,14 @@ public class UserService {
         refreshTokenService.addRefreshToken(mobiUser, refreshToken);
 
         return cookieMethods.createCookie(REFRESH.getType(), refreshToken);
+    }
+
+    public UserResponseDto getUserDetail(String email, String name, String phoneNumber, String picture) {
+        return UserResponseDto.builder()
+                .email(email)
+                .name(name)
+                .phoneNumber(phoneNumber)
+                .picture(picture)
+                .build();
     }
 }

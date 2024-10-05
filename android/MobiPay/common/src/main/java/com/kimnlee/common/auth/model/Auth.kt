@@ -9,6 +9,13 @@ data class LoginRequest(
     val scopes: List<String>
 )
 
+data class LoginResponse(
+    val email: String,
+    val name: String,
+    val phoneNumber: String,
+    val jwtAccessToken: String // 나중에 삭제 예정
+)
+
 data class RegistrationRequest(
     val email: String,
     val name: String,
@@ -16,6 +23,13 @@ data class RegistrationRequest(
     val picture: String,
     val accessToken: String,
     val refreshToken: String,
+)
+
+data class RegistrationResponse(
+    val email: String,
+    val name: String,
+    val phoneNumber: String,
+    val jwtAccessToken: String // 나중에 삭제 예정
 )
 
 data class SendTokenRequest(

@@ -22,7 +22,11 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat.getSystemService
+import com.kimnlee.common.FCMDependencyProvider
+import com.kimnlee.common.utils.MobiNotificationManager
 import com.kimnlee.memberinvitation.R
+import com.kimnlee.memberinvitation.data.api.MemberInvitationApiService
+import com.kimnlee.memberinvitation.data.repository.MemberInvitationRepository
 import com.kimnlee.memberinvitation.presentation.viewmodel.MemberInvitationViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -53,6 +57,16 @@ fun MemberInvitationBottomSheet(
         sheetState = sheetState,
         containerColor = Color(0xFFF2F4F6),
     ) {
+
+        val apiClient = (context.applicationContext as? FCMDependencyProvider)?.apiClient
+        var memberInvitationRepository : MemberInvitationRepository? = null
+        if(apiClient != null){
+            val memberInvitationApiService = apiClient.authenticatedApi.create(
+                MemberInvitationApiService::class.java)
+            val mobiNotificationManager = MobiNotificationManager.getInstance(context)
+            memberInvitationRepository = MemberInvitationRepository(memberInvitationApiService, mobiNotificationManager, context.applicationContext, viewModel)
+        }
+
         if (!showInvitationBLE) {
             Column(modifier = Modifier.padding(16.dp)) {
 //                Text(text = "$vehicleId 차량의 초대 화면")
@@ -77,7 +91,7 @@ fun MemberInvitationBottomSheet(
                         val bluetoothAdapter = bluetoothManager.adapter
 
                         viewModel.initBluetoothAdapter(bluetoothAdapter)
-                        viewModel.openInvitationBLE()
+                        viewModel.openInvitationBLE(vehicleId)
                         onExpandClick()
                     }
                 )
@@ -89,6 +103,8 @@ fun MemberInvitationBottomSheet(
                     .fillMaxHeight()
             ) {
                 MemberInvitationViaBLE(
+                    memberInvitationRepository = memberInvitationRepository,
+                    vehicleId = vehicleId,
                     viewModel = viewModel,
                     onNavigateToConfirmation = onNavigateToConfirmation
                 )

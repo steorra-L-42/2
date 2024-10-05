@@ -9,17 +9,19 @@ import lombok.Getter;
 public class RegisteredCardResponse {
     private Long mobiUserId;
     private Long ownedCardId;
+    private String cardNo;
+    private String cardExpriyDate;
     private Integer oneDayLimit;
     private Integer oneTimeLimit;
-    private String password;
 
     public static RegisteredCardResponse of(RegisteredCard registeredCard) {
         return RegisteredCardResponse.builder()
                 .mobiUserId(registeredCard.getMobiUserId())
                 .ownedCardId(registeredCard.getOwnedCardId())
+                .cardNo(registeredCard.getOwnedCard().getCardNo())
+                .cardExpriyDate(registeredCard.getOwnedCard().getCardExpiryDate())
                 .oneDayLimit(registeredCard.getOneDayLimit())
                 .oneTimeLimit(registeredCard.getOneTimeLimit())
-                .password(registeredCard.getPassword())
                 .build();
     }
 }

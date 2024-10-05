@@ -13,8 +13,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.kimnlee.auth.navigation.authNavGraph
-import com.kimnlee.auth.presentation.screen.PaymentScreen
-import com.kimnlee.auth.presentation.viewmodel.BiometricViewModel
+import com.kimnlee.payment.presentation.viewmodel.BiometricViewModel
 import com.kimnlee.auth.presentation.viewmodel.LoginViewModel
 import com.kimnlee.cardmanagement.navigation.cardManagementNavGraph
 import com.kimnlee.cardmanagement.presentation.viewmodel.CardManagementViewModel
@@ -28,6 +27,7 @@ import com.kimnlee.mobipay.presentation.screen.ShowMoreScreen
 import com.kimnlee.mobipay.presentation.viewmodel.ShowMoreViewModel
 import com.kimnlee.notification.navigation.notificationNavGraph
 import com.kimnlee.payment.navigation.paymentNavGraph
+import com.kimnlee.payment.presentation.screen.ManualPaymentScreen
 import com.kimnlee.vehiclemanagement.navigation.vehicleManagementNavGraph
 import com.kimnlee.vehiclemanagement.presentation.viewmodel.VehicleManagementViewModel
 
@@ -43,7 +43,7 @@ fun AppNavGraph(
     val application = context as Application
     val biometricViewModel = BiometricViewModel(application)
     val cardManagementViewModel = CardManagementViewModel(authManager, apiClient)
-    val vehicleManagementViewModel = VehicleManagementViewModel(apiClient)
+    val vehicleManagementViewModel = VehicleManagementViewModel(apiClient, context)
     val showMoreViewModel = ShowMoreViewModel(authManager)
     val isLoggedIn by loginViewModel.isLoggedIn.collectAsState()
 
@@ -93,27 +93,16 @@ fun AppNavGraph(
                 )
             }
         }
-        composable("payment_requestmanualpay",
-            enterTransition = { EnterTransition.None },
-            exitTransition = { ExitTransition.None }
-        ) {
-            BottomNavigation(navController) {
-                PaymentScreen(
-                    navController = navController,
-                    viewModel = biometricViewModel
-                )
-            }
-        }
 
         authNavGraph(navController, authManager, loginViewModel)
-        paymentNavGraph(navController)
+        paymentNavGraph(navController, biometricViewModel)
         cardManagementNavGraph(
-            navController,
-            authManager,
-            cardManagementViewModel,
-            apiClient
+            navController = navController,
+            authManager = authManager,
+            viewModel = cardManagementViewModel,
+            apiClient = apiClient
         )
-        vehicleManagementNavGraph(navController, context, apiClient, vehicleManagementViewModel)
+        vehicleManagementNavGraph(navController, context, apiClient, vehicleManagementViewModel, memberInvitationViewModel, cardManagementViewModel)
         memberInvitationNavGraph(navController, context, memberInvitationViewModel)
 
         notificationNavGraph(navController)

@@ -1,30 +1,35 @@
 package com.kimnlee.mobipay
 
 import android.Manifest
-import android.bluetooth.BluetoothManager
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import android.app.AlertDialog
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.compose.rememberNavController
 import com.google.gson.Gson
-import com.kimnlee.auth.presentation.viewmodel.AuthenticationState
-import com.kimnlee.auth.presentation.viewmodel.BiometricViewModel
+import com.kimnlee.payment.presentation.viewmodel.AuthenticationState
+import com.kimnlee.payment.presentation.viewmodel.BiometricViewModel
 import com.kimnlee.auth.presentation.viewmodel.LoginViewModel
-import com.kimnlee.memberinvitation.presentation.viewmodel.MemberInvitationViewModel
-import com.kimnlee.common.FCMData
 import com.kimnlee.common.ui.theme.MobiPayTheme
+import com.kimnlee.memberinvitation.presentation.viewmodel.MemberInvitationViewModel
 import com.kimnlee.mobipay.navigation.AppNavGraph
 import com.kimnlee.payment.PaymentApprovalReceiver
+import com.kimnlee.payment.data.repository.PaymentRepository
 
+private const val TAG = "MainActivity"
 class MainActivity : ComponentActivity() {
 
     private lateinit var biometricViewModel: BiometricViewModel
@@ -32,6 +37,11 @@ class MainActivity : ComponentActivity() {
     private lateinit var memberInvitationViewModel: MemberInvitationViewModel
 
     private var paymentApprovalReceiver: PaymentApprovalReceiver? = null
+
+    private lateinit var permissionLauncher: ActivityResultLauncher<Array<String>>
+    private lateinit var backgroundLocationPermissionLauncher: ActivityResultLauncher<String>
+    private var alertDialog: AlertDialog? = null
+    private lateinit var paymentRepository: PaymentRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,25 +57,37 @@ class MainActivity : ComponentActivity() {
 
         loginViewModel = LoginViewModel(authManager, apiClient, fcmService)
 
-        memberInvitationViewModel = MemberInvitationViewModel()
-        val bluetoothManager = this.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
-        val bluetoothAdapter = bluetoothManager.adapter
-        memberInvitationViewModel.initBluetoothAdapter(bluetoothAdapter)
+        val app = application as MobiPayApplication
+        memberInvitationViewModel = app.aMemberInvitationViewModel
+
+        setupPermissionsLauncher()
+        setupBackgroundLocationPermissionLauncher()
 
         requestPermissions()
 
         registerPayReceiver()
 
+        paymentRepository = (application as MobiPayApplication).paymentOperations as PaymentRepository
+
+
         setContent {
             MobiPayTheme {
                 val navController = rememberNavController()
                 val isLoggedIn by authManager.isLoggedIn.collectAsState(initial = false)
+                val fcmData by paymentRepository.fcmDataToNavigate.collectAsState()
 
                 LaunchedEffect(isLoggedIn) {
                     if (isLoggedIn) {
                         navController.navigate("home") {
                             popUpTo("auth") { inclusive = true }
                         }
+                    }
+                }
+
+                LaunchedEffect(fcmData) {
+                    fcmData?.let {
+                        val fcmDataJson = Gson().toJson(it)
+                        navController.navigate("payment_requestmanualpay?fcmData=$fcmDataJson")
                     }
                 }
 
@@ -82,32 +104,102 @@ class MainActivity : ComponentActivity() {
     }
 
 
+    private fun setupPermissionsLauncher() {
+        permissionLauncher = registerForActivityResult(
+            ActivityResultContracts.RequestMultiplePermissions()
+        ) { permissionsGranted ->
+            val allPermissionsGranted = permissionsGranted.values.all { it }
+            if (!allPermissionsGranted) {
+                Toast.makeText(this, "모든 권한을 허용해야 모비페이를 사용할 수 있어요.", Toast.LENGTH_LONG).show()
+                finish()
+            } else {
+                val accessFineLocationGranted = permissionsGranted[Manifest.permission.ACCESS_FINE_LOCATION] ?: false
+                if (accessFineLocationGranted && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    requestBackgroundLocationPermission()
+                }
+            }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        requestPermissions()
+    }
 
     private fun requestPermissions() {
         val permissions = mutableListOf<String>()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            permissions.add(Manifest.permission.POST_NOTIFICATIONS)
+        }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             permissions.add(Manifest.permission.BLUETOOTH_ADVERTISE)
             permissions.add(Manifest.permission.BLUETOOTH_SCAN)
             permissions.add(Manifest.permission.BLUETOOTH_CONNECT)
         } else {
-            permissions.add(Manifest.permission.BLUETOOTH)
-            permissions.add(Manifest.permission.BLUETOOTH_ADMIN)
+            permissions.add(Manifest.permission.ACCESS_FINE_LOCATION)
         }
 
-        // Location permission is required for BLE scanning
         permissions.add(Manifest.permission.ACCESS_FINE_LOCATION)
+        permissions.add(Manifest.permission.CAMERA)
 
-        val permissionLauncher = registerForActivityResult(RequestMultiplePermissions()) { permissionsGranted ->
-            val allPermissionsGranted = permissionsGranted.values.all { it }
-            if (!allPermissionsGranted) {
-                // Handle permission denial
-                // You might want to inform the user that the app cannot function without these permissions
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        }
+
+        if (permissions.isNotEmpty()) {
+            permissionLauncher.launch(permissions.toTypedArray())
+        } else {
+
+        }
+    }
+
+
+    private fun setupBackgroundLocationPermissionLauncher() {
+        backgroundLocationPermissionLauncher = registerForActivityResult(
+            ActivityResultContracts.RequestPermission()
+        ) { isGranted ->
+            if (isGranted) {
+                Log.d(TAG, "Background location permission granted")
+                alertDialog?.dismiss()
+                // Proceed with your app's logic now that permission is granted
+            } else {
+                Log.d(TAG, "Background location permission denied")
             }
         }
-
-        permissionLauncher.launch(permissions.toTypedArray())
     }
+
+
+    private fun requestBackgroundLocationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            if (checkSelfPermission(Manifest.permission.ACCESS_BACKGROUND_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                showBackgroundLocationRationale {
+                    backgroundLocationPermissionLauncher.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+                }
+            } else {
+                Log.d(TAG, "Background location permission already granted")
+            }
+        }
+    }
+
+
+    private fun showBackgroundLocationRationale(onRationaleAccepted: () -> Unit) {
+        alertDialog?.dismiss()
+        alertDialog = AlertDialog.Builder(this)
+            .setTitle("백그라운드 위치 권한 필요")
+            .setMessage("안전한 결제를 위해 백그라운드 위치 권한을 '항상 허용' 해주세요.")
+            .setPositiveButton("확인") { _, _ -> onRationaleAccepted() }
+            .setNegativeButton("취소") { dialog, _ ->
+                dialog.dismiss()
+                Toast.makeText(this, "백그라운드 위치 권한이 필요합니다. 일부 기능이 제한될 수 있습니다.", Toast.LENGTH_LONG).show()
+            }
+            .setCancelable(false)
+            .create()
+
+        alertDialog?.show()
+    }
+
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)

@@ -1,15 +1,13 @@
 package com.example.mobipay.domain.ownedcard.dto;
 
 import com.example.mobipay.domain.ownedcard.entity.OwnedCard;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import java.time.LocalDateTime;
 import lombok.Builder;
 import lombok.Getter;
 
 @Getter
 @Builder
-@JsonInclude(JsonInclude.Include.NON_NULL)
-public class OwnedCardDetailResponse {
+public class OwnedCardResponse {
     private Long id;
     private String cardNo;
     private String cvc;
@@ -20,8 +18,8 @@ public class OwnedCardDetailResponse {
     private Long accountId;
     private String cardUniqueNo;
 
-    public static OwnedCardDetailResponse from(OwnedCard ownedCard) {
-        return OwnedCardDetailResponse.builder()
+    public static OwnedCardResponse from(OwnedCard ownedCard) {
+        return OwnedCardResponse.builder()
                 .id(ownedCard.getId())
                 .cardNo(ownedCard.getCardNo())
                 .cvc(ownedCard.getCvc())
@@ -31,14 +29,6 @@ public class OwnedCardDetailResponse {
                 .mobiUserId(ownedCard.getMobiUser().getId())
                 .accountId(ownedCard.getAccount().getId())
                 .cardUniqueNo(ownedCard.getCardProduct().getCardUniqueNo())
-                .build();
-    }
-
-    public static OwnedCardDetailResponse fromDetailInfo(OwnedCard ownedCard) {
-        return OwnedCardDetailResponse.builder()
-                .cardNo(ownedCard.getCardNo())
-                .cvc(ownedCard.getCvc())
-                .cardExpiryDate(ownedCard.getCardExpiryDate())
                 .build();
     }
 }

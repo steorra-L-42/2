@@ -53,10 +53,10 @@ class LoginViewModel(
     val navigationEvent = _navigationEvent.asSharedFlow()
 
     private var _showPolicyModal = MutableStateFlow(false)
-    val showPolicyModal: StateFlow<Boolean> = _showPolicyModal
+    val showPolicyModal : StateFlow<Boolean> = _showPolicyModal
 
     private var _hasAgreed = MutableStateFlow(false)
-    val hasAgreed: StateFlow<Boolean> = _hasAgreed
+    val hasAgreed : StateFlow<Boolean> = _hasAgreed
 
     private var email: String = ""
     private var picture: String = ""
@@ -83,10 +83,10 @@ class LoginViewModel(
     fun login(activity: Activity) {
         viewModelScope.launch {
             authManager.loginWithKakao(activity).onSuccess { token ->
-                Log.d("KakaoLogin", "카카오에서 받은 토큰: $token")
+                Log.d(TAG, "카카오 로그인 api 요청 성공, Token: $token")
                 sendLoginRequest(token)
             }.onFailure { error ->
-                Log.e("LoginViewModel", "Kakao login failed", error)
+                Log.e(TAG, "카카오 로그인 실패", error)
             }
         }
     }
@@ -104,20 +104,17 @@ class LoginViewModel(
             val response = unAuthService.login(loginRequest)
 
             if (response.isSuccessful) {
-                val authTokenFromHeaders =
-                    response.headers()["Authorization"]?.split(" ")?.getOrNull(1)
+                val authTokenFromHeaders = response.headers()["Authorization"]?.split(" ")?.getOrNull(1)
                 authTokenFromHeaders?.let {
-                    Log.d(TAG, "Calling saveAuthToken from sendLoginRequest")
                     authManager.saveAuthToken(it)
-                    Log.d(TAG, "Auth token saved in sendLoginRequest")
+                    Log.d(TAG, "sendLoginRequest에서 authManager.saveAuthToken 호출")
                 }
-                val refreshToken = response.headers()["Set-Cookie"]?.let { setCookie ->
-                    setCookie.split(";").firstOrNull { it.trimStart().startsWith("refreshToken=") }
-                        ?.substringAfter("refreshToken=")
-                        ?.trim()
-                }
+                // 쿠키 처리
+                val cookies = apiClient.getCookieManager().cookieStore.cookies
+                val refreshToken = cookies.find { it.name == "refresh" }?.value
+
                 refreshToken?.let { authManager.saveRefreshToken(it) }
-                Log.d(TAG, "About to call sendTokens from sendLoginRequest")
+
                 sendTokens()
             } else if (response.code() == 404) {
                 val errorBody = response.errorBody()?.string()
@@ -132,14 +129,15 @@ class LoginViewModel(
                 kakaoAccessToken = token.accessToken
                 kakaoRefreshToken = token.refreshToken
                 _navigationEvent.emit("registration")
+            } else {
+                Log.d(TAG, "sendLoginRequest에서 회원가입(404) 이외의 에러코드 확인 : ${response.code()}")
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Login failed", e)
+            Log.e(TAG, "로그인 실패", e)
         }
     }
 
     fun register(name: String, phoneNumber: String) {
-        Log.d(TAG, "register 메서드 호출: name($name), phoneNumber($phoneNumber)")
         viewModelScope.launch {
             val registrationRequest = RegistrationRequest(
                 email = email,
@@ -149,57 +147,41 @@ class LoginViewModel(
                 accessToken = kakaoAccessToken,
                 refreshToken = kakaoRefreshToken
             )
-            Log.d(TAG, "회원가입 요청 json내용: $registrationRequest")
             try {
                 val response = unAuthService.register(registrationRequest)
-                Log.d(TAG, "register 메서드 요청 후 응답 받음: response($response)")
                 if (response.isSuccessful) {
-                    Log.d(TAG, "response.isSuccessful 됨")
-                    val authTokenFromHeaders =
-                        response.headers()["Authorization"]?.split(" ")?.getOrNull(1)
+                    Log.d(TAG, "response.isSuccessful")
+                    val authTokenFromHeaders = response.headers()["Authorization"]?.split(" ")?.getOrNull(1)
                     authTokenFromHeaders?.let {
-                        Log.d(TAG, "Calling saveAuthToken from register")
                         authManager.saveAuthToken(it)
-                        Log.d(TAG, "Auth token saved in register")
+                        Log.d(TAG, "AuthToken 저장 완료")
                     }
-                    val refreshToken = response.headers()["Set-Cookie"]?.let { setCookie ->
-                        setCookie.split(";")
-                            .firstOrNull { it.trimStart().startsWith("refreshToken=") }
-                            ?.substringAfter("refreshToken=")
-                            ?.trim()
-                    }
+                    // 쿠키 처리
+                    val cookies = apiClient.getCookieManager().cookieStore.cookies
+                    val refreshToken = cookies.find { it.name == "refresh" }?.value
+
                     refreshToken?.let { authManager.saveRefreshToken(it) }
-                    _needsRegistration.value = false
-                    _registrationResult.value = true
-                    Log.d(TAG, "About to call sendTokens from register")
+
                     sendTokens()
-                    Log.d(
-                        "KakaoLogin",
-                        "로그인 성공 AuthToken: ${authManager.getAuthToken()}, RefreshToken: ${authManager.getRefreshToken()}"
-                    )
+                    Log.d(TAG, "회원가입 성공 AuthToken: ${authManager.getAuthToken()}, RefreshToken: ${authManager.getRefreshToken()}")
                 } else if (response.code() == 500) {
-                    Log.d(TAG, "response http code 500")
+                    Log.d(TAG, "register response 500, 이미 가입된 전화번호로 가입 시도")
                     _registrationError.value = "이미 가입된 전화번호에요."
                 }
             } catch (e: HttpException) {
                 _registrationResult.value = false
-                Log.e("LoginViewModel", "Registration failed", e)
+                Log.e(TAG, "회원가입 실패", e)
             }
 
             // 네비게이션 이벤트는 모든 처리가 끝난 후 한 번만 발생시킴
             if (_isLoggedIn.value) {
                 _navigationEvent.emit("home")
-                Log.d("LoginViewModel", "Emitted navigation event to home")
             }
         }
     }
 
     // 200ok 오면 fcm token 바디에 넣어서 보내주기
     private suspend fun sendTokens() {
-        Log.d(TAG, "sendTokens called")
-        val currentAuthToken = authManager.getAuthToken()
-        Log.d(TAG, "Current auth token in sendTokens: ${currentAuthToken?.take(10) ?: "null"}...")
-
         val fcmToken = suspendCancellableCoroutine<String?> { continuation ->
             fcmService.getToken { token ->
                 continuation.resume(token)
@@ -210,24 +192,17 @@ class LoginViewModel(
             val sendTokensRequest = SendTokenRequest(token = fcmToken)
 
             try {
-                Log.d(TAG, "About to call authManager.sendTokens")
                 val response = authService.sendTokens(sendTokensRequest)
 
                 if (response.isSuccessful) {
-                    Log.d(TAG, "FCM token sent successfully")
+                    Log.d(TAG, "FCM 토큰 전송 완료")
                     // isLoggedIn true로 만들고 나머지 상태 원상복구
                     authManager.setLoggedIn(true)
                     authManager.saveUserInfoFromToken() // 저장된 authToken에서 사용자 정보 파싱하고 저장
                     _isLoggedIn.value = true
-                    _navigationEvent.emit("home")
-                    Log.d(TAG, "Login process completed, navigating to home")
-                } else {
-                    Log.e(TAG, "FCM 토큰 전송 실패: ${response.code()}")
-                    _isLoggedIn.value = false
-                    authManager.setLoggedIn(false)
                 }
             } catch (e: Exception) {
-                Log.d(TAG, "fcm토큰 서버로 전송 실패")
+                Log.d(TAG, "FCM 토큰 서버로 전송 실패")
                 // 예외 발생 시 처리
                 _isLoggedIn.value = false
                 authManager.setLoggedIn(false)
@@ -247,13 +222,14 @@ class LoginViewModel(
                 val result = authManager.logoutWithKakao()
                 if (result.isSuccess) {
                     resetStatus()
-                    Log.i(TAG, "Logout successful. Auth Token cleared.")
-                    _navigationEvent.emit("auth")
+                    Log.d(TAG, "로그아웃 성공")
                 } else {
-                    Log.e(TAG, "Kakao logout failed")
+                    Log.e(TAG, "카카오 로그아웃 실패")
+                    // 로그아웃에 실패해버리면 그냥 로그인 상태를 초기화 시켜버리기
+                    resetStatus()
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "Logout failed", e)
+                Log.e(TAG, "로그아웃 실패", e)
             }
         }
     }
@@ -265,23 +241,12 @@ class LoginViewModel(
             _isLoggedIn.value = true
             val testToken = "test_auth_token_${System.currentTimeMillis()}"
             authManager.saveAuthToken(testToken)
-            Log.i("TestLogin", "Test login successful. Auth Token: $testToken")
-        }
-    }
-
-    // 카카오 로그인 안될시에 디버깅 번거로우므로 임시로 남겨놓고 나중에 지울 예정
-    fun testLogout() {
-        viewModelScope.launch {
-            authManager.setLoggedIn(false)
-            _isLoggedIn.value = false
-            authManager.clearTokens()
-            _registrationResult.value = null
-            Log.i(TAG, "Test logout successful. Auth Token cleared.")
-            _navigationEvent.emit("auth")
+            Log.i(TAG, "테스트 로그인으로 진행, 로그아웃은 TestLogout으로만 로그아웃 가능")
         }
     }
 
     fun resetStatus() {
+        Log.d(TAG, "로그인 상태 초기화")
         viewModelScope.launch {
             authManager.setLoggedIn(false)
             _isLoggedIn.value = false
@@ -293,15 +258,14 @@ class LoginViewModel(
         }
     }
 
-    fun openPrivacyModal() {
+    // 약관 동의 모달
+    fun openPrivacyModal (){
         _showPolicyModal.value = true
     }
-
-    fun closePrivacyModal() {
+    fun closePrivacyModal (){
         _showPolicyModal.value = false
     }
-
-    fun tooglePolicy() {
+    fun tooglePolicy(){
         if (!hasAgreed.value) _hasAgreed.value = true
         else _hasAgreed.value = false
     }

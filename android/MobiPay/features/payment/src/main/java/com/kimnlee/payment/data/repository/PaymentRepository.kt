@@ -6,6 +6,8 @@ import android.content.Intent
 import android.util.Log
 import android.location.Location
 import android.net.Uri
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -18,6 +20,9 @@ import com.kimnlee.common.FCMData
 import com.kimnlee.common.utils.AAFocusManager
 import com.kimnlee.common.utils.MobiNotificationManager
 import com.kimnlee.payment.data.model.PaymentApprovalData
+import com.kimnlee.payment.presentation.screen.ManualPaymentScreen
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -30,6 +35,10 @@ class PaymentRepository(
     private val mobiNotificationManager: MobiNotificationManager,
     private val context: Context
 ) : PaymentOperations {
+
+    private val _fcmDataToNavigate = MutableStateFlow<FCMData?>(null)
+    val fcmDataToNavigate: StateFlow<FCMData?> get() = _fcmDataToNavigate
+
 
     private var currentLocation: LatLng? = null
     private val fusedLocationClient: FusedLocationProviderClient =
@@ -114,11 +123,11 @@ class PaymentRepository(
         call.enqueue(object : Callback<Void> {
             override fun onResponse(call: Call<Void>, response: Response<Void>) {
 
-//                if (response.isSuccessful) { // 결제 성공
-                if (response.isSuccessful) { // 임시 코드
-                    Log.e(TAG, "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
-                    Log.e(TAG, "@@@        임시 코드 사용중        @@")
-                    Log.e(TAG, "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+                if (response.isSuccessful) { // 결제 성공
+//                if (response.isSuccessful || 1 == 1) { // 임시 코드
+//                    Log.e(TAG, "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+//                    Log.e(TAG, "@@@        임시 코드 사용중        @@")
+//                    Log.e(TAG, "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
 
                     Log.d(TAG, "processPay: 결제 성공")
                     // 모바일에 알림 표시
@@ -202,7 +211,9 @@ class PaymentRepository(
         }else{
             // 폰
             // TODO 휴대폰으로 결제 요청하는 로직 작성 필요
+            _fcmDataToNavigate.value = fcmData
             // mobiNotificationManager.showNotification() ??????
+
         }
 
     }

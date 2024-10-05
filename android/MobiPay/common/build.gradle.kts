@@ -131,6 +131,7 @@ dependencies {
     api(libs.coil.gif)
 
     implementation(libs.guava)
+    implementation(libs.okhttp.urlconnection)
     testImplementation(libs.junit)
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.legacy.support.v4)
