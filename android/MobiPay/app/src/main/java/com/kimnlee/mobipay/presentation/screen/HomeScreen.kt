@@ -2,6 +2,7 @@ package com.kimnlee.mobipay.presentation.screen
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.location.Geocoder
 import android.view.Gravity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -42,12 +43,17 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavController
 import com.kimnlee.auth.presentation.viewmodel.LoginViewModel
+import com.kimnlee.common.BuildConfig
 import com.kimnlee.common.R
+import com.kimnlee.common.auth.repository.NaverMapRepository
+import com.kimnlee.common.network.ApiClient
+import com.kimnlee.common.network.NaverMapService
 import com.kimnlee.common.ui.theme.MobiCardBgGray
 import com.kimnlee.common.ui.theme.MobiPayTheme
 import com.kimnlee.common.ui.theme.MobiTextAlmostBlack
@@ -56,6 +62,11 @@ import com.naver.maps.map.CameraUpdate
 import com.naver.maps.map.MapView
 import com.naver.maps.map.overlay.Marker
 import com.naver.maps.map.overlay.OverlayImage
+import kotlinx.coroutines.runBlocking
+import retrofit2.Retrofit
+import java.util.Locale
+
+private val YOUR_CLIENT_SECRET = BuildConfig.NAVER_MAP_CLIENT_SECRET
 
 @Composable
 fun HomeScreen(
@@ -65,7 +76,7 @@ fun HomeScreen(
 ) {
     val isLoggedIn by viewModel.isLoggedIn.collectAsState()
     var lastLocation by remember { mutableStateOf<Pair<Double, Double>?>(null) }
-
+    val naverMapService by viewModel.naverMapService.collectAsState()
 
     LaunchedEffect(isLoggedIn) {
         if (!isLoggedIn) {
@@ -162,7 +173,7 @@ fun HomeScreen(
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(20.dp))
                     .background(MobiCardBgGray)
-                    .padding(24.dp, 18.dp, 24.dp, 18.dp),
+                    .padding(24.dp, 18.dp, 24.dp, 24.dp),
             ) {
                 Column(
                     modifier = Modifier
@@ -231,9 +242,9 @@ fun HomeScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(20.dp))
-                    .height(260.dp)
+                    .height(300.dp)
                     .background(MobiCardBgGray)
-                    .padding(24.dp, 18.dp, 24.dp, 24.dp),
+                    .padding(24.dp, 18.dp, 24.dp, 12.dp),
             ) {
                 Column(
                     modifier = Modifier
@@ -262,31 +273,35 @@ fun HomeScreen(
                         modifier = Modifier
                             .clip(RoundedCornerShape(6.dp))
                     ){
-                        NaverMapView(lastLocation)
+                        NaverMapView(lastLocation, naverMapService)
                     }
                 }
             }
-
         }
     }
-
 }
 
 @Composable
-fun NaverMapView(lastLocation: Pair<Double, Double>?) {
+fun NaverMapView(lastLocation: Pair<Double, Double>?, naverMapService: NaverMapService?) {
 
     val context = LocalContext.current
     var mapView = remember { MapView(context) }
 
+    lateinit var address : String
     // 주차 정보가 없으면 기본 위치 표시
     val lastLocationLatLng = lastLocation?.let { LatLng(it.first, it.second) } ?: LatLng(
-        37.526665, 126.927127)
+        36.107368, 128.425046) // 37.526665, 126.927127
+    runBlocking {
+        val repository = NaverMapRepository("81dn8nvzim", YOUR_CLIENT_SECRET, naverMapService)
+        address = repository.getAddressFromCoords(lastLocationLatLng)
+    }
 
-
+Column {
     AndroidView(
         factory = { mapView },
         modifier = Modifier
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .height(200.dp),
         update = { view ->
             view.getMapAsync { naverMap ->
 
@@ -311,6 +326,9 @@ fun NaverMapView(lastLocation: Pair<Double, Double>?) {
             }
         }
     )
+
+    Text(text = address, fontSize = 16.sp, letterSpacing = 0.1.sp, lineHeight = 13.sp)
+}
 }
 
 @Composable
@@ -380,7 +398,6 @@ fun TextOnLP() {
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.matchParentSize()
             )
-
             Box(
                 modifier = Modifier
                     .width(160.dp)
@@ -396,11 +413,9 @@ fun TextOnLP() {
                         .align(Alignment.Center)
                 )
             }
-
         }
     }
 }
-
 
 private fun getLastLocation(context: Context): Pair<Double, Double>? {
     val sharedPreferences: SharedPreferences = context.getSharedPreferences("last_location", Context.MODE_PRIVATE)
@@ -412,4 +427,19 @@ private fun getLastLocation(context: Context): Pair<Double, Double>? {
     } else {
         null
     }
+}
+// 위도 경도로 주소 구하는 Reverse-GeoCoding (기존 코드 유지)
+private fun getCurrentAddress(context: Context, latitude: Double, longitude: Double): String {
+    try {
+        val geocoder = Geocoder(context, Locale.KOREA)
+        val addresses = geocoder.getFromLocation(latitude, longitude, 1)
+
+        if (!addresses.isNullOrEmpty()) {
+            val address = addresses[0]
+            return address.getAddressLine(0)
+        }
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
+    return ""
 }

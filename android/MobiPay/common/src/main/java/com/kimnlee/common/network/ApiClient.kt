@@ -4,6 +4,7 @@ import android.content.ContentValues.TAG
 import android.util.Log
 import com.kimnlee.common.BuildConfig
 import com.kimnlee.common.auth.AuthManager
+import com.kimnlee.common.auth.model.ReverseGeocodeResponse
 import okhttp3.Interceptor
 import okhttp3.JavaNetCookieJar
 import okhttp3.OkHttpClient
@@ -12,6 +13,9 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.net.CookieManager
 import java.net.CookiePolicy
+import retrofit2.http.GET
+import retrofit2.http.Header
+import retrofit2.http.Query
 
 class ApiClient private constructor(private val tokenProvider: () -> String?) {
 
@@ -77,6 +81,13 @@ class ApiClient private constructor(private val tokenProvider: () -> String?) {
 
     fun getCookieManager(): CookieManager = cookieManager
 
+     val naverMapService : NaverMapService by lazy {
+         Retrofit.Builder()
+        .baseUrl("https://naveropenapi.apigw.ntruss.com/")
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
+        .create(NaverMapService::class.java)
+     }
     companion object {
         @Volatile
         private var instance: ApiClient? = null

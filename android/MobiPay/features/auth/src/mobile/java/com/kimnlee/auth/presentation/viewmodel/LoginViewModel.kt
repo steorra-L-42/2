@@ -3,6 +3,7 @@ package com.kimnlee.auth.presentation.viewmodel
 import android.app.Activity
 import android.util.Log
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kakao.sdk.auth.model.OAuthToken
@@ -12,11 +13,14 @@ import com.kimnlee.common.auth.model.LoginRequest
 import com.kimnlee.common.auth.model.RegistrationRequest
 import com.kimnlee.common.auth.model.SendTokenRequest
 import com.kimnlee.common.network.ApiClient
+import com.kimnlee.common.network.NaverMapService
 import com.kimnlee.firebase.FCMService
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import retrofit2.HttpException
+import retrofit2.http.Header
+import retrofit2.http.Query
 import kotlin.coroutines.resume
 
 private const val TAG = "LoginViewModel"
@@ -26,8 +30,12 @@ class LoginViewModel(
     private val fcmService: FCMService
 ) : ViewModel() {
 
-    private val unAuthService: AuthService = apiClient.unAuthenticatedApi.create(AuthService::class.java)
-    private val authService: AuthService = apiClient.authenticatedApi.create(AuthService::class.java)
+    private val unAuthService: AuthService =
+        apiClient.unAuthenticatedApi.create(AuthService::class.java)
+    private val authService: AuthService =
+        apiClient.authenticatedApi.create(AuthService::class.java)
+    private val _naverMapService = MutableStateFlow<NaverMapService?>(apiClient.naverMapService)
+    val naverMapService: StateFlow<NaverMapService?> = _naverMapService
 
     private val _isLoggedIn = MutableStateFlow(false)
     val isLoggedIn: StateFlow<Boolean> = _isLoggedIn
