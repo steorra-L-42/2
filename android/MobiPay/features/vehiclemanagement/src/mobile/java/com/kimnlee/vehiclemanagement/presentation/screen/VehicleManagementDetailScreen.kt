@@ -30,12 +30,12 @@ import com.kimnlee.cardmanagement.presentation.screen.findCardCompany
 import com.kimnlee.cardmanagement.presentation.viewmodel.CardManagementViewModel
 import com.kimnlee.common.ui.theme.MobiBlue
 import com.kimnlee.common.utils.CarModelImageProvider
+import com.kimnlee.common.utils.formatCardNumber
 import com.kimnlee.memberinvitation.presentation.components.MemberInvitationBottomSheet
 import com.kimnlee.memberinvitation.presentation.viewmodel.MemberInvitationViewModel
 import com.kimnlee.vehiclemanagement.R
 import com.kimnlee.vehiclemanagement.data.model.CarMember
 import com.kimnlee.vehiclemanagement.presentation.viewmodel.VehicleManagementViewModel
-import formatCardNumber
 
 private const val TAG = "VehicleManagementDetail"
 

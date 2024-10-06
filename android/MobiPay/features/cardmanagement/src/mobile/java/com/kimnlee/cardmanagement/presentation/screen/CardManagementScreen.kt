@@ -59,14 +59,14 @@ import com.kimnlee.cardmanagement.data.model.RegisteredCard
 import com.kimnlee.cardmanagement.presentation.viewmodel.CardManagementViewModel
 import com.kimnlee.common.R
 import com.kimnlee.common.ui.theme.MobiTextAlmostBlack
-import com.kimnlee.common.utils.moneyFormat
-import formatCardNumber
+import com.kimnlee.common.utils.formatCardNumber
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CardManagementScreen(
     onNavigateToOwnedCards: () -> Unit,
+    onNavigateToCardDetail: (Int) -> Unit,
     viewModel: CardManagementViewModel,
 ) {
     val registeredCards by viewModel.registeredCards.collectAsState()
@@ -125,7 +125,8 @@ fun CardManagementScreen(
                     card = card,
                     onAutoPaymentToggle = {
                         viewModel.setAutoPaymentCard(card.ownedCardId, !card.autoPayStatus)
-                    }
+                    },
+                    onCardClick = { onNavigateToCardDetail(card.ownedCardId) }
                 )
             }
             item {
@@ -138,12 +139,14 @@ fun CardManagementScreen(
 @Composable
 fun CardItem(
     card: RegisteredCard,
-    onAutoPaymentToggle: () -> Unit
+    onAutoPaymentToggle: () -> Unit,
+    onCardClick: () -> Unit
 ) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .aspectRatio(1.6f)
+            .clickable(onClick = onCardClick)
     ) {
         Image(
             painter = painterResource(id = findCardCompany(card.cardNo)),
@@ -164,7 +167,7 @@ fun CardItem(
             )
             Spacer(modifier = Modifier.height(50.dp))
             TextWithShadow(
-                text = "만료일: ${formatExpiryDate(card.cardExpriyDate)}",
+                text = "VALID THRU ${formatExpiryDate(card.cardExpriyDate)}",
                 style = MaterialTheme.typography.bodyMedium
             )
         }

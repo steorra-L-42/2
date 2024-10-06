@@ -170,6 +170,11 @@ class CardManagementViewModel(
         }
     }
 
+    // 카드 상세 정보 초기화
+    fun clearCardDetail() {
+        _cardDetail.value = null
+    }
+
     // 자동 결제 등록
     fun setAutoPaymentCard(ownedCardId: Int, autoPayStatus: Boolean) {
         viewModelScope.launch {

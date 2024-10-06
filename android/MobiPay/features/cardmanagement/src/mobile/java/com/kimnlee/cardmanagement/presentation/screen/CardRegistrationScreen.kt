@@ -34,9 +34,9 @@ import com.kimnlee.cardmanagement.data.model.RegisterCardRequest
 import com.kimnlee.cardmanagement.presentation.viewmodel.CardManagementViewModel
 import com.kimnlee.common.ui.theme.MobiTextAlmostBlack
 import com.kimnlee.common.ui.theme.MobiTextDarkGray
+import com.kimnlee.common.utils.formatCardNumber
 import java.math.BigInteger
 import com.kimnlee.common.utils.moneyFormat
-import formatCardNumber
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

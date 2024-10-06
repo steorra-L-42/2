@@ -57,9 +57,11 @@ data class RegisterCardResponse(
 
 // 카드 조회
 data class CardDetailResponse(
+    val ownedCardId: Int,
     val cardNo: String,
     val cvc: String,
-    val cardExpiryDate: String
+    val cardExpiryDate: String,
+    val oneTimeLimit: Int
 )
 
 // 자동 결제 등록 요청
