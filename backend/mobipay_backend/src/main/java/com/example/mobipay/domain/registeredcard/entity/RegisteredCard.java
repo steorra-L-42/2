@@ -53,10 +53,6 @@ public class RegisteredCard {
     @JoinColumn(name = "owned_card_id", insertable = false, updatable = false)
     private OwnedCard ownedCard;
 
-    public static RegisteredCard from() {
-        return new RegisteredCard();
-    }
-
     public static RegisteredCard from(Integer oneTimeLimit) {
         RegisteredCard registeredCard = new RegisteredCard();
         registeredCard.oneTimeLimit = oneTimeLimit;

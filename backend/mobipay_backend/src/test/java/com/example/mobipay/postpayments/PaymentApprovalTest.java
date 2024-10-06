@@ -246,7 +246,7 @@ public class PaymentApprovalTest {
         ownedCard.addRelation(mobiUser, account, cardProduct);
         ownedCardRepository.save(ownedCard);
 
-        RegisteredCard registeredCard = RegisteredCard.from();
+        RegisteredCard registeredCard = RegisteredCard.from(1000000);
         registeredCard.addRelations(mobiUser, ownedCard);
         registeredCardRepository.save(registeredCard);
 
@@ -584,7 +584,7 @@ public class PaymentApprovalTest {
         ownedCard.addRelation(mobiUser, account, cardProduct);
         ownedCardRepository.save(ownedCard);
 
-        RegisteredCard registeredCard = RegisteredCard.from();
+        RegisteredCard registeredCard = RegisteredCard.from(1000000);
         registeredCard.addRelations(mobiUser, ownedCard);
         registeredCardRepository.save(registeredCard);
 
@@ -665,7 +665,7 @@ public class PaymentApprovalTest {
         ownedCard.addRelation(mobiUser, account, cardProduct);
         ownedCardRepository.save(ownedCard);
 
-        RegisteredCard registeredCard = RegisteredCard.from();
+        RegisteredCard registeredCard = RegisteredCard.from(1000000);
         registeredCard.addRelations(mobiUser, ownedCard);
         registeredCardRepository.save(registeredCard);
 
@@ -752,7 +752,7 @@ public class PaymentApprovalTest {
         ownedCard.addRelation(mobiUser, account, cardProduct);
         ownedCardRepository.save(ownedCard);
 
-        RegisteredCard registeredCard = RegisteredCard.from();
+        RegisteredCard registeredCard = RegisteredCard.from(1000000);
         registeredCard.addRelations(mobiUser, ownedCard);
         registeredCardRepository.save(registeredCard);
 
@@ -861,7 +861,7 @@ public class PaymentApprovalTest {
         ownedCard.addRelation(mobiUser, account, cardProduct);
         ownedCardRepository.save(ownedCard);
 
-        RegisteredCard registeredCard = RegisteredCard.from();
+        RegisteredCard registeredCard = RegisteredCard.from(1000000);
         registeredCard.addRelations(mobiUser, ownedCard);
         registeredCardRepository.save(registeredCard);
 
