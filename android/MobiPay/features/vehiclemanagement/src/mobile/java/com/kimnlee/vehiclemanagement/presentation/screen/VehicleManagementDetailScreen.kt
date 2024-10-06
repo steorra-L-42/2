@@ -27,7 +27,6 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.kimnlee.cardmanagement.presentation.screen.findCardCompany
-import com.kimnlee.cardmanagement.presentation.screen.maskCardNumber
 import com.kimnlee.cardmanagement.presentation.viewmodel.CardManagementViewModel
 import com.kimnlee.common.ui.theme.MobiBlue
 import com.kimnlee.common.utils.CarModelImageProvider
@@ -36,6 +35,7 @@ import com.kimnlee.memberinvitation.presentation.viewmodel.MemberInvitationViewM
 import com.kimnlee.vehiclemanagement.R
 import com.kimnlee.vehiclemanagement.data.model.CarMember
 import com.kimnlee.vehiclemanagement.presentation.viewmodel.VehicleManagementViewModel
+import formatCardNumber
 
 private const val TAG = "VehicleManagementDetail"
 
@@ -158,7 +158,7 @@ fun VehicleManagementDetailScreen(
                             .height(250.dp)  // 카드 높이를 늘림
                     ) {
                         Image(
-                            painter = painterResource(id = findCardCompany(card.ownedCardId.toString())),
+                            painter = painterResource(id = findCardCompany(card.cardNo)),
                             contentDescription = "Card Image",
                             modifier = Modifier.fillMaxSize(),
                             contentScale = ContentScale.Fit
@@ -171,7 +171,7 @@ fun VehicleManagementDetailScreen(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
-                                text = maskCardNumber(card.ownedCardId.toString()),
+                                text = formatCardNumber(card.cardNo),
                                 color = Color.White,
                                 style = MaterialTheme.typography.titleLarge.copy(
                                     shadow = Shadow(
@@ -182,17 +182,6 @@ fun VehicleManagementDetailScreen(
                                 )
                             )
                             Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = "일일 한도: ${card.oneDayLimit}원",
-                                color = Color.White,
-                                style = MaterialTheme.typography.bodyLarge.copy(
-                                    shadow = Shadow(
-                                        color = Color.Black.copy(alpha = 0.6f),
-                                        offset = Offset(1f, 1f),
-                                        blurRadius = 2f
-                                    )
-                                )
-                            )
                             Text(
                                 text = "1회 한도: ${card.oneTimeLimit}원",
                                 color = Color.White,

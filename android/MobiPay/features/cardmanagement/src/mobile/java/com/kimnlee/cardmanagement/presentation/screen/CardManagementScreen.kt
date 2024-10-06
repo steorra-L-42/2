@@ -35,13 +35,11 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -58,11 +56,11 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.core.content.res.ResourcesCompat
 import com.kimnlee.cardmanagement.data.model.RegisteredCard
-import com.kimnlee.cardmanagement.presentation.components.CardManagementBottomSheet
 import com.kimnlee.cardmanagement.presentation.viewmodel.CardManagementViewModel
 import com.kimnlee.common.R
 import com.kimnlee.common.ui.theme.MobiTextAlmostBlack
 import com.kimnlee.common.utils.moneyFormat
+import formatCardNumber
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -148,7 +146,7 @@ fun CardItem(
             .aspectRatio(1.6f)
     ) {
         Image(
-            painter = painterResource(id = findCardCompany(card.ownedCardId.toString())),
+            painter = painterResource(id = findCardCompany(card.cardNo)),
             contentDescription = "Card Image",
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Fit
@@ -161,17 +159,12 @@ fun CardItem(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             TextWithShadow(
-                text = maskCardNumber(card.ownedCardId.toString()),
+                text = formatCardNumber(card.cardNo),
                 style = MaterialTheme.typography.titleLarge
             )
             Spacer(modifier = Modifier.height(50.dp))
             TextWithShadow(
-                text = "일일 한도: ${moneyFormat(card.oneDayLimit.toBigInteger())}",
-                style = MaterialTheme.typography.bodyMedium
-            )
-            Spacer(modifier = Modifier.height(25.dp))
-            TextWithShadow(
-                text = "1회 한도: ${moneyFormat(card.oneTimeLimit.toBigInteger())}",
+                text = "만료일: ${formatExpiryDate(card.cardExpriyDate)}",
                 style = MaterialTheme.typography.bodyMedium
             )
         }
@@ -269,11 +262,4 @@ fun AddCardButton(onNavigateToOwnedCards: () -> Unit) {
         }
     }
     Spacer(modifier = Modifier.height(24.dp))
-}
-
-fun maskCardNumber(cardNumber: String): String {
-    val visiblePart = cardNumber.take(6)
-    val maskedPart = "******"
-    val lastFour = cardNumber.takeLast(4)
-    return "$visiblePart$maskedPart$lastFour"
 }
