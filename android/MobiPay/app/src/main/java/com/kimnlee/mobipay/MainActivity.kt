@@ -14,20 +14,25 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import android.app.AlertDialog
+import android.net.Uri
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.compose.rememberNavController
 import com.google.gson.Gson
 import com.kimnlee.payment.presentation.viewmodel.AuthenticationState
 import com.kimnlee.payment.presentation.viewmodel.BiometricViewModel
 import com.kimnlee.auth.presentation.viewmodel.LoginViewModel
+import com.kimnlee.cardmanagement.presentation.viewmodel.CardManagementViewModel
+import com.kimnlee.common.FCMData
 import com.kimnlee.common.ui.theme.MobiPayTheme
 import com.kimnlee.memberinvitation.presentation.viewmodel.MemberInvitationViewModel
 import com.kimnlee.mobipay.navigation.AppNavGraph
 import com.kimnlee.payment.PaymentApprovalReceiver
 import com.kimnlee.payment.data.repository.PaymentRepository
+import kotlinx.coroutines.flow.MutableStateFlow
 
 private const val TAG = "MainActivity"
 class MainActivity : ComponentActivity() {
@@ -35,6 +40,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var biometricViewModel: BiometricViewModel
     private lateinit var loginViewModel: LoginViewModel
     private lateinit var memberInvitationViewModel: MemberInvitationViewModel
+    private lateinit var cardManagementViewModel: CardManagementViewModel
 
     private var paymentApprovalReceiver: PaymentApprovalReceiver? = null
 
@@ -42,6 +48,9 @@ class MainActivity : ComponentActivity() {
     private lateinit var backgroundLocationPermissionLauncher: ActivityResultLauncher<String>
     private var alertDialog: AlertDialog? = null
     private lateinit var paymentRepository: PaymentRepository
+//    private val fcmDataFromIntent = mutableStateOf<FCMData?>(null)
+    private val fcmDataFromIntent = MutableStateFlow<FCMData?>(null)
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,6 +63,7 @@ class MainActivity : ComponentActivity() {
         val fcmService = (application as MobiPayApplication).fcmService
 
         biometricViewModel = ViewModelProvider(this).get(BiometricViewModel::class.java)
+        cardManagementViewModel = CardManagementViewModel(authManager, apiClient)
 
         loginViewModel = LoginViewModel(authManager, apiClient, fcmService)
 
@@ -69,12 +79,16 @@ class MainActivity : ComponentActivity() {
 
         paymentRepository = (application as MobiPayApplication).paymentOperations as PaymentRepository
 
+        handleIntent(intent)
 
         setContent {
             MobiPayTheme {
                 val navController = rememberNavController()
                 val isLoggedIn by authManager.isLoggedIn.collectAsState(initial = false)
-                val fcmData by paymentRepository.fcmDataToNavigate.collectAsState()
+//                val fcmData by paymentRepository.fcmDataToNavigate.collectAsState()
+                val fcmData by fcmDataFromIntent.collectAsState()
+                val registeredCards by cardManagementViewModel.registeredCards.collectAsState()
+//                val fcmData = fcmDataFromIntent.value
 
                 LaunchedEffect(isLoggedIn) {
                     if (isLoggedIn) {
@@ -84,12 +98,26 @@ class MainActivity : ComponentActivity() {
                     }
                 }
 
-                LaunchedEffect(fcmData) {
-                    fcmData?.let {
-                        val fcmDataJson = Gson().toJson(it)
-                        navController.navigate("payment_requestmanualpay?fcmData=$fcmDataJson")
+                LaunchedEffect(isLoggedIn, fcmData, registeredCards) {
+                    if (isLoggedIn && fcmData != null && registeredCards.isNotEmpty()) {
+                        Log.d(TAG, "로그인 + FCM데이터 확인되어 수동결제 처리")
+
+                        val registeredCardsJson = Uri.encode(Gson().toJson(registeredCards))
+
+                        Log.d(TAG, "Registered Cards JSON: $registeredCardsJson")
+
+                        val fcmDataJson = Uri.encode(Gson().toJson(fcmData))
+                        navController.navigate("payment_requestmanualpay?fcmData=$fcmDataJson&registeredCards=$registeredCardsJson") {
+                            popUpTo("home") { inclusive = false }
+                        }
+
+                        // Reset fcmData after handling
+                        fcmDataFromIntent.value = null
+                    }else{
+                        Log.d(TAG, "onCreate: 카드가 NULL인지, 뭐가 NULL 이네 ")
                     }
                 }
+
 
                 AppNavGraph(
                     navController,
@@ -97,7 +125,8 @@ class MainActivity : ComponentActivity() {
                     applicationContext,
                     apiClient,
                     loginViewModel,
-                    memberInvitationViewModel
+                    memberInvitationViewModel,
+                    paymentRepository
                 )
             }
         }
@@ -224,6 +253,20 @@ class MainActivity : ComponentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
+    }
+
+    private fun handleIntent(intent: Intent?) {
+        intent?.data?.let { uri ->
+            if (uri.scheme == "mobipay" && uri.host == "payment_requestmanualpay") {
+                val fcmDataJson = uri.getQueryParameter("fcmData")
+                Log.d(TAG, "handleIntent: $fcmDataJson")
+                fcmDataJson?.let {
+                    val fcmData = Gson().fromJson(it, FCMData::class.java)
+                    fcmDataFromIntent.value = fcmData
+                    Log.d(TAG, "handleIntent: $fcmDataJson")
+                }
+            }
+        }
     }
 
     override fun onDestroy() {

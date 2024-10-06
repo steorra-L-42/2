@@ -24,6 +24,9 @@ data class RegisteredCard(
     val ownedCardId: Int,
     val oneDayLimit: Int,
     val oneTimeLimit: Int,
+    val cardNo: String,
+    val cardExpiryDate: String,
+    val cardName: String,
     val autoPayStatus: Boolean = false,
 )
 
