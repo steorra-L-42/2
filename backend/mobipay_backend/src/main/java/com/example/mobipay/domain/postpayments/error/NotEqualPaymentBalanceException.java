@@ -1,11 +1,11 @@
 package com.example.mobipay.domain.postpayments.error;
 
-public class InvalidPaymentBalanceException extends RuntimeException {
+public class NotEqualPaymentBalanceException extends RuntimeException {
 
-    public InvalidPaymentBalanceException() {
+    public NotEqualPaymentBalanceException() {
     }
 
-    public InvalidPaymentBalanceException(String message) {
+    public NotEqualPaymentBalanceException(String message) {
         super(message);
     }
 

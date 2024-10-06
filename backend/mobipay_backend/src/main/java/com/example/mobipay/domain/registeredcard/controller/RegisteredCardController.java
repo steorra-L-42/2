@@ -11,6 +11,7 @@ import com.example.mobipay.oauth2.dto.CustomOAuth2User;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -28,6 +29,7 @@ public class RegisteredCardController {
     private final RegisteredCardService registeredCardService;
 
 
+    @PreAuthorize("isAuthenticated()")
     @PostMapping
     public ResponseEntity<RegisteredCardResponse> registerCard(@RequestBody @Valid RegisteredCardRequest request,
                                                                @AuthenticationPrincipal CustomOAuth2User oauth2User) {
@@ -35,6 +37,7 @@ public class RegisteredCardController {
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("isAuthenticated()")
     @GetMapping
     public ResponseEntity<RegisteredCardListResponse> registerCardList(
             @AuthenticationPrincipal CustomOAuth2User oauth2User) {
@@ -45,6 +48,7 @@ public class RegisteredCardController {
 
     }
 
+    @PreAuthorize("isAuthenticated()")
     @PatchMapping("/auto-pay")
     public ResponseEntity<RegisteredCardAutoPayResponse> autoPayCard(
             @RequestBody @Valid RegisteredCardAutoPayRequest request,
@@ -53,11 +57,12 @@ public class RegisteredCardController {
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/{cardId}")
     public ResponseEntity<RegisteredCardDetailResponse> getRegisteredCardDetails(@PathVariable("cardId") Long cardId,
                                                                                  @AuthenticationPrincipal CustomOAuth2User oauth2User) {
         RegisteredCardDetailResponse response = registeredCardService.getRegisteredCardDetails(cardId, oauth2User);
-        
+
         return ResponseEntity.ok(response);
     }
 }

@@ -2,10 +2,11 @@ package com.example.mobipay.postpayments;
 
 import static com.example.mobipay.global.error.ErrorCode.INTERNAL_SERVER_ERROR;
 import static com.example.mobipay.global.error.ErrorCode.INVALID_CARD_NO;
-import static com.example.mobipay.global.error.ErrorCode.INVALID_PAYMENT_BALANCE;
 import static com.example.mobipay.global.error.ErrorCode.MERCHANT_NOT_FOUND;
 import static com.example.mobipay.global.error.ErrorCode.MOBI_USER_NOT_FOUND;
+import static com.example.mobipay.global.error.ErrorCode.NOT_EQUAL_PAYMENT_BALANCE;
 import static com.example.mobipay.global.error.ErrorCode.NOT_REGISTERED_CARD;
+import static com.example.mobipay.global.error.ErrorCode.ONE_TIME_LIMIT_EXCEED;
 import static com.example.mobipay.global.error.ErrorCode.TRANSACTION_ALREADY_APPROVED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -35,6 +36,7 @@ import com.example.mobipay.domain.ownedcard.repository.OwnedCardRepository;
 import com.example.mobipay.domain.postpayments.dto.ApprovalPaymentRequest;
 import com.example.mobipay.domain.postpayments.dto.cardtransaction.CardTransactionRequest;
 import com.example.mobipay.domain.postpayments.dto.cardtransaction.CardTransactionResponse;
+import com.example.mobipay.domain.postpayments.dto.paymentresult.PaymentResultRequest;
 import com.example.mobipay.domain.registeredcard.entity.RegisteredCard;
 import com.example.mobipay.domain.registeredcard.repository.RegisteredCardRepository;
 import com.example.mobipay.domain.setupdomain.account.entity.Account;
@@ -133,32 +135,6 @@ public class PaymentApprovalTest {
 
                 Arguments.of("16자리보다 작은 - cardNo", 1L, 1L, 10000L, "123456", "info", true),
                 Arguments.of("16자리보다 큰 - cardNo", 1L, 1L, 10000L, "123456123456123456123456123456", "info", true)
-
-                /**
-                 * empty, blank, 문자열이 들어올 경우 예외 발생 처리 추후 진행하도록
-                 */
-//                Arguments.of("empty - approvalWaitingId", "", 1L, 10000L, "1234567890123456", "info", true),
-//                Arguments.of("blank - approvalWaitingId", "  ", 1L, 10000L, "1234567890123456", "info", true),
-//                Arguments.of("문자 - approvalWaitingId", "!approvalWaiting@@Id$$", 1L, 10000L, "1234567890123456", "info",
-//                        true),
-//                Arguments.of("문자 + 숫자 - approvalWaitingId", "123approvalWaitingId", 1L, 10000L, "1234567890123456",
-//                        "info", true)
-//
-//                Arguments.of("empty - merchantId", 1L, "", 10000L, "1234567890123456", "info", true),
-//                Arguments.of("blank - merchantId", 1L, "  ", 10000L, "1234567890123456", "info", true),
-//                Arguments.of("문자 - merchantId", 1L, "!merchant@@Id$$", 10000L, "1234567890123456", "info", true),
-//                Arguments.of("문자 + 숫자 - merchantId", 1L, "123merchantId", 10000L, "1234567890123456", "info", true),
-//
-//                Arguments.of("empty - paymentBalance", 1L, 1L, "", "1234567890123456", "info", true),
-//                Arguments.of("blank - paymentBalance", 1L, 1L, "  ", "1234567890123456", "info", true),
-//                Arguments.of("문자 - paymentBalance", 1L, 1L, "  !payment@@Balance$$", "1234567890123456", "info", true),
-//                Arguments.of("문자 + 숫자 - paymentBalance", 1L, 1L, "123paymentBalance", "1234567890123456", "info", true),
-//
-//                Arguments.of("empty - approved", 1L, 1L, 10000L, "1234567890123456", "info", ""),
-//                Arguments.of("blank - approved", 1L, 1L, 10000L, "1234567890123456", "info", "  "),
-//                Arguments.of("문자 - approved", 1L, 1L, 10000L, "1234567890123456", "info", "true"),
-//                Arguments.of("숫자 - approved", 1L, 1L, 10000L, "1234567890123456", "info", 12345L),
-//                Arguments.of("문자 + 숫자 - approved", 1L, 1L, 10000L, "1234567890123456", "info", "t1r2u3e4")
         );
     }
 
@@ -307,6 +283,97 @@ public class PaymentApprovalTest {
                 .andExpect(jsonPath("$.approved").value(approved));
         assertEquals(approvalWaiting.getApproved(), approved);
         assertEquals(merchantTransactionRepository.count(), 1);
+    }
+
+    @Test
+    @Transactional
+    @DisplayName("[BadRequest] payment approval: 결제 진행(결제 금액 일회 한도 초과)")
+    void 결제금액_일회_한도_초과_결제_테스트() throws Exception {
+        // given
+        Long merchantId = 1906L;
+        String cardNo = "1234567890123456";
+        /**
+         * 결제금액이 일회 한도 초과하도록 크게 설정
+         */
+        Long paymentBalance = 5000000000L;
+        Boolean approved = true;
+
+        MobiUser mobiUser = MobiUser.of("bbam@gmail.com", "mobiuser", "010-1111-1111", "mobiUserPicture");
+        FcmToken fcmToken = FcmToken.from("fcmTokenValue");
+        fcmTokenRepository.save(fcmToken);
+        mobiUser.setFcmToken(fcmToken);
+
+        SsafyUserResponse ssafyUserResponse = mock(SsafyUserResponse.class);
+        when(ssafyUserResponse.getUserId()).thenReturn("ssafyUser");
+        when(ssafyUserResponse.getUserName()).thenReturn("ssafyUser");
+        when(ssafyUserResponse.getUserKey()).thenReturn("ssafyUserKey");
+        when(ssafyUserResponse.getCreated()).thenReturn(OffsetDateTime.now());
+        when(ssafyUserResponse.getModified()).thenReturn(OffsetDateTime.now());
+
+        SsafyUser ssafyUser = SsafyUser.of(ssafyUserResponse);
+        ssafyUserRepository.save(ssafyUser);
+        mobiUser.setSsafyUser(ssafyUser);
+
+        mobiUserRepository.save(mobiUser);
+
+        Car car = Car.of("123가4567", "carModel");
+        car.setOwner(mobiUser);
+        carRepository.save(car);
+
+        CarGroup carGroup = CarGroup.of(car, mobiUser);
+        carGroup.addRelation(car, mobiUser);
+        carGroupRepository.save(carGroup);
+
+        CardRec cardRec = mock(CardRec.class);
+        when(cardRec.getCardNo()).thenReturn(cardNo);
+        when(cardRec.getCvc()).thenReturn("123");
+        when(cardRec.getWithdrawalDate()).thenReturn("1234567890");
+        when(cardRec.getCardExpiryDate()).thenReturn("20251231");
+
+        OwnedCard ownedCard = OwnedCard.of(cardRec);
+
+        AccountRec accountRec = mock(AccountRec.class);
+        when(accountRec.getBankCode()).thenReturn("001");
+        when(accountRec.getAccountNo()).thenReturn("12345678901234");
+
+        Account account = Account.of(accountRec);
+        accountRepository.save(account);
+
+        CardProduct cardProduct = cardProductRepository.findByCardUniqueNo("1001-664f125022bf433").get();
+
+        ownedCard.addRelation(mobiUser, account, cardProduct);
+        ownedCardRepository.save(ownedCard);
+
+        RegisteredCard registeredCard = RegisteredCard.from(1000000);
+        registeredCard.addRelations(mobiUser, ownedCard);
+        registeredCardRepository.save(registeredCard);
+
+        ApprovalWaiting approvalWaiting = ApprovalWaiting.from(paymentBalance);
+        Merchant merchant = merchantRepository.findById(merchantId).get();
+        approvalWaiting.addRelations(car, merchant);
+        approvalWaitingRepository.save(approvalWaiting);
+
+        SecurityTestUtil.setUpMockUser(customOAuth2User, mobiUser.getId());
+        final String url = "/api/v1/postpayments/approval";
+        final String requestBody = objectMapper.writeValueAsString(
+                new ApprovalPaymentRequest(approvalWaiting.getId(), merchant.getId(),
+                        paymentBalance, cardNo, "info", approved)
+        );
+
+        // 결제 금액이 일회 한도 금액을 초과한 것에 대한 ResponseMock 설정
+        ResponseEntity<Void> mockResponse = ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        when(restClientUtil.sendResultToMerchantServer(any(PaymentResultRequest.class), any()))
+                .thenReturn(mockResponse);
+
+        // when
+        ResultActions result = mockMvc.perform(MockMvcRequestBuilders.post(url).with(csrf())
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody));
+
+        // then
+        result.andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value(ONE_TIME_LIMIT_EXCEED.getMessage()));
     }
 
     @ParameterizedTest(name = "{index}: {0}")
@@ -466,7 +533,7 @@ public class PaymentApprovalTest {
 
         // then
         result.andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value(INVALID_PAYMENT_BALANCE.getMessage()));
+                .andExpect(jsonPath("$.message").value(NOT_EQUAL_PAYMENT_BALANCE.getMessage()));
         assertEquals(approvalWaiting.getApproved(), false);
     }
 

@@ -11,6 +11,7 @@ import com.example.mobipay.oauth2.dto.CustomOAuth2User;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -27,6 +28,7 @@ public class CarController {
 
     private final CarService carService;
 
+    @PreAuthorize("isAuthenticated()")
     @PostMapping
     public ResponseEntity<CarRegisterResponse> registerCar(@RequestBody @Valid CarRegisterRequest request,
                                                            @AuthenticationPrincipal CustomOAuth2User oauth2User) {
@@ -35,6 +37,7 @@ public class CarController {
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("isAuthenticated()")
     @GetMapping
     public ResponseEntity<CarListResponse> getCars(@AuthenticationPrincipal CustomOAuth2User oauth2User) {
 
@@ -46,6 +49,7 @@ public class CarController {
         return ResponseEntity.ok(carListResponse);
     }
 
+    @PreAuthorize("isAuthenticated()")
     @PatchMapping("/auto-pay")
     public ResponseEntity<CarAutoPayChangeResponse> changeAutoPayStatus(
             @RequestBody @Valid CarAutoPayChangeRequest request, @AuthenticationPrincipal CustomOAuth2User oauth2User) {
@@ -55,9 +59,10 @@ public class CarController {
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/{carId}/members")
     public ResponseEntity<CarMemberListResponse> getCarMemberList(@PathVariable("carId") Long carId,
-                                                                @AuthenticationPrincipal CustomOAuth2User oauth2User) {
+                                                                  @AuthenticationPrincipal CustomOAuth2User oauth2User) {
         CarMemberListResponse response = carService.getCarMemberList(carId, oauth2User);
         return ResponseEntity.ok(response);
     }
