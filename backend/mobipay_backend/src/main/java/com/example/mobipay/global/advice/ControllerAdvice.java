@@ -18,7 +18,8 @@ import com.example.mobipay.domain.ownedcard.error.OwnedCardNotFoundException;
 import com.example.mobipay.domain.postpayments.error.CardTransactionServerError;
 import com.example.mobipay.domain.postpayments.error.InvalidCardNoException;
 import com.example.mobipay.domain.postpayments.error.InvalidMobiApiKeyException;
-import com.example.mobipay.domain.postpayments.error.InvalidPaymentBalanceException;
+import com.example.mobipay.domain.postpayments.error.NotEqualPaymentBalanceException;
+import com.example.mobipay.domain.postpayments.error.OneTimeLimitExceedException;
 import com.example.mobipay.domain.postpayments.error.ReceiptUserMismatchException;
 import com.example.mobipay.domain.postpayments.error.RegisteredCardNotFoundException;
 import com.example.mobipay.domain.postpayments.error.TransactionAlreadyApprovedException;
@@ -153,10 +154,10 @@ public class ControllerAdvice {
         return getResponse(ErrorCode.INTERNAL_SERVER_ERROR);
     }
 
-    @ExceptionHandler(InvalidPaymentBalanceException.class)
-    public ResponseEntity<ErrorResponseDto> handleInvalidPaymentBalanceException(InvalidPaymentBalanceException e) {
+    @ExceptionHandler(NotEqualPaymentBalanceException.class)
+    public ResponseEntity<ErrorResponseDto> handleInvalidPaymentBalanceException(NotEqualPaymentBalanceException e) {
         log.info(e.getMessage());
-        return getResponse(ErrorCode.INVALID_PAYMENT_BALANCE);
+        return getResponse(ErrorCode.NOT_EQUAL_PAYMENT_BALANCE);
     }
 
     @ExceptionHandler(OwnedCardNotFoundException.class)
@@ -194,6 +195,12 @@ public class ControllerAdvice {
     public ResponseEntity<ErrorResponseDto> handleCard(CardUserMismatch e) {
         log.info(e.getMessage());
         return getResponse(ErrorCode.CARD_USER_MISMATCH);
+    }
+
+    @ExceptionHandler(OneTimeLimitExceedException.class)
+    public ResponseEntity<ErrorResponseDto> handleOneTimeLimitExceedException(OneTimeLimitExceedException e) {
+        log.info(e.getMessage());
+        return getResponse(ErrorCode.ONE_TIME_LIMIT_EXCEED);
     }
 
     private ResponseEntity<ErrorResponseDto> getResponse(ErrorCode errorCode) {

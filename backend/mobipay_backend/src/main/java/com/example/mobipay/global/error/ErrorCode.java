@@ -27,13 +27,14 @@ public enum ErrorCode {
     APPROVAL_WAITING_NOT_FOUND(HttpStatus.NOT_FOUND, "결제 대기건을 찾을 수 없습니다."),
     INVALID_CARD_NO(HttpStatus.BAD_REQUEST, "올바르지 않은 카드번호 입니다."),
     NOT_REGISTERED_CARD(HttpStatus.BAD_REQUEST, "존재하지 않는 등록된 카드입니다."),
-    INVALID_PAYMENT_BALANCE(HttpStatus.BAD_REQUEST, "올바르지 않은 결제금액입니다."),
+    NOT_EQUAL_PAYMENT_BALANCE(HttpStatus.BAD_REQUEST, "결제금액이 일치하지 않습니다."),
     MERCHANT_TRANSACTION_NOT_FOUND(HttpStatus.NOT_FOUND, "가맹점 거래기록을 찾을 수 없습니다."),
     RECEIPT_USER_MISMATCH(HttpStatus.FORBIDDEN, "카드 가맹점을 찾을 수 없습니다."),
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 에러입니다."),
     NOT_FOUND_CARD(HttpStatus.FORBIDDEN, "해당 카드에 대한 권한이 없습니다."),
     FCM_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "FCM 전송 에러입니다."),
     ALREADY_REGISTERED_CARD(HttpStatus.CONFLICT, "이미 등록된 카드입니다."),
+    ONE_TIME_LIMIT_EXCEED(HttpStatus.BAD_REQUEST, "결제 금액이 일회 결제 금액 한도를 초과했습니다."),
     CARD_USER_MISMATCH(HttpStatus.FORBIDDEN, "카드를 찾을 수 없습니다.");
 
 
