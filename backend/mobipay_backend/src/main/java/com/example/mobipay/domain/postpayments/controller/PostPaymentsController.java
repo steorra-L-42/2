@@ -15,6 +15,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -42,6 +43,7 @@ public class PostPaymentsController {
         return ResponseEntity.ok(paymentResponse);
     }
 
+    @PreAuthorize("isAuthenticated()")
     @PostMapping("/approval")
     public ResponseEntity<ApprovalPaymentResponse> startPayment(@RequestBody @Valid ApprovalPaymentRequest request,
                                                                 @AuthenticationPrincipal CustomOAuth2User oAuth2User) {
@@ -52,6 +54,7 @@ public class PostPaymentsController {
         return ResponseEntity.ok(approvalPaymentResponse);
     }
 
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/receipt/{transaction_unique_no}")
     public ResponseEntity<ReceiptResponse> getReceipt(
             @PathVariable("transaction_unique_no") @Positive Long transactionUniqueNo,
@@ -61,6 +64,7 @@ public class PostPaymentsController {
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/history")
     public ResponseEntity<HistoryListResponse> getHistories(@AuthenticationPrincipal CustomOAuth2User oAuth2User) {
 
