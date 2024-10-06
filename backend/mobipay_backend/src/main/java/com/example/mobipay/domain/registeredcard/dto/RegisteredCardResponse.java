@@ -11,7 +11,6 @@ public class RegisteredCardResponse {
     private Long ownedCardId;
     private String cardNo;
     private String cardExpriyDate;
-    private Integer oneDayLimit;
     private Integer oneTimeLimit;
 
     public static RegisteredCardResponse of(RegisteredCard registeredCard) {
@@ -20,7 +19,6 @@ public class RegisteredCardResponse {
                 .ownedCardId(registeredCard.getOwnedCardId())
                 .cardNo(registeredCard.getOwnedCard().getCardNo())
                 .cardExpriyDate(registeredCard.getOwnedCard().getCardExpiryDate())
-                .oneDayLimit(registeredCard.getOneDayLimit())
                 .oneTimeLimit(registeredCard.getOneTimeLimit())
                 .build();
     }

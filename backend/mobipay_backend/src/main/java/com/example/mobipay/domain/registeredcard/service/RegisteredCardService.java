@@ -52,8 +52,7 @@ public class RegisteredCardService {
                     throw new AlreadyRegisteredCard();
                 });
 
-        RegisteredCard registeredCard = RegisteredCard.of(
-                request.getOneDayLimit(),
+        RegisteredCard registeredCard = RegisteredCard.from(
                 request.getOneTimeLimit());
 
         registeredCard.addRelations(mobiUser, ownedCard);

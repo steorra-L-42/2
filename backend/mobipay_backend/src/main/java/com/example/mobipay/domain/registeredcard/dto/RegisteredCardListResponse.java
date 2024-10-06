@@ -13,7 +13,6 @@ public class RegisteredCardListResponse {
     private final List<RegisteredCardListResponse> items;
     private Long mobiUserId;
     private Long ownedCardId;
-    private Integer oneDayLimit;
     private Integer oneTimeLimit;
     private String cardNo;
     private String cardExpriyDate;
@@ -24,7 +23,6 @@ public class RegisteredCardListResponse {
         return RegisteredCardListResponse.builder()
                 .mobiUserId(registeredCard.getMobiUserId())
                 .ownedCardId(registeredCard.getOwnedCardId())
-                .oneDayLimit(registeredCard.getOneDayLimit())
                 .oneTimeLimit(registeredCard.getOneTimeLimit())
                 .cardNo(registeredCard.getOwnedCard().getCardNo())
                 .cardExpriyDate(registeredCard.getOwnedCard().getCardExpiryDate())
