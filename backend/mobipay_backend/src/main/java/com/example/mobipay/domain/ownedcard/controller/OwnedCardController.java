@@ -5,6 +5,7 @@ import com.example.mobipay.domain.ownedcard.service.OwnedCardService;
 import com.example.mobipay.oauth2.dto.CustomOAuth2User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,6 +18,7 @@ public class OwnedCardController {
 
     private final OwnedCardService ownedCardService;
 
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/owned")
     public ResponseEntity<OwnedCardListResponse> getOwnedCardsList(
             @AuthenticationPrincipal CustomOAuth2User oauth2User) {

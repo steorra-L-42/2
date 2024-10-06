@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -24,6 +25,7 @@ import org.springframework.web.cors.CorsConfiguration;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
     private final JWTUtil jwtUtil;
@@ -31,6 +33,7 @@ public class SecurityConfig {
     private final CookieMethods cookieMethods;
     private final MobiUserRepository mobiUserRepository;
     private final FcmTokenRepository fcmTokenRepository;
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
     String[] whitelist_post = {
             "/api/v1/user/reissue"
@@ -106,7 +109,10 @@ public class SecurityConfig {
         //경로별 인가 작업
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .anyRequest().permitAll());
+                        .anyRequest().permitAll())
+                .exceptionHandling(exceptionHandling -> exceptionHandling
+                        .authenticationEntryPoint(customAuthenticationEntryPoint) // 커스텀 AuthenticationEntryPoint 설정
+                );
 
         //세션 설정 : STATELESS
         http
