@@ -13,7 +13,8 @@ import com.example.mobipay.domain.ownedcard.entity.OwnedCard;
 import com.example.mobipay.domain.ownedcard.repository.OwnedCardRepository;
 import com.example.mobipay.domain.postpayments.dto.ApprovalPaymentRequest;
 import com.example.mobipay.domain.postpayments.error.InvalidCardNoException;
-import com.example.mobipay.domain.postpayments.error.InvalidPaymentBalanceException;
+import com.example.mobipay.domain.postpayments.error.NotEqualPaymentBalanceException;
+import com.example.mobipay.domain.postpayments.error.OneTimeLimitExceedException;
 import com.example.mobipay.domain.postpayments.error.RegisteredCardNotFoundException;
 import com.example.mobipay.domain.postpayments.error.TransactionAlreadyApprovedException;
 import com.example.mobipay.domain.registeredcard.entity.RegisteredCard;
@@ -56,7 +57,7 @@ public class PaymentValidator {
         }
 
         if (!approvalWaiting.getPaymentBalance().equals(request.getPaymentBalance())) {
-            throw new InvalidPaymentBalanceException();
+            throw new NotEqualPaymentBalanceException();
         }
 
         return approvalWaiting;
@@ -79,5 +80,14 @@ public class PaymentValidator {
     public Merchant validateMerchant(ApprovalPaymentRequest request) {
         return merchantRepository.findById(request.getMerchantId())
                 .orElseThrow(MerchantNotFoundException::new);
+    }
+
+    // 결제 금액과 일회 결제 한도 검증
+    public void validateOneTimeLimit(ApprovalPaymentRequest request, RegisteredCard registeredCard) {
+        Long paymentBalance = request.getPaymentBalance();
+        Integer oneTimeLimit = registeredCard.getOneTimeLimit();
+        if (paymentBalance > oneTimeLimit) {
+            throw new OneTimeLimitExceedException();
+        }
     }
 }

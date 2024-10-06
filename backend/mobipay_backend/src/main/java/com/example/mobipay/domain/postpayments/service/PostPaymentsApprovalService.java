@@ -15,7 +15,7 @@ import com.example.mobipay.domain.postpayments.dto.cardtransaction.CardTransacti
 import com.example.mobipay.domain.postpayments.dto.cardtransaction.CardTransactionResponse;
 import com.example.mobipay.domain.postpayments.dto.paymentresult.PaymentResultRequest;
 import com.example.mobipay.domain.postpayments.error.CardTransactionServerError;
-import com.example.mobipay.domain.postpayments.error.InvalidPaymentBalanceException;
+import com.example.mobipay.domain.postpayments.error.NotEqualPaymentBalanceException;
 import com.example.mobipay.domain.postpayments.error.TransactionAlreadyApprovedException;
 import com.example.mobipay.domain.postpayments.util.PaymentValidator;
 import com.example.mobipay.domain.registeredcard.entity.RegisteredCard;
@@ -70,6 +70,8 @@ public class PostPaymentsApprovalService {
             // cardNo 및 registeredCard 검증
             OwnedCard ownedCard = paymentValidator.validateCardNo(request);
             RegisteredCard registeredCard = paymentValidator.validateRegisteredCard(mobiUser, ownedCard);
+            // 결제 금액이 일회 결제 금액 한도를 넘어가는지 검증
+            paymentValidator.validateOneTimeLimit(request, registeredCard);
             // SSAFY_API 결제 진행 요청
             PaymentContext context = PaymentContext.builder()
                     .request(request)
@@ -81,9 +83,10 @@ public class PostPaymentsApprovalService {
                     .build();
             processTransaction(context);
 
-            // paymentBalance가 일치하지 않거나, 올바르지 않은 merchantId일 경우 실패 메시지를 보내지 않는다.
+            // paymentBalance가 일치하지 않거나, 올바르지 않은 merchantId일 경우 결제 실패 응답을 Merchant Server로 보내지 않는다.
             // 검증되지 않은 정보이기 때문.
-        } catch (TransactionAlreadyApprovedException | InvalidPaymentBalanceException | MerchantNotFoundException e) {
+            // 결제금액 일회 한도 초과의 경우 올바른 결제라고 판단하여 결제 실패 응답을 Merchant Server로 보낸다.
+        } catch (TransactionAlreadyApprovedException | NotEqualPaymentBalanceException | MerchantNotFoundException e) {
             log.error(e.getMessage(), e);
             throw e;
         } catch (Exception e) {
@@ -122,7 +125,6 @@ public class PostPaymentsApprovalService {
     private void processTransaction(PaymentContext context) {
 
         ResponseEntity<CardTransactionResponse> response = getCardTransactionResponse(context);
-
         // 결제 승인 성공 시 MerchantTransaction 생성 및 저장
         boolean responseSuccess = response.getStatusCode().is2xxSuccessful();
         if (responseSuccess) {
