@@ -1,5 +1,6 @@
 package com.kimnlee.mobipay.presentation.screen
 
+import android.net.Uri
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -31,7 +32,9 @@ import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import coil.transform.CircleCropTransformation
+import com.google.gson.Gson
 import com.kimnlee.auth.presentation.viewmodel.LoginViewModel
+import com.kimnlee.common.FCMData
 import com.kimnlee.common.R
 import com.kimnlee.common.ui.theme.MobiBgGray
 import com.kimnlee.common.ui.theme.MobiTextAlmostBlack
@@ -57,6 +60,20 @@ fun ShowMoreScreen(
     val formattedPhoneNumber = remember(userPhoneNumber) {
         formatPhoneNumber(userPhoneNumber)
     }
+
+    val fcmDataTemporary = FCMData(
+        paymentBalance="2100",
+        approvalWaitingId="25",
+        autoPay="false",
+        merchantId="1911",
+        lat="36.095567",
+        lng="128.43126",
+        info="초코 도넛 x 1",
+        type="transactionRequest",
+        merchantName="스타벅스 구미인의DT점",
+        cardNo = null
+    )
+    val fcmDataJson = Uri.encode(Gson().toJson(fcmDataTemporary))
 
     Scaffold(
         topBar = {
@@ -114,7 +131,7 @@ fun ShowMoreScreen(
                         MenuItem("결제 내역", { navController.navigate("paymenthistory") }, emoji = "💳"),
                         MenuItem("초대 대기", { navController.navigate("memberinvitation_invitationwaiting") }, emoji = "📩"),
                         MenuItem("프리오더", { }, emoji = "🍴"),
-                        MenuItem("결제화면(임시)", { navController.navigate("payment_requestmanualpay") }),
+                        MenuItem("결제화면(임시)", { navController.navigate("payment_requestmanualpay?fcmData=${fcmDataJson}") }),
                         MenuItem("로그아웃", { loginViewModel.logout() })
                     )
                 )
