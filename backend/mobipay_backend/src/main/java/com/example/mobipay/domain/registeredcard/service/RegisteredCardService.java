@@ -59,7 +59,7 @@ public class RegisteredCardService {
 
         registeredCardRepository.save(registeredCard);
 
-        return RegisteredCardResponse.of(registeredCard);
+        return RegisteredCardResponse.from(registeredCard);
 
     }
 

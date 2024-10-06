@@ -13,7 +13,7 @@ public class RegisteredCardResponse {
     private String cardExpriyDate;
     private Integer oneTimeLimit;
 
-    public static RegisteredCardResponse of(RegisteredCard registeredCard) {
+    public static RegisteredCardResponse from(RegisteredCard registeredCard) {
         return RegisteredCardResponse.builder()
                 .mobiUserId(registeredCard.getMobiUserId())
                 .ownedCardId(registeredCard.getOwnedCardId())
