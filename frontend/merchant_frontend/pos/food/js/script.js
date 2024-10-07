@@ -139,6 +139,11 @@ function initApp() {
       this.isShowModalReceipt = false;
     },
 
+    closeModalSuccess() {
+      this.isShowModalSuccess = false;
+    },
+
+
     dateFormat(date) {
       const formatter = new Intl.DateTimeFormat('id', { dateStyle: 'short', timeStyle: 'short'});
       return formatter.format(date);
