@@ -27,18 +27,15 @@ import com.example.mobipay.domain.setupdomain.card.entity.CardProduct;
 import com.example.mobipay.domain.setupdomain.card.repository.CardProductRepository;
 import com.example.mobipay.global.authentication.dto.AccountRec;
 import com.example.mobipay.global.authentication.dto.CardRec;
-import com.example.mobipay.util.RestClientUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 
@@ -87,16 +84,12 @@ public class GetMerchantTransactionTest {
         this.cardProductRepository = cardProductRepository;
     }
 
-    @MockBean
-    RestClientUtil restClientUtil;
-
     @BeforeEach
     public void setUp() {
         merchantTransactionRepository.deleteAll();
         registeredCardRepository.deleteAll();
         ownedCardRepository.deleteAll();
         mobiUserRepository.deleteAll();
-        Mockito.reset(restClientUtil);
     }
 
     @AfterEach
@@ -105,7 +98,6 @@ public class GetMerchantTransactionTest {
         registeredCardRepository.deleteAll();
         ownedCardRepository.deleteAll();
         mobiUserRepository.deleteAll();
-        Mockito.reset(restClientUtil);
     }
 
     @Nested
@@ -138,7 +130,7 @@ public class GetMerchantTransactionTest {
         }
 
         @Test
-        @DisplayName("실패: 400 Bad Request : merchantId에 해당하는 MobiApiKey가 아닐 때")
+        @DisplayName("merchantId에 해당하는 MobiApiKey가 아닐 때")
         void Fail400_invalidMobiApiKey() throws Exception {
             // given
             final String url = "/api/v1/merchants/" + STARBUCkS_ID + "/transactions";
