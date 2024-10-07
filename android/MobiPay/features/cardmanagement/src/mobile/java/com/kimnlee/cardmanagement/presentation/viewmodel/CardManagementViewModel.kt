@@ -269,23 +269,30 @@ class CardManagementViewModel(
     }
 
     // 마이 데이터 동의 여부 확인
-    fun checkMyDataConsentStatus() {
-        Log.d(TAG, "마이데이터 동의 했는지 조회")
+    fun checkMyDataConsentStatus(callback: (MyDataConsentStatus) -> Unit) {
         viewModelScope.launch {
             try {
                 val response = cardManagementService.getMyDataConsentStatus()
                 if (response.isSuccessful) {
                     val myDataConsentResponse = response.body()
                     if (myDataConsentResponse != null) {
-                        _myDataConsentStatus.value = MyDataConsentStatus.Fetched(myDataConsentResponse.myDataConsent)
+                        val status = MyDataConsentStatus.Fetched(myDataConsentResponse.myDataConsent)
+                        _myDataConsentStatus.value = status
+                        callback(status)
                     } else {
-                        _myDataConsentStatus.value = MyDataConsentStatus.Error("Response body is null")
+                        val status = MyDataConsentStatus.Error("Response body is null")
+                        _myDataConsentStatus.value = status
+                        callback(status)
                     }
                 } else {
-                    _myDataConsentStatus.value = MyDataConsentStatus.Error("Failed to fetch consent status: ${response.code()}")
+                    val status = MyDataConsentStatus.Error("Failed to fetch consent status: ${response.code()}")
+                    _myDataConsentStatus.value = status
+                    callback(status)
                 }
             } catch (e: Exception) {
-                _myDataConsentStatus.value = MyDataConsentStatus.Error("Exception occurred: ${e.message}")
+                val status = MyDataConsentStatus.Error("Exception occurred: ${e.message}")
+                _myDataConsentStatus.value = status
+                callback(status)
             }
         }
     }

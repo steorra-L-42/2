@@ -133,24 +133,22 @@ fun CardManagementScreen(
             }
             item {
                 AddCardButton {
-                    viewModel.checkMyDataConsentStatus()
-                }
-            }
-        }
-
-        LaunchedEffect(viewModel.myDataConsentStatus) {
-            when (val status = viewModel.myDataConsentStatus.value) {
-                is MyDataConsentStatus.Fetched -> {
-                    if (status.isConsented) {
-                        onNavigateToOwnedCards()
-                    } else {
-                        onNavigateToMyDataAgreement()
+                    viewModel.checkMyDataConsentStatus { status ->
+                        when (status) {
+                            is MyDataConsentStatus.Fetched -> {
+                                if (status.isConsented) {
+                                    onNavigateToOwnedCards()
+                                } else {
+                                    onNavigateToMyDataAgreement()
+                                }
+                            }
+                            is MyDataConsentStatus.Error -> {
+                                // 에러 처리 (예: 토스트 메시지 표시)
+                            }
+                            else -> {} // Unknown 상태 처리
+                        }
                     }
                 }
-                is MyDataConsentStatus.Error -> {
-                    // 에러 처리 (예: 토스트 메시지 표시)
-                }
-                else -> {} // Unknown 상태 처리
             }
         }
     }
