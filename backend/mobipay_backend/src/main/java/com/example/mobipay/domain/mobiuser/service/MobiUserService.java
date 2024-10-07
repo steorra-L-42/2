@@ -29,4 +29,12 @@ public class MobiUserService {
 
         return MyDataConsentResponse.newInstance(mobiUser);
     }
+
+    public MyDataConsentResponse getMyDataConsent(CustomOAuth2User oauth2User) {
+
+        MobiUser mobiUser = mobiUserRepository.findById(oauth2User.getMobiUserId())
+                .orElseThrow(MobiUserNotFoundException::new);
+
+        return MyDataConsentResponse.newInstance(mobiUser);
+    }
 }
