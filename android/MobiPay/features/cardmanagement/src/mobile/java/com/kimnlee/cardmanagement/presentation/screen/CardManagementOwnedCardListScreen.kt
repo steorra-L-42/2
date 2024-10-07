@@ -22,9 +22,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.kimnlee.common.R as CommonR
 import com.kimnlee.cardmanagement.R as CardManagementR
 import com.kimnlee.cardmanagement.data.model.OwnedCard
@@ -32,7 +30,7 @@ import com.kimnlee.cardmanagement.presentation.viewmodel.CardManagementViewModel
 import com.kimnlee.cardmanagement.presentation.viewmodel.OwnedCardUiState
 import com.kimnlee.common.ui.theme.MobiTextAlmostBlack
 import com.kimnlee.common.ui.theme.MobiTextDarkGray
-import formatCardNumber
+import com.kimnlee.common.utils.formatCardNumber
 
 // 소유한 카드 리스트에서 모비페이에 등록할 카드를 등록하는 페이지
 @OptIn(ExperimentalMaterial3Api::class)
@@ -198,7 +196,7 @@ fun CardItem(
                         color = MobiTextAlmostBlack
                     )
                     Text(
-                        text = "만료일: ${formatExpiryDate(card.cardExpiryDate)}",
+                        text = "만료일: ${nonFormatExpiryDate(card.cardExpiryDate)}",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MobiTextDarkGray
                     )
@@ -242,5 +240,9 @@ fun findCardCompany(cardNumber: String): Int {
 }
 
 fun formatExpiryDate(date: String): String {
+    return "${date.substring(2, 4)}/${date.substring(4, 6)}"
+}
+
+fun nonFormatExpiryDate(date: String): String {
     return "${date.substring(0, 4)}/${date.substring(4, 6)}/${date.substring(6, 8)}"
 }

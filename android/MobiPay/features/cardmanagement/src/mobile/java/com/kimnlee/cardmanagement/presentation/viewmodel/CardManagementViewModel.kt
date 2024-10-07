@@ -123,10 +123,11 @@ class CardManagementViewModel(
 
     // 내 소유의 카드 중에서 사용할 카드 등록
     fun registerCards(cards: List<RegisterCardRequest>) {
+        Log.d(TAG, "registerCards 호출")
         viewModelScope.launch {
             cards.forEachIndexed { index, cardInfo ->
                 try {
-                    val request = RegisterCardRequest(cardInfo.ownedCardId, cardInfo.oneDayLimit, cardInfo.oneTimeLimit, cardInfo.password)
+                    val request = RegisterCardRequest(cardInfo.ownedCardId, cardInfo.oneTimeLimit)
                     val response = cardManagementService.registerCard(request)
                     if (response.isSuccessful) {
                         val registeredCard = response.body()
@@ -136,12 +137,15 @@ class CardManagementViewModel(
                                 isFirstCardRegistration = false
                             }
                         } else {
+                            Log.d(TAG, "카드 등록 실패: ${response.code()}")
                             _registrationStatus.value = "카드 등록 실패: 응답 데이터 없음"
                         }
                     } else {
+                        Log.d(TAG, "카드 등록 실패: ${response.code()}")
                         _registrationStatus.value = "카드 등록 실패: ${response.code()}"
                     }
                 } catch (e: Exception) {
+                    Log.d(TAG, "카드 등록 실패 Exception")
                     _registrationStatus.value = "카드 등록 실패: ${e.message}"
                 }
             }
@@ -165,6 +169,11 @@ class CardManagementViewModel(
                 Log.e(TAG, "Exception while loading card detail: ${e.message}")
             }
         }
+    }
+
+    // 카드 상세 정보 초기화
+    fun clearCardDetail() {
+        _cardDetail.value = null
     }
 
     // 자동 결제 등록

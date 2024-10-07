@@ -22,10 +22,9 @@ data class OwnedCardListResponse(
 data class RegisteredCard(
     val mobiUserId: Int,
     val ownedCardId: Int,
-    val oneDayLimit: Int,
     val oneTimeLimit: Int,
     val cardNo: String,
-    val cardExpiryDate: String,
+    val cardExpriyDate: String, // 여기 오타인데 백에서 수정하기 전에 임시로 설정
     val cardName: String,
     val autoPayStatus: Boolean = false,
 )
@@ -38,9 +37,7 @@ data class RegisteredCardListResponse(
 // 소유한 카드에서 등록하기
 data class RegisterCardRequest(
     val ownedCardId : Int,
-    val oneDayLimit: Int,
-    val oneTimeLimit: Int,
-    val password : String
+    val oneTimeLimit: Int
 )
 
 // 카드 정보 넘겨줄때 data
@@ -53,16 +50,18 @@ data class CardInfo(
 data class RegisterCardResponse(
     val mobiUserId : Int,
     val ownedCardId : Int,
-    val oneDayLimit : Int,
-    val oneTimeLimit : Int,
-    val password : String,
+    val cardNo: String,
+    val cardExpiryDate: String,
+    val oneTimeLimit : Int
 )
 
 // 카드 조회
 data class CardDetailResponse(
+    val ownedCardId: Int,
     val cardNo: String,
     val cvc: String,
-    val cardExpiryData: String
+    val cardExpiryDate: String,
+    val oneTimeLimit: Int
 )
 
 // 자동 결제 등록 요청
