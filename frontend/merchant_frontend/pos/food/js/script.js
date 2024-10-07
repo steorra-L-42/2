@@ -268,6 +268,8 @@ function initApp() {
       this.closeModalReceipt();
       this.isLoading = true;
 
+      const self = this;
+
       // websocket 연결
       //const socket = new WebSocket('wss://merchant.mobipay.kr/api/v1/merchants/websocket');
       this.socket = new WebSocket('wss://merchant.mobipay.kr/api/v1/merchants/websocket');
@@ -278,13 +280,13 @@ function initApp() {
       this.socket.onopen = async (event) => {
         console.log('WebSocket is open now.');
 
-        let info = this.cart.map(item => `${item.name} x ${item.qty}`).join(', ');
-        let paymentBalance = this.getTotalPrice();
-        let carNumber = this.lpno || "번호 인식 실패";
+        let info = self.cart.map(item => `${item.name} x ${item.qty}`).join(', ');
+        let paymentBalance = self.getTotalPrice();
+        let carNumber = self.lpno || "번호 인식 실패"; 
 
-        if(carNumber == null) {
+        if (carNumber === "번호 인식 실패") {
           console.log("차량번호 없음");
-           return;
+          return;
         }
 
         // 결제 요청
@@ -300,8 +302,6 @@ function initApp() {
           console.log('결제 요청 성공, 결제 결과 대기 중...');
         } catch (error) {
           console.error('결제 요청 실패:', error);
-          // 웹소켓 연결 해제
-          //socket.close();
           this.socket.close();
           alert('결제 요청 실패');
         }
@@ -323,16 +323,16 @@ function initApp() {
           this.socket.send(JSON.stringify({ "type": MERCHANT_TYPE }));
         } else {
           if (message.success) {
-            this.isLoading = false;
-            this.isShowModalSuccess = true;
-            this.lpno = null;
-            this.isMobiUser = false; 
-            this.cart = [];
+            self.isLoading = false;
+            self.isShowModalSuccess = true;
+            self.lpno = null;
+            self.isMobiUser = false; 
+            self.cart = [];
           } else {
-            this.isLoading = false;
+            self.isLoading = false;
             alert('결제 실패');
           }
-          this.socket.close();
+          self.socket.close();
         }
       };
     },
@@ -350,7 +350,7 @@ function initApp() {
 
     async detectObjects() {
       if (this.detectionStopped) {
-        console.log('Detection is stopped.');
+        console.log('차량 감지.');
         return;
       }
 
@@ -405,9 +405,9 @@ function initApp() {
 
                       if (self.lpnoMatchCount >= 3) {
                         console.log('같은 차량번호 3회 인식으로 감지 종료:', detectedLpno);
-                        // Update Alpine store
                         Alpine.store('appState').lpno = detectedLpno;
                         Alpine.store('appState').isMobiUser = true;
+                        self.lpno = detectedLpno;
                         self.detectionStopped = true;
                         self.updateMenuIndicator(false);
                       }
@@ -443,8 +443,15 @@ function initApp() {
       this.lpnoMatchCount = 0;
       this.lastLpno = null;
       this.updateMenuIndicator(true);
-      requestAnimationFrame(() => this.detectObjects());
+
+      cocoSsd.load().then((loadedModel) => {
+        this.model = loadedModel;
+        requestAnimationFrame(() => this.detectObjects());
+      }).catch((error) => {
+        console.error('모델 로드 실패: ', error);
+      });
     },
+
 
     updateMenuIndicator(isDetecting) {
       const menuElement = document.querySelector('.bg-blue-500');
@@ -457,46 +464,47 @@ function initApp() {
       }
     },
 
-    initANPR(){
+    initANPR() {
+      const self = this;
       if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
         this.startCamera({ exact: 'environment' })
-            .then((stream) => {
-              this.video.srcObject = stream;
-              this.video.play();
-              const track = stream.getVideoTracks()[0];
-              const settings = track.getSettings();
-              this.video.width = settings.width;
-              this.video.height = settings.height;
+          .then((stream) => {
+            self.video.srcObject = stream;
+            self.video.play();
+            const track = stream.getVideoTracks()[0];
+            const settings = track.getSettings();
+            self.video.width = settings.width;
+            self.video.height = settings.height;
 
-              cocoSsd.load().then((loadedModel) => {
-                this.model = loadedModel;
-                this.detectObjects();
-              }).catch((error) => {
-                console.error('모델 로드 실패: ', error);
-              });
-            })
-            .catch((error) => {
-              console.warn('후면카메라 사용 불가하여 전면 카메라를 사용합니다.');
-              this.startCamera('user')
-                  .then((stream) => {
-                    this.video.srcObject = stream;
-                    this.video.play();
-                    const track = stream.getVideoTracks()[0];
-                    const settings = track.getSettings();
-                    this.video.width = settings.width;
-                    this.video.height = settings.height;
-
-                    cocoSsd.load().then((loadedModel) => {
-                      this.model = loadedModel;
-                      this.detectObjects();
-                    }).catch((error) => {
-                      console.error('모델 로드 실패: ', error);
-                    });
-                  })
-                  .catch((error) => {
-                    console.error('전면카메라 사용 불가: ', error);
-                  });
+            cocoSsd.load().then((loadedModel) => {
+              self.model = loadedModel;
+              self.detectObjects();
+            }).catch((error) => {
+              console.error('모델 로드 실패: ', error);
             });
+          })
+          .catch((error) => {
+            console.warn('후면카메라 사용 불가하여 전면 카메라를 사용합니다.');
+            self.startCamera('user')
+              .then((stream) => {
+                self.video.srcObject = stream;
+                self.video.play();
+                const track = stream.getVideoTracks()[0];
+                const settings = track.getSettings();
+                self.video.width = settings.width;
+                self.video.height = settings.height;
+
+                cocoSsd.load().then((loadedModel) => {
+                  self.model = loadedModel;
+                  self.detectObjects();
+                }).catch((error) => {
+                  console.error('모델 로드 실패: ', error);
+                });
+              })
+              .catch((error) => {
+                console.error('전면카메라 사용 불가: ', error);
+              });
+          });
       } else {
         console.error('getUserMedia 사용불가.');
       }
