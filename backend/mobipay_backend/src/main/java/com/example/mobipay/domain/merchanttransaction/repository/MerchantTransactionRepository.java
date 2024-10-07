@@ -17,4 +17,8 @@ public interface MerchantTransactionRepository extends JpaRepository<MerchantTra
             "order by mt.transactionDate desc, mt.transactionTime desc")
     List<MerchantTransaction> findByMobiUserId(@Param("mobiUserId") Long mobiUserId);
 
+    @Query("select mt from MerchantTransaction mt where mt.merchant.id = :merchantId " +
+            "order by mt.transactionDate desc, mt.transactionTime desc")
+    List<MerchantTransaction> findAllByMerchantId(@Param("merchantId") Long merchantId);
+
 }

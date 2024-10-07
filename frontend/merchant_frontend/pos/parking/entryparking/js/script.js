@@ -49,12 +49,80 @@ function initApp() {
     car_present: false,
     model: null,
     video: null,
+    socket: null,
+    isManualLPnoModalOpen: false,
+    isShowCameraChooseModal: false,
+    camerasLoaded: false,
+    manualLpno: '',
+    entrytime: null,
+    leavetime: null,
 
     initVideo() {
       this.video = document.getElementById('video');
+      this.detectCameras();
     },
 
-    // clear하는 과정은 하나 필요하긴하겠다.
+    openCameraChooseModal() {
+      this.isShowCameraChooseModal = true;
+    },
+
+    closeCameraChooseModal() {
+      this.isShowCameraChooseModal = false;
+    },
+
+    openLPnoModal() {
+      this.isManualLPnoModalOpen = true;
+    },
+
+    closeLPnoModal() {
+      this.isManualLPnoModalOpen = false;
+      this.manualLpno = '';
+    },
+
+    async detectCameras() {
+      try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        this.cameraDevices = devices.filter(device => device.kind === 'videoinput');
+        this.camerasLoaded = true;
+      } catch (error) {
+        console.error('Failed to enumerate devices:', error);
+      }
+    },
+
+    async selectCamera(deviceId) {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            deviceId: { exact: deviceId },
+            width: { ideal: 1920 },
+            height: { ideal: 1080 },
+            frameRate: { ideal: 60 }
+          }
+        });
+
+        this.video.srcObject = stream;
+        this.video.play();
+        this.closeCameraChooseModal();
+      } catch (error) {
+        console.error('Failed to select camera:', error);
+      }
+    },
+
+    submitManualLpno() {
+      if (this.manualLpno.trim() !== '') {
+        this.lpno = this.manualLpno;
+        this.isMobiUser = true;
+      }
+      this.closeLPnoModal();
+    },
+
+
+    async initDatabase() {
+      this.db = await loadDatabase();
+      await this.loadJsonData();
+    },
+
+
     async loadJsonData() {
       await this.db.clearProducts();
 
@@ -133,6 +201,11 @@ function initApp() {
       this.isShowModalReceipt = false;
     },
 
+    closeModalSuccess() {
+      this.isShowModalSuccess = false;
+    },
+
+
     dateFormat(date) {
       const formatter = new Intl.DateTimeFormat('id', { dateStyle: 'short', timeStyle: 'short'});
       return formatter.format(date);
@@ -176,18 +249,26 @@ function initApp() {
     },
 
 
+    cancelLoading() {
+      if (this.socket) {
+        this.socket.close();
+        this.socket = null;
+      }
+      this.isLoading = false;
+    },
 
     requestPayMobi() {
       this.closeModalReceipt();
       this.isLoading = true;
 
       // websocket 연결
-      const socket = new WebSocket('wss://merchant.mobipay.kr/api/v1/merchants/websocket');
+      //const socket = new WebSocket('wss://merchant.mobipay.kr/api/v1/merchants/websocket');
+      this.socket = new WebSocket('wss://merchant.mobipay.kr/api/v1/merchants/websocket');
 
       let sessionId; // 세션 ID를 저장할 변수
 
 
-      socket.onopen = async (event) => {
+      this.socket.onopen = async (event) => {
         console.log('WebSocket is open now.');
 
         let info = this.cart.map(item => `${item.name} x ${item.qty}`).join(', ');
@@ -196,7 +277,7 @@ function initApp() {
 
         if(carNumber == null) {
           console.log("차량번호 없음");
-           return;
+          return;
         }
 
         // 결제 요청
@@ -213,37 +294,40 @@ function initApp() {
         } catch (error) {
           console.error('결제 요청 실패:', error);
           // 웹소켓 연결 해제
-          socket.close();
+          //socket.close();
+          this.socket.close();
           alert('결제 요청 실패');
         }
       };
 
-      socket.onclose = (event) => {
+      this.socket.onclose = (event) => {
         console.log('WebSocket is closed now.');
       };
 
-      socket.onerror = (error) => {
+      this.socket.onerror = (error) => {
         console.log('WebSocket error:', error);
       };
 
-      socket.onmessage = (event) => {
+      this.socket.onmessage = (event) => {
         const message = JSON.parse(event.data);
 
         if (message.sessionId) {
           sessionId = message.sessionId;
-          socket.send(JSON.stringify({ "type": MERCHANT_TYPE }));
+          this.socket.send(JSON.stringify({ "type": MERCHANT_TYPE }));
         } else {
           if (message.success) {
             this.isLoading = false;
             this.isShowModalSuccess = true;
+            this.lpno = null;
+            this.isMobiUser = false;
+            this.cart = [];
           } else {
             this.isLoading = false;
             alert('결제 실패');
           }
-          socket.close();
+          this.socket.close();
         }
       };
- 
     },
 
     startCamera(facingMode) {
@@ -259,15 +343,8 @@ function initApp() {
 
     async detectObjects() {
       try {
-        // 감지가 종료되었는지 확인하는 플래그
-        if (this.isDetectionStopped) return; // 감지 중단 상태일 경우 함수 종료
-
         const predictions = await this.model.detect(this.video);
         this.car_present = false;
-
-        // 변수 초기화
-        let detectionCount = 0; // 감지 횟수
-        const predictedCounts = {}; // 예측된 번호판 카운트
 
         predictions.forEach((prediction) => {
           if (prediction.class === 'car') {
@@ -304,25 +381,8 @@ function initApp() {
                     const confidence = parseFloat(data.confidence);
 
                     if (confidence > 0.85) {
-                      detectionCount++; // 감지 횟수 증가
-                      const predictedText = data.predicted_text;
-
-                      // 예측된 텍스트 카운트 증가
-                      if (predictedCounts[predictedText]) {
-                        predictedCounts[predictedText]++;
-                      } else {
-                        predictedCounts[predictedText] = 1;
-                      }
-
-                      // 감지 횟수가 5회에 도달하면 요청 종료
-                      if (detectionCount >= 5) {
-                        console.log("감지 횟수가 5회에 도달했습니다.");
-                        self.$data.lpno = getMostFrequent(predictedCounts);
-                        self.$data.isMobiUser = true;
-                        console.log("최종 번호판: ", self.$data.lpno);
-                        self.isDetectionStopped = true; // 감지 중단 플래그 설정
-                        // 요청 종료
-                      }
+                      self.$data.lpno = data.predicted_text;
+                      self.$data.isMobiUser = true;
                     } else {
                       console.log("정확도 낮음");
                       self.$data.lpno = null;
@@ -341,28 +401,18 @@ function initApp() {
           // 차량 감지 안 된 경우 처리
         }
 
-        // 감지 횟수가 5회에 도달하기 전에는 계속해서 감지
         setTimeout(() => {
           requestAnimationFrame(() => this.detectObjects());
         }, 600);
-
       } catch (error) {
         console.error('물체 감지 실패: ', error);
 
-        // 감지 횟수가 5회에 도달하기 전에는 계속해서 감지
         setTimeout(() => {
           requestAnimationFrame(() => this.detectObjects());
         }, 600);
       }
-
-      // 가장 많이 감지된 값을 반환하는 함수
-      const getMostFrequent = (predictedCounts) => {
-        return Object.keys(predictedCounts).reduce((a, b) =>
-            predictedCounts[a] > predictedCounts[b] ? a : b
-        );
-      };
     },
-    
+
     initANPR(){
       if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
         this.startCamera({ exact: 'environment' })

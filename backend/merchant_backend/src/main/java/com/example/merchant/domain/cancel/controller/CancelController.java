@@ -1,7 +1,7 @@
 package com.example.merchant.domain.cancel.controller;
 
 import com.example.merchant.domain.cancel.dto.CancelTransactionResponse;
-import com.example.merchant.domain.cancel.dto.MerchantTranscactionResponse;
+import com.example.merchant.domain.cancel.dto.MerchantTransactionResponse;
 import com.example.merchant.domain.cancel.service.CancelSerivce;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -26,8 +26,8 @@ public class CancelController {
      * @return ResponseEntity<MerchantTranscactionResponse>
      */
     @GetMapping("/{merchantType}/transactions")
-    public ResponseEntity<MerchantTranscactionResponse> getTransactions(@RequestHeader("merApiKey") String merApiKey,
-                                                                        @PathVariable("merchantType") String merchantType) {
+    public ResponseEntity<MerchantTransactionResponse> getTransactions(@RequestHeader("merApiKey") String merApiKey,
+                                                                       @PathVariable("merchantType") String merchantType) {
 
         return cancelService.getTransactions(merApiKey, merchantType);
     }

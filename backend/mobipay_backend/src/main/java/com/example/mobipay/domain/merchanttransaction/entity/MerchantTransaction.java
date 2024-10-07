@@ -82,4 +82,8 @@ public class MerchantTransaction {
         this.merchant = merchant;
         merchant.getMerchantTransactions().add(this);
     }
+
+    public void cancel() {
+        this.cancelled = true;
+    }
 }
