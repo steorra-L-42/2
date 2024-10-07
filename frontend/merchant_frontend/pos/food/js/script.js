@@ -49,6 +49,7 @@ function initApp() {
     car_present: false,
     model: null,
     video: null,
+    socket: null,
 
     initVideo() {
       this.video = document.getElementById('video');
@@ -180,19 +181,27 @@ function initApp() {
       sound.onended = () => delete(sound);
     },
 
-
+    
+    cancelLoading() {
+      if (this.socket) {
+        this.socket.close();
+        this.socket = null;
+      }
+      this.isLoading = false;
+    },
 
     requestPayMobi() {
       this.closeModalReceipt();
       this.isLoading = true;
 
       // websocket 연결
-      const socket = new WebSocket('wss://merchant.mobipay.kr/api/v1/merchants/websocket');
+      //const socket = new WebSocket('wss://merchant.mobipay.kr/api/v1/merchants/websocket');
+      this.socket = new WebSocket('wss://merchant.mobipay.kr/api/v1/merchants/websocket');
 
       let sessionId; // 세션 ID를 저장할 변수
 
 
-      socket.onopen = async (event) => {
+      this.socket.onopen = async (event) => {
         console.log('WebSocket is open now.');
 
         let info = this.cart.map(item => `${item.name} x ${item.qty}`).join(', ');
@@ -218,25 +227,26 @@ function initApp() {
         } catch (error) {
           console.error('결제 요청 실패:', error);
           // 웹소켓 연결 해제
-          socket.close();
+          //socket.close();
+          this.socket.close();
           alert('결제 요청 실패');
         }
       };
 
-      socket.onclose = (event) => {
+      this.socket.onclose = (event) => {
         console.log('WebSocket is closed now.');
       };
 
-      socket.onerror = (error) => {
+      this.socket.onerror = (error) => {
         console.log('WebSocket error:', error);
       };
 
-      socket.onmessage = (event) => {
+      this.socket.onmessage = (event) => {
         const message = JSON.parse(event.data);
 
         if (message.sessionId) {
           sessionId = message.sessionId;
-          socket.send(JSON.stringify({ "type": MERCHANT_TYPE }));
+          this.socket.send(JSON.stringify({ "type": MERCHANT_TYPE }));
         } else {
           if (message.success) {
             this.isLoading = false;
@@ -245,7 +255,7 @@ function initApp() {
             this.isLoading = false;
             alert('결제 실패');
           }
-          socket.close();
+          this.socket.close();
         }
       };
 
