@@ -342,7 +342,10 @@ function initApp() {
     },
 
     async detectObjects() {
-      if (this.detectionStopped) return;
+      if (this.detectionStopped) {
+        console.log('Detection is stopped.');
+        return;
+      }
 
       try {
         const predictions = await this.model.detect(this.video);
@@ -354,6 +357,7 @@ function initApp() {
             const [x, y, width, height] = prediction.bbox;
 
             if (height > 240 && width > 350) {
+              const startTime = performance.now();
               const canvas = document.createElement('canvas');
               canvas.width = width;
               canvas.height = height;
@@ -363,6 +367,12 @@ function initApp() {
               canvas.toBlob(async (blob) => {
                 const formData = new FormData();
                 formData.append('file', blob, 'image.jpg');
+                const endTime = performance.now();
+                const duration = endTime - startTime;
+                console.log("변환 시간: " + duration.toFixed(3) + "ms");
+
+
+                console.log('GPU 서버로 번호판 OCR 요청중...');
 
                 try {
                   const response = await fetch('https://anpr.mobipay.kr/predict/', {
@@ -373,8 +383,10 @@ function initApp() {
                   const data = await response.json();
                   if (data !== null) {
                     const confidence = parseFloat(data.confidence);
+
                     if (confidence > 0.85) {
                       const detectedLpno = data.predicted_text;
+                      console.log('[정확도 0.85 이상] 인식된 차량번호:', detectedLpno);
 
                       if (this.lastLpno === detectedLpno) {
                         this.lpnoMatchCount++;
@@ -383,17 +395,21 @@ function initApp() {
                         this.lpnoMatchCount = 1;
                       }
 
-                      // 3회 이상 같은 번호 detect시 detection 종료
                       if (this.lpnoMatchCount >= 3) {
+                        console.log('같은 차량번호 3회 인식으로 감지 종료:', detectedLpno);
                         this.lpno = detectedLpno;
                         this.isMobiUser = true;
                         this.detectionStopped = true;
                         this.updateMenuIndicator(false);
                       }
+                    } else {
+                      console.log("GPU 서버 응답 정확도 낮음. 정확도:", confidence.toFixed(3));
+                      this.lpno = null;
+                      this.isMobiUser = false;
                     }
                   }
                 } catch (error) {
-                  console.error('POST 실패: ', error);
+                  console.error('POST request failed:', error);
                 }
               });
             }
@@ -406,7 +422,7 @@ function initApp() {
           }, 600);
         }
       } catch (error) {
-        console.error('물체 감지 실패: ', error);
+        console.error('Object detection 실패:', error);
         setTimeout(() => {
           requestAnimationFrame(() => this.detectObjects());
         }, 600);
