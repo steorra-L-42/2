@@ -1,6 +1,5 @@
 package com.example.mobipay.domain.cancel.controller;
 
-import com.example.mobipay.domain.cancel.dto.CancelTransactionResponse;
 import com.example.mobipay.domain.cancel.dto.MerchantTransactionResponse;
 import com.example.mobipay.domain.cancel.service.CancelService;
 import lombok.RequiredArgsConstructor;
@@ -31,13 +30,12 @@ public class CancelController {
     }
 
     @RequestMapping("/{merchantId}/cancelled-transactions/{transactionUniqueNo}")
-    public ResponseEntity<CancelTransactionResponse> cancelTransaction(@RequestHeader("mobiApiKey") String mobiApiKey,
+    public ResponseEntity<?> cancelTransaction(@RequestHeader("mobiApiKey") String mobiApiKey,
                                                                        @PathVariable("merchantId") Long merchantId,
                                                                        @PathVariable("transactionUniqueNo") Long transactionUniqueNo) {
 
-        CancelTransactionResponse response = cancelService.cancelTransaction(mobiApiKey, merchantId, transactionUniqueNo);
+        cancelService.cancelTransaction(mobiApiKey, merchantId, transactionUniqueNo);
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok().build();
     }
-
 }
