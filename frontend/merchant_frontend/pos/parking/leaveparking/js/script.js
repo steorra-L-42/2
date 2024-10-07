@@ -51,8 +51,11 @@ function initApp() {
     video: null,
     socket: null,
     isManualLPnoModalOpen: false,
-    isShowCameraChooseModal: false, 
+    isShowCameraChooseModal: false,
+    camerasLoaded: false,
     manualLpno: '',
+    entrytime: null,
+    leavetime: null,
 
     initVideo() {
       this.video = document.getElementById('video');
@@ -80,6 +83,7 @@ function initApp() {
       try {
         const devices = await navigator.mediaDevices.enumerateDevices();
         this.cameraDevices = devices.filter(device => device.kind === 'videoinput');
+        this.camerasLoaded = true;
       } catch (error) {
         console.error('Failed to enumerate devices:', error);
       }
@@ -244,7 +248,7 @@ function initApp() {
       sound.onended = () => delete(sound);
     },
 
-    
+
     cancelLoading() {
       if (this.socket) {
         this.socket.close();
@@ -273,7 +277,7 @@ function initApp() {
 
         if(carNumber == null) {
           console.log("차량번호 없음");
-           return;
+          return;
         }
 
         // 결제 요청
@@ -315,7 +319,7 @@ function initApp() {
             this.isLoading = false;
             this.isShowModalSuccess = true;
             this.lpno = null;
-            this.isMobiUser = false; 
+            this.isMobiUser = false;
             this.cart = [];
           } else {
             this.isLoading = false;

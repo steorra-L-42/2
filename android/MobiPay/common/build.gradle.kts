@@ -125,6 +125,10 @@ dependencies {
     implementation("io.jsonwebtoken:jjwt-impl:0.12.6")
     implementation("io.jsonwebtoken:jjwt-jackson:0.12.6") // If using Jackson for JSON parsing
 
+    // rtc 관련 라이브러리
+    api("io.socket:socket.io-client:2.1.1")
+    api("com.dafruits:webrtc:123.0.0")
+    api("androidx.localbroadcastmanager:localbroadcastmanager:1.1.0")
 
     // coil (gif)
     api(libs.coil.compose)

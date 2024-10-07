@@ -57,15 +57,6 @@ fun CardRegistrationScreen(
 
     val oneTimeLimitFocusRequester = remember { FocusRequester() }
 
-    fun formatMoney(input: String): String {
-        return try {
-            val amount = BigInteger(input.replace(Regex("[^0-9]"), ""))
-            moneyFormat(amount)
-        } catch (e: NumberFormatException) {
-            ""
-        }
-    }
-
     fun applyToAllCards(oneTimeValue: String) {
         oneTimeLimits = List(cardInfos.size) { oneTimeValue }
         val errors = cardInfos.indices.map { validateLimits(oneTimeValue) }

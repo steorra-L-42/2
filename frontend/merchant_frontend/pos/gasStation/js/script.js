@@ -51,13 +51,14 @@ function initApp() {
     video: null,
     socket: null,
     isManualLPnoModalOpen: false,
-    isShowCameraChooseModal: false, 
+    isShowCameraChooseModal: false,
     manualLpno: '',
 
     initVideo() {
       this.video = document.getElementById('video');
       this.detectCameras();
     },
+
 
     openCameraChooseModal() {
       this.isShowCameraChooseModal = true;
@@ -112,12 +113,10 @@ function initApp() {
       this.closeLPnoModal();
     },
 
-
     async initDatabase() {
       this.db = await loadDatabase();
       await this.loadJsonData();
     },
-
 
     async loadJsonData() {
       await this.db.clearProducts();
@@ -135,17 +134,33 @@ function initApp() {
       return this.products;
     },
 
+    //
+    handleClick(product) {
+      this.addToCart(product); // 기존 동작 유지
+      this.isShowModal = true; // 모달 띄우기
+      this.selectAmount(10000);
+    },
+
+    // 모달 닫기
+    closeModal() {
+      this.isShowModal = false;
+    },
+
+    selectAmount(amount) {
+      this.selectedAmount = amount; // 선택된 금액 저장
+    },
+
     addToCart(product) {
       const index = this.findCartIndex(product);
       if (index === -1) {
-        this.cart.push({
+        this.cart = [{
           productId: product.id,
           image: product.image,
           name: product.name,
           price: product.price,
           option: product.option,
           qty: 1,
-        });
+        }];
       } else {
         this.cart[index].qty += 1;
       }
@@ -201,7 +216,6 @@ function initApp() {
       this.isShowModalSuccess = false;
     },
 
-
     dateFormat(date) {
       const formatter = new Intl.DateTimeFormat('id', { dateStyle: 'short', timeStyle: 'short'});
       return formatter.format(date);
@@ -214,8 +228,12 @@ function initApp() {
           .replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,");
     },
 
-    priceFormat(number) {
-      return number ? `${this.numberFormat(number)} 원` : `0 원`;
+    priceFormat() {
+      return `${this.selectedAmount.toLocaleString()} 원`;
+    },
+
+    howmany(price) {
+      return `${(this.selectedAmount/price).toFixed(2)} L`;
     },
 
     clear() {
@@ -244,7 +262,6 @@ function initApp() {
       sound.onended = () => delete(sound);
     },
 
-    
     cancelLoading() {
       if (this.socket) {
         this.socket.close();
@@ -258,11 +275,8 @@ function initApp() {
       this.isLoading = true;
 
       // websocket 연결
-      //const socket = new WebSocket('wss://merchant.mobipay.kr/api/v1/merchants/websocket');
       this.socket = new WebSocket('wss://merchant.mobipay.kr/api/v1/merchants/websocket');
-
       let sessionId; // 세션 ID를 저장할 변수
-
 
       this.socket.onopen = async (event) => {
         console.log('WebSocket is open now.');
@@ -290,7 +304,6 @@ function initApp() {
         } catch (error) {
           console.error('결제 요청 실패:', error);
           // 웹소켓 연결 해제
-          //socket.close();
           this.socket.close();
           alert('결제 요청 실패');
         }
@@ -315,7 +328,7 @@ function initApp() {
             this.isLoading = false;
             this.isShowModalSuccess = true;
             this.lpno = null;
-            this.isMobiUser = false; 
+            this.isMobiUser = false;
             this.cart = [];
           } else {
             this.isLoading = false;
@@ -324,6 +337,7 @@ function initApp() {
           this.socket.close();
         }
       };
+
     },
 
     startCamera(facingMode) {
