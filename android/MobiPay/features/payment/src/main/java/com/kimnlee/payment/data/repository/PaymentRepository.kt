@@ -3,31 +3,27 @@ package com.kimnlee.payment.data.repository
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import android.location.Location
 import android.net.Uri
-import androidx.navigation.NavController
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
+import android.util.Log
+import androidx.navigation.NavDeepLinkBuilder
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
 import com.google.gson.Gson
-import com.kimnlee.common.PaymentOperations
-import com.kimnlee.payment.data.api.PaymentApiService
-import com.kimnlee.payment.data.model.Photos
 import com.kimnlee.common.FCMData
+import com.kimnlee.common.PaymentOperations
 import com.kimnlee.common.utils.AAFocusManager
 import com.kimnlee.common.utils.MobiNotificationManager
+import com.kimnlee.common.utils.moneyFormat
+import com.kimnlee.payment.data.api.PaymentApiService
 import com.kimnlee.payment.data.model.PaymentApprovalData
-import com.kimnlee.payment.presentation.screen.ManualPaymentScreen
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import java.text.NumberFormat
-import java.util.Locale
+import kotlin.random.Random
 
 private const val TAG = "PaymentRepository"
 class PaymentRepository(
@@ -84,6 +80,22 @@ class PaymentRepository(
 
         processPay(fcmData, true)
 
+    }
+
+    fun approveManualPay(fcmData: FCMData, cardNo: String){
+        val newFcmData = FCMData(
+            fcmData.autoPay,
+            cardNo,
+            fcmData.approvalWaitingId,
+            fcmData.merchantId,
+            fcmData.paymentBalance,
+            fcmData.merchantName,
+            fcmData.info,
+            fcmData.lat,
+            fcmData.lng,
+            fcmData.type
+        )
+        processPay(newFcmData, false)
     }
 
     override fun processPay(fcmData: FCMData, isAutoPay: Boolean){
@@ -143,7 +155,7 @@ class PaymentRepository(
                         context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
                     )
 
-                    val amountKRW = moneyFormat(fcmData.paymentBalance)
+                    val amountKRW = moneyFormat(fcmData.paymentBalance!!.toBigInteger())
 
                     var notiTitle = if (isAutoPay) "모비페이 자동결제 완료" else "모비페이 결제완료"
 
@@ -211,8 +223,24 @@ class PaymentRepository(
         }else{
             // 폰
             // TODO 휴대폰으로 결제 요청하는 로직 작성 필요
-            _fcmDataToNavigate.value = fcmData
+//            _fcmDataToNavigate.value = fcmData
             // mobiNotificationManager.showNotification() ??????
+            val fcmDataJson = Uri.encode(Gson().toJson(fcmData))
+            val deepLinkUri = Uri.parse("mobipay://payment_requestmanualpay?fcmData=$fcmDataJson")
+
+            val intent = Intent(Intent.ACTION_VIEW, deepLinkUri).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            }
+
+            val pendingIntent = PendingIntent.getActivity(
+                context, Random.nextInt(), intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+
+            val amountKRW = moneyFormat(fcmData.paymentBalance!!.toBigInteger())
+            val notiTitle = "모비페이 결제 요청"
+            val notiMsg = "${fcmData.merchantName}에서\n${amountKRW} 결제를 요청했어요!"
+
+            mobiNotificationManager.showNotification(notiTitle, notiMsg, pendingIntent)
 
         }
 
@@ -243,15 +271,6 @@ class PaymentRepository(
                 Log.d(TAG, "processFCM: 현재 위치를 가져오지 못했습니다.")
             }
         }
-    }
-
-    fun moneyFormat(paymentBalance: String?): String {
-        if(paymentBalance == null)
-            return "오류"
-
-        val number = paymentBalance.toLongOrNull() ?: 0L
-        val numberFormat = NumberFormat.getNumberInstance(Locale.KOREA)
-        return numberFormat.format(number)
     }
 
 }

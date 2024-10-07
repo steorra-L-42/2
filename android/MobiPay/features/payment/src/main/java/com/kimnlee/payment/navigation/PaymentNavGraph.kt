@@ -16,6 +16,7 @@ import com.kimnlee.common.components.BottomNavigation
 import com.kimnlee.payment.data.dummyMerchants
 import com.kimnlee.payment.data.dummyTransactions
 import com.kimnlee.payment.data.model.MerchantTransaction
+import com.kimnlee.payment.data.repository.PaymentRepository
 import com.kimnlee.payment.presentation.screen.ManualPaymentScreen
 import com.kimnlee.payment.presentation.screen.PaymentDetailListScreen
 import com.kimnlee.payment.presentation.screen.PaymentDetailScreen
@@ -24,7 +25,8 @@ import com.kimnlee.payment.presentation.viewmodel.BiometricViewModel
 
 fun NavGraphBuilder.paymentNavGraph(
     navController: NavHostController,
-    biometricViewModel: BiometricViewModel
+    biometricViewModel: BiometricViewModel,
+    paymentRepository: PaymentRepository
 ) {
     navigation(startDestination = "payment_main", route = "paymenthistory") {
         composable("payment_main",
@@ -71,19 +73,29 @@ fun NavGraphBuilder.paymentNavGraph(
         ) {
             PaymentSucceedScreen(navController)
         }
+
         composable(
-            route = "payment_requestmanualpay?fcmData={fcmData}",
+            route = "payment_requestmanualpay?fcmData={fcmData}&registeredCards={registeredCards}",
             enterTransition = { EnterTransition.None },
             exitTransition = { ExitTransition.None },
-            arguments = listOf(navArgument("fcmData") { type = NavType.StringType })
+            arguments = listOf(
+                navArgument("fcmData") { type = NavType.StringType; nullable = true },
+                navArgument("registeredCards") { type = NavType.StringType; nullable = true }
+            ),
+//            deepLinks = listOf(navDeepLink { uriPattern = "mobipay://payment_requestmanualpay{?fcmData}" })
+            deepLinks = listOf(navDeepLink { uriPattern = "mobipay://payment_requestmanualpay{?fcmData}&{registeredCards}" })
         ) { backStackEntry ->
             val fcmDataJson = backStackEntry.arguments?.getString("fcmData")
-            val fcmData = Gson().fromJson(fcmDataJson, FCMData::class.java)
+            val fcmData = fcmDataJson?.let { Gson().fromJson(it, FCMData::class.java) }
+
+            val registeredCardsJson = backStackEntry.arguments?.getString("registeredCards")
 
             ManualPaymentScreen(
                 navController = navController,
                 viewModel = biometricViewModel,
-                fcmData = fcmData
+                fcmData = fcmData,
+                paymentRepository = paymentRepository,
+                registeredCards = registeredCardsJson!!
             )
         }
     }

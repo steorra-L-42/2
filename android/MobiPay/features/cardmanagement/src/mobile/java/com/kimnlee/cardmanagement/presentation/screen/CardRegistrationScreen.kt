@@ -34,6 +34,7 @@ import com.kimnlee.cardmanagement.data.model.RegisterCardRequest
 import com.kimnlee.cardmanagement.presentation.viewmodel.CardManagementViewModel
 import com.kimnlee.common.ui.theme.MobiTextAlmostBlack
 import com.kimnlee.common.ui.theme.MobiTextDarkGray
+import com.kimnlee.common.utils.formatCardNumber
 import java.math.BigInteger
 import com.kimnlee.common.utils.moneyFormat
 
@@ -47,34 +48,19 @@ fun CardRegistrationScreen(
     val pagerState = rememberPagerState(pageCount = { cardInfos.size })
     val focusManager = LocalFocusManager.current
 
-    var oneDayLimits by remember { mutableStateOf(List(cardInfos.size) { "" }) }
     var oneTimeLimits by remember { mutableStateOf(List(cardInfos.size) { "" }) }
-
-    var oneDayLimitErrors by remember { mutableStateOf(List(cardInfos.size) { "" }) }
     var oneTimeLimitErrors by remember { mutableStateOf(List(cardInfos.size) { "" }) }
 
     var isApplyToAll by remember { mutableStateOf(false) }
 
-    val isAnyLimitExceeded = oneDayLimitErrors.any { it.isNotEmpty() } || oneTimeLimitErrors.any { it.isNotEmpty() }
+    val isAnyLimitExceeded = oneTimeLimitErrors.any { it.isNotEmpty() }
 
-    val oneDayLimitFocusRequester = remember { FocusRequester() }
     val oneTimeLimitFocusRequester = remember { FocusRequester() }
 
-    fun formatMoney(input: String): String {
-        return try {
-            val amount = BigInteger(input.replace(Regex("[^0-9]"), ""))
-            moneyFormat(amount)
-        } catch (e: NumberFormatException) {
-            ""
-        }
-    }
-
-    fun applyToAllCards(oneDayValue: String, oneTimeValue: String) {
-        oneDayLimits = List(cardInfos.size) { oneDayValue }
+    fun applyToAllCards(oneTimeValue: String) {
         oneTimeLimits = List(cardInfos.size) { oneTimeValue }
-        val errors = cardInfos.indices.map { validateLimits(oneDayValue, oneTimeValue) }
-        oneDayLimitErrors = errors.map { it.first }
-        oneTimeLimitErrors = errors.map { it.second }
+        val errors = cardInfos.indices.map { validateLimits(oneTimeValue) }
+        oneTimeLimitErrors = errors.map { it }
     }
 
     Scaffold(
@@ -150,7 +136,7 @@ fun CardRegistrationScreen(
                             isApplyToAll = newValue
                             if (newValue) {
                                 val currentPage = pagerState.currentPage
-                                applyToAllCards(oneDayLimits[currentPage], oneTimeLimits[currentPage])
+                                applyToAllCards(oneTimeLimits[currentPage])
                             }
                         },
                         colors = CheckboxDefaults.colors(checkedColor = Color(0xFF3182F6))
@@ -165,54 +151,14 @@ fun CardRegistrationScreen(
             }
 
             OutlinedTextField(
-                value = oneDayLimits[pagerState.currentPage],
-                onValueChange = { newValue ->
-                    val filteredValue = newValue.filter { it.isDigit() }
-                    if (isApplyToAll) {
-                        applyToAllCards(filteredValue, oneTimeLimits[pagerState.currentPage])
-                    } else {
-                        oneDayLimits = oneDayLimits.toMutableList().apply { this[pagerState.currentPage] = filteredValue }
-                        val (oneDayError, oneTimeError) = validateLimits(filteredValue, oneTimeLimits[pagerState.currentPage])
-                        oneDayLimitErrors = oneDayLimitErrors.toMutableList().apply { this[pagerState.currentPage] = oneDayError }
-                        oneTimeLimitErrors = oneTimeLimitErrors.toMutableList().apply { this[pagerState.currentPage] = oneTimeError }
-                    }
-                },
-                label = {
-                    Text(
-                        text = "1일 결제 한도",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MobiTextDarkGray
-                    )
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .focusRequester(oneDayLimitFocusRequester),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next),
-                keyboardActions = KeyboardActions(onNext = { oneTimeLimitFocusRequester.requestFocus() }),
-                isError = oneDayLimitErrors[pagerState.currentPage].isNotEmpty(),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Color.Black,
-                    unfocusedBorderColor = Color.Gray
-                ),
-                visualTransformation = MoneyFormat(),
-            )
-
-            if (oneDayLimitErrors[pagerState.currentPage].isNotEmpty()) {
-                Text(oneDayLimitErrors[pagerState.currentPage], color = Color.Red)
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            OutlinedTextField(
                 value = oneTimeLimits[pagerState.currentPage],
                 onValueChange = { newValue ->
                     val filteredValue = newValue.filter { it.isDigit() }
                     if (isApplyToAll) {
-                        applyToAllCards(oneDayLimits[pagerState.currentPage], filteredValue)
+                        applyToAllCards(filteredValue)
                     } else {
                         oneTimeLimits = oneTimeLimits.toMutableList().apply { this[pagerState.currentPage] = filteredValue }
-                        val (oneDayError, oneTimeError) = validateLimits(oneDayLimits[pagerState.currentPage], filteredValue)
-                        oneDayLimitErrors = oneDayLimitErrors.toMutableList().apply { this[pagerState.currentPage] = oneDayError }
+                        val oneTimeError = validateLimits(filteredValue)
                         oneTimeLimitErrors = oneTimeLimitErrors.toMutableList().apply { this[pagerState.currentPage] = oneTimeError }
                     }
                 },
@@ -244,18 +190,14 @@ fun CardRegistrationScreen(
                     val cardsToRegister = cardInfos.mapIndexed { index, cardInfo ->
                         RegisterCardRequest(
                             ownedCardId = cardInfo.cardId,
-                            oneDayLimit = oneDayLimits[index].toIntOrNull() ?: 0,
-                            oneTimeLimit = oneTimeLimits[index].toIntOrNull() ?: 0,
-                            password = "123" // 임시로 비밀번호 적용, 나중에 없어짐
+                            oneTimeLimit = oneTimeLimits[index].toIntOrNull() ?: 0
                         )
                     }
                     viewModel.registerCards(cardsToRegister)
                     onNavigateBack()
                 },
                 modifier = Modifier.fillMaxWidth().height(56.dp),
-                enabled = oneDayLimits.all { it.isNotEmpty() } &&
-                        oneTimeLimits.all { it.isNotEmpty() } &&
-                        !isAnyLimitExceeded,
+                enabled = oneTimeLimits.all { it.isNotEmpty() } && !isAnyLimitExceeded,
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3182F6)),
                 shape = RoundedCornerShape(8.dp)
             ) {
@@ -270,7 +212,7 @@ fun CardRegistrationScreen(
 
     LaunchedEffect(pagerState.currentPage, isApplyToAll) {
         if (isApplyToAll) {
-            applyToAllCards(oneDayLimits[pagerState.currentPage], oneTimeLimits[pagerState.currentPage])
+            applyToAllCards(oneTimeLimits[pagerState.currentPage])
         }
     }
 }
@@ -290,27 +232,18 @@ fun CardImage(cardInfo: CardInfo) {
             contentScale = ContentScale.Fit
         )
         Text(
-            text = maskCardNumber(cardInfo.cardNo),
+            text = formatCardNumber(cardInfo.cardNo),
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(16.dp)
         )
     }
 }
 
-private fun validateLimits(oneDayLimit: String, oneTimeLimit: String): Pair<String, String> {
-    val oneDayValue = oneDayLimit.toLongOrNull() ?: 0L
+private fun validateLimits(oneTimeLimit: String): String {
     val oneTimeValue = oneTimeLimit.toLongOrNull() ?: 0L
 
-    val oneDayError = when {
-        oneDayValue > 10_000_000L -> "1일 결제 한도는 1,000만원을 초과할 수 없어요."
-        else -> ""
-    }
-
-    val oneTimeError = when {
+    return when {
         oneTimeValue > 1_000_000L -> "1회 결제 한도는 100만원을 초과할 수 없어요."
-        oneTimeValue > oneDayValue && oneDayValue != 0L -> "1회 결제 한도는 1일 결제 한도를 초과할 수 없어요."
         else -> ""
     }
-
-    return Pair(oneDayError, oneTimeError)
 }

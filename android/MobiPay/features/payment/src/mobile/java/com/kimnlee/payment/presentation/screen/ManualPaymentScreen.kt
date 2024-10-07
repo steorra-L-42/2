@@ -10,15 +10,21 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -28,14 +34,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.kimnlee.common.FCMData
 import com.kimnlee.common.R
 import com.kimnlee.common.utils.moneyFormat
+import com.kimnlee.payment.data.repository.PaymentRepository
 import com.kimnlee.payment.presentation.viewmodel.AuthenticationState
 import com.kimnlee.payment.presentation.viewmodel.BiometricViewModel
 
@@ -45,12 +54,17 @@ private const val TAG = "ManualPaymentScreen"
 fun ManualPaymentScreen(
     navController: NavController,
     viewModel: BiometricViewModel = viewModel(),
-    fcmData: FCMData?
+    fcmData: FCMData?,
+    paymentRepository: PaymentRepository,
+    registeredCards: String
 ) {
     val context = LocalContext.current
     val authState by viewModel.authenticationState.collectAsState()
     val keyguardManager = context.getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
+    val pagerState = rememberPagerState(pageCount = { 3 })
 //    val bioAuth = viewModel.BIO_AUTH
+
+    //  1002134901000082
 
     val biometricLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
@@ -65,15 +79,27 @@ fun ManualPaymentScreen(
     LaunchedEffect(Unit) {
         viewModel.navigateToPaymentDetail.collect {
             Log.d(TAG, "ManualPaymentScreen: 인증 성공. payment_detail로 이동합니다.")
-            navController.navigate("payment_detail")
-            viewModel.resetAuthState()
+            val cardNo = "1002134901000082"
+            if (fcmData != null && !isAnyFieldNull(fcmData) && cardNo != null){
+                Log.d(TAG, "ManualPaymentScreen: NULL값 없고 카드번호 OK")
+                paymentRepository.approveManualPay(fcmData, cardNo)
+//                navController.navigate("payment_detail")
+                viewModel.resetAuthState()
+            }
         }
     }
 
-    if(fcmData == null)
+    if(fcmData == null) {
+        Log.d(TAG, "ManualPaymentScreen: FCM 데이터가 NULL 이어서 종료.")
         return
-    else if(isAnyFieldNull(fcmData))
+    }else if(isAnyFieldNull(fcmData)) {
+        Log.d(TAG, "ManualPaymentScreen: FCM 필드 중 NULL 발견.")
+        Log.d(TAG, "ManualPaymentScreen: ${fcmData.toString()}")
         return
+    }else{
+        Log.d(TAG, "ManualPaymentScreen: FCMData null 아님.")
+        Log.d(TAG, "ManualPaymentScreen: 등록 카드정보 잘 넘어옴\n 카드 정보: ${registeredCards}")
+    }
     // NULL체크 완료
 
     Column(
@@ -84,13 +110,17 @@ fun ManualPaymentScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween
     ) {
-        Image(
-            painter = painterResource(id = R.drawable.ic_mobipay),
-            contentDescription = "Coin Icon",
+
+        HorizontalPager(
+            state = pagerState,
             modifier = Modifier
-                .size(100.dp)
-                .padding(top = 24.dp)
-        )
+                .weight(0.5f)
+                .fillMaxWidth(),
+            pageSpacing = 16.dp,
+            contentPadding = PaddingValues(horizontal = 48.dp)
+        ) { page ->
+//            CardImage(cardInfo = cardInfos[page])
+        }
         Row(
             modifier = Modifier.padding(vertical = 16.dp),
             horizontalArrangement = Arrangement.Center,
@@ -157,9 +187,76 @@ fun ManualPaymentScreen(
         }
     }
 }
+
+
+data class CardInfo(
+    val cardId: Int,
+    val cardNo: String
+)
+
+fun findCardCompany(cardNumber: String): Int {
+    val company = cardNumber.take(4)
+    return when (company) {
+        "1001" -> R.drawable.kb_only_you_titanium
+        "1002" -> R.drawable.s_taptap
+        "1003" -> R.drawable.l_im_driving
+        "1004" -> R.drawable.w_inyou
+        "1006" -> R.drawable.h_energy_plus_edition3
+        "1007" -> R.drawable.bc_baro
+        "1008" -> R.drawable.nh_zgm_point
+        "1009" -> R.drawable.ha_enery_double
+        "1010" -> R.drawable.ibk_daily_happy
+        else -> R.drawable.card_example
+    }
+}
+
+@Composable
+fun CardImage(cardInfo: CardInfo) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .aspectRatio(1.6f),
+        colors = CardDefaults.cardColors(containerColor = Color.White)
+    ) {
+        Image(
+            painter = painterResource(id = findCardCompany(cardInfo.cardNo)),
+            contentDescription = "Card Image",
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Fit
+        )
+        Text(
+            text = maskCardNumber(cardInfo.cardNo),
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(16.dp)
+        )
+    }
+}
+
+
+fun maskCardNumber(cardNumber: String): String {
+
+    // 앞뒤 공백이나 - 지우고 처리
+    val cleanNumber = cardNumber.replace(Regex("[^0-9]"), "")
+
+    return when (cleanNumber.length) {
+        15 -> { // 아멕스
+            val first4 = cleanNumber.take(4)
+            val last3 = cleanNumber.takeLast(3)
+            "$first4${"*".repeat(8)}$last3"
+        }
+        16 -> { // 일반 카드
+            val first4 = cleanNumber.take(4)
+            val last4 = cleanNumber.takeLast(4)
+            "$first4${"*".repeat(8)}$last4"
+        }
+        else -> cleanNumber
+    }
+}
+
 private fun isAnyFieldNull(fcmData: FCMData): Boolean {
     return with(fcmData) {
-        listOf(autoPay, cardNo, approvalWaitingId, merchantId, paymentBalance, merchantName, info, lat, lng, type)
+        // 카드번호는 NULL 체크 하지 않습니다.
+        listOf(autoPay, approvalWaitingId, merchantId, paymentBalance, merchantName, info, lat, lng, type)
             .any { it == null }
     }
 }
