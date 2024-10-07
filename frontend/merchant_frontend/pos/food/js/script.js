@@ -51,10 +51,20 @@ function initApp() {
     video: null,
     socket: null,
     isManualLPnoModalOpen: false,
+    isShowCameraChooseModal: false, 
     manualLpno: '',
 
     initVideo() {
       this.video = document.getElementById('video');
+      this.detectCameras();
+    },
+
+    openCameraChooseModal() {
+      this.isShowCameraChooseModal = true;
+    },
+
+    closeCameraChooseModal() {
+      this.isShowCameraChooseModal = false;
     },
 
     openLPnoModal() {
@@ -64,6 +74,34 @@ function initApp() {
     closeLPnoModal() {
       this.isManualLPnoModalOpen = false;
       this.manualLpno = '';
+    },
+
+    async detectCameras() {
+      try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        this.cameraDevices = devices.filter(device => device.kind === 'videoinput');
+      } catch (error) {
+        console.error('Failed to enumerate devices:', error);
+      }
+    },
+
+    async selectCamera(deviceId) {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            deviceId: { exact: deviceId },
+            width: { ideal: 1920 },
+            height: { ideal: 1080 },
+            frameRate: { ideal: 60 }
+          }
+        });
+
+        this.video.srcObject = stream;
+        this.video.play();
+        this.closeCameraChooseModal();
+      } catch (error) {
+        console.error('Failed to select camera:', error);
+      }
     },
 
     submitManualLpno() {
