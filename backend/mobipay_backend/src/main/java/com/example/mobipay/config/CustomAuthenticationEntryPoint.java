@@ -3,10 +3,12 @@ package com.example.mobipay.config;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
@@ -32,5 +34,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
         // 응답에 JSON 데이터 작성
         response.getWriter().write(jsonResponse);
         response.getWriter().flush();
+
+        log.info("★Unauthorized User accessed★");
     }
 }
