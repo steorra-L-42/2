@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -17,8 +18,10 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.DefaultTintColor
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.VerticalAlignmentLine
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -29,7 +32,10 @@ import com.kimnlee.auth.R
 import com.kimnlee.auth.presentation.components.PrivacyPolicyModal
 import com.kimnlee.auth.presentation.viewmodel.LoginViewModel
 import com.kimnlee.common.ui.theme.MobiBgGray
+import com.kimnlee.common.ui.theme.MobiBlue
+import com.kimnlee.common.ui.theme.MobiTextAlmostBlack
 import com.kimnlee.common.ui.theme.MobiTextDarkGray
+import com.kimnlee.common.ui.theme.MobiUnselectedButtonGray
 
 @Composable
 fun RegistrationScreen(
@@ -53,6 +59,8 @@ fun RegistrationScreen(
     val showPolicyModal by viewModel.showPolicyModal.collectAsState()
     val hasAgreed by viewModel.hasAgreed.collectAsState()
     var hasAgreedError by remember { mutableStateOf("") }
+
+    val focusManager = LocalFocusManager.current
 
     fun validatePhoneNumber(): Boolean {
         return phoneMiddle.length == 4 && phoneLast.length == 4
@@ -89,7 +97,12 @@ fun RegistrationScreen(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 24.dp),
+            .padding(horizontal = 24.dp)
+            .pointerInput(Unit) {
+            detectTapGestures(onTap = {
+                focusManager.clearFocus()
+            })
+        },
         horizontalAlignment = Alignment.Start
     ) {
         Spacer(modifier = Modifier.height(40.dp))
@@ -134,7 +147,12 @@ fun RegistrationScreen(
                     }
                 },
                 modifier = Modifier
-                    .weight(1f),
+                    .weight(1f)
+                    .pointerInput(Unit) {
+                        detectTapGestures(onTap = {
+                            focusManager.clearFocus()
+                        })
+                    },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 singleLine = true,
                 colors = TextFieldDefaults.colors(
@@ -161,7 +179,12 @@ fun RegistrationScreen(
                 },
                 modifier = Modifier
                     .weight(1f)
-                    .focusRequester(focusRequesterLast),
+                    .focusRequester(focusRequesterLast)
+                    .pointerInput(Unit) {
+                        detectTapGestures(onTap = {
+                            focusManager.clearFocus()
+                        })
+                    },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 singleLine = true,
                 colors = TextFieldDefaults.colors(
@@ -194,7 +217,12 @@ fun RegistrationScreen(
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .focusRequester(focusRequesterName),
+                .focusRequester(focusRequesterName)
+                .pointerInput(Unit) {
+                    detectTapGestures(onTap = {
+                        focusManager.clearFocus()
+                    })
+                },
             placeholder = { Text("홍길동") },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
             colors = TextFieldDefaults.colors(
@@ -206,111 +234,126 @@ fun RegistrationScreen(
                 focusedIndicatorColor = MobiTextDarkGray,
             )
         )
+
         Spacer(modifier = Modifier.weight(1f))
-        Box() {
-            Column {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Start,
-                    modifier = Modifier
-                        .height(IntrinsicSize.Min)
-                        .padding(vertical = 4.dp)
-                ) {
-                    Checkbox(
-                        checked = hasAgreed,
-                        onCheckedChange = { viewModel.tooglePolicy() },
-                        modifier = Modifier.size(30.dp)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp)) // 체크박스와 텍스트 사이 간격
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            "모비페이 ",
-                            fontSize = 9.sp,
-                            modifier = Modifier
-                                .alignByBaseline()
-                        )
-                        Text(text = "이용약관",
-                            color = Color.Blue,
-                            textDecoration = TextDecoration.Underline,
-                            fontSize = 9.sp,
-                            modifier = Modifier
-                                .clickable {
-                                    privacyText = getPrivacyText("privacy_text.txt")
-                                    viewModel.openPrivacyModal()
-                                }
-                                .height(IntrinsicSize.Min)
-                                .alignByBaseline()
-                        )
-                        Text(
-                            "및", fontSize = 8.sp,
-                            modifier = Modifier
-                                .alignByBaseline()
-                                .padding(horizontal = 1.dp)
-                        )
-                        Text(
-                            "자동 결제 약관",
-                            color = Color.Blue,
-                            textDecoration = TextDecoration.Underline,
-                            fontSize = 9.sp,
-                            modifier = Modifier
-                                .alignByBaseline()
-                                .height(IntrinsicSize.Min)
-                                .clickable {
-                                    privacyText = getPrivacyText("payment_text.txt")
-                                    viewModel.openPrivacyModal()
-                                }
-                        )
-                        Text("에 동의합니다", fontSize = 9.sp, modifier = Modifier.alignByBaseline())
-                    }
-                }
-                Spacer(modifier = Modifier.padding(8.dp))
-                Button(
-                    onClick = {
-                        if (!validatePhoneNumber()) {
-                            phoneNumberError = "올바른 전화번호 형식이 아니에요."
-                        } else {
-                            val fullPhoneNumber = "010$phoneMiddle$phoneLast"
-                            viewModel.register(name, fullPhoneNumber)
-                        }
-                    },
-                    enabled = hasAgreed,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp),
-                    colors =
-                    ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF3182F6)
-                    ),
 
-                    shape = RoundedCornerShape(8.dp)
-                ) {
-                    Text("확인", fontSize = 16.sp)
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                TextButton(
-                    onClick = {
-                        onBackPressed()
-                        viewModel.resetStatus()
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(36.dp),
-//                    colors = ButtonDefaults.buttonColors(containerColor = MobiBgGray),
-                    shape = RoundedCornerShape(8.dp)
-                ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 32.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Start,
+                modifier = Modifier
+                    .height(IntrinsicSize.Min)
+                    .padding(vertical = 4.dp)
+            ) {
+                Checkbox(
+                    checked = hasAgreed,
+                    onCheckedChange = { viewModel.tooglePolicy() },
+                    modifier = Modifier.size(30.dp),
+                    colors = CheckboxDefaults.colors(checkedColor = MobiBlue)
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = "뒤로가기",
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontSize = 12.sp,
-                        color = MobiTextDarkGray
+                        "모비페이 ",
+                        fontSize = 9.sp,
+                        modifier = Modifier.alignByBaseline()
+                    )
+                    Text(
+                        text = "이용약관",
+                        color = Color.Blue,
+                        textDecoration = TextDecoration.Underline,
+                        fontSize = 9.sp,
+                        modifier = Modifier
+                            .clickable {
+                                privacyText = getPrivacyText("privacy_text.txt")
+                                viewModel.openPrivacyModal()
+                            }
+                            .height(IntrinsicSize.Min)
+                            .alignByBaseline()
+                    )
+                    Text(
+                        text = "및",
+                        fontSize = 8.sp,
+                        modifier = Modifier
+                            .alignByBaseline()
+                            .padding(horizontal = 1.dp)
+                    )
+                    Text(
+                        "자동 결제 약관",
+                        color = Color.Blue,
+                        textDecoration = TextDecoration.Underline,
+                        fontSize = 9.sp,
+                        modifier = Modifier
+                            .alignByBaseline()
+                            .height(IntrinsicSize.Min)
+                            .clickable {
+                                privacyText = getPrivacyText("payment_text.txt")
+                                viewModel.openPrivacyModal()
+                            }
+                    )
+                    Text(
+                        text = "에 동의합니다",
+                        fontSize = 9.sp,
+                        modifier = Modifier.alignByBaseline()
                     )
                 }
             }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(
+                onClick = {
+                    if (!validatePhoneNumber()) {
+                        phoneNumberError = "올바른 전화번호 형식이 아니에요."
+                    } else {
+                        val fullPhoneNumber = "010$phoneMiddle$phoneLast"
+                        viewModel.register(name, fullPhoneNumber)
+                    }
+                },
+                enabled = hasAgreed,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF3182F6)
+                ),
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Text(
+                    text = "확인",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = Color.White
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(
+                onClick = {
+                    onBackPressed()
+                    viewModel.resetStatus()
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MobiBgGray
+                ),
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Text(
+                    text = "뒤로가기",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MobiTextAlmostBlack
+                )
+            }
         }
     }
-    Spacer(modifier = Modifier.height(40.dp))
+
     if (showPolicyModal) {
         PrivacyPolicyModal(viewModel = viewModel, privacyText = privacyText)
     }
