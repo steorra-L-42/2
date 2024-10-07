@@ -57,6 +57,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.res.ResourcesCompat
 import com.kimnlee.cardmanagement.data.model.RegisteredCard
 import com.kimnlee.cardmanagement.presentation.viewmodel.CardManagementViewModel
+import com.kimnlee.cardmanagement.presentation.viewmodel.MyDataConsentStatus
 import com.kimnlee.common.R
 import com.kimnlee.common.ui.theme.MobiTextAlmostBlack
 import com.kimnlee.common.utils.formatCardNumber
@@ -66,6 +67,7 @@ import com.kimnlee.common.utils.formatCardNumber
 @Composable
 fun CardManagementScreen(
     onNavigateToOwnedCards: () -> Unit,
+    onNavigateToMyDataAgreement: () -> Unit,
     onNavigateToCardDetail: (Int) -> Unit,
     viewModel: CardManagementViewModel,
 ) {
@@ -130,7 +132,25 @@ fun CardManagementScreen(
                 )
             }
             item {
-                AddCardButton { onNavigateToOwnedCards() }
+                AddCardButton {
+                    viewModel.checkMyDataConsentStatus()
+                }
+            }
+        }
+
+        LaunchedEffect(viewModel.myDataConsentStatus) {
+            when (val status = viewModel.myDataConsentStatus.value) {
+                is MyDataConsentStatus.Fetched -> {
+                    if (status.isConsented) {
+                        onNavigateToOwnedCards()
+                    } else {
+                        onNavigateToMyDataAgreement()
+                    }
+                }
+                is MyDataConsentStatus.Error -> {
+                    // 에러 처리 (예: 토스트 메시지 표시)
+                }
+                else -> {} // Unknown 상태 처리
             }
         }
     }
