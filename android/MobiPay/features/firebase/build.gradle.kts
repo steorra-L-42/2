@@ -40,6 +40,7 @@ dependencies {
     implementation(libs.androidx.appcompat)
     api(platform("com.google.firebase:firebase-bom:33.2.0"))
     api("com.google.firebase:firebase-messaging")
+    implementation(project(":features:notification"))
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
