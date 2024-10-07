@@ -106,24 +106,26 @@
           <div class="w-60 ml-2">
             <video id="video" autoplay muted></video>
           </div>
-          <div class="flex w-full ml-4 mr-3 px-2 flex-row items-center rounded-3xl shadow text-lg h-22 py-4 px-6 transition-shadow focus:shadow-2xl focus:outline-none"
-               :class="{
-                'mobi-error': lpno === null,
-                'mobi-warn': lpno !== null && !isMobiUser,
-                'mobi-success': lpno !== null && isMobiUser,
-             }">
+          <div class="flex w-full ml-4 mr-3 px-2 flex-row items-center rounded-3xl shadow text-lg h-22 py-4 px-6 transition-shadow focus:shadow-2xl focus:outline-none mobi-error"
+              :class="{
+                  'mobi-error': $store.appState.lpno === null,
+                  'mobi-warn': $store.appState.lpno !== null && !$store.appState.isMobiUser,
+                  'mobi-success': $store.appState.lpno !== null && $store.appState.isMobiUser,
+              }">
             <div class="flex flex-row w-full items-center">
               <div class="flex flex-row text-3xl items-center ml-2 w-80 font-bold">
-  <!--              <div>차량번호: </div>-->
-                <div id="lpno" class="items-center" x-text="lpno || '차량 감지 안 됨'"></div>
+                <!-- 차량번호 표시 -->
+                <div id="lpno" class="items-center" x-text="$store.appState.lpno || '차량 감지 안 됨'">차량 감지 안 됨</div>
               </div>
               <div id="isMobiUser" class="mr-2 text-2xl items-center font-bold flex flex-row-reverse justify-items-end w-full">
-                <div class="flex" x-text="isMobiUser ? '모비페이 회원' : '모비페이 비회원'"
-                     :class="{
-                      'text-orange-700': !isMobiUser,
-                      'text-green-800': isMobiUser
-                   }"
-                  x-show="lpno !== null">
+                <div class="flex text-orange-700"
+                    x-text="$store.appState.isMobiUser ? '모비페이 회원' : '모비페이 비회원'"
+                    :class="{
+                        'text-orange-700': !$store.appState.isMobiUser,
+                        'text-green-800': $store.appState.isMobiUser
+                    }"
+                    x-show="$store.appState.lpno !== null">
+                  모비페이 비회원
                 </div>
               </div>
             </div>

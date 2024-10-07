@@ -1,3 +1,10 @@
+document.addEventListener('alpine:init', () => {
+  Alpine.store('appState', {
+    lpno: null,
+    isMobiUser: false
+  });
+});
+
 let lpnumber = null;
 const url = "https://merchant.mobipay.kr/api/v1";
 const MERCHANT_TYPE = 'FOOD';
@@ -348,7 +355,7 @@ function initApp() {
       }
 
       const self = this;
-      
+
       try {
         const predictions = await this.model.detect(this.video);
         this.car_present = false;
@@ -372,7 +379,6 @@ function initApp() {
                 const endTime = performance.now();
                 const duration = endTime - startTime;
                 console.log("변환 시간: " + duration.toFixed(3) + "ms");
-
 
                 console.log('GPU 서버로 번호판 OCR 요청중...');
 
@@ -399,15 +405,16 @@ function initApp() {
 
                       if (self.lpnoMatchCount >= 3) {
                         console.log('같은 차량번호 3회 인식으로 감지 종료:', detectedLpno);
-                        self.lpno = detectedLpno;
-                        self.isMobiUser = true;
+                        // Update Alpine store
+                        Alpine.store('appState').lpno = detectedLpno;
+                        Alpine.store('appState').isMobiUser = true;
                         self.detectionStopped = true;
                         self.updateMenuIndicator(false);
                       }
                     } else {
                       console.log("GPU 서버 응답 정확도 낮음. 정확도:", confidence.toFixed(3));
-                      self.lpno = null;
-                      self.isMobiUser = false;
+                      Alpine.store('appState').lpno = null;
+                      Alpine.store('appState').isMobiUser = false;
                     }
                   }
                 } catch (error) {
