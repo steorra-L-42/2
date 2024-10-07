@@ -50,10 +50,30 @@ function initApp() {
     model: null,
     video: null,
     socket: null,
+    isManualLPnoModalOpen: false,
+    manualLpno: '',
 
     initVideo() {
       this.video = document.getElementById('video');
     },
+
+    openLPnoModal() {
+      this.isManualLPnoModalOpen = true;
+    },
+
+    closeLPnoModal() {
+      this.isManualLPnoModalOpen = false;
+      this.manualLpno = '';
+    },
+
+    submitManualLpno() {
+      if (this.manualLpno.trim() !== '') {
+        this.lpno = this.manualLpno;
+        this.isMobiUser = true;
+      }
+      this.closeLPnoModal();
+    },
+
 
     async initDatabase() {
       this.db = await loadDatabase();
