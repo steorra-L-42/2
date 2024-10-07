@@ -38,6 +38,7 @@ dependencies {
     implementation(project(":features:payment"))
 
     implementation(libs.androidx.appcompat)
+
     api(platform("com.google.firebase:firebase-bom:33.2.0"))
     api("com.google.firebase:firebase-messaging")
     implementation(project(":features:notification"))

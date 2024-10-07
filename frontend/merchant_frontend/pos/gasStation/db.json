@@ -1,0 +1,18 @@
+{
+    "products": [
+        {
+            "id": 13,
+            "name": "경유",
+            "price": 1600,
+            "image": "img/diesel.png",
+            "options": null
+        },
+        {
+            "id": 14,
+            "name": "휘발유",
+            "price": 1700,
+            "image": "img/gasoline.png",
+            "options": null
+        }
+    ]
+}
