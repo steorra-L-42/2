@@ -1,6 +1,10 @@
 package com.example.mobipay.global.advice;
 
 import com.example.mobipay.domain.approvalwaiting.error.ApprovalWaitingNotFoundException;
+import com.example.mobipay.domain.cancel.error.CancelServerException;
+import com.example.mobipay.domain.cancel.error.InvalidMerchantTransactionException;
+import com.example.mobipay.domain.cancel.error.TransactionAlreadyCancelledException;
+import com.example.mobipay.domain.cancel.error.TransactionNotBelongToMerchantException;
 import com.example.mobipay.domain.car.error.CarNotFoundException;
 import com.example.mobipay.domain.car.error.DuplicatedCarNumberException;
 import com.example.mobipay.domain.car.error.NotMemberException;
@@ -201,6 +205,31 @@ public class ControllerAdvice {
     public ResponseEntity<ErrorResponseDto> handleOneTimeLimitExceedException(OneTimeLimitExceedException e) {
         log.info(e.getMessage());
         return getResponse(ErrorCode.ONE_TIME_LIMIT_EXCEED);
+    }
+
+    @ExceptionHandler(InvalidMerchantTransactionException.class)
+    public ResponseEntity<ErrorResponseDto> handleInvalidMerchantTransactionException(InvalidMerchantTransactionException e) {
+        log.info(e.getMessage());
+        return getResponse(ErrorCode.INVALID_MERCHANT_TRANSACTION);
+    }
+
+    @ExceptionHandler(TransactionNotBelongToMerchantException.class)
+    public ResponseEntity<ErrorResponseDto> handleTransactionNotBelongToMerchantException(TransactionNotBelongToMerchantException e) {
+        log.info(e.getMessage());
+        return getResponse(ErrorCode.TRANSACTION_NOT_BELONG_TO_MERCHANT);
+    }
+
+    @ExceptionHandler(TransactionAlreadyCancelledException.class)
+    public ResponseEntity<ErrorResponseDto> handleTransactionAlreadyCancelledException(
+            TransactionAlreadyCancelledException e) {
+        log.info(e.getMessage());
+        return getResponse(ErrorCode.TRANSACTION_ALREADY_CANCELLED);
+    }
+
+    @ExceptionHandler(CancelServerException.class)
+    public ResponseEntity<ErrorResponseDto> handleCancelServerException(CancelServerException e) {
+        log.info(e.getMessage());
+        return getResponse(ErrorCode.CANCEL_SERVER_ERROR);
     }
 
     private ResponseEntity<ErrorResponseDto> getResponse(ErrorCode errorCode) {
