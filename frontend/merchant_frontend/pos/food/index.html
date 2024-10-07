@@ -123,11 +123,8 @@
                       'text-orange-700': !isMobiUser,
                       'text-green-800': isMobiUser
                    }"
-                     :visibility="{
-                      'hidden': (lpno === null),
-                      'visible': (lpno !== null)
-                   }"
-                ></div>
+                  x-show="lpno !== null">
+                </div>
               </div>
             </div>
           </div>

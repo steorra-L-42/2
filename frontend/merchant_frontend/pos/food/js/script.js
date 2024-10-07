@@ -347,13 +347,15 @@ function initApp() {
         return;
       }
 
+      const self = this;
+      
       try {
         const predictions = await this.model.detect(this.video);
         this.car_present = false;
 
         predictions.forEach((prediction) => {
           if (prediction.class === 'car') {
-            this.car_present = true;
+            self.car_present = true;
             const [x, y, width, height] = prediction.bbox;
 
             if (height > 240 && width > 350) {
@@ -362,7 +364,7 @@ function initApp() {
               canvas.width = width;
               canvas.height = height;
               const context = canvas.getContext('2d');
-              context.drawImage(this.video, x, y, width, height, 0, 0, width, height);
+              context.drawImage(self.video, x, y, width, height, 0, 0, width, height);
 
               canvas.toBlob(async (blob) => {
                 const formData = new FormData();
@@ -388,24 +390,24 @@ function initApp() {
                       const detectedLpno = data.predicted_text;
                       console.log('[정확도 0.85 이상] 인식된 차량번호:', detectedLpno);
 
-                      if (this.lastLpno === detectedLpno) {
-                        this.lpnoMatchCount++;
+                      if (self.lastLpno === detectedLpno) {
+                        self.lpnoMatchCount++;
                       } else {
-                        this.lastLpno = detectedLpno;
-                        this.lpnoMatchCount = 1;
+                        self.lastLpno = detectedLpno;
+                        self.lpnoMatchCount = 1;
                       }
 
-                      if (this.lpnoMatchCount >= 3) {
+                      if (self.lpnoMatchCount >= 3) {
                         console.log('같은 차량번호 3회 인식으로 감지 종료:', detectedLpno);
-                        this.lpno = detectedLpno;
-                        this.isMobiUser = true;
-                        this.detectionStopped = true;
-                        this.updateMenuIndicator(false);
+                        self.lpno = detectedLpno;
+                        self.isMobiUser = true;
+                        self.detectionStopped = true;
+                        self.updateMenuIndicator(false);
                       }
                     } else {
                       console.log("GPU 서버 응답 정확도 낮음. 정확도:", confidence.toFixed(3));
-                      this.lpno = null;
-                      this.isMobiUser = false;
+                      self.lpno = null;
+                      self.isMobiUser = false;
                     }
                   }
                 } catch (error) {
@@ -418,13 +420,13 @@ function initApp() {
 
         if (!this.detectionStopped) {
           setTimeout(() => {
-            requestAnimationFrame(() => this.detectObjects());
+            requestAnimationFrame(() => self.detectObjects());
           }, 600);
         }
       } catch (error) {
         console.error('Object detection 실패:', error);
         setTimeout(() => {
-          requestAnimationFrame(() => this.detectObjects());
+          requestAnimationFrame(() => self.detectObjects());
         }, 600);
       }
     },
