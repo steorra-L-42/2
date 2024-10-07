@@ -49,7 +49,6 @@ dependencies {
     implementation(project(":common"))
 
     implementation("androidx.startup:startup-runtime:1.1.1")
-    implementation("androidx.localbroadcastmanager:localbroadcastmanager:1.1.0")
 
     // Mapbox
     api("com.mapbox.navigation:ui-androidauto:0.22.0")
