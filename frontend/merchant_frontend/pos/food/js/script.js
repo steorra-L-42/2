@@ -256,6 +256,9 @@ function initApp() {
           if (message.success) {
             this.isLoading = false;
             this.isShowModalSuccess = true;
+            this.lpno = null;
+            this.isMobiUser = false; 
+            this.cart = [];
           } else {
             this.isLoading = false;
             alert('결제 실패');
@@ -263,7 +266,6 @@ function initApp() {
           this.socket.close();
         }
       };
-
     },
 
     startCamera(facingMode) {
