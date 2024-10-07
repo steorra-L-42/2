@@ -46,6 +46,11 @@ import com.kimnlee.common.utils.MobiConversation
 import com.kimnlee.common.utils.MobiUser
 import com.kimnlee.common.utils.REMOTE_INPUT_RESULT_KEY
 import com.kimnlee.common.utils.moneyFormat
+import com.kimnlee.notification.data.Notification
+import com.kimnlee.notification.data.NotificationDetails
+import com.kimnlee.notification.data.NotificationType
+import com.kimnlee.notification.data.NotificationRepository
+import java.time.LocalDateTime
 
 private const val TAG = "FCMService"
 private const val FCM_TYPE_MEMBER_INVITATION = "invitation"
@@ -139,12 +144,48 @@ class FCMService : FirebaseMessagingService() {
                 }
                 FCM_TYPE_PAYMENT_REQUEST -> {
                     if (fcmData.lat != null && fcmData.lng != null) {
+
+                        val notificationDetails = NotificationDetails(
+                            merchantName = fcmData.merchantName,
+                            paymentBalance = fcmData.paymentBalance,
+                            info = fcmData.info,
+                            body = null,
+                            inviterName = null,
+                            inviterPicture = null,
+                            carNumber = null,
+                            carModel = null
+                        )
+                        val notification = Notification(
+                            details = notificationDetails,
+                            timestamp = LocalDateTime.now(),
+                            type = NotificationType.PAYMENT
+                        )
+                        NotificationRepository.addPaymentRequestNotification(notification)
+
                         paymentOperations?.processFCM(fcmData)
                     }
                 }
                 FCM_TYPE_MEMBER_INVITATION -> {
                     val rjs = Gson().toJson(remoteMessage.data)
                     val fcmDataForInvitation = Gson().fromJson(rjs, FCMDataForInvitation::class.java)
+
+                    val notificationDetails = NotificationDetails(
+                        merchantName = null,
+                        paymentBalance = null,
+                        info = null,
+                        body = fcmDataForInvitation.body,
+                        inviterName = fcmDataForInvitation.inviterName,
+                        inviterPicture = fcmDataForInvitation.inviterPicture,
+                        carNumber = fcmDataForInvitation.carNumber,
+                        carModel = fcmDataForInvitation.carModel
+                    )
+                    val notification = Notification(
+                        details = notificationDetails,
+                        timestamp = LocalDateTime.now(),
+                        type = NotificationType.MEMBER
+                    )
+                    NotificationRepository.addInvitationNotification(notification)
+
                     memberInvitationOperations?.processFCM(fcmDataForInvitation)
                 }
                 FCM_TYPE_AUTO_PAY_FAILURE -> {
