@@ -48,7 +48,7 @@
           </li>
           <li>
             <a href="#"
-               class="flex items-center">
+               class="flex items-center" @click="resumeDetection()">
               <span class="flex items-center justify-center text-blue-100 hover:bg-blue-400 h-12 w-12 rounded-2xl">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
@@ -288,7 +288,7 @@
         <div class="p-4">
           <button
             class="bg-red-500 text-white text-lg px-4 py-3 rounded-2xl w-full focus:outline-none"
-            @click="cancelLoading()"
+            @click="cancelLoading(); resumeDetection()"
           >
             취소하기
           </button>
@@ -309,10 +309,9 @@
           <p>결제가 성공적으로 처리되었습니다.</p>
         </div>
         <div class="p-4">
-          <!-- Changed Button Text to "닫기" -->
           <button
             class="bg-blue-500 text-white text-lg px-4 py-3 rounded-2xl w-full focus:outline-none"
-            @click="closeModalSuccess()"
+            @click="closeModalSuccess(); resumeDetection()"
           >
             닫기
           </button>

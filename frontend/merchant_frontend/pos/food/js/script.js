@@ -53,6 +53,9 @@ function initApp() {
     isManualLPnoModalOpen: false,
     isShowCameraChooseModal: false, 
     manualLpno: '',
+    lastLpno: null,
+    lpnoMatchCount: 0,
+    detectionStopped: false,
 
     initVideo() {
       this.video = document.getElementById('video');
@@ -338,6 +341,8 @@ function initApp() {
     },
 
     async detectObjects() {
+      if (this.detectionStopped) return;
+
       try {
         const predictions = await this.model.detect(this.video);
         this.car_present = false;
@@ -345,26 +350,18 @@ function initApp() {
         predictions.forEach((prediction) => {
           if (prediction.class === 'car') {
             this.car_present = true;
-
             const [x, y, width, height] = prediction.bbox;
 
             if (height > 240 && width > 350) {
-              const startTime = performance.now();
               const canvas = document.createElement('canvas');
               canvas.width = width;
               canvas.height = height;
               const context = canvas.getContext('2d');
-
               context.drawImage(this.video, x, y, width, height, 0, 0, width, height);
-
-              const self = this;
 
               canvas.toBlob(async (blob) => {
                 const formData = new FormData();
                 formData.append('file', blob, 'image.jpg');
-                const endTime = performance.now();
-                const duration = endTime - startTime;
-                console.log("변환 시간: " + duration.toFixed(3) + "ms");
 
                 try {
                   const response = await fetch('https://anpr.mobipay.kr/predict/', {
@@ -375,14 +372,23 @@ function initApp() {
                   const data = await response.json();
                   if (data !== null) {
                     const confidence = parseFloat(data.confidence);
-
                     if (confidence > 0.85) {
-                      self.$data.lpno = data.predicted_text;
-                      self.$data.isMobiUser = true;
-                    } else {
-                      console.log("정확도 낮음");
-                      self.$data.lpno = null;
-                      self.$data.isMobiUser = false;
+                      const detectedLpno = data.predicted_text;
+
+                      if (this.lastLpno === detectedLpno) {
+                        this.lpnoMatchCount++;
+                      } else {
+                        this.lastLpno = detectedLpno;
+                        this.lpnoMatchCount = 1;
+                      }
+
+                      // 3회 이상 같은 번호 detect시 detection 종료
+                      if (this.lpnoMatchCount >= 3) {
+                        this.lpno = detectedLpno;
+                        this.isMobiUser = true;
+                        this.detectionStopped = true;
+                        this.updateMenuIndicator(false);
+                      }
                     }
                   }
                 } catch (error) {
@@ -393,19 +399,35 @@ function initApp() {
           }
         });
 
-        if (!this.car_present) {
-          // 차량 감지 안 된 경우 처리
+        if (!this.detectionStopped) {
+          setTimeout(() => {
+            requestAnimationFrame(() => this.detectObjects());
+          }, 600);
         }
-
-        setTimeout(() => {
-          requestAnimationFrame(() => this.detectObjects());
-        }, 600);
       } catch (error) {
         console.error('물체 감지 실패: ', error);
-
         setTimeout(() => {
           requestAnimationFrame(() => this.detectObjects());
         }, 600);
+      }
+    },
+
+    resumeDetection() {
+      this.detectionStopped = false;
+      this.lpnoMatchCount = 0;
+      this.lastLpno = null;
+      this.updateMenuIndicator(true);
+      requestAnimationFrame(() => this.detectObjects());
+    },
+
+    updateMenuIndicator(isDetecting) {
+      const menuElement = document.querySelector('.bg-blue-500');
+      if (isDetecting) {
+        menuElement.classList.remove('bg-blue-300');
+        menuElement.classList.add('bg-blue-500');
+      } else {
+        menuElement.classList.remove('bg-blue-500');
+        menuElement.classList.add('bg-blue-300');
       }
     },
 
