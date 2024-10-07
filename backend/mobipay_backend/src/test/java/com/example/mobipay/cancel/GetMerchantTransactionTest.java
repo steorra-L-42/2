@@ -222,7 +222,7 @@ public class GetMerchantTransactionTest {
             ownedCardRepository.save(ownedCard);
 
             // 4. 카드 등록
-            RegisteredCard registeredCard = RegisteredCard.from();
+            RegisteredCard registeredCard = RegisteredCard.from(1000000);
             registeredCard.addRelations(mobiUser, ownedCard);
             registeredCardRepository.save(registeredCard);
 
