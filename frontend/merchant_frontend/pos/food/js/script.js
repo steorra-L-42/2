@@ -49,10 +49,69 @@ function initApp() {
     car_present: false,
     model: null,
     video: null,
+    socket: null,
+    isManualLPnoModalOpen: false,
+    isShowCameraChooseModal: false, 
+    manualLpno: '',
 
     initVideo() {
       this.video = document.getElementById('video');
+      this.detectCameras();
     },
+
+    openCameraChooseModal() {
+      this.isShowCameraChooseModal = true;
+    },
+
+    closeCameraChooseModal() {
+      this.isShowCameraChooseModal = false;
+    },
+
+    openLPnoModal() {
+      this.isManualLPnoModalOpen = true;
+    },
+
+    closeLPnoModal() {
+      this.isManualLPnoModalOpen = false;
+      this.manualLpno = '';
+    },
+
+    async detectCameras() {
+      try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        this.cameraDevices = devices.filter(device => device.kind === 'videoinput');
+      } catch (error) {
+        console.error('Failed to enumerate devices:', error);
+      }
+    },
+
+    async selectCamera(deviceId) {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            deviceId: { exact: deviceId },
+            width: { ideal: 1920 },
+            height: { ideal: 1080 },
+            frameRate: { ideal: 60 }
+          }
+        });
+
+        this.video.srcObject = stream;
+        this.video.play();
+        this.closeCameraChooseModal();
+      } catch (error) {
+        console.error('Failed to select camera:', error);
+      }
+    },
+
+    submitManualLpno() {
+      if (this.manualLpno.trim() !== '') {
+        this.lpno = this.manualLpno;
+        this.isMobiUser = true;
+      }
+      this.closeLPnoModal();
+    },
+
 
     async initDatabase() {
       this.db = await loadDatabase();
@@ -138,6 +197,11 @@ function initApp() {
       this.isShowModalReceipt = false;
     },
 
+    closeModalSuccess() {
+      this.isShowModalSuccess = false;
+    },
+
+
     dateFormat(date) {
       const formatter = new Intl.DateTimeFormat('id', { dateStyle: 'short', timeStyle: 'short'});
       return formatter.format(date);
@@ -180,19 +244,27 @@ function initApp() {
       sound.onended = () => delete(sound);
     },
 
-
+    
+    cancelLoading() {
+      if (this.socket) {
+        this.socket.close();
+        this.socket = null;
+      }
+      this.isLoading = false;
+    },
 
     requestPayMobi() {
       this.closeModalReceipt();
       this.isLoading = true;
 
       // websocket 연결
-      const socket = new WebSocket('wss://merchant.mobipay.kr/api/v1/merchants/websocket');
+      //const socket = new WebSocket('wss://merchant.mobipay.kr/api/v1/merchants/websocket');
+      this.socket = new WebSocket('wss://merchant.mobipay.kr/api/v1/merchants/websocket');
 
       let sessionId; // 세션 ID를 저장할 변수
 
 
-      socket.onopen = async (event) => {
+      this.socket.onopen = async (event) => {
         console.log('WebSocket is open now.');
 
         let info = this.cart.map(item => `${item.name} x ${item.qty}`).join(', ');
@@ -218,37 +290,40 @@ function initApp() {
         } catch (error) {
           console.error('결제 요청 실패:', error);
           // 웹소켓 연결 해제
-          socket.close();
+          //socket.close();
+          this.socket.close();
           alert('결제 요청 실패');
         }
       };
 
-      socket.onclose = (event) => {
+      this.socket.onclose = (event) => {
         console.log('WebSocket is closed now.');
       };
 
-      socket.onerror = (error) => {
+      this.socket.onerror = (error) => {
         console.log('WebSocket error:', error);
       };
 
-      socket.onmessage = (event) => {
+      this.socket.onmessage = (event) => {
         const message = JSON.parse(event.data);
 
         if (message.sessionId) {
           sessionId = message.sessionId;
-          socket.send(JSON.stringify({ "type": MERCHANT_TYPE }));
+          this.socket.send(JSON.stringify({ "type": MERCHANT_TYPE }));
         } else {
           if (message.success) {
             this.isLoading = false;
             this.isShowModalSuccess = true;
+            this.lpno = null;
+            this.isMobiUser = false; 
+            this.cart = [];
           } else {
             this.isLoading = false;
             alert('결제 실패');
           }
-          socket.close();
+          this.socket.close();
         }
       };
-
     },
 
     startCamera(facingMode) {
