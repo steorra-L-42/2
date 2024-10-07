@@ -34,8 +34,6 @@ class LoginViewModel(
         apiClient.unAuthenticatedApi.create(AuthService::class.java)
     private val authService: AuthService =
         apiClient.authenticatedApi.create(AuthService::class.java)
-    private val _naverMapService = MutableStateFlow<NaverMapService?>(apiClient.naverMapService)
-    val naverMapService: StateFlow<NaverMapService?> = _naverMapService
 
     private val _isLoggedIn = MutableStateFlow(false)
     val isLoggedIn: StateFlow<Boolean> = _isLoggedIn

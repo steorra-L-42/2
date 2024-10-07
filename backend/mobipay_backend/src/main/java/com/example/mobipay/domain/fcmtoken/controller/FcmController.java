@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -27,6 +28,7 @@ public class FcmController {
     private final FcmService fcmService;
 
     // 로그인 후 fcm 토큰을 받아서 mobiUser와 연관관계 설정
+    @PreAuthorize("isAuthenticated()")
     @PostMapping("/registertoken")
     public ResponseEntity<FcmTokenResponseDto> registerToken(@RequestBody @Valid FcmTokenRequestDto request,
                                                              @AuthenticationPrincipal CustomOAuth2User oauth2User) {

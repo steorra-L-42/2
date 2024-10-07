@@ -12,20 +12,18 @@ import androidx.navigation.navigation
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.kimnlee.cardmanagement.data.model.CardInfo
-import com.kimnlee.cardmanagement.presentation.screen.CardManagementDirectRegistrationScreen
+import com.kimnlee.cardmanagement.presentation.screen.CardDetailScreen
 import com.kimnlee.cardmanagement.presentation.screen.CardManagementOwnedCardListScreen
 import com.kimnlee.cardmanagement.presentation.screen.CardManagementScreen
 import com.kimnlee.cardmanagement.presentation.screen.CardRegistrationScreen
 import com.kimnlee.cardmanagement.presentation.viewmodel.CardManagementViewModel
 import com.kimnlee.common.auth.AuthManager
 import com.kimnlee.common.components.BottomNavigation
-import com.kimnlee.common.network.ApiClient
 
 fun NavGraphBuilder.cardManagementNavGraph(
     navController: NavHostController,
     authManager: AuthManager,
-    viewModel: CardManagementViewModel,
-    apiClient: ApiClient
+    viewModel: CardManagementViewModel
 ) {
     navigation(startDestination = "cardmanagement_main", route = "cardmanagement") {
         composable("cardmanagement_main",
@@ -35,8 +33,10 @@ fun NavGraphBuilder.cardManagementNavGraph(
             BottomNavigation(navController) {
                 CardManagementScreen(
                     viewModel = viewModel,
-                    onNavigateToRegistration = { navController.navigate("cardmanagement_registration") },
                     onNavigateToOwnedCards = { navController.navigate("cardmanagement_owned") },
+                    onNavigateToCardDetail = { cardId ->
+                        navController.navigate("cardmanagement_detail/$cardId")
+                    }
                 )
             }
         }
@@ -72,12 +72,17 @@ fun NavGraphBuilder.cardManagementNavGraph(
                 )
             }
         }
-        composable("cardmanagement_direct_registration",
+        composable(
+            route = "cardmanagement_detail/{cardId}",
+            arguments = listOf(navArgument("cardId") { type = NavType.IntType }),
             enterTransition = { EnterTransition.None },
             exitTransition = { ExitTransition.None }
-        ) {
+        ) { backStackEntry ->
+            val cardId = backStackEntry.arguments?.getInt("cardId") ?: return@composable
             BottomNavigation(navController) {
-                CardManagementDirectRegistrationScreen(
+                CardDetailScreen(
+                    viewModel = viewModel,
+                    cardId = cardId,
                     onNavigateBack = { navController.navigateUp() }
                 )
             }

@@ -36,9 +36,6 @@ public class RegisteredCard {
     @Column(name = "owned_card_id")
     private Long ownedCardId;
 
-    @Column(name = "one_day_limit", nullable = false)
-    private Integer oneDayLimit = ONE_DAY_LIMIT;
-
     @Column(name = "one_time_limit", nullable = false)
     private Integer oneTimeLimit = ONE_TIME_LIMIT;
 
@@ -56,13 +53,8 @@ public class RegisteredCard {
     @JoinColumn(name = "owned_card_id", insertable = false, updatable = false)
     private OwnedCard ownedCard;
 
-    public static RegisteredCard from() {
-        return new RegisteredCard();
-    }
-
-    public static RegisteredCard of(Integer oneDayLimit, Integer oneTimeLimit) {
+    public static RegisteredCard from(Integer oneTimeLimit) {
         RegisteredCard registeredCard = new RegisteredCard();
-        registeredCard.oneDayLimit = oneDayLimit;
         registeredCard.oneTimeLimit = oneTimeLimit;
 
         return registeredCard;
