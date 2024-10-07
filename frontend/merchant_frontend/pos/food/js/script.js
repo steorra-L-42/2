@@ -56,6 +56,7 @@ function initApp() {
     lastLpno: null,
     lpnoMatchCount: 0,
     detectionStopped: false,
+    cameraDevices: [],
 
     initVideo() {
       this.video = document.getElementById('video');
