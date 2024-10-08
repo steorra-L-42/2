@@ -135,24 +135,24 @@ table td {
     object-fit: cover;
 }
 
-table {
-width: 100%;
-border-collapse: collapse;
+#transaction-table table {
+    width: 100%;
+    border-collapse: collapse;
 }
 
-th, td {
-border: 1px solid #ddd;
-text-align: left;
-padding: 8px;
+#transaction-table th, #transaction-table td {
+    border: 1px solid #ddd;
+    text-align: left;
+    padding: 8px;
 }
 
-th {
-background-color: #3b82f6;
-color: white;
+#transaction-table th {
+    background-color: #3b82f6;
+    color: white;
 }
 
-tr:nth-child(even) {
-background-color: #f2f2f2;
+#transaction-table tr:nth-child(even) {
+    background-color: #f2f2f2;
 }
 
 @media print {

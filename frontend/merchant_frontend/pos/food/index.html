@@ -487,28 +487,28 @@
         <button @click="closeTransactionListModal()" type="button" class="bg-blue-500 text-white px-4 py-2 rounded-md">
           닫기
         </button>
-        <table>
-          <tr>
-          <th>거래번호</th>
-          <th>거래일자</th>
-          <th>거래시간</th>
-          <th>거래금액</th>
-          <th>거래정보</th>
-          <th>취소 가능 여부</th>
-          <th>거래취소</th>
+        <table id="transaction-table">
+          <tr id="transaction-table">
+          <th id="transaction-table">거래번호</th>
+          <th id="transaction-table">거래일자</th>
+          <th id="transaction-table">거래시간</th>
+          <th id="transaction-table">거래금액</th>
+          <th id="transaction-table">거래정보</th>
+          <th id="transaction-table">취소 가능 여부</th>
+          <th id="transaction-table">거래취소</th>
           </tr>
           <template
           x-for="(transaction, index) in transactionList"
           :key="index"
           >
-          <tr>
-            <td x-text="transaction.transactionUniqueNo"></td>
-            <td x-text="transaction.transactionDate"></td>
-            <td x-text="transaction.transactionTime.substring(0, 2) + '시 ' + transaction.transactionTime.substring(2, 4) + '분'"></td> 
-            <td x-text="transaction.paymentBalance + '원'"></td>
-            <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" x-text="transaction.info"></td>
-            <td x-text="transaction.cancelled ? 'X' : 'O'"></td>
-            <td>
+          <tr id="transaction-table">
+            <td x-text="transaction.transactionUniqueNo" id="transaction-table"></td>
+            <td x-text="transaction.transactionDate" id="transaction-table"></td>
+            <td x-text="transaction.transactionTime.substring(0, 2) + '시 ' + transaction.transactionTime.substring(2, 4) + '분'" id="transaction-table"></td> 
+            <td x-text="transaction.paymentBalance + '원'" id="transaction-table"></td>
+            <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" x-text="transaction.info" id="transaction-table"></td>
+            <td x-text="transaction.cancelled ? 'X' : 'O'" id="transaction-table"></td>
+            <td id="transaction-table">
               <button @click="cancelTransaction(transaction.transactionUniqueNo)" class="bg-red-500 text-white px-2 py-1 rounded-md">
                 취소
               </button>
