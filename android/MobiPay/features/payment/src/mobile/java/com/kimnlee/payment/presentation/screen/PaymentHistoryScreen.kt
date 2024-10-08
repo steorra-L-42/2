@@ -29,6 +29,7 @@ import com.kimnlee.common.ui.theme.MobiBgGray
 import com.kimnlee.common.ui.theme.MobiBgWhite
 import com.kimnlee.common.ui.theme.MobiTextAlmostBlack
 import com.kimnlee.common.ui.theme.MobiTextDarkGray
+import com.kimnlee.common.utils.formatDateTime
 import com.kimnlee.common.utils.moneyFormat
 import com.kimnlee.payment.data.model.PaymentHistoryItem
 import com.kimnlee.payment.presentation.viewmodel.PaymentHistoryState
@@ -149,7 +150,7 @@ fun ItemCard(
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "${item.transactionDate} ${item.transactionTime}",
+                    text = formatDateTime(item.transactionDate, item.transactionTime),
                     style = MaterialTheme.typography.bodySmall,
                     color = MobiTextDarkGray
                 )
