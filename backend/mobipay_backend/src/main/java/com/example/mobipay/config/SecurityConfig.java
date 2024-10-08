@@ -36,14 +36,22 @@ public class SecurityConfig {
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
     String[] whitelist_post = {
-            "/api/v1/user/reissue"
-            // 논의 후 추가 필요
+            "/api/v1/users/reissue",
+            "/api/v1/users/login/**",
+            "/api/v1/users/detail/**",
+            "/api/v1/merchants/**",
+            "/api/v1/postpayments/**",
     };
+
     String[] whitelist_get = {
-            "/",
-            "/api/v1/user/login/**"
-            // 논의 후 추가 필요
+            "/api/v1/merchants/**",
+            "/api/v1/postpayments/**",
     };
+
+    String[] whitelist_patch = {
+            "/api/v1/merchants/**"
+    };
+
 
     @Value("${cors.url}")
     private String corsURL;

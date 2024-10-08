@@ -20,9 +20,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
-import coil.compose.rememberImagePainter
 import com.kimnlee.common.ui.theme.*
+import com.kimnlee.notification.R
 import com.kimnlee.notification.data.Notification
 import com.kimnlee.notification.data.NotificationRepository
 import com.kimnlee.notification.data.NotificationType
@@ -31,6 +33,9 @@ import com.kimnlee.notification.data.NotificationType
 fun NotificationScreen(
     onNavigateBack: () -> Unit
 ) {
+    val context = LocalContext.current
+    val notificationRepository = remember { NotificationRepository(context) }
+
     var selectedTab by remember { mutableStateOf(0) }
     val tabs = listOf("전체", "결제", "멤버")
 
@@ -62,6 +67,13 @@ fun NotificationScreen(
                 textAlign = TextAlign.Center,
                 modifier = Modifier.align(Alignment.Center)
             )
+
+            TextButton(
+                onClick = { notificationRepository.clearAllNotifications() },
+                modifier = Modifier.align(Alignment.CenterEnd)
+            ) {
+                Text("모두 지우기", color = Color.Red)
+            }
         }
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -75,9 +87,9 @@ fun NotificationScreen(
         Spacer(modifier = Modifier.height(24.dp))
 
         when (selectedTab) {
-            0 -> AllNotifications()
-            1 -> PaymentRequests()
-            2 -> MemberInvitations()
+            0 -> AllNotifications(notificationRepository)
+            1 -> PaymentRequests(notificationRepository)
+            2 -> MemberInvitations(notificationRepository)
         }
     }
 }
@@ -134,30 +146,34 @@ fun CustomTab(
 }
 
 @Composable
-fun AllNotifications() {
-    val allNotifications = listOf(
-        *NotificationRepository.paymentRequestMessages.toTypedArray(),
-        *NotificationRepository.invitationMessages.toTypedArray()
-    ).sortedByDescending { it.timestamp }
+fun AllNotifications(notificationRepository: NotificationRepository) {
+    val allNotifications = remember {
+        (notificationRepository.paymentRequestMessages + notificationRepository.invitationMessages)
+            .sortedByDescending { it.timestamp }
+    }
 
     NotificationList(allNotifications)
 }
 
 @Composable
-fun PaymentRequests() {
-    NotificationList(NotificationRepository.paymentRequestMessages)
+fun PaymentRequests(notificationRepository: NotificationRepository) {
+    NotificationList(notificationRepository.paymentRequestMessages)
 }
 
 @Composable
-fun MemberInvitations() {
-    NotificationList(NotificationRepository.invitationMessages)
+fun MemberInvitations(notificationRepository: NotificationRepository) {
+    NotificationList(notificationRepository.invitationMessages)
 }
 
 @Composable
 fun NotificationList(notifications: List<Notification>) {
-    LazyColumn {
-        items(notifications) { notification ->
-            NotificationItem(notification)
+    if (notifications.isEmpty()) {
+        EmptyNotificationState()
+    } else {
+        LazyColumn {
+            items(notifications) { notification ->
+                NotificationItem(notification)
+            }
         }
     }
 }
@@ -210,7 +226,7 @@ fun NotificationItem(notification: Notification) {
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .align(Alignment.CenterStart)
-                .padding(start = 32.dp)
+                .padding(start = 32.dp, end = 80.dp)
         ) {
             Column {
                 Text(
@@ -218,6 +234,7 @@ fun NotificationItem(notification: Notification) {
                     style = MaterialTheme.typography.bodyMedium,
                     color = MobiTextAlmostBlack,
                     maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                     fontWeight = FontWeight.SemiBold,
                 )
                 Spacer(modifier = Modifier.height(8.dp))
@@ -225,13 +242,12 @@ fun NotificationItem(notification: Notification) {
                     Text(
                         text = notification.details.info ?: "정보 없음",
                         style = MaterialTheme.typography.bodySmall,
-                        color = Color.Gray
+                        color = Color.Gray,
+                        maxLines = 3,
+                        overflow = TextOverflow.Ellipsis
                     )
                 } else if (notification.type == NotificationType.MEMBER) {
                     val details = notification.details
-                    details.inviterPicture?.let { picture ->
-                        Image(painter = rememberImagePainter(picture), contentDescription = null)
-                    }
                     Text(
                         text = "차량 번호: ${details.carNumber ?: "정보 없음"}",
                         style = MaterialTheme.typography.bodySmall,
@@ -257,5 +273,38 @@ fun formatTime(timestamp: LocalDateTime): String {
         diff.toMinutes() < 60 -> "${diff.toMinutes()}분 전"
         diff.toHours() < 24 && now.dayOfMonth == timestamp.dayOfMonth -> "${diff.toHours()}시간 전"
         else -> timestamp.format(DateTimeFormatter.ofPattern("yyyy.MM.dd"))
+    }
+}
+
+@Composable
+fun EmptyNotificationState() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.no_notifications_icon),
+                contentDescription = "알림 없음",
+                modifier = Modifier.size(80.dp)
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+            Text(
+                text = "알림이 없습니다",
+                style = MaterialTheme.typography.headlineSmall,
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "새로운 알림이 오면 여기에 표시됩니다",
+                style = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Center
+            )
+        }
     }
 }
