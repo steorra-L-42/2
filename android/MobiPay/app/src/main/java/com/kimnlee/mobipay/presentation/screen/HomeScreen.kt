@@ -43,6 +43,7 @@ import com.kimnlee.common.ui.theme.MobiTextDarkGray
 import com.kimnlee.common.ui.theme.pMedium
 import com.kimnlee.common.ui.theme.tossEmoji
 import com.kimnlee.common.utils.CarModelImageProvider
+import com.kimnlee.common.utils.moneyFormat
 import com.kimnlee.mobipay.presentation.viewmodel.HomeViewModel
 import com.kimnlee.vehiclemanagement.data.model.CarMember
 import com.kimnlee.vehiclemanagement.data.model.VehicleItem
@@ -52,6 +53,11 @@ import com.naver.maps.map.MapView
 import com.naver.maps.map.overlay.Marker
 import com.naver.maps.map.overlay.OverlayImage
 import kotlinx.coroutines.runBlocking
+import java.time.Duration
+import java.time.LocalDateTime
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 private val NAVER_MAP_CLIENT_SECRET = BuildConfig.NAVER_MAP_CLIENT_SECRET
 private const val TAG = "HomeScreen"
@@ -71,6 +77,7 @@ fun HomeScreen(
     val currentVehicle = vehicles.firstOrNull()
     val userName by homeViewModel.userName.collectAsState()
     val userPhoneNumber by homeViewModel.userPhoneNumber.collectAsState()
+    val paidParkingDetail by homeViewModel.paidParkingDetail.collectAsState()
 
 
 
@@ -227,9 +234,7 @@ fun HomeScreen(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            var enteredPaidParkingLot = false
-            enteredPaidParkingLot = true
-            if(enteredPaidParkingLot){
+            if(paidParkingDetail != null){
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -265,20 +270,23 @@ fun HomeScreen(
                                 .clip(RoundedCornerShape(6.dp))
                         ){
                             Text(
-                                text = "여의도 더현대 지하주차장",
+//                                text = "여의도 더현대 지하주차장",
+                                text = paidParkingDetail!!.parkingLotName,
                                 style = MaterialTheme.typography.headlineMedium,
                                 color = MobiTextAlmostBlack,
                                 fontSize = 22.5.sp,
                             )
                             Spacer(modifier = Modifier.height(7.dp))
                             Text(
-                                text = "입차: 2024년 9월 29일 오전 10시 11분",
+//                                text = "입차: 2024년 9월 29일 오전 10시 11분",
+                                text = "입차: ${formatEntryTime(paidParkingDetail!!.entry)}",
                                 style = MaterialTheme.typography.bodyLarge,
                                 color = MobiTextAlmostBlack,
                             )
                             Spacer(modifier = Modifier.height(21.dp))
                             Text(
-                                text = "2시간 14분 경과",
+//                                text = "2시간 14분 경과",
+                                text = calculateElapsedTime(paidParkingDetail!!.entry),
                                 style = MaterialTheme.typography.headlineMedium,
                                 color = MobiTextAlmostBlack,
                                 fontSize = 19.sp,
@@ -287,7 +295,7 @@ fun HomeScreen(
                             )
                             Spacer(modifier = Modifier.height(6.dp))
                             Text(
-                                text = "예상 요금  8,000원",
+                                text = "예상 요금  ${moneyFormat((paidParkingDetail!!.paymentBalance.toBigInteger()))}",
                                 style = MaterialTheme.typography.headlineMedium,
                                 color = MobiTextAlmostBlack,
                                 fontSize = 19.sp,
@@ -523,6 +531,35 @@ fun CarUserIconsRow(carMembers: List<CarMember>, userPhoneNumber: String) {
             )
         }
     }
+}
+
+fun calculateElapsedTime(entry: String): String {
+
+    val formatterWithMillis = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS")
+    val parsedEntry = LocalDateTime.parse(entry, formatterWithMillis)
+
+    val currentTime = LocalDateTime.now()
+
+    val duration = Duration.between(parsedEntry, currentTime)
+
+    val hours = duration.toHours()
+    val minutes = duration.toMinutes() % 60
+
+    return if (hours > 0) {
+        "${hours}시간 ${minutes}분 경과"
+    } else {
+        "${minutes}분 경과"
+    }
+}
+
+fun formatEntryTime(entry: String): String {
+    val formatterWithMillis = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS")
+
+    val parsedEntry = LocalDateTime.parse(entry, formatterWithMillis)
+
+    val outputFormatter = DateTimeFormatter.ofPattern("yyyy년 M월 d일 a h시 m분", Locale("ko", "KR"))
+
+    return parsedEntry.format(outputFormatter)
 }
 
 fun formatLicensePlate(number: String): String {
