@@ -19,6 +19,7 @@ import com.kimnlee.vehiclemanagement.data.model.VehicleRegistrationRequest
 import kotlinx.coroutines.flow.update
 import com.kimnlee.common.event.EventBus
 import com.kimnlee.common.event.NewNotificationEvent
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 
 
@@ -224,6 +225,15 @@ class VehicleManagementViewModel(
     // 알림을 읽으면 호출
     fun markNotificationsAsRead() {
         updateNotificationStatus(false)
+    }
+
+    fun startRefreshingCycle(carId: Int) {
+        viewModelScope.launch {
+            repeat(7) { // 5초 간격으로 4번 반복 (총 20초)
+                requestCarMembers(carId)
+                delay(2000) // 5초 대기
+            }
+        }
     }
 }
 

@@ -123,7 +123,10 @@ fun VehicleManagementDetailScreen(
             CarMembersRow(
                 carMembers = carMembers,
                 userPhoneNumber = userPhoneNumber,
-                onAddMember = { memberInvitationViewModel.openBottomSheet() }
+                onAddMember = {
+                    memberInvitationViewModel.openBottomSheet()
+                    viewModel.startRefreshingCycle(vehicleId)
+                }
             )
 
             Spacer(modifier = Modifier.height(16.dp))
