@@ -9,7 +9,8 @@ public enum FcmTokenType {
     AUTO_PAY_FAILED("autoPayFailed"),
     TRANSACTION_REQUEST("transactionRequest"),
     TRANSACTION_RESULT("transactionResult"),
-    INVITATION("invitation");
+    INVITATION("invitation"),
+    TRANSACTION_CANCEL("transactionCancel");
 
     private final String value;
 }
