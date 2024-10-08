@@ -327,11 +327,11 @@ function initApp() {
             this.lpno = null;
             this.isMobiUser = false; 
             this.cart = [];
+            this.socket.close();
           } else {
             this.isLoading = false;
-            alert('결제 실패');
+            alert('결제 취소');
           }
-          this.socket.close();
         }
       };
     },
@@ -504,6 +504,11 @@ function initApp() {
       referrerPolicy: 'no-referrer',
       body: JSON.stringify(data)
     });
+
+    if(!response.ok){
+      throw new Error(`postRequest() : error! status: ${response.status}`);
+    }
+
     return response;
   }
 

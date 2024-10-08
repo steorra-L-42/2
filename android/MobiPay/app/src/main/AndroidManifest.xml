@@ -20,6 +20,7 @@
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <uses-permission android:name="android.permission.NEARBY_WIFI_DEVICES" />
     <uses-permission android:name="android.permission.NFC" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
     <!-- Conflict 해결 -->
     <!--        android:roundIcon="@mipmap/ic_launcher_round"-->
@@ -55,6 +56,8 @@
                 <data android:host="youvegotinvited"/>
                 <data android:scheme="mobipay"/>
                 <data android:host="payment_requestmanualpay"/>
+                <data android:scheme="mobipay"/>
+                <data android:host="payment_successful"/>
             </intent-filter>
         </activity>
 
