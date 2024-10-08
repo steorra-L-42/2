@@ -22,10 +22,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -66,6 +63,7 @@ import com.naver.maps.map.overlay.OverlayImage
 import kotlinx.coroutines.runBlocking
 import retrofit2.Retrofit
 import java.util.Locale
+import androidx.compose.material.icons.Icons
 
 private val YOUR_CLIENT_SECRET = BuildConfig.NAVER_MAP_CLIENT_SECRET
 
@@ -79,6 +77,7 @@ fun HomeScreen(
     val isLoggedIn by loginViewModel.isLoggedIn.collectAsState()
     var lastLocation by remember { mutableStateOf<Pair<Double, Double>?>(null) }
     val naverMapService by homeViewModel.naverMapService.collectAsState()
+    val hasNewNotifications by homeViewModel.hasNewNotifications.collectAsState()
 
     LaunchedEffect(isLoggedIn) {
         if (!isLoggedIn) {
@@ -131,11 +130,24 @@ fun HomeScreen(
                         modifier = Modifier
                             .padding(end = 8.dp)
                     ){
-                        Image(
-                            painter = painterResource(id = R.drawable.bell_new),
-                            contentDescription = "알림 아이콘",
-                            contentScale = ContentScale.Fit
-                        )
+                        IconButton(
+                            onClick = {
+                                navController.navigate("notification_main")
+                                homeViewModel.markNotificationsAsRead()
+                            },
+                            modifier = Modifier.size(30.dp)
+                        ) {
+                            val notificationIcon = if (hasNewNotifications) {
+                                painterResource(id = R.drawable.bell_new)
+                            } else {
+                                painterResource(id = R.drawable.bell)
+                            }
+                            Icon(
+                                painter = notificationIcon,
+                                contentDescription = "알림",
+                                tint = Color.Unspecified
+                            )
+                        }
                     }
                 }
 
