@@ -59,7 +59,6 @@ fun PaymentHistoryScreen(
                             text = "💳",
                             style = MaterialTheme.typography.headlineMedium,
                             fontFamily = FontFamily(Font(R.font.emoji)),
-                            fontSize = 24.sp,
                             modifier = Modifier
                                 .padding(top = 10.dp)
                                 .padding(end = 8.dp)
@@ -68,7 +67,6 @@ fun PaymentHistoryScreen(
                             text = "결제 내역",
                             style = MaterialTheme.typography.headlineMedium,
                             color = MobiTextAlmostBlack,
-                            fontSize = 24.sp,
                             fontWeight = FontWeight.Bold
                         )
                     }
@@ -146,7 +144,7 @@ fun ItemCard(
                     text = item.merchantName,
                     style = MaterialTheme.typography.titleMedium,
                     color = MobiTextAlmostBlack,
-                    fontWeight = FontWeight.Bold
+                    fontFamily = FontFamily(Font(R.font.pbold))
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
