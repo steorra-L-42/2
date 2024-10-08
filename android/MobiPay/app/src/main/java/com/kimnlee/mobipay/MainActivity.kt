@@ -90,14 +90,6 @@ class MainActivity : ComponentActivity() {
                 val fcmData by fcmDataFromIntent.collectAsState()
                 val registeredCards by cardManagementViewModel.registeredCards.collectAsState()
 
-                LaunchedEffect(isLoggedIn) {
-                    if (isLoggedIn) {
-                        navController.navigate("home") {
-                            popUpTo("auth") { inclusive = true }
-                        }
-                    }
-                }
-
                 LaunchedEffect(isLoggedIn, fcmData, registeredCards) {
                     if (isLoggedIn && fcmData != null && fcmData!!.type != "payment_success" && registeredCards.isNotEmpty()) {
                         Log.d(TAG, "로그인 + FCM데이터 확인되어 수동결제 처리")
