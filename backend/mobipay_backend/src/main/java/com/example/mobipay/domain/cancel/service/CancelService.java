@@ -72,6 +72,8 @@ public class CancelService {
         }catch (Exception e) {
             throw new CancelServerException();
         }
+
+        merchantTransaction.cancel();
     }
 
     private void validateMobiApiKey(String mobiApiKey, Long merchantId) {
