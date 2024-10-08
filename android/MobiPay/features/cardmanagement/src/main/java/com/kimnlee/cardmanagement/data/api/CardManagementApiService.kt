@@ -3,6 +3,7 @@ package com.kimnlee.cardmanagement.data.api
 import com.kimnlee.cardmanagement.data.model.AutoPaymentCardRequest
 import com.kimnlee.cardmanagement.data.model.AutoPaymentCardResponse
 import com.kimnlee.cardmanagement.data.model.CardDetailResponse
+import com.kimnlee.cardmanagement.data.model.MyDataConsentResponse
 import com.kimnlee.cardmanagement.data.model.OwnedCardListResponse
 import com.kimnlee.cardmanagement.data.model.RegisterCardRequest
 import com.kimnlee.cardmanagement.data.model.RegisterCardResponse
@@ -35,4 +36,12 @@ interface CardManagementApiService {
     // 자동 결제 카드 등록
     @PATCH("api/v1/cards/auto-pay")
     suspend fun registerAutoPaymentCard(@Body autoPaymentCardRequest: AutoPaymentCardRequest): Response<AutoPaymentCardResponse>
+
+    // 마이 데이터 동의 설정
+    @PATCH("api/v1/users/mydata-consent")
+    suspend fun submitMyDataAgreement(): Response<MyDataConsentResponse>
+
+    // 마이 데이터 동의 여부 조회
+    @GET("api/v1/users/mydata-consent")
+    suspend fun getMyDataConsentStatus(): Response<MyDataConsentResponse>
 }

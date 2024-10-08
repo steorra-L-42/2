@@ -51,8 +51,12 @@ function initApp() {
     video: null,
     socket: null,
     isManualLPnoModalOpen: false,
-    isShowCameraChooseModal: false, 
+    isShowCameraChooseModal: false,
+    lastLpno: '',
+    lpnoCounter: 0,
+    detectionStopped: false, 
     manualLpno: '',
+    cameraDevices: [],
 
     initVideo() {
       this.video = document.getElementById('video');
@@ -81,7 +85,7 @@ function initApp() {
         const devices = await navigator.mediaDevices.enumerateDevices();
         this.cameraDevices = devices.filter(device => device.kind === 'videoinput');
       } catch (error) {
-        console.error('Failed to enumerate devices:', error);
+        console.error('카메라 뭐뭐 있는지 파악 실패:', error);
       }
     },
 
@@ -201,6 +205,12 @@ function initApp() {
       this.isShowModalSuccess = false;
     },
 
+    resumeDetection() {
+      this.detectionStopped = false;
+      this.lastLpno = '',
+      this.lpnoCounter= 0,
+      document.querySelector('.flex-col.items-center.py-4').classList.remove('bg-blue-300');
+    },
 
     dateFormat(date) {
       const formatter = new Intl.DateTimeFormat('id', { dateStyle: 'short', timeStyle: 'short'});
@@ -337,75 +347,100 @@ function initApp() {
       });
     },
 
+    
     async detectObjects() {
-      try {
-        const predictions = await this.model.detect(this.video);
-        this.car_present = false;
+      if (!this.detectionStopped){
+        try {
+          const predictions = await this.model.detect(this.video);
+          this.car_present = false;
 
-        predictions.forEach((prediction) => {
-          if (prediction.class === 'car') {
-            this.car_present = true;
+          predictions.forEach((prediction) => {
+            if (prediction.class === 'car') {
+              this.car_present = true;
 
-            const [x, y, width, height] = prediction.bbox;
+              const [x, y, width, height] = prediction.bbox;
 
-            if (height > 240 && width > 350) {
-              const startTime = performance.now();
-              const canvas = document.createElement('canvas');
-              canvas.width = width;
-              canvas.height = height;
-              const context = canvas.getContext('2d');
+              if (height > 240 && width > 350) {
+                const startTime = performance.now();
+                const canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+                const context = canvas.getContext('2d');
 
-              context.drawImage(this.video, x, y, width, height, 0, 0, width, height);
+                context.drawImage(this.video, x, y, width, height, 0, 0, width, height);
 
-              const self = this;
+                const self = this;
 
-              canvas.toBlob(async (blob) => {
-                const formData = new FormData();
-                formData.append('file', blob, 'image.jpg');
-                const endTime = performance.now();
-                const duration = endTime - startTime;
-                console.log("변환 시간: " + duration.toFixed(3) + "ms");
+                canvas.toBlob(async (blob) => {
+                  const formData = new FormData();
+                  formData.append('file', blob, 'image.jpg');
+                  const endTime = performance.now();
+                  const duration = endTime - startTime;
+                  console.log("변환 시간: " + duration.toFixed(3) + "ms");
 
-                try {
-                  const response = await fetch('https://anpr.mobipay.kr/predict/', {
-                    method: 'POST',
-                    body: formData,
-                  });
+                  try {
+                    const response = await fetch('https://anpr.mobipay.kr/predict/', {
+                      method: 'POST',
+                      body: formData,
+                    });
 
-                  const data = await response.json();
-                  if (data !== null) {
-                    const confidence = parseFloat(data.confidence);
+                    const data = await response.json();
+                    if (data !== null) {
+                      const confidence = parseFloat(data.confidence);
 
-                    if (confidence > 0.85) {
-                      self.$data.lpno = data.predicted_text;
-                      self.$data.isMobiUser = true;
-                    } else {
-                      console.log("정확도 낮음");
-                      self.$data.lpno = null;
-                      self.$data.isMobiUser = false;
+                      if (confidence > 0.85) {
+                        const detectedLpno = data.predicted_text;
+
+                        if (self.lastLpno !== detectedLpno) {
+                          self.lpnoCounter = 1;
+                          self.lastLpno = detectedLpno;
+                        } else {
+                          self.lpnoCounter++;
+                        }
+
+                        if (self.lpnoCounter >= 3) {
+                          self.detectionStopped = true;
+                          self.$data.lpno = detectedLpno;
+                          self.$data.isMobiUser = true;
+
+                          document.querySelector('.flex-col.items-center.py-4').classList.add('bg-blue-300');
+                        } else {
+                          self.$data.lpno = detectedLpno;
+                          self.$data.isMobiUser = true;
+                        }
+                      } else {
+                        console.log("정확도 낮음");
+                        self.$data.lpno = null;
+                        self.$data.isMobiUser = false;
+                      }
                     }
+                  } catch (error) {
+                    console.error('POST 실패: ', error);
                   }
-                } catch (error) {
-                  console.error('POST 실패: ', error);
-                }
-              });
+                });
+              }
             }
+          });
+
+          if (!this.car_present) {
+            // 차량 감지 안 된 경우 처리
           }
-        });
 
-        if (!this.car_present) {
-          // 차량 감지 안 된 경우 처리
+          setTimeout(() => {
+            requestAnimationFrame(() => this.detectObjects());
+          }, 600);
+        } catch (error) {
+          console.error('물체 감지 실패: ', error);
+
+          setTimeout(() => {
+            requestAnimationFrame(() => this.detectObjects());
+          }, 600);
         }
-
-        setTimeout(() => {
-          requestAnimationFrame(() => this.detectObjects());
-        }, 600);
-      } catch (error) {
-        console.error('물체 감지 실패: ', error);
-
-        setTimeout(() => {
-          requestAnimationFrame(() => this.detectObjects());
-        }, 600);
+      }else{
+        // Detection 중지 상태면 2초 간격으로 함수 실행, 실제 detection 수행 안 함 (로컬 GPU 사용 X)
+          setTimeout(() => {
+            requestAnimationFrame(() => this.detectObjects());
+          }, 2000);
       }
     },
 
