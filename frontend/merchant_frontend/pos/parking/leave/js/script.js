@@ -340,7 +340,7 @@ function initApp() {
         console.log('WebSocket error:', error);
       };
 
-      this.socket.onmessage = (event) => {
+      this.socket.onmessage = async (event) => {
         const message = JSON.parse(event.data);
 
         if (message.sessionId) {
@@ -348,6 +348,22 @@ function initApp() {
           this.socket.send(JSON.stringify({ "type": MERCHANT_TYPE }));
         } else {
           if (message.success) {
+            // paid상태를 바꿔야한다. api 호출.
+            const response = await fetch(url + '/merchants/parking/paid', {
+              method: 'PATCH',
+              headers: {
+                'Content-Type': 'application/json',
+                'merApiKey': 'Da19J03F6g7H8iB2c54e'
+              },
+              body: JSON.stringify({
+                "carNumber": this.lpno,
+              }),
+            });
+            if (response.status === 200) {
+              console.log('paid 상태 변경 성공');
+            } else {
+              console.log('paid 상태 변경 실패');
+            }
 
             this.isLoading = false;
             this.isShowModalSuccess = true;

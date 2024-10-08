@@ -47,7 +47,6 @@ android {
 dependencies {
 
     implementation(project(":common"))
-    implementation(project(":features:cardmanagement"))
     implementation(project(":features:memberinvitation"))
 
     implementation(libs.guava)
