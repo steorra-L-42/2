@@ -21,8 +21,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import com.kimnlee.common.ui.theme.*
+import com.kimnlee.notification.R
 import com.kimnlee.notification.data.Notification
 import com.kimnlee.notification.data.NotificationRepository
 import com.kimnlee.notification.data.NotificationType
@@ -165,9 +167,13 @@ fun MemberInvitations(notificationRepository: NotificationRepository) {
 
 @Composable
 fun NotificationList(notifications: List<Notification>) {
-    LazyColumn {
-        items(notifications) { notification ->
-            NotificationItem(notification)
+    if (notifications.isEmpty()) {
+        EmptyNotificationState()
+    } else {
+        LazyColumn {
+            items(notifications) { notification ->
+                NotificationItem(notification)
+            }
         }
     }
 }
@@ -267,5 +273,38 @@ fun formatTime(timestamp: LocalDateTime): String {
         diff.toMinutes() < 60 -> "${diff.toMinutes()}분 전"
         diff.toHours() < 24 && now.dayOfMonth == timestamp.dayOfMonth -> "${diff.toHours()}시간 전"
         else -> timestamp.format(DateTimeFormatter.ofPattern("yyyy.MM.dd"))
+    }
+}
+
+@Composable
+fun EmptyNotificationState() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.no_notifications_icon),
+                contentDescription = "알림 없음",
+                modifier = Modifier.size(80.dp)
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+            Text(
+                text = "알림이 없습니다",
+                style = MaterialTheme.typography.headlineSmall,
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "새로운 알림이 오면 여기에 표시됩니다",
+                style = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Center
+            )
+        }
     }
 }
