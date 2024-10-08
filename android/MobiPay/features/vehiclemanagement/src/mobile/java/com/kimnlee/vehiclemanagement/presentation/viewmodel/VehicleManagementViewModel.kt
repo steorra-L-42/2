@@ -229,9 +229,9 @@ class VehicleManagementViewModel(
 
     fun startRefreshingCycle(carId: Int) {
         viewModelScope.launch {
-            repeat(7) { // 5초 간격으로 4번 반복 (총 20초)
+            repeat(7) {
                 requestCarMembers(carId)
-                delay(2000) // 5초 대기
+                delay(2000)
             }
         }
     }
