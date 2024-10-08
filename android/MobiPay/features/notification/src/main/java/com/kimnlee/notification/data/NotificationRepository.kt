@@ -74,7 +74,9 @@ class NotificationRepository(private val context: Context) {
             remove(invitationMessagesKey)
             apply()
         }
-        emitNewNotificationEvent()
+        coroutineScope.launch {
+            EventBus.emit(NewNotificationEvent(false))  // 알림이 없음을 나타내는 이벤트 발생
+        }
     }
 
     private fun emitNewNotificationEvent() {
