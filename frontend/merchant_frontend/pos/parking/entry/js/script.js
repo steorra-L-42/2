@@ -431,9 +431,13 @@ function initApp() {
 
                                 // prettyEntrytime을 원하는 형식으로 설정
                                 const date = new Date(self.$data.entrytime);
-                                self.$data.prettyDate = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
-                                self.$data.prettyTime = `${date.getHours()}시 ${date.getMinutes()}분 ${date.getSeconds()}초`;
-                                console.log("entrytime 반영완료");
+                                if (isNaN(date.getTime())) {
+                                  alert("이미 입차한 차량입니다.");
+                                } else {
+                                  self.$data.prettyDate = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+                                  self.$data.prettyTime = `${date.getHours()}시 ${date.getMinutes()}분 ${date.getSeconds()}초`;
+                                  console.log("entrytime 반영완료");
+                                }
                               })
                               .catch(error => {
                                 // 에러 발생 시 콘솔에 출력

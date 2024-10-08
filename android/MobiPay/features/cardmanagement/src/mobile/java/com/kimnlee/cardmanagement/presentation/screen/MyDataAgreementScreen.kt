@@ -100,8 +100,8 @@ fun MyDataAgreementScreen(
                                 .padding(top = 8.dp, end = 8.dp)
                         )
                         Text(
-                            text = "서비스 신청 및 이용약관동의",
-                            style = MaterialTheme.typography.headlineSmall,
+                            text = "서비스 이용약관동의",
+                            style = MaterialTheme.typography.headlineMedium,
                             fontFamily = FontFamily(Font(R.font.pbold)),
                             color = MobiTextAlmostBlack
                         )

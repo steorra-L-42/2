@@ -34,6 +34,9 @@ class HomeViewModel (apiClient: ApiClient, private val authManager: AuthManager)
     private val _userName = MutableStateFlow("")
     val userName: StateFlow<String> = _userName
 
+    private val _userPhoneNumber = MutableStateFlow("")
+    val userPhoneNumber: StateFlow<String> = _userPhoneNumber
+
     init {
         viewModelScope.launch {
             EventBus.events.collectLatest { event ->
@@ -44,6 +47,7 @@ class HomeViewModel (apiClient: ApiClient, private val authManager: AuthManager)
         }
         getUserVehicles()
         loadUserName()
+        loadUserPhoneNumber()
     }
 
     private fun loadUserName() {
@@ -83,9 +87,11 @@ class HomeViewModel (apiClient: ApiClient, private val authManager: AuthManager)
                 if (response.isSuccessful) {
                     response.body()?.let { carMembersResponse ->
                         val vehicle = _vehicles.value.find { it.carId == carId }
-                        val sortedMembers = carMembersResponse.items.sortedWith(compareBy<CarMember> {
-                            it.mobiUserId != vehicle?.ownerId
-                        }.thenBy { it.name })
+                        val sortedMembers = carMembersResponse.items.sortedWith(
+                            compareBy<CarMember> {
+                                it.phoneNumber != _userPhoneNumber.value
+                            }.thenBy { it.name }
+                        )
                         _carMembers.value = sortedMembers
                     }
                 } else {
@@ -95,5 +101,14 @@ class HomeViewModel (apiClient: ApiClient, private val authManager: AuthManager)
                 Log.e("HomeViewModel", "Error getting car members", e)
             }
         }
+    }
+
+    fun refreshVehicles() {
+        getUserVehicles()
+    }
+
+    private fun loadUserPhoneNumber() {
+        val userInfo = authManager.getUserInfo()
+        _userPhoneNumber.value = userInfo.phoneNumber
     }
 }

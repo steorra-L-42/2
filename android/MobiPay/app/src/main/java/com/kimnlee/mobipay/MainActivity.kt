@@ -90,14 +90,6 @@ class MainActivity : ComponentActivity() {
                 val fcmData by fcmDataFromIntent.collectAsState()
                 val registeredCards by cardManagementViewModel.registeredCards.collectAsState()
 
-                LaunchedEffect(isLoggedIn) {
-                    if (isLoggedIn) {
-                        navController.navigate("home") {
-                            popUpTo("auth") { inclusive = true }
-                        }
-                    }
-                }
-
                 LaunchedEffect(isLoggedIn, fcmData, registeredCards) {
                     if (isLoggedIn && fcmData != null && fcmData!!.type != "payment_success" && registeredCards.isNotEmpty()) {
                         Log.d(TAG, "로그인 + FCM데이터 확인되어 수동결제 처리")
@@ -117,7 +109,8 @@ class MainActivity : ComponentActivity() {
                 }
 
                 LaunchedEffect(isLoggedIn, fcmData, registeredCards) {
-                    if (isLoggedIn && fcmData != null && fcmData!!.type == "payment_successful" ) {
+                    Log.d(TAG, "onCreate: 여긴 불림")
+                    if (isLoggedIn && fcmData != null && fcmData!!.type == "payment_successful") {
                         Log.d(TAG, "결제완료 화면 넘어감")
 
                         val registeredCardsJson = Uri.encode(Gson().toJson(registeredCards))
@@ -129,6 +122,20 @@ class MainActivity : ComponentActivity() {
 
                         // 처리 후 fcmData 리셋
                         fcmDataFromIntent.value = null
+                    }else if (isLoggedIn && fcmData != null && fcmData!!.type == "transactionCancel"){
+                        Log.d(TAG, "결제취소 성공 화면으로 이동")
+
+                        val fcmDataJson = Uri.encode(Gson().toJson(fcmData))
+                        navController.navigate("payment_cancelled?fcmData=$fcmDataJson") {
+                            popUpTo("home") { inclusive = false }
+                        }
+
+                        // 처리 후 fcmData 리셋
+                        fcmDataFromIntent.value = null
+                    }else{
+                        Log.d(TAG, "onCreate: 여기도 불림")
+                        if(fcmData != null)
+                            Log.d(TAG, "onCreate: fcmData 타입 = ${fcmData!!.type}")
                     }
                 }
 
@@ -266,7 +273,7 @@ class MainActivity : ComponentActivity() {
 
     private fun handleIntent(intent: Intent?) {
         intent?.data?.let { uri ->
-            if (uri.scheme == "mobipay" && (uri.host == "payment_requestmanualpay" || uri.host == "payment_successful")) {
+            if (uri.scheme == "mobipay" && (uri.host == "payment_requestmanualpay" || uri.host == "payment_successful"|| uri.host == "payment_cancelled")) {
                 val fcmDataJson = uri.getQueryParameter("fcmData")
                 Log.d(TAG, "handleIntent: $fcmDataJson")
                 fcmDataJson?.let {

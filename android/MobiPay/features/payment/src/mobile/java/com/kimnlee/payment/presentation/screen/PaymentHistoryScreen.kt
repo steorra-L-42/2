@@ -11,6 +11,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -26,19 +29,27 @@ import com.kimnlee.common.ui.theme.MobiBgGray
 import com.kimnlee.common.ui.theme.MobiBgWhite
 import com.kimnlee.common.ui.theme.MobiTextAlmostBlack
 import com.kimnlee.common.ui.theme.MobiTextDarkGray
-import com.kimnlee.payment.data.model.Merchant
-import com.kimnlee.payment.data.model.MerchantTransaction
+import com.kimnlee.common.utils.formatDateTime
+import com.kimnlee.common.utils.moneyFormat
+import com.kimnlee.payment.data.model.PaymentHistoryItem
+import com.kimnlee.payment.presentation.viewmodel.PaymentHistoryState
+import com.kimnlee.payment.presentation.viewmodel.PaymentViewModel
 
 private val ReceiptBgColor = Color(0xFF3182F6)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PaymentDetailListScreen(
-    transactions: List<MerchantTransaction>,
-    merchants: List<Merchant>,
-    onNavigateToDetail: (transaction: MerchantTransaction) -> Unit,
-    onNavigateBack: () -> Unit
+fun PaymentHistoryScreen(
+    onNavigateBack: () -> Unit,
+    paymentViewModel: PaymentViewModel,
+    onNavigateToDetail: (Int) -> Unit
 ) {
+    val paymentHistoryState by paymentViewModel.paymentHistory.collectAsState()
+
+    LaunchedEffect(Unit) {
+        paymentViewModel.loadPaymentHistory()
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -48,7 +59,6 @@ fun PaymentDetailListScreen(
                             text = "💳",
                             style = MaterialTheme.typography.headlineMedium,
                             fontFamily = FontFamily(Font(R.font.emoji)),
-                            fontSize = 24.sp,
                             modifier = Modifier
                                 .padding(top = 10.dp)
                                 .padding(end = 8.dp)
@@ -57,7 +67,6 @@ fun PaymentDetailListScreen(
                             text = "결제 내역",
                             style = MaterialTheme.typography.headlineMedium,
                             color = MobiTextAlmostBlack,
-                            fontSize = 24.sp,
                             fontWeight = FontWeight.Bold
                         )
                     }
@@ -79,34 +88,47 @@ fun PaymentDetailListScreen(
         },
         containerColor = MobiBgGray
     ) { innerPadding ->
-        LazyColumn(
-            contentPadding = innerPadding,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            items(transactions) { transaction ->
-                TransactionCard(
-                    transaction = transaction,
-                    merchant = merchants.find { it.merchant_id == transaction.merchant_id },
-                    onNavigateToDetail = onNavigateToDetail
-                )
+        when (paymentHistoryState) {
+            is PaymentHistoryState.Success -> {
+                val paymentHistory = (paymentHistoryState as PaymentHistoryState.Success).data
+                LazyColumn(
+                    contentPadding = innerPadding,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    items(paymentHistory.items) { item ->
+                        ItemCard(
+                            item = item,
+                            onNavigateToDetail = { onNavigateToDetail(item.transactionUniqueNo) }
+                        )
+                    }
+                }
             }
+            is PaymentHistoryState.NoContent -> {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(
+                        text = "결제 내역이 없어요",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MobiTextDarkGray
+                    )
+                }
+            }
+            PaymentHistoryState.Initial -> {}
         }
     }
 }
 
 @Composable
-fun TransactionCard(
-    transaction: MerchantTransaction,
-    merchant: Merchant?,
-    onNavigateToDetail: (transaction: MerchantTransaction) -> Unit
+fun ItemCard(
+    item: PaymentHistoryItem,
+    onNavigateToDetail: () -> Unit
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onNavigateToDetail(transaction) },
+            .clickable(onClick = onNavigateToDetail),
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         colors = CardDefaults.cardColors(containerColor = MobiBgWhite)
@@ -119,19 +141,14 @@ fun TransactionCard(
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = merchant?.merchant_name ?: "Unknown Merchant",
+                    text = item.merchantName,
                     style = MaterialTheme.typography.titleMedium,
                     color = MobiTextAlmostBlack,
-                    fontWeight = FontWeight.Bold
+                    fontFamily = FontFamily(Font(R.font.pbold))
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "${transaction.transaction_date} ${transaction.transaction_time}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MobiTextDarkGray
-                )
-                Text(
-                    text = transaction.info,
+                    text = formatDateTime(item.transactionDate, item.transactionTime),
                     style = MaterialTheme.typography.bodySmall,
                     color = MobiTextDarkGray
                 )
@@ -140,7 +157,7 @@ fun TransactionCard(
                 horizontalAlignment = Alignment.End
             ) {
                 Text(
-                    text = "${transaction.payment_balance}원",
+                    text = moneyFormat(item.paymentBalance.toBigInteger()),
                     style = MaterialTheme.typography.titleMedium,
                     color = MobiTextAlmostBlack,
                     fontWeight = FontWeight.Bold

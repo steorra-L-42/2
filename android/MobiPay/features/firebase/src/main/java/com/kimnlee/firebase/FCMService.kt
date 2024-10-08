@@ -8,6 +8,7 @@ import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.media.RingtoneManager
+import android.net.Uri
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
@@ -51,11 +52,13 @@ import com.kimnlee.notification.data.NotificationDetails
 import com.kimnlee.notification.data.NotificationType
 import com.kimnlee.notification.data.NotificationRepository
 import java.time.LocalDateTime
+import kotlin.random.Random
 
 private const val TAG = "FCMService"
 private const val FCM_TYPE_MEMBER_INVITATION = "invitation"
 private const val FCM_TYPE_PAYMENT_REQUEST = "transactionRequest"
 private const val FCM_TYPE_PAYMENT_RESULT = "transactionResult"
+private const val FCM_TYPE_PAYMENT_CANCEL = "transactionCancel"
 private const val FCM_TYPE_AUTO_PAY_FAILURE = "autoPayFailed"
 
 class FCMService : FirebaseMessagingService() {
@@ -142,9 +145,6 @@ class FCMService : FirebaseMessagingService() {
             val fcmData = Gson().fromJson(responseJsonString, FCMData::class.java)
 
             when (fcmData.type) {
-                FCM_TYPE_PAYMENT_RESULT -> {
-                    // 결제 결과화면 표시
-                }
                 FCM_TYPE_PAYMENT_REQUEST -> {
                     if (fcmData.lat != null && fcmData.lng != null) {
 
@@ -191,9 +191,31 @@ class FCMService : FirebaseMessagingService() {
 
                     memberInvitationOperations?.processFCM(fcmDataForInvitation)
                 }
+                FCM_TYPE_PAYMENT_CANCEL -> {
+                    // 결제 취소화면 표시
+                    Log.d(TAG, "processMessage: 결제취소 요청 확인됨")
+
+                    val fcmDataJson = Uri.encode(Gson().toJson(fcmData))
+                    Log.d(TAG, "processMessage: $fcmDataJson")
+                    val deepLinkUri = Uri.parse("mobipay://payment_cancelled?fcmData=$fcmDataJson")
+
+                    val intent = Intent(Intent.ACTION_VIEW, deepLinkUri).apply {
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    }
+
+                    val pendingIntent = PendingIntent.getActivity(
+                        applicationContext, Random.nextInt(), intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                    )
+
+                    notificationManager.showNotification("모비페이 결제취소", "${fcmData.merchantName}\n${moneyFormat(fcmData.paymentBalance!!.toBigInteger())}", pendingIntent)
+                }
                 FCM_TYPE_AUTO_PAY_FAILURE -> {
 
                 }
+                FCM_TYPE_PAYMENT_RESULT -> {
+                    // 결제 결과화면 표시
+                }
+
                 else -> {
 //                    Log.d(TAG, "processMessage: 이것은 ELSE에 속한다.")
 //                    try{
@@ -238,7 +260,11 @@ class FCMService : FirebaseMessagingService() {
 
                 // Send this to the screen through LocalBroadcastManager
                 val intent = Intent("com.kimnlee.testmsg.UPDATE_UI")
-                intent.putExtra("new_text", displayMenu)
+                intent.putExtra("menus", displayMenu)
+
+                val merchantName = data["merchant_name"] ?: "모비페이 가맹점 메뉴 (음성주문 가능)"
+
+                intent.putExtra("merchant_name", merchantName)
                 LocalBroadcastManager.getInstance(applicationContext).sendBroadcast(intent)
             }
         }

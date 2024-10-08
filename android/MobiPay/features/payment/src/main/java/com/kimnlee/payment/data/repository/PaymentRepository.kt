@@ -211,7 +211,7 @@ class PaymentRepository(
 
                     var notiTitle = if (isAutoPay) "모비페이 자동결제 완료" else "모비페이 결제완료"
 
-                    var notiMsg = "${fcmData.merchantName}\n${amountKRW}원 결제완료"
+                    var notiMsg = "${fcmData.merchantName}\n${amountKRW} 결제완료"
 
                     // TODO 인 앱 알림목록에 추가
 
