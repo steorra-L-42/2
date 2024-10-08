@@ -1,6 +1,8 @@
 package com.example.mobipay.cancel;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -8,6 +10,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.example.mobipay.MobiPayApplication;
+import com.example.mobipay.domain.fcmtoken.entity.FcmToken;
+import com.example.mobipay.domain.fcmtoken.error.FCMException;
+import com.example.mobipay.domain.fcmtoken.repository.FcmTokenRepository;
+import com.example.mobipay.domain.fcmtoken.service.FcmService;
 import com.example.mobipay.domain.merchant.entity.Merchant;
 import com.example.mobipay.domain.merchant.error.MerchantNotFoundException;
 import com.example.mobipay.domain.merchant.repository.MerchantRepository;
@@ -74,10 +80,13 @@ public class CancelTransactionTest {
     private final CardProductRepository cardProductRepository;
     private final OwnedCardRepository ownedCardRepository;
     private final RegisteredCardRepository registeredCardRepository;
+    private final FcmTokenRepository fcmTokenRepository;
     private final EntityManager em;
 
     @MockBean
     private RestClientUtil restClientUtil;
+    @MockBean
+    private FcmService fcmServiceImpl;
 
     @Autowired
     public CancelTransactionTest(WebApplicationContext context, MockMvc mockMvc,
@@ -85,7 +94,9 @@ public class CancelTransactionTest {
                                  MerchantTransactionRepository merchantTransactionRepository,
                                  MobiUserRepository mobiUserRepository, AccountRepository accountRepository,
                                  CardProductRepository cardProductRepository, OwnedCardRepository ownedCardRepository,
-                                 RegisteredCardRepository registeredCardRepository, SsafyUserRepository ssafyUserRepository, EntityManager em) {
+                                 RegisteredCardRepository registeredCardRepository,
+                                 SsafyUserRepository ssafyUserRepository, FcmTokenRepository fcmTokenRepository,
+                                 EntityManager em) {
         this.context = context;
         this.mockMvc = mockMvc;
         this.objectMapper = objectMapper;
@@ -96,6 +107,7 @@ public class CancelTransactionTest {
         this.ownedCardRepository = ownedCardRepository;
         this.registeredCardRepository = registeredCardRepository;
         this.merchantTransactionRepository = merchantTransactionRepository;
+        this.fcmTokenRepository = fcmTokenRepository;
         this.ssafyUserRepository = ssafyUserRepository;
         this.em = em;
     }
@@ -107,7 +119,9 @@ public class CancelTransactionTest {
         ownedCardRepository.deleteAll();
         accountRepository.deleteAll();
         mobiUserRepository.deleteAll();
+        fcmTokenRepository.deleteAll();
         ssafyUserRepository.deleteAll();
+        Mockito.reset(fcmServiceImpl);
         Mockito.reset(restClientUtil);
     }
 
@@ -118,7 +132,9 @@ public class CancelTransactionTest {
         ownedCardRepository.deleteAll();
         accountRepository.deleteAll();
         mobiUserRepository.deleteAll();
+        fcmTokenRepository.deleteAll();
         ssafyUserRepository.deleteAll();
+        Mockito.reset(fcmServiceImpl);
         Mockito.reset(restClientUtil);
     }
 
@@ -161,7 +177,7 @@ public class CancelTransactionTest {
         @DisplayName("merchantId에 해당하는 MobiApiKey가 아닐 때")
         void Fail400_invalidMobiApiKey() throws Exception {
             //given
-            final String url = "/api/v1/merchants/"+ STARBUCkS_ID + "/cancelled-transactions/1";
+            final String url = "/api/v1/merchants/" + STARBUCkS_ID + "/cancelled-transactions/1";
 
             //when
             ResultActions result = mockMvc.perform(patch(url).with(csrf())
@@ -195,12 +211,14 @@ public class CancelTransactionTest {
     @DisplayName("실패: 403 Forbidden : merchantId에 해당하는 transaction이 아닐 때")
     void Fail403_not_merchant_transaction() throws Exception {
         //given
-        MerchantTransaction merchantTransaction = createMerchantTransaction(1906L, 1L, "20240101", "000001", 10000L, "info");
+        MerchantTransaction merchantTransaction = createMerchantTransaction(1906L, 1L, "20240101", "000001", 10000L,
+                "info");
 
         final String mobiApiKey = merchantRepository.findById(STARBUCkS_ID)
                 .orElseThrow(MerchantNotFoundException::new).getApiKey();
 
-        final String url = "/api/v1/merchants/" + STARBUCkS_ID + "/cancelled-transactions/" + merchantTransaction.getTransactionUniqueNo();
+        final String url = "/api/v1/merchants/" + STARBUCkS_ID + "/cancelled-transactions/"
+                + merchantTransaction.getTransactionUniqueNo();
 
         //when
         ResultActions result = mockMvc.perform(patch(url).with(csrf())
@@ -256,13 +274,15 @@ public class CancelTransactionTest {
     @DisplayName("실패: 409 Conflict : 이미 취소된 transaction일 때")
     void fail409_already_cancelled() throws Exception {
         //given
-        MerchantTransaction merchantTransaction = createMerchantTransaction(STARBUCkS_ID, 1L, "20240101", "000001", 10000L, "info");
+        MerchantTransaction merchantTransaction = createMerchantTransaction(STARBUCkS_ID, 1L, "20240101", "000001",
+                10000L, "info");
         merchantTransaction.cancel();
 
         final String mobiApiKey = merchantRepository.findById(STARBUCkS_ID)
                 .orElseThrow(MerchantNotFoundException::new).getApiKey();
 
-        final String url = "/api/v1/merchants/" + STARBUCkS_ID + "/cancelled-transactions/" + merchantTransaction.getTransactionUniqueNo();
+        final String url = "/api/v1/merchants/" + STARBUCkS_ID + "/cancelled-transactions/"
+                + merchantTransaction.getTransactionUniqueNo();
 
         //when
         ResultActions result = mockMvc.perform(patch(url).with(csrf())
@@ -274,42 +294,79 @@ public class CancelTransactionTest {
         result.andExpect(status().isConflict());
     }
 
-    @Transactional
-    @Test
-    @DisplayName("실패: 500 Internal Server Error : 금융 API 서버 오류")
-    void Fail500_financial_api_server_error() throws Exception {
-        //given
-        Mockito.when(restClientUtil.cancelTransaction(Mockito.any(), Mockito.any())).thenThrow(new RuntimeException("금융 API 서버 오류"));
+    @Nested
+    @DisplayName("실패: 500 Internal Server Error")
+    class fail500 {
 
-        MerchantTransaction merchantTransaction = createMerchantTransaction(STARBUCkS_ID, 1L, "20240101", "000001", 10000L, "info");
+        @Transactional
+        @Test
+        @DisplayName("금융 API 서버 오류")
+        void Fail500_financial_api_server_error() throws Exception {
+            //given
+            Mockito.when(restClientUtil.cancelTransaction(Mockito.any(), Mockito.any()))
+                    .thenThrow(new RuntimeException("금융 API 서버 오류"));
 
-        final String mobiApiKey = merchantRepository.findById(STARBUCkS_ID)
-                .orElseThrow(MerchantNotFoundException::new).getApiKey();
+            MerchantTransaction merchantTransaction = createMerchantTransaction(STARBUCkS_ID, 1L, "20240101", "000001",
+                    10000L, "info");
 
-        final String url = "/api/v1/merchants/" + STARBUCkS_ID + "/cancelled-transactions/" + merchantTransaction.getTransactionUniqueNo();
+            final String mobiApiKey = merchantRepository.findById(STARBUCkS_ID)
+                    .orElseThrow(MerchantNotFoundException::new).getApiKey();
 
-        //when
-        ResultActions result = mockMvc.perform(patch(url).with(csrf())
-                .header("mobiApiKey", mobiApiKey)
-                .contentType(MediaType.APPLICATION_JSON));
-        em.flush();
+            final String url = "/api/v1/merchants/" + STARBUCkS_ID + "/cancelled-transactions/"
+                    + merchantTransaction.getTransactionUniqueNo();
 
-        //then
-        result.andExpect(status().isInternalServerError());
+            //when
+            ResultActions result = mockMvc.perform(patch(url).with(csrf())
+                    .header("mobiApiKey", mobiApiKey)
+                    .contentType(MediaType.APPLICATION_JSON));
+            em.flush();
+
+            //then
+            result.andExpect(status().isInternalServerError());
+        }
+
+        @Transactional
+        @Test
+        @DisplayName("fcm 전송 오류")
+        void Fail500_fcm_send_error() throws Exception {
+            //given
+            doThrow(new FCMException("fcm push failed")).when(fcmServiceImpl).sendMessage(any());
+
+            MerchantTransaction merchantTransaction = createMerchantTransaction(STARBUCkS_ID, 1L, "20240101", "000001",
+                    10000L, "info");
+
+            final String mobiApiKey = merchantRepository.findById(STARBUCkS_ID)
+                    .orElseThrow(MerchantNotFoundException::new).getApiKey();
+
+            final String url = "/api/v1/merchants/" + STARBUCkS_ID + "/cancelled-transactions/"
+                    + merchantTransaction.getTransactionUniqueNo();
+
+            //when
+            ResultActions result = mockMvc.perform(patch(url).with(csrf())
+                    .header("mobiApiKey", mobiApiKey)
+                    .contentType(MediaType.APPLICATION_JSON));
+            em.flush();
+
+            //then
+            result.andExpect(status().isInternalServerError());
+        }
     }
+
 
     @Transactional
     @Test
     @DisplayName("성공")
-    void Success200 () throws Exception {
+    void Success200() throws Exception {
 
         //given
-        MerchantTransaction merchantTransaction = createMerchantTransaction(STARBUCkS_ID, 1L, "20240101", "000001", 10000L, "info");
+        MerchantTransaction merchantTransaction = createMerchantTransaction(STARBUCkS_ID, 1L, "20240101", "000001",
+                10000L, "info");
 
         final String mobiApiKey = merchantRepository.findById(STARBUCkS_ID)
                 .orElseThrow(MerchantNotFoundException::new).getApiKey();
 
-        final String url = "/api/v1/merchants/" + STARBUCkS_ID + "/cancelled-transactions/" + merchantTransaction.getTransactionUniqueNo();
+        final String url = "/api/v1/merchants/" + STARBUCkS_ID + "/cancelled-transactions/"
+                + merchantTransaction.getTransactionUniqueNo();
 
         //when
         ResultActions result = mockMvc.perform(patch(url).with(csrf())
@@ -322,7 +379,9 @@ public class CancelTransactionTest {
     }
 
 
-    private MerchantTransaction createMerchantTransaction(Long merchantId, Long transactionUniqueNo, String transactionDate, String transactionTime, Long paymentBalance, String info) {
+    private MerchantTransaction createMerchantTransaction(Long merchantId, Long transactionUniqueNo,
+                                                          String transactionDate, String transactionTime,
+                                                          Long paymentBalance, String info) {
 
         // 0. SsafyUser 생성
         SsafyUserResponse ssafyUserResponse = mock(SsafyUserResponse.class);
@@ -335,12 +394,16 @@ public class CancelTransactionTest {
         SsafyUser ssafyUser = SsafyUser.of(ssafyUserResponse);
         ssafyUserRepository.save(ssafyUser);
 
-        // 1. mobiUser 생성
+        // 1. FcmToken 생성
+        FcmToken fcmToken = fcmTokenRepository.save(FcmToken.from("fcmToken"));
+
+        // 2. mobiUser 생성
         MobiUser mobiUser = MobiUser.of("bbam@gmail.com", "mobiuser", "010-1111-1111", "mobiUserPicture");
         mobiUser.setSsafyUser(ssafyUser);
-        mobiUser =mobiUserRepository.save(mobiUser);
+        mobiUser.setFcmToken(fcmToken);
+        mobiUser = mobiUserRepository.save(mobiUser);
 
-        // 2. 계좌 생성
+        // 3. 계좌 생성
         AccountRec accountRec = mock(AccountRec.class);
         when(accountRec.getBankCode()).thenReturn("001");
         when(accountRec.getAccountNo()).thenReturn("12345678901234");
@@ -348,7 +411,7 @@ public class CancelTransactionTest {
         Account account = Account.of(accountRec);
         account = accountRepository.save(account);
 
-        // 3. 카드 생성
+        // 4. 카드 생성
         CardRec cardRec = mock(CardRec.class);
         when(cardRec.getCardNo()).thenReturn("1234567890123456");
         when(cardRec.getCvc()).thenReturn("123");
@@ -361,7 +424,7 @@ public class CancelTransactionTest {
         ownedCard.addRelation(mobiUser, account, cardProduct);
         ownedCardRepository.save(ownedCard);
 
-        // 4. 카드 등록
+        // 5. 카드 등록
         RegisteredCard registeredCard = RegisteredCard.from(1000000);
         registeredCard.addRelations(mobiUser, ownedCard);
         registeredCardRepository.save(registeredCard);

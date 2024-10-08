@@ -1,5 +1,8 @@
 package com.example.mobipay.domain.cancel.service;
 
+import static com.example.mobipay.domain.fcmtoken.enums.FcmTokenType.INVITATION;
+import static com.example.mobipay.domain.fcmtoken.enums.FcmTokenType.TRANSACTION_CANCEL;
+
 import com.example.mobipay.domain.cancel.dto.MerchantTransactionItem;
 import com.example.mobipay.domain.cancel.dto.MerchantTransactionResponse;
 import com.example.mobipay.domain.cancel.dto.SsafyCancelTransactionRequest;
@@ -7,6 +10,10 @@ import com.example.mobipay.domain.cancel.dto.SsafyCancelTransactionResponse;
 import com.example.mobipay.domain.cancel.error.CancelServerException;
 import com.example.mobipay.domain.cancel.error.TransactionAlreadyCancelledException;
 import com.example.mobipay.domain.cancel.error.TransactionNotBelongToMerchantException;
+import com.example.mobipay.domain.fcmtoken.dto.FcmSendDto;
+import com.example.mobipay.domain.fcmtoken.error.FCMException;
+import com.example.mobipay.domain.fcmtoken.service.FcmService;
+import com.example.mobipay.domain.invitation.entity.Invitation;
 import com.example.mobipay.domain.merchant.entity.Merchant;
 import com.example.mobipay.domain.merchant.error.MerchantNotFoundException;
 import com.example.mobipay.domain.merchant.repository.MerchantRepository;
@@ -15,7 +22,9 @@ import com.example.mobipay.domain.merchanttransaction.error.MerchantTransactionN
 import com.example.mobipay.domain.merchanttransaction.repository.MerchantTransactionRepository;
 import com.example.mobipay.domain.postpayments.error.InvalidMobiApiKeyException;
 import com.example.mobipay.util.RestClientUtil;
+import com.google.firebase.messaging.FirebaseMessagingException;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +42,7 @@ public class CancelService {
     private final MerchantTransactionRepository merchantTransactionRepository;
     private final MerchantRepository merchantRepository;
     private final RestClientUtil restClientUtil;
+    private final FcmService fcmServiceImpl;
 
     public MerchantTransactionResponse getTransactions(String mobiApiKey, Long merchantId) {
 
@@ -73,6 +83,17 @@ public class CancelService {
             throw new CancelServerException();
         }
 
+        // fcm 전송
+        Map<String, String> data = Map.of(
+                "type", TRANSACTION_CANCEL.getValue(),
+                "title", "결제 취소",
+                "body", "결제가 취소되었습니다.",
+                "merchantName", merchantTransaction.getMerchant().getMerchantName(),
+                "paymentBalance", merchantTransaction.getPaymentBalance().toString(),
+                "cardNo", merchantTransaction.getRegisteredCard().getOwnedCard().getCardNo()
+        );
+        sendCancelMessage(merchantTransaction, data);
+
         merchantTransaction.cancel();
     }
 
@@ -104,6 +125,18 @@ public class CancelService {
     private void validateNotCancelledTransaction(MerchantTransaction merchantTransaction) {
         if(merchantTransaction.getCancelled()) {
             throw new TransactionAlreadyCancelledException();
+        }
+    }
+
+    private void sendCancelMessage(MerchantTransaction merchantTransaction, Map<String, String> data) {
+        // 초대 메시지 전송
+        String token = merchantTransaction.getRegisteredCard().getMobiUser().getFcmToken().getValue();
+        FcmSendDto fcmSendDto = new FcmSendDto(token, data);
+
+        try {
+            fcmServiceImpl.sendMessage(fcmSendDto);
+        } catch (FirebaseMessagingException e) {
+            throw new FCMException(e.getMessage());
         }
     }
 
