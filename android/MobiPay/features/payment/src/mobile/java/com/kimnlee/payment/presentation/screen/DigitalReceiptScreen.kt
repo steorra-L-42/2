@@ -5,9 +5,12 @@ import android.location.Geocoder
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -21,10 +24,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.kimnlee.common.R
 import com.kimnlee.common.ui.theme.MobiBgGray
 import com.kimnlee.common.ui.theme.MobiBgWhite
+import com.kimnlee.common.ui.theme.MobiBlue
 import com.kimnlee.common.ui.theme.MobiTextAlmostBlack
 import com.kimnlee.common.ui.theme.MobiTextDarkGray
 import com.kimnlee.common.utils.formatCardNumber
@@ -107,6 +112,33 @@ fun DigitalReceiptScreen(
     }
 }
 
+// 왼쪽 정렬 SingleLineDetailItem (카드 번호용)
+@Composable
+fun LeftAlignedDetailItem(content: String) {
+    Text(
+        text = content,
+        style = MaterialTheme.typography.bodyMedium,
+        color = MobiTextAlmostBlack,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp)
+    )
+}
+
+// 오른쪽 정렬 SingleLineDetailItem (가맹점 주소용)
+@Composable
+fun RightAlignedDetailItem(content: String) {
+    Text(
+        text = content,
+        style = MaterialTheme.typography.bodySmall,
+        color = MobiTextAlmostBlack,
+        textAlign = TextAlign.End,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp)
+    )
+}
+
 @Composable
 fun ReceiptCard(receipt: ReceiptResponse, context: Context) {
     Card(
@@ -114,13 +146,13 @@ fun ReceiptCard(receipt: ReceiptResponse, context: Context) {
             .fillMaxSize()
             .padding(16.dp),
         colors = CardDefaults.cardColors(containerColor = MobiBgWhite),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        shape = RoundedCornerShape(16.dp)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(16.dp)
         ) {
             ReceiptHeader(receipt)
             PaymentAmountSection(receipt)
@@ -159,6 +191,7 @@ fun PaymentAmountSection(receipt: ReceiptResponse) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .background(Color(0xFFE8F3FF))
             .padding(horizontal = 24.dp, vertical = 24.dp)
     ) {
         Text(
@@ -171,7 +204,7 @@ fun PaymentAmountSection(receipt: ReceiptResponse) {
             text = moneyFormat(receipt.paymentBalance.toBigInteger()),
             style = MaterialTheme.typography.headlineLarge,
             fontWeight = FontWeight.Bold,
-            color = MobiTextAlmostBlack
+            color = MobiBlue
         )
     }
 }
@@ -185,21 +218,14 @@ fun PaymentDetailsSection(receipt: ReceiptResponse) {
     ) {
         DetailItem("공급가액", moneyFormat(taxCalc(receipt.paymentBalance.toBigInteger(), 10)))
         DetailItem("부가세", moneyFormat(taxCalc(receipt.paymentBalance.toBigInteger(), 1)))
-        Divider(modifier = Modifier.padding(vertical = 16.dp))
+        Divider(
+            modifier = Modifier
+                .padding(vertical = 16.dp)
+                .height(2.dp)
+                .background(Color(0xFFE8F3FF))  // 연한 파란색 구분선
+        )
         DetailItem("합계", moneyFormat(receipt.paymentBalance.toBigInteger()), isTotal = true)
     }
-}
-
-@Composable
-fun SingleLineDetailItem(content: String) {
-    Text(
-        text = content,
-        style = MaterialTheme.typography.bodyMedium,
-        color = MobiTextAlmostBlack,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp)
-    )
 }
 
 @Composable
@@ -207,15 +233,23 @@ fun CardInfoSection(receipt: ReceiptResponse) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 24.dp, vertical = 32.dp)
+            .padding(horizontal = 24.dp, vertical = 24.dp)
     ) {
-        Text(
-            text = "결제 수단",
-            style = MaterialTheme.typography.titleMedium,
-            color = MobiTextDarkGray
-        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                imageVector = Icons.Default.Check,
+                contentDescription = "Check Icon",
+                tint = MobiTextDarkGray
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = "결제 수단",
+                style = MaterialTheme.typography.titleMedium,
+                color = MobiTextDarkGray
+            )
+        }
         Spacer(modifier = Modifier.height(16.dp))
-        SingleLineDetailItem("${receipt.cardName} (${formatCardNumber(receipt.cardNo)})")
+        LeftAlignedDetailItem("${receipt.cardName} (${formatCardNumber(receipt.cardNo)})")
         DetailItem("승인번호", receipt.transactionUniqueNo.toString())
     }
 }
@@ -225,16 +259,24 @@ fun MerchantInfoSection(receipt: ReceiptResponse, context: Context) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 24.dp, vertical = 32.dp)
+            .padding(horizontal = 24.dp, vertical = 16.dp)
     ) {
-        Text(
-            text = "가맹점 정보",
-            style = MaterialTheme.typography.titleMedium,
-            color = MobiTextDarkGray
-        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                imageVector = Icons.Default.ShoppingCart,
+                contentDescription = "Cart Icon",
+                tint = MobiTextDarkGray
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = "가맹점 정보",
+                style = MaterialTheme.typography.titleMedium,
+                color = MobiTextDarkGray
+            )
+        }
         Spacer(modifier = Modifier.height(16.dp))
         DetailItem("상호", receipt.merchantName)
-        SingleLineDetailItem(getCurrentAddress(context, receipt.lat, receipt.lng))
+        RightAlignedDetailItem(getCurrentAddress(context, receipt.lat, receipt.lng))
         DetailItem("가맹점 번호", receipt.merchantId.toString())
     }
 }
