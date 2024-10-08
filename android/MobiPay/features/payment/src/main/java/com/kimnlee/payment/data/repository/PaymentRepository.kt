@@ -83,6 +83,7 @@ class PaymentRepository(
     }
 
     fun approveManualPay(fcmData: FCMData, cardNo: String){
+//        fun approveManualPay(fcmData: FCMData, cardNo: String){
         val newFcmData = FCMData(
             fcmData.autoPay,
             cardNo,

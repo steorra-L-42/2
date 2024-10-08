@@ -79,10 +79,11 @@ fun ManualPaymentScreen(
     LaunchedEffect(Unit) {
         viewModel.navigateToPaymentDetail.collect {
             Log.d(TAG, "ManualPaymentScreen: 인증 성공. payment_detail로 이동합니다.")
-            val cardNo = "1002134901000082"
-            if (fcmData != null && !isAnyFieldNull(fcmData) && cardNo != null){
+//            val cardNo = "1002134901000082"
+//            if (fcmData != null && !isAnyFieldNull(fcmData) && cardNo != null){
+            if (fcmData != null && !isAnyFieldNull(fcmData)){
                 Log.d(TAG, "ManualPaymentScreen: NULL값 없고 카드번호 OK")
-                paymentRepository.approveManualPay(fcmData, cardNo)
+                paymentRepository.approveManualPay(fcmData,  "")
 //                navController.navigate("payment_detail")
                 viewModel.resetAuthState()
             }
@@ -255,8 +256,9 @@ fun maskCardNumber(cardNumber: String): String {
 
 private fun isAnyFieldNull(fcmData: FCMData): Boolean {
     return with(fcmData) {
-        // 카드번호는 NULL 체크 하지 않습니다.
-        listOf(autoPay, approvalWaitingId, merchantId, paymentBalance, merchantName, info, lat, lng, type)
+        listOf(autoPay,
+
+            approvalWaitingId, merchantId, paymentBalance, merchantName, info, lat, lng, type)
             .any { it == null }
     }
 }
