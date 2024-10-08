@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.kimnlee.cardmanagement.presentation.screen.TextWithShadow
 import com.kimnlee.cardmanagement.presentation.screen.findCardCompany
 import com.kimnlee.cardmanagement.presentation.viewmodel.CardManagementViewModel
 import com.kimnlee.common.ui.theme.MobiBlue
@@ -36,6 +37,8 @@ import com.kimnlee.memberinvitation.presentation.viewmodel.MemberInvitationViewM
 import com.kimnlee.vehiclemanagement.R
 import com.kimnlee.vehiclemanagement.data.model.CarMember
 import com.kimnlee.vehiclemanagement.presentation.viewmodel.VehicleManagementViewModel
+import androidx.compose.ui.text.AnnotatedString
+import com.kimnlee.common.utils.MoneyFormat
 
 private const val TAG = "VehicleManagementDetail"
 
@@ -172,32 +175,18 @@ fun VehicleManagementDetailScreen(
                         Column(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .padding(16.dp),
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally
+                                .padding(start = 24.dp, bottom = 50.dp),
+                            verticalArrangement = Arrangement.Bottom,
+                            horizontalAlignment = Alignment.Start
                         ) {
-                            Text(
+                            TextWithShadow(
                                 text = formatCardNumber(card.cardNo),
-                                color = Color.White,
-                                style = MaterialTheme.typography.titleLarge.copy(
-                                    shadow = Shadow(
-                                        color = Color.Black.copy(alpha = 0.6f),
-                                        offset = Offset(2f, 2f),
-                                        blurRadius = 4f
-                                    )
-                                )
+                                style = MaterialTheme.typography.titleLarge
                             )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = "1회 한도: ${card.oneTimeLimit}원",
-                                color = Color.White,
-                                style = MaterialTheme.typography.bodyLarge.copy(
-                                    shadow = Shadow(
-                                        color = Color.Black.copy(alpha = 0.6f),
-                                        offset = Offset(1f, 1f),
-                                        blurRadius = 2f
-                                    )
-                                )
+                            Spacer(modifier = Modifier.height(30.dp))
+                            TextWithShadow(
+                                text = "1회 한도: ${formatMoney(card.oneTimeLimit)}",
+                                style = MaterialTheme.typography.bodyMedium
                             )
                         }
                     }
@@ -330,4 +319,10 @@ fun formatLicensePlate(number: String): String {
     return number.reversed().chunked(4)
         .joinToString(" ")
         .reversed()
+}
+
+private fun formatMoney(amount: Int): String {
+    val moneyFormat = MoneyFormat()
+    val formattedText = moneyFormat.filter(AnnotatedString(amount.toString()))
+    return formattedText.text.toString()
 }
