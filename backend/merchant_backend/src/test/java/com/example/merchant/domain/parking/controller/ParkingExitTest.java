@@ -1,14 +1,18 @@
 package com.example.merchant.domain.parking.controller;
 
+import static com.example.merchant.util.ParkingTestUtil.isWithinOneHundredWon;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.example.merchant.MerchantApplication;
+import com.example.merchant.domain.parking.dto.ParkingEntryTimeResponse;
 import com.example.merchant.domain.parking.dto.ParkingExitRequest;
+import com.example.merchant.domain.parking.dto.ParkingExitResponse;
 import com.example.merchant.domain.parking.entity.Parking;
 import com.example.merchant.domain.parking.repository.ParkingRepository;
+import com.example.merchant.domain.parking.util.ParkingUtil;
 import com.example.merchant.util.TimeUtil;
 import com.example.merchant.util.credential.CredentialUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -47,7 +51,7 @@ class ParkingExitTest {
     private final ParkingRepository parkingRepository;
     private final CredentialUtil credentialUtil;
     protected final ObjectMapper objectMapper;
-    protected final MockMvc mockMvc;
+    protected MockMvc mockMvc;
 
     @Autowired
     public ParkingExitTest(WebApplicationContext context, ParkingRepository parkingRepository, MockMvc mockMvc, ObjectMapper objectMapper, CredentialUtil credentialUtil) {
@@ -68,6 +72,14 @@ class ParkingExitTest {
                 .number("123가4567")
                 .entry(LocalDateTime.now().minusHours(1))
                 .build());
+    }
+
+    @BeforeEach()
+    void EncodingSetUp() {
+        this.mockMvc = MockMvcBuilders.webAppContextSetup(context)
+                .addFilters(new CharacterEncodingFilter("UTF-8", true))  // 필터 추가
+                .alwaysDo(print())
+                .build();
     }
 
     @AfterEach
@@ -93,11 +105,6 @@ class ParkingExitTest {
         );
     }
 
-    private static Stream<Arguments> validParameter() {
-        return Stream.of(
-                Arguments.of("성공: Parking한 차량이 나갈 때 200 OK", "123가4567", LocalDateTime.now().toString())
-        );
-    }
 
     @ParameterizedTest(name = "{index} : {0}")
     @MethodSource("BadRequestParameter")
@@ -185,25 +192,34 @@ class ParkingExitTest {
         assertThat(notPaidParkingList.size()).isEqualTo(2);
     }
 
-    @ParameterizedTest(name = "{index} : {0}")
-    @MethodSource("validParameter")
-    @DisplayName("exit: 200 OK")
-    public void exitSuccess(String testName, String carNumber, String exit) throws Exception {
+    @Test
+    @DisplayName("exit: 200 Ok")
+    public void exitSuccess() throws Exception {
         // given
         final String url = "/api/v1/merchants/parking/exit";
-        final ParkingExitRequest request = new ParkingExitRequest(carNumber, TimeUtil.parseDateTime(exit));
+        final ParkingExitRequest request = new ParkingExitRequest("123가4567", LocalDateTime.now());
         final String requestBody = objectMapper.writeValueAsString(request);
 
         // when
         ResultActions result = mockMvc.perform(patch(url)
-                        .header("merApiKey", POS_MER_API_KEY)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestBody));
+                .header("merApiKey", POS_MER_API_KEY)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody));
 
         // then
-        result.andExpect(status().isOk());
-        List<Parking> notPaidParkingList = parkingRepository.findAllByNumberAndPaidFalse("123가4567");
-        assertThat(notPaidParkingList.size()).isOne();
-        assertThat(TimeUtil.isSimilarDateTime(notPaidParkingList.get(0).getExit(), LocalDateTime.now())).isTrue();
+        Parking parking = parkingRepository.findAllByNumberAndPaidFalse("123가4567").get(0);
+        int expectedPaymentBalance = ParkingUtil.getPaymentBalance(parking.getEntry(), parking.getExit());
+
+        result.andExpect(status().isOk())
+                .andExpect(mvcResult -> {
+                    String content = mvcResult.getResponse().getContentAsString();
+                    ParkingExitResponse actual = objectMapper.readValue(content, ParkingExitResponse.class);
+
+                    assertThat(actual.getParkingId()).isEqualTo(parking.getId());
+                    assertThat(actual.getCarNumber()).isEqualTo("123가4567");
+                    assertThat(TimeUtil.isSimilarDateTime(actual.getEntry(), parking.getEntry())).isTrue();
+                    assertThat(TimeUtil.isSimilarDateTime(actual.getExit(), parking.getExit())).isTrue();
+                    assertThat(isWithinOneHundredWon(actual.getPaymentBalance(), expectedPaymentBalance)).isTrue();
+                });
     }
 }

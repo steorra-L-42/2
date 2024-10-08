@@ -15,7 +15,8 @@ public enum ErrorCode {
     WEBSOCKET_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "웹소켓 에러가 발생했습니다."),
     UNKNOWN_MERCHANTID(HttpStatus.BAD_REQUEST, "알 수 없는 Merchant Id 입니다."),
     INVALID_TRANSACTION_UNIQUE_NO(HttpStatus.BAD_REQUEST, "유효하지 않은 거래 고유 번호입니다."),
-    INVALID_MERCHANT_TYPE(HttpStatus.BAD_REQUEST, "유효하지 않은 Merchant Type 입니다.");
+    INVALID_MERCHANT_TYPE(HttpStatus.BAD_REQUEST, "유효하지 않은 Merchant Type 입니다."),
+    INVALID_CAR_NUMBER(HttpStatus.BAD_REQUEST, "차량 번호는 7자리 이상 8자리 이하로 입력해주세요.");
 
     private final HttpStatus status;
     private final String message;

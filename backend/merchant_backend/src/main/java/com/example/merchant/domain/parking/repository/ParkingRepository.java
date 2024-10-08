@@ -10,5 +10,4 @@ public interface ParkingRepository extends JpaRepository<Parking, Long> {
 
     boolean existsByNumberAndPaidIsFalse(String number);
     List<Parking> findAllByNumberAndPaidFalse(String number);
-//    Integer countByNumberAndPaidFalse(String number);
 }
