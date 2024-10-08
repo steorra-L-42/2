@@ -1,6 +1,6 @@
 let lpnumber = null;
 const url = "https://merchant.mobipay.kr/api/v1";
-const MERCHANT_TYPE = 'FOOD';
+const MERCHANT_TYPE = 'OIL';
 const MER_API_KEY = 'Da19J03F6g7H8iB2c54e';
 
 async function loadDatabase() {
@@ -191,10 +191,7 @@ function initApp() {
     },
 
     getTotalPrice() {
-      return this.cart.reduce(
-          (total, item) => total + item.qty * item.price,
-          0
-      );
+      return this.selectedAmount
     },
 
     submit() {
