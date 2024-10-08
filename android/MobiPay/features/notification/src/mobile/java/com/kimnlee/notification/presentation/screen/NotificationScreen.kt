@@ -20,8 +20,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
-import coil.compose.rememberImagePainter
 import com.kimnlee.common.ui.theme.*
 import com.kimnlee.notification.data.Notification
 import com.kimnlee.notification.data.NotificationRepository
@@ -31,6 +31,9 @@ import com.kimnlee.notification.data.NotificationType
 fun NotificationScreen(
     onNavigateBack: () -> Unit
 ) {
+    val context = LocalContext.current
+    val notificationRepository = remember { NotificationRepository(context) }
+
     var selectedTab by remember { mutableStateOf(0) }
     val tabs = listOf("전체", "결제", "멤버")
 
@@ -62,6 +65,13 @@ fun NotificationScreen(
                 textAlign = TextAlign.Center,
                 modifier = Modifier.align(Alignment.Center)
             )
+
+            TextButton(
+                onClick = { notificationRepository.clearAllNotifications() },
+                modifier = Modifier.align(Alignment.CenterEnd)
+            ) {
+                Text("모두 지우기", color = Color.Red)
+            }
         }
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -75,9 +85,9 @@ fun NotificationScreen(
         Spacer(modifier = Modifier.height(24.dp))
 
         when (selectedTab) {
-            0 -> AllNotifications()
-            1 -> PaymentRequests()
-            2 -> MemberInvitations()
+            0 -> AllNotifications(notificationRepository)
+            1 -> PaymentRequests(notificationRepository)
+            2 -> MemberInvitations(notificationRepository)
         }
     }
 }
@@ -134,23 +144,23 @@ fun CustomTab(
 }
 
 @Composable
-fun AllNotifications() {
-    val allNotifications = listOf(
-        *NotificationRepository.paymentRequestMessages.toTypedArray(),
-        *NotificationRepository.invitationMessages.toTypedArray()
-    ).sortedByDescending { it.timestamp }
+fun AllNotifications(notificationRepository: NotificationRepository) {
+    val allNotifications = remember {
+        (notificationRepository.paymentRequestMessages + notificationRepository.invitationMessages)
+            .sortedByDescending { it.timestamp }
+    }
 
     NotificationList(allNotifications)
 }
 
 @Composable
-fun PaymentRequests() {
-    NotificationList(NotificationRepository.paymentRequestMessages)
+fun PaymentRequests(notificationRepository: NotificationRepository) {
+    NotificationList(notificationRepository.paymentRequestMessages)
 }
 
 @Composable
-fun MemberInvitations() {
-    NotificationList(NotificationRepository.invitationMessages)
+fun MemberInvitations(notificationRepository: NotificationRepository) {
+    NotificationList(notificationRepository.invitationMessages)
 }
 
 @Composable
