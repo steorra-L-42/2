@@ -12,16 +12,19 @@
     @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100..900&display=swap');
   </style>
   <script src="https://unpkg.com/idb@6.1.5/build/iife/index-min.js"></script>
-  <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+
   <!-- TensorFlow.js 불러옴 -->
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
   <!-- COCO-SSD 모델 불러옴 -->
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@latest"></script>
-  <script src="js/script.js"></script>
-  <!-- 디버깅 방지 도구 -->
-  <!-- <script disable-devtool-auto src="https://cdn.jsdelivr.net/npm/disable-devtool"></script> -->
+
+  <!-- 자신의 스크립트 -->
+  <script src="js/script.js" defer></script>
+
+  <!-- Alpine.js 불러옴 -->
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
-<body class="bg-blue-gray-50" x-data="initApp()" x-init="initVideo(); initDatabase();">
+<body class="bg-blue-gray-50" x-data="initApp()" x-init="initVideo();">
 <div class="hide-print flex flex-row h-screen antialiased text-blue-gray-800">
   <div class="flex flex-row w-auto flex-shrink-0 pl-4 pr-2 py-4">
     <div class="flex flex-col items-center py-4 flex-shrink-0 w-20 bg-blue-500 rounded-3xl">
@@ -104,9 +107,9 @@
   <div class="flex-grow flex">
     <div class="flex flex-col bg-blue-gray-50 h-full w-full py-4">
       <div class="flex flex-row w-full">
-<!--        <div class="w-60 ml-2">-->
-<!--          <video id="video" autoplay muted></video>-->
-<!--        </div>-->
+        <!--        <div class="w-60 ml-2">-->
+        <!--          <video id="video" autoplay muted></video>-->
+        <!--        </div>-->
         <div class="flex w-full ml-4 mr-3 px-2 flex-row items-center rounded-3xl shadow text-lg h-22 py-4 px-6 transition-shadow focus:shadow-2xl focus:outline-none"
              :class="{
                 'mobi-error': lpno === null,
@@ -141,189 +144,34 @@
         </div>
 
         <!-- 오른쪽 영역 -->
-        <div
-                class="select-none bg-blue-gray-100 rounded-3xl flex flex-wrap content-center justify-center h-full w-[500px] opacity-25"
-                x-show="products.length === 1"
-        >
-          <p class="text-4xl font-bold">
-            인식된 차량이 없습니다.
-            </br>
-            잠시 기다려주세요.
-          </p>
-        </div>
+<!--        <div x-data="app">-->
+          <template x-if="entryTime === null || isNaN(entryTime)">
+            <div class="select-none bg-blue-gray-100 rounded-3xl flex flex-wrap content-center justify-center h-full w-[500px] opacity-25">
+              <p class="text-4xl font-bold">
+                인식된 차량이 없습니다.
+                </br>
+                잠시 기다려주세요.
+              </p>
+            </div>
+          </template>
 
-        <div
-                class="select-none bg-blue-gray-100 opacity-70 rounded-3xl flex flex-col justify-between h-full w-[500px] p-8"
-                x-show="products.length === 0"
-        >
-          <!-- 상단에 고정된 입차 시간과 출차 시간 -->
-          <div class="text-4xl font-bold text-left space-y-4 mt-10">
-            <p class="text-blue-800">입차 시간 : <span class="text-black">모름</span></p>
-            <p class="text-blue-800">출차 시간 : <span class="text-black">모름</span></p>
-          </div>
+          <template x-if="entryTime !== null && !isNaN(entryTime)">
+            <div class="select-none bg-blue-gray-100 opacity-70 rounded-3xl flex flex-col justify-center h-full w-[500px] p-8">
+              <div class="font-bold text-left space-y-4 mt-10">
+                <p class="text-3xl text-blue-800 mt-4">입차 시간 :</p>
+                <div class="text-5xl text-black" x-text="prettyEntryDate"></div>
+                <div class="text-5xl text-black" x-text="prettyEntryTime"></div>
 
-          <!-- 하단에 고정된 금액 -->
-          <div class="text-4xl font-bold text-left mt-auto mb-4">
-            <p class="text-blue-800">금액 : <span class="text-black">5000₩</span></p>
-          </div>
-        </div>
+                <p class="text-3xl text-blue-800 mt-4">출차 시간 :</p>
+                <div class="text-5xl text-black" x-text="prettyExitDate"></div>
+                <div class="text-5xl text-black" x-text="prettyExitTime"></div>
 
+                <p class="text-3xl text-blue-800 mt-4">결제 금액 :</p>
+                <div class="text-5xl text-black" x-text="paymentBalance"></div>
+              </div>
+            </div>
+          </template>
 
-      </div>
-    </div>
-
-    <!-- 모달 -->
-    <div x-show="isShowModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
-      <div class="bg-white p-8 rounded-lg shadow-lg">
-        <!-- 모달 내용 -->
-        <h2 class="text-lg font-bold mb-4">결제 금액 선택</h2>
-        <div class="grid grid-cols-5 gap-2">
-          <button
-                  @click="selectAmount(10000)"
-                  :class="{'bg-blue-500': selectedAmount === 10000, 'bg-gray-300': selectedAmount !== 10000}"
-                  class="bg-gray-300 text-white py-2 px-4 rounded w-full">
-            1만원
-          </button>
-          <button
-                  @click="selectAmount(20000)"
-                  :class="{'bg-blue-500': selectedAmount === 20000, 'bg-gray-300': selectedAmount !== 20000}"
-                  class="bg-gray-300 text-white py-2 px-4 rounded w-full">
-            2만원
-          </button>
-          <button
-                  @click="selectAmount(30000)"
-                  :class="{'bg-blue-500': selectedAmount === 30000, 'bg-gray-300': selectedAmount !== 30000}"
-                  class="bg-gray-300 text-white py-2 px-4 rounded w-full">
-            3만원
-          </button>
-          <button
-                  @click="selectAmount(40000)"
-                  :class="{'bg-blue-500': selectedAmount === 40000, 'bg-gray-300': selectedAmount !== 40000}"
-                  class="bg-gray-300 text-white py-2 px-4 rounded w-full">
-            4만원
-          </button>
-          <button
-                  @click="selectAmount(50000)"
-                  :class="{'bg-blue-500': selectedAmount === 50000, 'bg-gray-300': selectedAmount !== 50000}"
-                  class="bg-gray-300 text-white py-2 px-4 rounded w-full">
-            5만원
-          </button>
-          <button
-                  @click="selectAmount(60000)"
-                  :class="{'bg-blue-500': selectedAmount === 60000, 'bg-gray-300': selectedAmount !== 60000}"
-                  class="bg-gray-300 text-white py-2 px-4 rounded w-full">
-            6만원
-          </button>
-          <button
-                  @click="selectAmount(70000)"
-                  :class="{'bg-blue-500': selectedAmount === 70000, 'bg-gray-300': selectedAmount !== 70000}"
-                  class="bg-gray-300 text-white py-2 px-4 rounded w-full">
-            7만원
-          </button>
-          <button
-                  @click="selectAmount(80000)"
-                  :class="{'bg-blue-500': selectedAmount === 80000, 'bg-gray-300': selectedAmount !== 80000}"
-                  class="bg-gray-300 text-white py-2 px-4 rounded w-full">
-            8만원
-          </button>
-          <button
-                  @click="selectAmount(90000)"
-                  :class="{'bg-blue-500': selectedAmount === 90000, 'bg-gray-300': selectedAmount !== 90000}"
-                  class="bg-gray-300 text-white py-2 px-4 rounded w-full">
-            9만원
-          </button>
-          <button
-                  @click="selectAmount(100000)"
-                  :class="{'bg-blue-500': selectedAmount === 100000, 'bg-gray-300': selectedAmount !== 100000}"
-                  class="bg-gray-300 text-white py-2 px-4 rounded w-full">
-            10만원
-          </button>
-        </div>
-        <div class="select-none h-auto w-full text-center pt-3 pb-4 px-4">
-          <div class="flex mb-3 text-lg font-semibold text-blue-gray-700">
-            <div class="w-10">합계</div>
-            <div class="text-right w-full" x-text="priceFormat(getTotalPrice())"></div>
-          </div>
-          <button
-                  class="text-white rounded-2xl text-lg w-full py-3 focus:outline-none"
-                  :class="{
-                                'bg-blue-500 hover:bg-blue-600': (submitable() && isMobiUser),
-                                'bg-blue-gray-200': !(submitable() && isMobiUser)
-                              }"
-                  :disabled="!(submitable() && isMobiUser)"
-                  @click="submit()"
-          >
-            모비페이 결제 요청
-          </button>
-          <div class="grid grid-cols-2 gap-2 mt-2">
-            <button
-                    class="text-white rounded-2xl text-lg w-full py-3 focus:outline-none"
-                    :class="{
-                                  'mobi-others-blue-button hover:mobi-others-blue-button': submitable(),
-                                  'bg-blue-gray-200': !submitable(),
-                                  'text-white' : !submitable()
-                                }"
-                    :disabled="!submitable()"
-                    @click="submit()"
-            >
-              카드결제
-            </button>
-            <button
-                    class="rounded-2xl text-lg w-full py-3 focus:outline-none"
-                    :class="{
-                                  'mobi-others-blue-button hover:mobi-others-blue-button': submitable(),
-                                  'bg-blue-gray-200': !submitable(),
-                                  'text-white' : !submitable()
-                                }"
-                    :disabled="!submitable()"
-                    @click="submit()"
-            >
-              현금결제
-            </button>
-          </div>
-        </div>
-        <div class="flex justify-end mt-4">
-          <button @click="closeModal()" class="bg-red-500 text-white py-2 px-4 rounded">취소</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- 결제 처리 중 모달 -->
-  <div
-          x-show="isLoading"
-          class="fixed w-full h-screen left-0 top-0 z-20 flex flex-wrap justify-center content-center p-24"
-  >
-    <div class="fixed glass w-full h-screen left-0 top-0 z-10"></div>
-    <div class="w-96 rounded-3xl bg-white shadow-xl overflow-hidden z-20">
-      <div class="text-center p-6">
-        <img src="img/loading.gif" alt="Loading..." class="mb-2 w-12 h-12 inline-block">
-        <h2 class="text-xl font-semibold">결제 처리 중...</h2>
-      </div>
-    </div>
-  </div>
-
-  <!-- 결제 성공 모달 -->
-  <div
-          x-show="isShowModalSuccess"
-          class="fixed w-full h-screen left-0 top-0 z-20 flex flex-wrap justify-center content-center p-24"
-  >
-    <div class="fixed glass w-full h-screen left-0 top-0 z-10" @click="closeModalSuccess()"></div>
-    <div class="w-96 rounded-3xl bg-white shadow-xl overflow-hidden z-20">
-      <div class="text-center p-6">
-        <img src="img/success.png" alt="Success" class="mb-2 w-12 h-12 inline-block">
-        <h2 class="text-xl font-semibold">결제 성공</h2>
-        <p>결제가 성공적으로 처리되었습니다.</p>
-      </div>
-      <div class="p-4">
-
-        <!-- Changed Button Text to "닫기" -->
-        <button
-                class="bg-blue-500 text-white text-lg px-4 py-3 rounded-2xl w-full focus:outline-none"
-                @click="closeModalSuccess()"
-        >
-          닫기
-        </button>
       </div>
     </div>
   </div>
@@ -473,5 +321,27 @@
     </div>
   </div>
 </div>
+
+<div
+        x-show="isLoading"
+        class="fixed w-full h-screen left-0 top-0 z-20 flex flex-wrap justify-center content-center p-24"
+>
+  <div class="fixed glass w-full h-screen left-0 top-0 z-10"></div>
+  <div class="w-96 rounded-3xl bg-white shadow-xl overflow-hidden z-20">
+    <div class="text-center p-6">
+      <img src="img/loading.gif" alt="Loading..." class="mb-2 w-28 h-28 inline-block">
+      <h2 class="text-xl font-semibold">결제 처리 중...</h2>
+    </div>
+    <div class="p-4">
+      <button
+              class="bg-red-500 text-white text-lg px-4 py-3 rounded-2xl w-full focus:outline-none"
+              @click="cancelLoading(); resumeDetection()"
+      >
+        취소하기
+      </button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
