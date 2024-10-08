@@ -157,12 +157,24 @@ fun AllNotifications(notificationRepository: NotificationRepository) {
 
 @Composable
 fun PaymentRequests(notificationRepository: NotificationRepository) {
-    NotificationList(notificationRepository.paymentRequestMessages)
+    val paymentNotifications by remember {
+        derivedStateOf {
+            notificationRepository.paymentRequestMessages.sortedByDescending { it.timestamp }
+        }
+    }
+
+    NotificationList(paymentNotifications)
 }
 
 @Composable
 fun MemberInvitations(notificationRepository: NotificationRepository) {
-    NotificationList(notificationRepository.invitationMessages)
+    val invitationNotifications by remember {
+        derivedStateOf {
+            notificationRepository.invitationMessages.sortedByDescending { it.timestamp }
+        }
+    }
+
+    NotificationList(invitationNotifications)
 }
 
 @Composable
