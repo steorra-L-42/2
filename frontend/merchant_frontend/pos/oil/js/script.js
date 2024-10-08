@@ -1,6 +1,6 @@
 let lpnumber = null;
 const url = "https://merchant.mobipay.kr/api/v1";
-const MERCHANT_TYPE = 'FOOD';
+const MERCHANT_TYPE = 'OIL';
 const MER_API_KEY = 'Da19J03F6g7H8iB2c54e';
 
 async function loadDatabase() {
@@ -52,7 +52,11 @@ function initApp() {
     socket: null,
     isManualLPnoModalOpen: false,
     isShowCameraChooseModal: false,
+    lastLpno: '',
+    lpnoCounter: 0,
+    detectionStopped: false,
     manualLpno: '',
+    cameraDevices: [],
 
     initVideo() {
       this.video = document.getElementById('video');
@@ -191,10 +195,7 @@ function initApp() {
     },
 
     getTotalPrice() {
-      return this.cart.reduce(
-          (total, item) => total + item.qty * item.price,
-          0
-      );
+      return this.selectedAmount
     },
 
     submit() {
@@ -214,6 +215,13 @@ function initApp() {
 
     closeModalSuccess() {
       this.isShowModalSuccess = false;
+    },
+
+    resumeDetection() {
+      this.detectionStopped = false;
+      this.lastLpno = '',
+          this.lpnoCounter= 0,
+          document.querySelector('.flex-col.items-center.py-4').classList.remove('bg-blue-300');
     },
 
     dateFormat(date) {
@@ -352,9 +360,10 @@ function initApp() {
     },
 
     async detectObjects() {
-      try {
-        const predictions = await this.model.detect(this.video);
-        this.car_present = false;
+      if (!this.detectionStopped){
+        try {
+          const predictions = await this.model.detect(this.video);
+          this.car_present = false;
 
         predictions.forEach((prediction) => {
           if (prediction.class === 'car') {
@@ -391,8 +400,25 @@ function initApp() {
                     const confidence = parseFloat(data.confidence);
 
                     if (confidence > 0.85) {
-                      self.$data.lpno = data.predicted_text;
-                      self.$data.isMobiUser = true;
+                      const detectedLpno = data.predicted_text;
+
+                      if (self.lastLpno !== detectedLpno) {
+                        self.lpnoCounter = 1;
+                        self.lastLpno = detectedLpno;
+                      } else {
+                        self.lpnoCounter++;
+                      }
+
+                      if (self.lpnoCounter >= 3) {
+                        self.detectionStopped = true;
+                        self.$data.lpno = detectedLpno;
+                        self.$data.isMobiUser = true;
+
+                        document.querySelector('.flex-col.items-center.py-4').classList.add('bg-blue-300');
+                      } else {
+                        self.$data.lpno = detectedLpno;
+                        self.$data.isMobiUser = true;
+                      }
                     } else {
                       console.log("정확도 낮음");
                       self.$data.lpno = null;
@@ -407,19 +433,25 @@ function initApp() {
           }
         });
 
-        if (!this.car_present) {
-          // 차량 감지 안 된 경우 처리
+          if (!this.car_present) {
+            // 차량 감지 안 된 경우 처리
+          }
+
+          setTimeout(() => {
+            requestAnimationFrame(() => this.detectObjects());
+          }, 600);
+        } catch (error) {
+          console.error('물체 감지 실패: ', error);
+
+          setTimeout(() => {
+            requestAnimationFrame(() => this.detectObjects());
+          }, 600);
         }
-
+      }else{
+        // Detection 중지 상태면 2초 간격으로 함수 실행, 실제 detection 수행 안 함 (로컬 GPU 사용 X)
         setTimeout(() => {
           requestAnimationFrame(() => this.detectObjects());
-        }, 600);
-      } catch (error) {
-        console.error('물체 감지 실패: ', error);
-
-        setTimeout(() => {
-          requestAnimationFrame(() => this.detectObjects());
-        }, 600);
+        }, 2000);
       }
     },
 
