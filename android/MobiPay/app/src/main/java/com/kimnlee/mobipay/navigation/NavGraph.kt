@@ -45,7 +45,7 @@ fun AppNavGraph(
     val application = context as Application
     val biometricViewModel = BiometricViewModel(application)
     val cardManagementViewModel = CardManagementViewModel(authManager, apiClient)
-    val vehicleManagementViewModel = VehicleManagementViewModel(apiClient, context)
+    val vehicleManagementViewModel = VehicleManagementViewModel(apiClient, context, authManager)
     val showMoreViewModel = ShowMoreViewModel(authManager)
     val isLoggedIn by loginViewModel.isLoggedIn.collectAsState()
     val homeViewModel = HomeViewModel(apiClient, authManager)
