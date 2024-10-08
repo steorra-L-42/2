@@ -48,7 +48,7 @@ fun AppNavGraph(
     val vehicleManagementViewModel = VehicleManagementViewModel(apiClient, context)
     val showMoreViewModel = ShowMoreViewModel(authManager)
     val isLoggedIn by loginViewModel.isLoggedIn.collectAsState()
-    val homeViewModel = HomeViewModel(apiClient)
+    val homeViewModel = HomeViewModel(apiClient, authManager)
 
     LaunchedEffect(loginViewModel) {
         val bluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager

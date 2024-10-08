@@ -22,10 +22,11 @@ public class CancelSerivce {
 
         credentialUtil.validatePosMerApiKey(posMerApiKey);
         validateMerchantType(merchantType);
-
-        // mobiPay server의 응답을 그대로 전달
-        return mobiPay.getTransactionList(credentialUtil.getMerchantTypeLowerCaseString(merchantType),
+        ResponseEntity<MerchantTransactionResponse> mobiPayResponseEntity = mobiPay.getTransactionList(credentialUtil.getMerchantTypeLowerCaseString(merchantType),
                 MerchantTransactionResponse.class);
+
+        return ResponseEntity.status(mobiPayResponseEntity.getStatusCode())
+                .body(mobiPayResponseEntity.getBody());
     }
 
 
@@ -34,10 +35,11 @@ public class CancelSerivce {
         credentialUtil.validatePosMerApiKey(posMerApiKey);
         validateMerchantType(merchantType);
         Long valid_T_U_No = getValidTransactionUniqueNo(transactionUniqueNo);
-
-        // mobiPay server의 응답을 그대로 전달
-        return mobiPay.cancelTransaction(credentialUtil.getMerchantTypeLowerCaseString(merchantType),
+        ResponseEntity<CancelTransactionResponse> mobiPayResponseEntity = mobiPay.cancelTransaction(credentialUtil.getMerchantTypeLowerCaseString(merchantType),
                 valid_T_U_No, CancelTransactionResponse.class);
+
+        return ResponseEntity.status(mobiPayResponseEntity.getStatusCode())
+                .body(mobiPayResponseEntity.getBody());
     }
 
 

@@ -25,7 +25,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -39,9 +38,9 @@ import org.springframework.web.filter.CharacterEncodingFilter;
 @SpringBootTest
 @ContextConfiguration(classes = MerchantApplication.class)
 @AutoConfigureMockMvc
-class ParkingEntryTest {
+class ParkingEntryPostTest {
 
-    private static final Logger log = LoggerFactory.getLogger(ParkingEntryTest.class);
+    private static final Logger log = LoggerFactory.getLogger(ParkingEntryPostTest.class);
 
     private final WebApplicationContext context;
     private final ParkingRepository parkingRepository;
@@ -52,8 +51,8 @@ class ParkingEntryTest {
     private String POS_MER_API_KEY;
 
     @Autowired
-    public ParkingEntryTest(WebApplicationContext context, ParkingRepository parkingRepository,
-                            CredentialUtil credentialUtil, MockMvc mockMvc, ObjectMapper objectMapper) {
+    public ParkingEntryPostTest(WebApplicationContext context, ParkingRepository parkingRepository,
+                                CredentialUtil credentialUtil, MockMvc mockMvc, ObjectMapper objectMapper) {
         this.context = context;
         this.parkingRepository = parkingRepository;
         this.credentialUtil = credentialUtil;

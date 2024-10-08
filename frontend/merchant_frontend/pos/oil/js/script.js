@@ -1,6 +1,6 @@
 let lpnumber = null;
 const url = "https://merchant.mobipay.kr/api/v1";
-const MERCHANT_TYPE = 'FOOD';
+const MERCHANT_TYPE = 'OIL';
 const MER_API_KEY = 'Da19J03F6g7H8iB2c54e';
 
 async function loadDatabase() {
@@ -52,15 +52,17 @@ function initApp() {
     socket: null,
     isManualLPnoModalOpen: false,
     isShowCameraChooseModal: false,
-    camerasLoaded: false,
+    lastLpno: '',
+    lpnoCounter: 0,
+    detectionStopped: false,
     manualLpno: '',
-    entrytime: null,
-    leavetime: null,
+    cameraDevices: [],
 
     initVideo() {
       this.video = document.getElementById('video');
       this.detectCameras();
     },
+
 
     openCameraChooseModal() {
       this.isShowCameraChooseModal = true;
@@ -83,7 +85,6 @@ function initApp() {
       try {
         const devices = await navigator.mediaDevices.enumerateDevices();
         this.cameraDevices = devices.filter(device => device.kind === 'videoinput');
-        this.camerasLoaded = true;
       } catch (error) {
         console.error('Failed to enumerate devices:', error);
       }
@@ -116,12 +117,10 @@ function initApp() {
       this.closeLPnoModal();
     },
 
-
     async initDatabase() {
       this.db = await loadDatabase();
       await this.loadJsonData();
     },
-
 
     async loadJsonData() {
       await this.db.clearProducts();
@@ -139,17 +138,33 @@ function initApp() {
       return this.products;
     },
 
+    //
+    handleClick(product) {
+      this.addToCart(product); // 기존 동작 유지
+      this.isShowModal = true; // 모달 띄우기
+      this.selectAmount(10000);
+    },
+
+    // 모달 닫기
+    closeModal() {
+      this.isShowModal = false;
+    },
+
+    selectAmount(amount) {
+      this.selectedAmount = amount; // 선택된 금액 저장
+    },
+
     addToCart(product) {
       const index = this.findCartIndex(product);
       if (index === -1) {
-        this.cart.push({
+        this.cart = [{
           productId: product.id,
           image: product.image,
           name: product.name,
           price: product.price,
           option: product.option,
           qty: 1,
-        });
+        }];
       } else {
         this.cart[index].qty += 1;
       }
@@ -180,10 +195,7 @@ function initApp() {
     },
 
     getTotalPrice() {
-      return this.cart.reduce(
-          (total, item) => total + item.qty * item.price,
-          0
-      );
+      return this.selectedAmount
     },
 
     submit() {
@@ -205,6 +217,12 @@ function initApp() {
       this.isShowModalSuccess = false;
     },
 
+    resumeDetection() {
+      this.detectionStopped = false;
+      this.lastLpno = '',
+          this.lpnoCounter= 0,
+          document.querySelector('.flex-col.items-center.py-4').classList.remove('bg-blue-300');
+    },
 
     dateFormat(date) {
       const formatter = new Intl.DateTimeFormat('id', { dateStyle: 'short', timeStyle: 'short'});
@@ -218,8 +236,12 @@ function initApp() {
           .replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,");
     },
 
-    priceFormat(number) {
-      return number ? `${this.numberFormat(number)} 원` : `0 원`;
+    priceFormat() {
+      return `${this.selectedAmount.toLocaleString()} 원`;
+    },
+
+    howmany(price) {
+      return `${(this.selectedAmount/price).toFixed(2)} L`;
     },
 
     clear() {
@@ -248,7 +270,6 @@ function initApp() {
       sound.onended = () => delete(sound);
     },
 
-
     cancelLoading() {
       if (this.socket) {
         this.socket.close();
@@ -262,11 +283,8 @@ function initApp() {
       this.isLoading = true;
 
       // websocket 연결
-      //const socket = new WebSocket('wss://merchant.mobipay.kr/api/v1/merchants/websocket');
       this.socket = new WebSocket('wss://merchant.mobipay.kr/api/v1/merchants/websocket');
-
       let sessionId; // 세션 ID를 저장할 변수
-
 
       this.socket.onopen = async (event) => {
         console.log('WebSocket is open now.');
@@ -277,7 +295,7 @@ function initApp() {
 
         if(carNumber == null) {
           console.log("차량번호 없음");
-          return;
+           return;
         }
 
         // 결제 요청
@@ -294,7 +312,6 @@ function initApp() {
         } catch (error) {
           console.error('결제 요청 실패:', error);
           // 웹소켓 연결 해제
-          //socket.close();
           this.socket.close();
           alert('결제 요청 실패');
         }
@@ -321,11 +338,11 @@ function initApp() {
             this.lpno = null;
             this.isMobiUser = false;
             this.cart = [];
+            this.socket.close();
           } else {
             this.isLoading = false;
-            alert('결제 실패');
+            alert('결제 거절');
           }
-          this.socket.close();
         }
       };
     },
@@ -342,9 +359,10 @@ function initApp() {
     },
 
     async detectObjects() {
-      try {
-        const predictions = await this.model.detect(this.video);
-        this.car_present = false;
+      if (!this.detectionStopped){
+        try {
+          const predictions = await this.model.detect(this.video);
+          this.car_present = false;
 
         predictions.forEach((prediction) => {
           if (prediction.class === 'car') {
@@ -381,8 +399,25 @@ function initApp() {
                     const confidence = parseFloat(data.confidence);
 
                     if (confidence > 0.85) {
-                      self.$data.lpno = data.predicted_text;
-                      self.$data.isMobiUser = true;
+                      const detectedLpno = data.predicted_text;
+
+                      if (self.lastLpno !== detectedLpno) {
+                        self.lpnoCounter = 1;
+                        self.lastLpno = detectedLpno;
+                      } else {
+                        self.lpnoCounter++;
+                      }
+
+                      if (self.lpnoCounter >= 3) {
+                        self.detectionStopped = true;
+                        self.$data.lpno = detectedLpno;
+                        self.$data.isMobiUser = true;
+
+                        document.querySelector('.flex-col.items-center.py-4').classList.add('bg-blue-300');
+                      } else {
+                        self.$data.lpno = detectedLpno;
+                        self.$data.isMobiUser = true;
+                      }
                     } else {
                       console.log("정확도 낮음");
                       self.$data.lpno = null;
@@ -397,19 +432,25 @@ function initApp() {
           }
         });
 
-        if (!this.car_present) {
-          // 차량 감지 안 된 경우 처리
+          if (!this.car_present) {
+            // 차량 감지 안 된 경우 처리
+          }
+
+          setTimeout(() => {
+            requestAnimationFrame(() => this.detectObjects());
+          }, 600);
+        } catch (error) {
+          console.error('물체 감지 실패: ', error);
+
+          setTimeout(() => {
+            requestAnimationFrame(() => this.detectObjects());
+          }, 600);
         }
-
+      }else{
+        // Detection 중지 상태면 2초 간격으로 함수 실행, 실제 detection 수행 안 함 (로컬 GPU 사용 X)
         setTimeout(() => {
           requestAnimationFrame(() => this.detectObjects());
-        }, 600);
-      } catch (error) {
-        console.error('물체 감지 실패: ', error);
-
-        setTimeout(() => {
-          requestAnimationFrame(() => this.detectObjects());
-        }, 600);
+        }, 2000);
       }
     },
 
@@ -473,6 +514,9 @@ function initApp() {
       referrerPolicy: 'no-referrer',
       body: JSON.stringify(data)
     });
+    if(!response.ok){
+      throw new Error(`postRequest() : error! status: ${response.status}`);
+    }
     return response;
   }
 

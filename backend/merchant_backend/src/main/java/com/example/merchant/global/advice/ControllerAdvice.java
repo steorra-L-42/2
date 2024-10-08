@@ -2,6 +2,7 @@ package com.example.merchant.global.advice;
 
 import com.example.merchant.domain.cancel.error.InvalidTransactionUniqueNoException;
 import com.example.merchant.domain.parking.error.DuplicatedParkingException;
+import com.example.merchant.domain.parking.error.InvalidCarNumberException;
 import com.example.merchant.domain.parking.error.InvalidMerApiKeyException;
 import com.example.merchant.domain.parking.error.MultipleNotPaidException;
 import com.example.merchant.domain.parking.error.NotExistParkingException;
@@ -65,6 +66,12 @@ public class ControllerAdvice {
     public ResponseEntity<ErrorResponseDto> handleInvalidMerchantTypeException  (InvalidMerchantTypeException e) {
         log.error("InvalidMerchantTypeException: " + e.getMessage());
         return getResponse(ErrorCode.INVALID_MERCHANT_TYPE);
+    }
+
+    @ExceptionHandler(InvalidCarNumberException.class)
+    public ResponseEntity<ErrorResponseDto> handleInvalidCarNumberException  (InvalidCarNumberException e) {
+        log.error("InvalidCarNumberException: " + e.getMessage());
+        return getResponse(ErrorCode.INVALID_CAR_NUMBER);
     }
 
     private ResponseEntity<ErrorResponseDto> getResponse(ErrorCode errorCode) {
