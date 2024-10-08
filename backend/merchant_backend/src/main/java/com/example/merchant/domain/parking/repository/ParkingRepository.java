@@ -13,5 +13,5 @@ public interface ParkingRepository extends JpaRepository<Parking, Long> {
 
     List<Parking> findAllByNumberAndPaidFalse(String number);
 
-    Optional<Parking> findByNumber(String carNumber);
+    Optional<Parking> findByNumberAndPaidFalse(String carNumber);
 }

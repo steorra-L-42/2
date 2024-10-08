@@ -7,7 +7,7 @@ public class ParkingUtil {
 
     public static int getPaymentBalance(LocalDateTime from, LocalDateTime to) {
         long minutes = ChronoUnit.MINUTES.between(from, to);
-        return (int) (minutes / 10) * 1000; // 10분 당 1000원
+        return (int) Math.ceil(minutes / 10.0) * 1000; // 10분당 천원
     }
 
 }
