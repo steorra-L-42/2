@@ -1,7 +1,17 @@
-import android.app.Activity
+package com.kimnlee.payment.presentation.screen
+
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -11,40 +21,44 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.google.gson.Gson
 import com.kimnlee.common.FCMData
 import com.kimnlee.common.R
 import com.kimnlee.common.ui.theme.MobiPayTheme
+import com.kimnlee.common.ui.theme.pBold
+import com.kimnlee.common.ui.theme.pMedium
+import com.kimnlee.common.ui.theme.pRegular
+import com.kimnlee.common.utils.moneyFormat
+import com.kimnlee.common.utils.findCardCompanyName
 import java.math.BigInteger
-import java.text.NumberFormat
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.util.Locale
-import com.kimnlee.common.utils.moneyFormat
 
-// Custom Font Family
-val pRegularFontFamily = FontFamily(Font(R.font.pregular))
-val pBoldFontFamily = FontFamily(Font(R.font.pbold))
-val pMediumFontFamily = FontFamily(Font(R.font.pmedium))
+private const val TAG = "PaymentSuccessfulScreen"
 
 @Composable
-fun PaymentSucceedScreen(navController: NavController) {
+fun PaymentSuccessfulScreen(
+    navController: NavController,
+    fcmData: FCMData?
+) {
 
-    val context = LocalContext.current
-    val fcmDataJson = (context as? Activity)?.intent?.getStringExtra("fcmData")
-
-    val fcmDataExtra = fcmDataJson?.let { Gson().fromJson(it, FCMData::class.java) }
+    if (fcmData == null) {
+        Log.d(TAG, "PaymentSuccessfulScreen: FCM 데이터가 NULL 이어서 종료.")
+        return
+    } else if (isAnyFieldNull(fcmData)) {
+        Log.d(TAG, "PaymentSuccessfulScreen: FCM 필드 중 NULL 발견.")
+        Log.d(TAG, "PaymentSuccessfulScreen: ${fcmData.toString()}")
+        return
+    } else {
+        Log.d(TAG, "PaymentSuccessfulScreen: FCMData null 아님")
+    }
 
     MobiPayTheme {
         Column(
@@ -71,7 +85,7 @@ fun PaymentSucceedScreen(navController: NavController) {
                 fontSize = 28.sp,
                 color = Color.Black,
                 textAlign = TextAlign.Center,
-                fontFamily = pBoldFontFamily,
+                fontFamily = pBold,
             )
 
             Spacer(modifier = Modifier.height(6.dp))
@@ -81,12 +95,12 @@ fun PaymentSucceedScreen(navController: NavController) {
                 fontSize = 16.sp,
                 color = Color.Gray,
                 textAlign = TextAlign.Center,
-                fontFamily = pRegularFontFamily
+                fontFamily = pRegular
             )
 
             Spacer(modifier = Modifier.height(40.dp))
 
-            PaymentDetailsCard(fcmDataExtra)
+            PaymentDetailsCard(fcmData)
 
             Spacer(modifier = Modifier.height(80.dp))
 
@@ -97,9 +111,10 @@ fun PaymentSucceedScreen(navController: NavController) {
     }
 }
 
+
 fun taxCalc(originalAmount: BigInteger, tenOrOne: Int): BigInteger {
     return when (tenOrOne) {
-        10 -> (originalAmount / BigInteger("11")) * BigInteger("10")
+        10 -> (originalAmount - (originalAmount / BigInteger("11")))
         1 -> originalAmount / BigInteger("11")
         else -> BigInteger.ZERO
     }
@@ -120,7 +135,8 @@ fun PaymentDetailsCard(fcmData: FCMData?) {
             Spacer(modifier = Modifier.height(14.dp))
             PaymentDetailRow("일시", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss")))
             Spacer(modifier = Modifier.height(14.dp))
-            PaymentDetailRow("결제 카드", "모비카드 8282")
+            val cardNo = fcmData!!.cardNo!!
+            PaymentDetailRow("결제 카드", "${findCardCompanyName(cardNo)} *${cardNo.substring(cardNo.length-3, cardNo.length)}")
             Spacer(modifier = Modifier.height(14.dp))
             PaymentDetailRow("금액", moneyFormat(taxCalc(BigInteger(fcmData?.paymentBalance), 10)))
             Spacer(modifier = Modifier.height(14.dp))
@@ -128,6 +144,29 @@ fun PaymentDetailsCard(fcmData: FCMData?) {
             Spacer(modifier = Modifier.height(14.dp))
             PaymentDetailRow("합계", moneyFormat(BigInteger(fcmData?.paymentBalance)))
         }
+    }
+}
+
+
+@Composable
+fun PaymentDetailRow(label: String, value: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(label, style = TextStyle(
+            fontSize = 16.sp,
+            color = Color.Gray,
+            fontFamily = pRegular
+        )
+        )
+        Text(value, style = TextStyle(
+            fontSize = 16.sp,
+            fontFamily = pMedium
+        )
+        )
     }
 }
 
@@ -141,10 +180,10 @@ fun ReturnToMainButton(navController: NavController) {
             .fillMaxWidth()
             .clickable {
                 navController.navigate("home") {
-                    popUpTo(0) {  // '0' indicates popping all the way to the root of the back stack
-                        inclusive = true  // Removes all back stack entries
+                    popUpTo(0) {
+                        inclusive = true
                     }
-                    launchSingleTop = true  // Ensures that only a single instance of the home screen is in the stack
+                    launchSingleTop = true
                 }
             }
         ,
@@ -158,28 +197,14 @@ fun ReturnToMainButton(navController: NavController) {
                 .fillMaxWidth()
                 .padding(16.dp),
             textAlign = TextAlign.Center,
-            fontFamily = pMediumFontFamily
+            fontFamily = pMedium
         )
     }
 }
 
-@Composable
-fun PaymentDetailRow(label: String, value: String) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Text(label, style = TextStyle(
-            fontSize = 16.sp,
-            color = Color.Gray,
-            fontFamily = pRegularFontFamily
-        ))
-        Text(value, style = TextStyle(
-            fontSize = 16.sp,
-            fontFamily = pMediumFontFamily
-        ))
+private fun isAnyFieldNull(fcmData: FCMData): Boolean {
+    return with(fcmData) {
+        listOf(autoPay,cardNo,approvalWaitingId, merchantId, paymentBalance, merchantName, info, lat, lng, type)
+            .any { it == null }
     }
 }
-
