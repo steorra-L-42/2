@@ -1,10 +1,3 @@
-document.addEventListener('alpine:init', () => {
-  Alpine.store('appState', {
-    lpno: null,
-    isMobiUser: false
-  });
-});
-
 let lpnumber = null;
 const url = "https://merchant.mobipay.kr/api/v1";
 const MERCHANT_TYPE = 'FOOD';
@@ -58,12 +51,11 @@ function initApp() {
     video: null,
     socket: null,
     isManualLPnoModalOpen: false,
-    isShowCameraChooseModal: false, 
+    isShowCameraChooseModal: false,
+    lastLpno: '',
+    lpnoCounter: 0,
+    detectionStopped: false, 
     manualLpno: '',
-    lastLpno: null,
-    lpnoMatchCount: 0,
-    detectionStopped: false,
-    cameraDevices: [],
 
     initVideo() {
       this.video = document.getElementById('video');
@@ -212,6 +204,12 @@ function initApp() {
       this.isShowModalSuccess = false;
     },
 
+    resumeDetection() {
+      this.detectionStopped = false;
+      this.lastLpno = '',
+      this.lpnoCounter= 0,
+      document.querySelector('.flex-col.items-center.py-4').classList.remove('bg-blue-300');
+    },
 
     dateFormat(date) {
       const formatter = new Intl.DateTimeFormat('id', { dateStyle: 'short', timeStyle: 'short'});
@@ -268,8 +266,6 @@ function initApp() {
       this.closeModalReceipt();
       this.isLoading = true;
 
-      const self = this;
-
       // websocket 연결
       //const socket = new WebSocket('wss://merchant.mobipay.kr/api/v1/merchants/websocket');
       this.socket = new WebSocket('wss://merchant.mobipay.kr/api/v1/merchants/websocket');
@@ -280,13 +276,13 @@ function initApp() {
       this.socket.onopen = async (event) => {
         console.log('WebSocket is open now.');
 
-        let info = self.cart.map(item => `${item.name} x ${item.qty}`).join(', ');
-        let paymentBalance = self.getTotalPrice();
-        let carNumber = self.lpno || "번호 인식 실패"; 
+        let info = this.cart.map(item => `${item.name} x ${item.qty}`).join(', ');
+        let paymentBalance = this.getTotalPrice();
+        let carNumber = this.lpno || "번호 인식 실패";
 
-        if (carNumber === "번호 인식 실패") {
+        if(carNumber == null) {
           console.log("차량번호 없음");
-          return;
+           return;
         }
 
         // 결제 요청
@@ -302,6 +298,8 @@ function initApp() {
           console.log('결제 요청 성공, 결제 결과 대기 중...');
         } catch (error) {
           console.error('결제 요청 실패:', error);
+          // 웹소켓 연결 해제
+          //socket.close();
           this.socket.close();
           alert('결제 요청 실패');
         }
@@ -323,16 +321,16 @@ function initApp() {
           this.socket.send(JSON.stringify({ "type": MERCHANT_TYPE }));
         } else {
           if (message.success) {
-            self.isLoading = false;
-            self.isShowModalSuccess = true;
-            self.lpno = null;
-            self.isMobiUser = false; 
-            self.cart = [];
+            this.isLoading = false;
+            this.isShowModalSuccess = true;
+            this.lpno = null;
+            this.isMobiUser = false; 
+            this.cart = [];
           } else {
-            self.isLoading = false;
+            this.isLoading = false;
             alert('결제 실패');
           }
-          self.socket.close();
+          this.socket.close();
         }
       };
     },
@@ -348,163 +346,143 @@ function initApp() {
       });
     },
 
+    
     async detectObjects() {
-      if (this.detectionStopped) {
-        console.log('차량 감지.');
-        return;
-      }
+      if (!this.detectionStopped){
+        try {
+          const predictions = await this.model.detect(this.video);
+          this.car_present = false;
 
-      const self = this;
+          predictions.forEach((prediction) => {
+            if (prediction.class === 'car') {
+              this.car_present = true;
 
-      try {
-        const predictions = await this.model.detect(this.video);
-        this.car_present = false;
+              const [x, y, width, height] = prediction.bbox;
 
-        predictions.forEach((prediction) => {
-          if (prediction.class === 'car') {
-            self.car_present = true;
-            const [x, y, width, height] = prediction.bbox;
+              if (height > 240 && width > 350) {
+                const startTime = performance.now();
+                const canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+                const context = canvas.getContext('2d');
 
-            if (height > 240 && width > 350) {
-              const startTime = performance.now();
-              const canvas = document.createElement('canvas');
-              canvas.width = width;
-              canvas.height = height;
-              const context = canvas.getContext('2d');
-              context.drawImage(self.video, x, y, width, height, 0, 0, width, height);
+                context.drawImage(this.video, x, y, width, height, 0, 0, width, height);
 
-              canvas.toBlob(async (blob) => {
-                const formData = new FormData();
-                formData.append('file', blob, 'image.jpg');
-                const endTime = performance.now();
-                const duration = endTime - startTime;
-                console.log("변환 시간: " + duration.toFixed(3) + "ms");
+                const self = this;
 
-                console.log('GPU 서버로 번호판 OCR 요청중...');
+                canvas.toBlob(async (blob) => {
+                  const formData = new FormData();
+                  formData.append('file', blob, 'image.jpg');
+                  const endTime = performance.now();
+                  const duration = endTime - startTime;
+                  console.log("변환 시간: " + duration.toFixed(3) + "ms");
 
-                try {
-                  const response = await fetch('https://anpr.mobipay.kr/predict/', {
-                    method: 'POST',
-                    body: formData,
-                  });
+                  try {
+                    const response = await fetch('https://anpr.mobipay.kr/predict/', {
+                      method: 'POST',
+                      body: formData,
+                    });
 
-                  const data = await response.json();
-                  if (data !== null) {
-                    const confidence = parseFloat(data.confidence);
+                    const data = await response.json();
+                    if (data !== null) {
+                      const confidence = parseFloat(data.confidence);
 
-                    if (confidence > 0.85) {
-                      const detectedLpno = data.predicted_text;
-                      console.log('[정확도 0.85 이상] 인식된 차량번호:', detectedLpno);
+                      if (confidence > 0.85) {
+                        const detectedLpno = data.predicted_text;
 
-                      if (self.lastLpno === detectedLpno) {
-                        self.lpnoMatchCount++;
+                        if (self.lastLpno !== detectedLpno) {
+                          self.lpnoCounter = 1;
+                          self.lastLpno = detectedLpno;
+                        } else {
+                          self.lpnoCounter++;
+                        }
+
+                        if (self.lpnoCounter >= 3) {
+                          self.detectionStopped = true;
+                          self.$data.lpno = detectedLpno;
+                          self.$data.isMobiUser = true;
+
+                          document.querySelector('.flex-col.items-center.py-4').classList.add('bg-blue-300');
+                        } else {
+                          self.$data.lpno = detectedLpno;
+                          self.$data.isMobiUser = true;
+                        }
                       } else {
-                        self.lastLpno = detectedLpno;
-                        self.lpnoMatchCount = 1;
+                        console.log("정확도 낮음");
+                        self.$data.lpno = null;
+                        self.$data.isMobiUser = false;
                       }
-
-                      if (self.lpnoMatchCount >= 3) {
-                        console.log('같은 차량번호 3회 인식으로 감지 종료:', detectedLpno);
-                        Alpine.store('appState').lpno = detectedLpno;
-                        Alpine.store('appState').isMobiUser = true;
-                        self.lpno = detectedLpno;
-                        self.detectionStopped = true;
-                        self.updateMenuIndicator(false);
-                      }
-                    } else {
-                      console.log("GPU 서버 응답 정확도 낮음. 정확도:", confidence.toFixed(3));
-                      Alpine.store('appState').lpno = null;
-                      Alpine.store('appState').isMobiUser = false;
                     }
+                  } catch (error) {
+                    console.error('POST 실패: ', error);
                   }
-                } catch (error) {
-                  console.error('POST request failed:', error);
-                }
-              });
+                });
+              }
             }
-          }
-        });
+          });
 
-        if (!this.detectionStopped) {
+          if (!this.car_present) {
+            // 차량 감지 안 된 경우 처리
+          }
+
           setTimeout(() => {
-            requestAnimationFrame(() => self.detectObjects());
+            requestAnimationFrame(() => this.detectObjects());
+          }, 600);
+        } catch (error) {
+          console.error('물체 감지 실패: ', error);
+
+          setTimeout(() => {
+            requestAnimationFrame(() => this.detectObjects());
           }, 600);
         }
-      } catch (error) {
-        console.error('Object detection 실패:', error);
-        setTimeout(() => {
-          requestAnimationFrame(() => self.detectObjects());
-        }, 600);
+      }else{
+        // Detection 중지 상태면 2초 간격으로 함수 실행, 실제 detection 수행 안 함 (로컬 GPU 사용 X)
+          setTimeout(() => {
+            requestAnimationFrame(() => this.detectObjects());
+          }, 2000);
       }
     },
 
-    resumeDetection() {
-      this.detectionStopped = false;
-      this.lpnoMatchCount = 0;
-      this.lastLpno = null;
-      this.updateMenuIndicator(true);
-
-      cocoSsd.load().then((loadedModel) => {
-        this.model = loadedModel;
-        requestAnimationFrame(() => this.detectObjects());
-      }).catch((error) => {
-        console.error('모델 로드 실패: ', error);
-      });
-    },
-
-
-    updateMenuIndicator(isDetecting) {
-      const menuElement = document.querySelector('.bg-blue-500');
-      if (isDetecting) {
-        menuElement.classList.remove('bg-blue-300');
-        menuElement.classList.add('bg-blue-500');
-      } else {
-        menuElement.classList.remove('bg-blue-500');
-        menuElement.classList.add('bg-blue-300');
-      }
-    },
-
-    initANPR() {
-      const self = this;
+    initANPR(){
       if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
         this.startCamera({ exact: 'environment' })
-          .then((stream) => {
-            self.video.srcObject = stream;
-            self.video.play();
-            const track = stream.getVideoTracks()[0];
-            const settings = track.getSettings();
-            self.video.width = settings.width;
-            self.video.height = settings.height;
+            .then((stream) => {
+              this.video.srcObject = stream;
+              this.video.play();
+              const track = stream.getVideoTracks()[0];
+              const settings = track.getSettings();
+              this.video.width = settings.width;
+              this.video.height = settings.height;
 
-            cocoSsd.load().then((loadedModel) => {
-              self.model = loadedModel;
-              self.detectObjects();
-            }).catch((error) => {
-              console.error('모델 로드 실패: ', error);
-            });
-          })
-          .catch((error) => {
-            console.warn('후면카메라 사용 불가하여 전면 카메라를 사용합니다.');
-            self.startCamera('user')
-              .then((stream) => {
-                self.video.srcObject = stream;
-                self.video.play();
-                const track = stream.getVideoTracks()[0];
-                const settings = track.getSettings();
-                self.video.width = settings.width;
-                self.video.height = settings.height;
-
-                cocoSsd.load().then((loadedModel) => {
-                  self.model = loadedModel;
-                  self.detectObjects();
-                }).catch((error) => {
-                  console.error('모델 로드 실패: ', error);
-                });
-              })
-              .catch((error) => {
-                console.error('전면카메라 사용 불가: ', error);
+              cocoSsd.load().then((loadedModel) => {
+                this.model = loadedModel;
+                this.detectObjects();
+              }).catch((error) => {
+                console.error('모델 로드 실패: ', error);
               });
-          });
+            })
+            .catch((error) => {
+              console.warn('후면카메라 사용 불가하여 전면 카메라를 사용합니다.');
+              this.startCamera('user')
+                  .then((stream) => {
+                    this.video.srcObject = stream;
+                    this.video.play();
+                    const track = stream.getVideoTracks()[0];
+                    const settings = track.getSettings();
+                    this.video.width = settings.width;
+                    this.video.height = settings.height;
+
+                    cocoSsd.load().then((loadedModel) => {
+                      this.model = loadedModel;
+                      this.detectObjects();
+                    }).catch((error) => {
+                      console.error('모델 로드 실패: ', error);
+                    });
+                  })
+                  .catch((error) => {
+                    console.error('전면카메라 사용 불가: ', error);
+                  });
+            });
       } else {
         console.error('getUserMedia 사용불가.');
       }
