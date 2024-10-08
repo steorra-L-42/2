@@ -37,6 +37,7 @@ import com.kimnlee.common.network.NaverMapService
 import com.kimnlee.common.ui.theme.MobiCardBgGray
 import com.kimnlee.common.ui.theme.MobiPayTheme
 import com.kimnlee.common.ui.theme.MobiTextAlmostBlack
+import com.kimnlee.common.ui.theme.pMedium
 import com.kimnlee.mobipay.presentation.viewmodel.HomeViewModel
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.CameraUpdate
@@ -54,8 +55,8 @@ import com.kimnlee.common.utils.CarModelImageProvider
 import com.kimnlee.vehiclemanagement.data.model.CarMember
 import com.kimnlee.vehiclemanagement.data.model.VehicleItem
 
-private val YOUR_CLIENT_SECRET = BuildConfig.NAVER_MAP_CLIENT_SECRET
-
+private val NAVER_MAP_CLIENT_SECRET = BuildConfig.NAVER_MAP_CLIENT_SECRET
+private const val TAG = "HomeScreen"
 @Composable
 fun HomeScreen(
     loginViewModel: LoginViewModel,
@@ -114,7 +115,7 @@ fun HomeScreen(
                         .padding(top = 3.dp)
                 )
                 Text(
-                    text = " ${userName} 님, 반가워요!",
+                    text = " 원영님, 반가워요!",
                     style = MaterialTheme.typography.headlineMedium,
                     color = MobiTextAlmostBlack,
                     fontSize = 24.sp,
@@ -326,7 +327,7 @@ fun NaverMapView(lastLocation: Pair<Double, Double>?, naverMapService: NaverMapS
     val lastLocationLatLng = lastLocation?.let { LatLng(it.first, it.second) } ?: LatLng(
         36.107368, 128.425046) // 37.526665, 126.927127
     runBlocking {
-        val repository = NaverMapRepository("81dn8nvzim", YOUR_CLIENT_SECRET, naverMapService)
+        val repository = NaverMapRepository("81dn8nvzim", NAVER_MAP_CLIENT_SECRET, naverMapService)
         address = repository.getAddressFromCoords(lastLocationLatLng)
     }
 
@@ -335,33 +336,43 @@ fun NaverMapView(lastLocation: Pair<Double, Double>?, naverMapService: NaverMapS
             factory = { mapView },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(200.dp),
+                .height(160.dp),
             update = { view ->
                 view.getMapAsync { naverMap ->
 
-                    naverMap.moveCamera(CameraUpdate.scrollTo(lastLocationLatLng))
+                naverMap.moveCamera(CameraUpdate.scrollTo(lastLocationLatLng))
 
-                    if(lastLocation != null){
-                        val marker = Marker()
-                        marker.icon = OverlayImage.fromResource(R.drawable.park)
-                        marker.position = lastLocationLatLng
-                        marker.width = 130
-                        marker.height = 130
-                        marker.map = naverMap
-                    }
+                if(lastLocation != null){
+                    val marker = Marker()
+                    marker.icon = OverlayImage.fromResource(R.drawable.park)
+                    marker.position = lastLocationLatLng
+                    marker.width = 130
+                    marker.height = 130
+                    marker.map = naverMap
+                }
 
-                    naverMap.uiSettings.apply {
-                        isZoomControlEnabled = false
-                        logoGravity = Gravity.END or Gravity.BOTTOM
-                        setLogoMargin(0,0,30,30)
-                        isScaleBarEnabled = false
-                    }
+                naverMap.uiSettings.apply {
+                    isZoomControlEnabled = false
+                    logoGravity = Gravity.END or Gravity.BOTTOM
+                    setLogoMargin(0,0,30,30)
+                    isScaleBarEnabled = false
+                }
 
                 }
             }
         )
-
-        Text(text = address, fontSize = 16.sp, letterSpacing = 0.1.sp, lineHeight = 13.sp)
+        Spacer(modifier = Modifier.height(12.dp))
+        Text(
+            text = address,
+            fontSize = 16.sp,
+            letterSpacing = 0.1.sp,
+            lineHeight = 13.sp,
+            fontFamily = pMedium,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.CenterHorizontally)
+        )
     }
 }
 
