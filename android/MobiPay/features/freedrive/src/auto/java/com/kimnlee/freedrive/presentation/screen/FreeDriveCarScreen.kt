@@ -123,7 +123,6 @@ internal class FreeDriveCarScreen @UiThread constructor(
 
     private fun getNavigationTemplate(): Template {
         val customFreeDriveActionStrip = ActionStrip.Builder()
-            .addAction(customBuildSearchAction())
             .addAction(customBuildFavoritesAction())
             .build()
 
@@ -177,20 +176,6 @@ internal class FreeDriveCarScreen @UiThread constructor(
         return PaneTemplate.Builder(paneBuilder.build())
             .build()
     }
-
-    private fun customBuildSearchAction(): Action = Action.Builder()
-        .setIcon(
-            CarIcon.Builder(
-                IconCompat.createWithResource(
-                    carContext,
-                    R.drawable.ic_search_black36dp
-                )
-            ).build()
-        )
-        .setOnClickListener {
-            MapboxScreenManager.push(MapboxScreen.SEARCH)
-        }
-        .build()
 
     private fun customBuildFavoritesAction(): Action = Action.Builder()
         .setTitle("주변가맹점 보기")
