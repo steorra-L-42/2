@@ -29,6 +29,7 @@ import com.kimnlee.common.ui.theme.MobiBgGray
 import com.kimnlee.common.ui.theme.MobiBgWhite
 import com.kimnlee.common.ui.theme.MobiTextAlmostBlack
 import com.kimnlee.common.ui.theme.MobiTextDarkGray
+import com.kimnlee.common.utils.moneyFormat
 import com.kimnlee.payment.data.model.PaymentHistoryItem
 import com.kimnlee.payment.presentation.viewmodel.PaymentHistoryState
 import com.kimnlee.payment.presentation.viewmodel.PaymentViewModel
@@ -115,15 +116,6 @@ fun PaymentHistoryScreen(
                     )
                 }
             }
-            is PaymentHistoryState.Error -> {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(
-                        text = "Error: ${(paymentHistoryState as PaymentHistoryState.Error).message}",
-                        color = Color.Red,
-                        modifier = Modifier.padding(16.dp)
-                    )
-                }
-            }
             PaymentHistoryState.Initial -> {}
         }
     }
@@ -166,7 +158,7 @@ fun ItemCard(
                 horizontalAlignment = Alignment.End
             ) {
                 Text(
-                    text = "${item.paymentBalance}원",
+                    text = moneyFormat(item.paymentBalance.toBigInteger()),
                     style = MaterialTheme.typography.titleMedium,
                     color = MobiTextAlmostBlack,
                     fontWeight = FontWeight.Bold
