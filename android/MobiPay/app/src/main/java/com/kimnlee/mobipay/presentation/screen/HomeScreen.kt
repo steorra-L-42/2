@@ -64,6 +64,7 @@ import com.naver.maps.map.MapView
 import com.naver.maps.map.overlay.Marker
 import com.naver.maps.map.overlay.OverlayImage
 import kotlinx.coroutines.runBlocking
+import pMediumFontFamily
 import retrofit2.Retrofit
 import java.util.Locale
 
@@ -244,9 +245,9 @@ fun HomeScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(20.dp))
-                    .height(300.dp)
+                    .height(262.dp)
                     .background(MobiCardBgGray)
-                    .padding(24.dp, 18.dp, 24.dp, 12.dp),
+                    .padding(24.dp, 18.dp, 24.dp, 10.dp),
             ) {
                 Column(
                     modifier = Modifier
@@ -292,45 +293,56 @@ fun NaverMapView(lastLocation: Pair<Double, Double>?, naverMapService: NaverMapS
     lateinit var address : String
     // 주차 정보가 없으면 기본 위치 표시
     val lastLocationLatLng = lastLocation?.let { LatLng(it.first, it.second) } ?: LatLng(
-        36.107368, 128.425046) // 37.526665, 126.927127
+        37.526665, 126.927127) // 37.526665, 126.927127
     runBlocking {
         val repository = NaverMapRepository("81dn8nvzim", YOUR_CLIENT_SECRET, naverMapService)
         address = repository.getAddressFromCoords(lastLocationLatLng)
     }
 
-Column {
-    AndroidView(
-        factory = { mapView },
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(200.dp),
-        update = { view ->
-            view.getMapAsync { naverMap ->
+    Column {
+        AndroidView(
+            factory = { mapView },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(160.dp)
+            ,
+            update = { view ->
+                view.getMapAsync { naverMap ->
 
-                naverMap.moveCamera(CameraUpdate.scrollTo(lastLocationLatLng))
+                    naverMap.moveCamera(CameraUpdate.scrollTo(lastLocationLatLng))
 
-                if(lastLocation != null){
-                    val marker = Marker()
-                    marker.icon = OverlayImage.fromResource(R.drawable.park)
-                    marker.position = lastLocationLatLng
-                    marker.width = 130
-                    marker.height = 130
-                    marker.map = naverMap
+                    if(lastLocation != null){
+                        val marker = Marker()
+                        marker.icon = OverlayImage.fromResource(R.drawable.park)
+                        marker.position = lastLocationLatLng
+                        marker.width = 130
+                        marker.height = 130
+                        marker.map = naverMap
+                    }
+
+                    naverMap.uiSettings.apply {
+                        isZoomControlEnabled = false
+                        logoGravity = Gravity.END or Gravity.BOTTOM
+                        setLogoMargin(0,0,30,30)
+                        isScaleBarEnabled = false
+                    }
+
                 }
-
-                naverMap.uiSettings.apply {
-                    isZoomControlEnabled = false
-                    logoGravity = Gravity.END or Gravity.BOTTOM
-                    setLogoMargin(0,0,30,30)
-                    isScaleBarEnabled = false
-                }
-
             }
-        }
-    )
-
-    Text(text = address, fontSize = 16.sp, letterSpacing = 0.1.sp, lineHeight = 13.sp)
-}
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+        Text(
+            text = address,
+            fontSize = 16.sp,
+            letterSpacing = 0.1.sp,
+            lineHeight = 13.sp,
+            fontFamily = pMediumFontFamily,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.CenterHorizontally)
+        )
+    }
 }
 
 @Composable
