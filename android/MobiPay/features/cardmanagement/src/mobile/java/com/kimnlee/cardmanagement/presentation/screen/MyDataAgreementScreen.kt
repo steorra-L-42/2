@@ -1,6 +1,5 @@
 package com.kimnlee.cardmanagement.presentation.screen
 
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -28,7 +27,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -37,7 +35,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -51,7 +48,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.kimnlee.cardmanagement.presentation.viewmodel.CardManagementViewModel
-import com.kimnlee.cardmanagement.presentation.viewmodel.MyDataAgreementState
 import com.kimnlee.common.ui.theme.MobiBgWhite
 import com.kimnlee.common.ui.theme.MobiBlue
 import kotlinx.coroutines.delay
@@ -200,8 +196,7 @@ fun AgreementItem(
     Column {
         Row(
             modifier = Modifier
-                .fillMaxWidth()
-                .clickable(onClick = onExpandToggle),
+                .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
