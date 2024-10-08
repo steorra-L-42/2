@@ -1,5 +1,7 @@
 package com.example.mobipay.util;
 
+import com.example.mobipay.domain.cancel.dto.SsafyCancelTransactionRequest;
+import com.example.mobipay.domain.cancel.dto.SsafyCancelTransactionResponse;
 import com.example.mobipay.domain.postpayments.dto.cardtransaction.CardTransactionRequest;
 import com.example.mobipay.domain.postpayments.dto.cardtransaction.CardTransactionResponse;
 import com.example.mobipay.domain.postpayments.dto.paymentresult.PaymentResultRequest;
@@ -44,6 +46,7 @@ public class RestClientUtil {
             SSAFY_PREFIX + "/edu/demandDeposit/updateDemandDepositAccountDeposit";
     private static final String CARD_TRANSACTION_URL = SSAFY_PREFIX + "/edu/creditCard/createCreditCardTransaction";
     private static final String RESULT_TO_MERCHANT_SERVER_URL = "https://merchant.mobipay.kr/api/v1/merchants/payments/result";
+    private static final String CANCEL_TRANSACTION_URL = SSAFY_PREFIX + "/edu/creditCard/deleteCreditCardTransaction";
 
     private final Validator validator;
     private final RestClient restClient = RestClient.create();
@@ -108,6 +111,13 @@ public class RestClientUtil {
                                                                           Class<CardTransactionResponse> response) {
 
         ResponseEntity<CardTransactionResponse> responseEntity = post(request, CARD_TRANSACTION_URL, response);
+        validate(responseEntity);
+        return responseEntity;
+    }
+
+    public ResponseEntity<SsafyCancelTransactionResponse> cancelTransaction(SsafyCancelTransactionRequest request, Class<SsafyCancelTransactionResponse> response) {
+
+        ResponseEntity<SsafyCancelTransactionResponse> responseEntity = post(request, CANCEL_TRANSACTION_URL, response);
         validate(responseEntity);
         return responseEntity;
     }

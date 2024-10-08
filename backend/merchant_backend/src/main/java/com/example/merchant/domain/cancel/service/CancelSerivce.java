@@ -1,7 +1,7 @@
 package com.example.merchant.domain.cancel.service;
 
 import com.example.merchant.domain.cancel.dto.CancelTransactionResponse;
-import com.example.merchant.domain.cancel.dto.MerchantTranscactionResponse;
+import com.example.merchant.domain.cancel.dto.MerchantTransactionResponse;
 import com.example.merchant.domain.cancel.error.InvalidTransactionUniqueNoException;
 import com.example.merchant.domain.payment.error.InvalidMerchantTypeException;
 import com.example.merchant.util.credential.CredentialUtil;
@@ -18,14 +18,14 @@ public class CancelSerivce {
     private final CredentialUtil credentialUtil;
     private final MobiPay mobiPay;
 
-    public ResponseEntity<MerchantTranscactionResponse> getTransactions(String posMerApiKey, String merchantType) {
+    public ResponseEntity<MerchantTransactionResponse> getTransactions(String posMerApiKey, String merchantType) {
 
         credentialUtil.validatePosMerApiKey(posMerApiKey);
         validateMerchantType(merchantType);
 
         // mobiPay server의 응답을 그대로 전달
         return mobiPay.getTransactionList(credentialUtil.getMerchantTypeLowerCaseString(merchantType),
-                MerchantTranscactionResponse.class);
+                MerchantTransactionResponse.class);
     }
 
 

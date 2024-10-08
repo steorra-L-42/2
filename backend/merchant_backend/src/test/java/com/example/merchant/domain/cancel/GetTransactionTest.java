@@ -6,7 +6,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.example.merchant.MerchantApplication;
 import com.example.merchant.domain.cancel.dto.MerchantTransaction;
-import com.example.merchant.domain.cancel.dto.MerchantTranscactionResponse;
+import com.example.merchant.domain.cancel.dto.MerchantTransactionResponse;
 import com.example.merchant.util.credential.CredentialUtil;
 import com.example.merchant.util.mobipay.MobiPay;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -153,8 +153,8 @@ public class GetTransactionTest {
                 new MerchantTransaction(3L, "20241005", "055300", 10000L, "food1", false, credentialUtil.getFOOD_MER_ID(), 3L, 33L),
                 new MerchantTransaction(4L, "20241005", "055333", 10000L, "food1", false, credentialUtil.getFOOD_MER_ID(), 4L, 44L)
         );
-        MerchantTranscactionResponse response = new MerchantTranscactionResponse(transactions);
-        ResponseEntity<MerchantTranscactionResponse> responseEntity = ResponseEntity.ok(response);
+        MerchantTransactionResponse response = new MerchantTransactionResponse(transactions);
+        ResponseEntity<MerchantTransactionResponse> responseEntity = ResponseEntity.ok(response);
 
         Mockito.when(mobiPay.getTransactionList(Mockito.any(), Mockito.any()))
                 .thenReturn(responseEntity);
@@ -176,7 +176,7 @@ public class GetTransactionTest {
     @DisplayName("성공 : 204 No Content")
     void success_204() throws Exception {
         //given
-        ResponseEntity<MerchantTranscactionResponse> responseEntity = ResponseEntity.noContent().build();
+        ResponseEntity<MerchantTransactionResponse> responseEntity = ResponseEntity.noContent().build();
 
         Mockito.when(mobiPay.getTransactionList(Mockito.any(), Mockito.any()))
                 .thenReturn(responseEntity);

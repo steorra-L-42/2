@@ -35,8 +35,11 @@ public enum ErrorCode {
     FCM_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "FCM 전송 에러입니다."),
     ALREADY_REGISTERED_CARD(HttpStatus.CONFLICT, "이미 등록된 카드입니다."),
     ONE_TIME_LIMIT_EXCEED(HttpStatus.BAD_REQUEST, "결제 금액이 일회 결제 금액 한도를 초과했습니다."),
-    CARD_USER_MISMATCH(HttpStatus.FORBIDDEN, "카드를 찾을 수 없습니다.");
-
+    CARD_USER_MISMATCH(HttpStatus.FORBIDDEN, "카드를 찾을 수 없습니다."),
+    INVALID_MERCHANT_TRANSACTION(HttpStatus.BAD_REQUEST, "올바르지 않은 가맹점 거래입니다."),
+    TRANSACTION_NOT_BELONG_TO_MERCHANT(HttpStatus.FORBIDDEN, "해당 가맹점의 거래가 아닙니다."),
+    TRANSACTION_ALREADY_CANCELLED(HttpStatus.CONFLICT, "이미 취소된 거래입니다."),
+    CANCEL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "취소 요청 SSAFY API 서버 에러입니다.");
 
     private final HttpStatus status;
     private final String message;

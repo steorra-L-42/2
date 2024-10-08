@@ -1,7 +1,7 @@
 package com.example.merchant.util.mobipay;
 
 import com.example.merchant.domain.cancel.dto.CancelTransactionResponse;
-import com.example.merchant.domain.cancel.dto.MerchantTranscactionResponse;
+import com.example.merchant.domain.cancel.dto.MerchantTransactionResponse;
 import com.example.merchant.global.enums.MerchantType;
 import com.example.merchant.util.credential.CredentialUtil;
 import com.example.merchant.util.mobipay.dto.MobiPaymentRequest;
@@ -40,10 +40,10 @@ public class MobiPayImpl implements MobiPay{
     }
 
     @Override
-    public ResponseEntity<MerchantTranscactionResponse> getTransactionList(MerchantType merchantType,
-                                                                           Class<MerchantTranscactionResponse> responseClass) {
+    public ResponseEntity<MerchantTransactionResponse> getTransactionList(MerchantType merchantType,
+                                                                          Class<MerchantTransactionResponse> responseClass) {
         final String url = MOBI_PAY_URL + "/merchants/" + credentialUtil.getMerchantIdByType(merchantType) + "/transactions";
-        ResponseEntity<MerchantTranscactionResponse> responseEntity = get(merchantType, url, responseClass);
+        ResponseEntity<MerchantTransactionResponse> responseEntity = get(merchantType, url, responseClass);
         validate(responseEntity);
 
         return responseEntity;

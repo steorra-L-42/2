@@ -7,8 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import androidx.compose.foundation.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
@@ -22,14 +21,18 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.ui.text.style.TextAlign
+import coil.compose.rememberImagePainter
 import com.kimnlee.common.ui.theme.*
+import com.kimnlee.notification.data.Notification
+import com.kimnlee.notification.data.NotificationRepository
+import com.kimnlee.notification.data.NotificationType
 
 @Composable
 fun NotificationScreen(
     onNavigateBack: () -> Unit
 ) {
     var selectedTab by remember { mutableStateOf(0) }
-    val tabs = listOf("전체", "결제", "멤버", "기타")
+    val tabs = listOf("전체", "결제", "멤버")
 
     Column(
         modifier = Modifier
@@ -75,7 +78,6 @@ fun NotificationScreen(
             0 -> AllNotifications()
             1 -> PaymentRequests()
             2 -> MemberInvitations()
-            3 -> OtherNotifications()
         }
     }
 }
@@ -88,7 +90,6 @@ fun CustomTabRow(
 ) {
     Row(
         modifier = Modifier
-//            .fillMaxWidth()
             .width(320.dp)
             .height(40.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -135,9 +136,8 @@ fun CustomTab(
 @Composable
 fun AllNotifications() {
     val allNotifications = listOf(
-        *getPaymentRequests().toTypedArray(),
-        *getMemberInvitations().toTypedArray(),
-        *getOtherNotifications().toTypedArray()
+        *NotificationRepository.paymentRequestMessages.toTypedArray(),
+        *NotificationRepository.invitationMessages.toTypedArray()
     ).sortedByDescending { it.timestamp }
 
     NotificationList(allNotifications)
@@ -145,47 +145,12 @@ fun AllNotifications() {
 
 @Composable
 fun PaymentRequests() {
-    NotificationList(getPaymentRequests())
+    NotificationList(NotificationRepository.paymentRequestMessages)
 }
 
 @Composable
 fun MemberInvitations() {
-    NotificationList(getMemberInvitations())
-}
-
-@Composable
-fun OtherNotifications() {
-    NotificationList(getOtherNotifications())
-}
-
-fun getPaymentRequests(): List<Notification> {
-    return listOf(
-        Notification("결제 요청", LocalDateTime.now().minusMinutes(20), NotificationType.PAYMENT),
-        Notification("결제 요청", LocalDateTime.now().minusHours(2), NotificationType.PAYMENT),
-        Notification("결제 요청", LocalDateTime.now().minusDays(1), NotificationType.PAYMENT),
-        Notification("결제 요청", LocalDateTime.now().minusDays(2), NotificationType.PAYMENT)
-    )
-}
-
-fun getMemberInvitations(): List<Notification> {
-    return listOf(
-        Notification(
-            "누군가의 차에 초대됐어요누군가의 차에 초대됐어요누군가의 차에 초대됐어요누군가의 차에 초대됐어요누군가의 차에 초대됐어요누군가의 차에 초대됐어요누군가의 차에 초대됐어요누군가의 차에 초대됐어요누군가의 차에 초대됐어요누군가의 차에 초대됐어요",
-            LocalDateTime.now().minusMinutes(10),
-            NotificationType.MEMBER
-        ), // 장문 메시지 테스트용입니다.
-        Notification("누군가의 차에 초대됐어요", LocalDateTime.now().minusDays(10), NotificationType.MEMBER)
-    )
-}
-
-fun getOtherNotifications(): List<Notification> {
-    return listOf(
-        Notification("공지사항 1", LocalDateTime.now().minusDays(1), NotificationType.OTHER),
-        Notification("공지사항 2", LocalDateTime.now().minusDays(2), NotificationType.OTHER),
-        Notification("공지사항 3", LocalDateTime.now().minusDays(3), NotificationType.OTHER),
-        Notification("공지사항 4", LocalDateTime.now().minusDays(4), NotificationType.OTHER),
-        Notification("공지사항 5", LocalDateTime.now().minusDays(5), NotificationType.OTHER)
-    )
+    NotificationList(NotificationRepository.invitationMessages)
 }
 
 @Composable
@@ -218,9 +183,16 @@ fun NotificationItem(notification: Notification) {
         )
 
         val (icon, type) = when (notification.type) {
-            NotificationType.PAYMENT -> Pair(Icons.Outlined.CreditCard, "결제")
-            NotificationType.MEMBER -> Pair(Icons.Outlined.Group, "멤버")
-            NotificationType.OTHER -> Pair(Icons.Default.Notifications, "기타")
+            NotificationType.PAYMENT -> {
+                val details = notification.details
+                val paymentMessage = "${details.merchantName}에서 ${details.paymentBalance}원을 결제했습니다"
+                Pair(Icons.Outlined.CreditCard, paymentMessage)
+            }
+            NotificationType.MEMBER -> {
+                val details = notification.details
+                val invitationMessage = "${details.inviterName}님의 차에 초대되었습니다"
+                Pair(Icons.Outlined.Group, invitationMessage)
+            }
         }
 
         Icon(
@@ -249,26 +221,31 @@ fun NotificationItem(notification: Notification) {
                     fontWeight = FontWeight.SemiBold,
                 )
                 Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = notification.message,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MobiTextDarkGray,
-                    maxLines = 3,
-                    overflow = TextOverflow.Ellipsis
-                )
+                if (notification.type == NotificationType.PAYMENT) {
+                    Text(
+                        text = notification.details.info ?: "정보 없음",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.Gray
+                    )
+                } else if (notification.type == NotificationType.MEMBER) {
+                    val details = notification.details
+                    details.inviterPicture?.let { picture ->
+                        Image(painter = rememberImagePainter(picture), contentDescription = null)
+                    }
+                    Text(
+                        text = "차량 번호: ${details.carNumber ?: "정보 없음"}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.Gray
+                    )
+                    Text(
+                        text = "차량 모델: ${details.carModel ?: "정보 없음"}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.Gray
+                    )
+                }
             }
         }
     }
-}
-
-data class Notification(
-    val message: String,
-    val timestamp: LocalDateTime,
-    val type: NotificationType
-)
-
-enum class NotificationType {
-    PAYMENT, MEMBER, OTHER
 }
 
 fun formatTime(timestamp: LocalDateTime): String {
