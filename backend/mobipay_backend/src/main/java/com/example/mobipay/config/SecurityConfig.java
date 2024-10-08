@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -36,14 +37,22 @@ public class SecurityConfig {
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
     String[] whitelist_post = {
-            "/api/v1/user/reissue"
-            // 논의 후 추가 필요
+            "/api/v1/users/reissue",
+            "/api/v1/users/login/**",
+            "/api/v1/users/detail/**",
+            "/api/v1/merchants/**",
+            "/api/v1/postpayments/**",
     };
+
     String[] whitelist_get = {
-            "/",
-            "/api/v1/user/login/**"
-            // 논의 후 추가 필요
+            "/api/v1/merchants/**",
+            "/api/v1/postpayments/**",
     };
+
+    String[] whitelist_patch = {
+            "/api/v1/merchants/**"
+    };
+
 
     @Value("${cors.url}")
     private String corsURL;
@@ -109,7 +118,10 @@ public class SecurityConfig {
         //경로별 인가 작업
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .anyRequest().permitAll())
+                        .requestMatchers(HttpMethod.POST, whitelist_post).permitAll()
+                        .requestMatchers(HttpMethod.GET, whitelist_get).permitAll()
+                        .requestMatchers(HttpMethod.PATCH, whitelist_patch).permitAll()
+                        .anyRequest().authenticated())
                 .exceptionHandling(exceptionHandling -> exceptionHandling
                         .authenticationEntryPoint(customAuthenticationEntryPoint) // 커스텀 AuthenticationEntryPoint 설정
                 );
