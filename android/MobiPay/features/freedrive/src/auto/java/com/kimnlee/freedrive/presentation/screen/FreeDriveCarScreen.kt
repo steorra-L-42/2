@@ -31,6 +31,7 @@ import com.mapbox.androidauto.internal.logAndroidAuto
 import com.mapbox.androidauto.location.CarLocationRenderer
 import com.mapbox.androidauto.navigation.CarCameraMode
 import com.mapbox.androidauto.navigation.CarNavigationCamera
+import com.mapbox.androidauto.navigation.audioguidance.CarAudioGuidanceAction
 import com.mapbox.androidauto.navigation.roadlabel.CarRoadLabelRenderer
 import com.mapbox.androidauto.navigation.speedlimit.CarSpeedLimitRenderer
 import com.mapbox.androidauto.preview.CarRouteLineRenderer
@@ -123,6 +124,7 @@ internal class FreeDriveCarScreen @UiThread constructor(
 
     private fun getNavigationTemplate(): Template {
         val customFreeDriveActionStrip = ActionStrip.Builder()
+            .addAction(CarAudioGuidanceAction().getAction(this)) // 음소거 버튼으로 변경
             .addAction(customBuildFavoritesAction())
             .build()
 
