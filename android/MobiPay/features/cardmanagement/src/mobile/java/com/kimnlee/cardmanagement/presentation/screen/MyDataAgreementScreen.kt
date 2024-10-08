@@ -50,8 +50,10 @@ import androidx.compose.ui.unit.dp
 import com.kimnlee.cardmanagement.presentation.viewmodel.CardManagementViewModel
 import com.kimnlee.common.ui.theme.MobiBgWhite
 import com.kimnlee.common.ui.theme.MobiBlue
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -145,8 +147,10 @@ fun MyDataAgreementScreen(
                     coroutineScope.launch {
                         viewModel.setMyDataAgreement() // 비동기 작업 시작
                         delay(2000) // 2초 지연
-                        showLoading = false
-                        onNavigateToOwnedCards() // 결과에 상관없이 항상 이동
+                        withContext(Dispatchers.Main) {
+                            showLoading = false
+                            onNavigateToOwnedCards() // 메인 스레드에서 실행
+                        }
                     }
                 },
                 enabled = allAgreed.value,
