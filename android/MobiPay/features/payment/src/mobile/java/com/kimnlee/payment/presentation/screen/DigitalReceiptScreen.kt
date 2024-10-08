@@ -24,6 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.kimnlee.common.R
 import com.kimnlee.common.ui.theme.MobiBgGray
+import com.kimnlee.common.ui.theme.MobiBgWhite
 import com.kimnlee.common.ui.theme.MobiTextAlmostBlack
 import com.kimnlee.common.ui.theme.MobiTextDarkGray
 import com.kimnlee.common.utils.formatCardNumber
@@ -70,7 +71,7 @@ fun DigitalReceiptScreen(
                         )
                         Text(
                             text = "전자 영수증",
-                            style = MaterialTheme.typography.titleLarge,
+                            style = MaterialTheme.typography.headlineMedium,
                             color = MobiTextAlmostBlack
                         )
                     }
@@ -86,32 +87,47 @@ fun DigitalReceiptScreen(
                 )
             )
         },
-        containerColor = Color.White
+        containerColor = MobiBgGray
     ) { innerPadding ->
-        when (electronicReceiptState) {
-            is ElectronicReceiptState.Success -> {
-                val receipt = (electronicReceiptState as ElectronicReceiptState.Success).data
-                ReceiptContent(receipt, innerPadding, context)
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .background(MobiBgGray)
+        ) {
+            when (electronicReceiptState) {
+                is ElectronicReceiptState.Success -> {
+                    val receipt = (electronicReceiptState as ElectronicReceiptState.Success).data
+                    ReceiptCard(receipt, context)
+                }
+                is ElectronicReceiptState.Error -> {}
+                ElectronicReceiptState.Initial -> {}
             }
-            is ElectronicReceiptState.Error -> {}
-            ElectronicReceiptState.Initial -> {}
         }
     }
 }
 
 @Composable
-fun ReceiptContent(receipt: ReceiptResponse, innerPadding: PaddingValues, context: Context) {
-    Column(
+fun ReceiptCard(receipt: ReceiptResponse, context: Context) {
+    Card(
         modifier = Modifier
             .fillMaxSize()
-            .padding(innerPadding)
-            .verticalScroll(rememberScrollState())
+            .padding(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MobiBgWhite),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
-        ReceiptHeader(receipt)
-        PaymentAmountSection(receipt)
-        PaymentDetailsSection(receipt)
-        CardInfoSection(receipt)
-        MerchantInfoSection(receipt, context)
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp)
+        ) {
+            ReceiptHeader(receipt)
+            PaymentAmountSection(receipt)
+            PaymentDetailsSection(receipt)
+            CardInfoSection(receipt)
+            MerchantInfoSection(receipt, context)
+        }
     }
 }
 
@@ -120,19 +136,20 @@ fun ReceiptHeader(receipt: ReceiptResponse) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(MobiBgGray)
-            .padding(24.dp)
+            .background(MobiBgWhite)
+            .padding(16.dp)
     ) {
         Text(
             text = receipt.merchantName,
             style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            color = MobiTextAlmostBlack
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = formatDateTimeWithHyphens(receipt.transactionDate, receipt.transactionTime),
             style = MaterialTheme.typography.bodyMedium,
-            color = Color.Gray
+            color = MobiTextDarkGray
         )
     }
 }
@@ -142,18 +159,19 @@ fun PaymentAmountSection(receipt: ReceiptResponse) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 24.dp, vertical = 32.dp)
+            .padding(horizontal = 24.dp, vertical = 24.dp)
     ) {
         Text(
             text = "결제 금액",
             style = MaterialTheme.typography.titleMedium,
-            color = Color.Gray
+            color = MobiTextDarkGray
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = moneyFormat(receipt.paymentBalance.toBigInteger()),
             style = MaterialTheme.typography.headlineLarge,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            color = MobiTextAlmostBlack
         )
     }
 }
@@ -173,6 +191,18 @@ fun PaymentDetailsSection(receipt: ReceiptResponse) {
 }
 
 @Composable
+fun SingleLineDetailItem(content: String) {
+    Text(
+        text = content,
+        style = MaterialTheme.typography.bodyMedium,
+        color = MobiTextAlmostBlack,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp)
+    )
+}
+
+@Composable
 fun CardInfoSection(receipt: ReceiptResponse) {
     Column(
         modifier = Modifier
@@ -185,7 +215,7 @@ fun CardInfoSection(receipt: ReceiptResponse) {
             color = MobiTextDarkGray
         )
         Spacer(modifier = Modifier.height(16.dp))
-        DetailItem("카드", "${receipt.cardName} (${formatCardNumber(receipt.cardNo)})")
+        SingleLineDetailItem("${receipt.cardName} (${formatCardNumber(receipt.cardNo)})")
         DetailItem("승인번호", receipt.transactionUniqueNo.toString())
     }
 }
@@ -204,7 +234,7 @@ fun MerchantInfoSection(receipt: ReceiptResponse, context: Context) {
         )
         Spacer(modifier = Modifier.height(16.dp))
         DetailItem("상호", receipt.merchantName)
-        DetailItem("주소", getCurrentAddress(context, receipt.lat, receipt.lng))
+        SingleLineDetailItem(getCurrentAddress(context, receipt.lat, receipt.lng))
         DetailItem("가맹점 번호", receipt.merchantId.toString())
     }
 }
