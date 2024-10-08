@@ -87,6 +87,13 @@
               </span>
             </a>
           </li>
+          <!-- 거래내역 조회 -->
+          <li>
+            <a href="#" @click="getTransactions(); openTransactionListModal();"
+                >거래내역 조회</a
+            >
+          </li>
+          <!-- 거래내역 조회 -->
         </ul>
         <a
           href="https://merchant.mobipay.kr/guide/guide.html"
@@ -462,6 +469,44 @@
         </div>
       </div>
     </div>
+    <!-- 거래내역 조회 모달 -->
+    <div x-show="isShowTransactionListModal">
+        <button @click="closeTransactionListModal()" type="button">
+            닫기
+        </button>
+        <table>
+            <tr>
+                <th>거래번호</th>
+                <th>거래일자</th>
+                <th>거래시간</th>
+                <th>거래금액</th>
+                <th>거래정보</th>
+                <th>거래취소 여부</th>
+                <th>거래취소</th>
+            </tr>
+            <template
+                x-for="(transaction, index) in transactionList"
+                :key="index"
+            >
+                <tr>
+                    <td x-text="transaction.transactionUniqueNo"></td>
+                    <td x-text="transaction.transactionDate"></td>
+                    <td x-text="transaction.transactionTime"></td>
+                    <td x-text="transaction.paymentBalance"></td>
+                    <td x-text="transaction.info"></td>
+                    <td x-text="transaction.cancelled ? '취소 불가' : '취소 가능'"></td>
+                    <td>
+                        <button
+                            @click="cancelTransaction(transaction.transactionUniqueNo)"
+                        >
+                            취소
+                        </button>
+                    </td>
+                </tr>
+            </template>
+        </table>
+    </div>
+    <!-- 거래내역 조회 -->
   </div>
 </body>
 </html>

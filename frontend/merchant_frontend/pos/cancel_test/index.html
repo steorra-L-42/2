@@ -1,26 +1,141 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    <a href="#" id="getTransactions" merchantType="food">거래내역 조회</a>
-    <div>
-        <table id="transactionList">
-            <tr>
-                <th>거래번호</th>
-                <th>거래일자</th>
-                <th>거래시간</th>
-                <th>거래금액</th>
-                <th>거래정보</th>
-                <th>거래취소 여부</th>
-                <th>거래취소</th>
-            </tr>
-            <!-- 거래내역들 -->
-        </table>
-    </div>
-    <script src="./js/cancel.js" defer></script>
-</body>
+<html lang="ko">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Document</title>
+        <script src="https://unpkg.com/idb@6.1.5/build/iife/index-min.js"></script>
+        <script
+            src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"
+            defer
+        ></script>
+    </head>
+    <body x-data="initApp()">
+        <ul>
+            <a href="#" @click="getTransactions(); openTransactionListModal();"
+                >거래내역 조회</a
+            >
+        </ul>
+
+        <div x-show="isShowTransactionListModal">
+            <button @click="closeTransactionListModal()" type="button">
+                닫기
+            </button>
+            <table>
+                <tr>
+                    <th>거래번호</th>
+                    <th>거래일자</th>
+                    <th>거래시간</th>
+                    <th>거래금액</th>
+                    <th>거래정보</th>
+                    <th>거래취소 여부</th>
+                    <th>거래취소</th>
+                </tr>
+                <template
+                    x-for="(transaction, index) in transactionList"
+                    :key="index"
+                >
+                    <tr>
+                        <td x-text="transaction.transactionUniqueNo"></td>
+                        <td x-text="transaction.transactionDate"></td>
+                        <td x-text="transaction.transactionTime"></td>
+                        <td x-text="transaction.paymentBalance"></td>
+                        <td x-text="transaction.info"></td>
+                        <td x-text="transaction.cancelled ? '취소 불가' : '취소 가능'"></td>
+                        <td>
+                            <button
+                                @click="cancelTransaction(transaction.transactionUniqueNo)"
+                            >
+                                취소
+                            </button>
+                        </td>
+                    </tr>
+                </template>
+            </table>
+        </div>
+        <script>
+            const MER_API_KEY = 'Da19J03F6g7H8iB2c54e';
+            const MERCHANT_TYPE_URL = 'food';
+
+            function initApp() {
+                const app = {
+                    isShowTransactionListModal: false,
+                    transactionList: [],
+
+                    openTransactionListModal() {
+                        this.isShowTransactionListModal = true;
+                    },
+
+                    closeTransactionListModal() {
+                        this.isShowTransactionListModal = false;
+                    },
+
+                    async getTransactions() {
+                        const url = `/api/v1/merchants/${MERCHANT_TYPE_URL}/transactions`;
+                        const data = await getRequest(url);
+                        this.transactionList = data?.items;
+                    },
+
+                    cancelTransaction(transactionUniqueNo) {
+                        const url = `/api/v1/merchants/${MERCHANT_TYPE_URL}/cancelled-transactions/${transactionUniqueNo}`;
+                        patchRequest(url).then(() => {
+                            this.getTransactions();
+                        });
+                    },
+                }
+
+                // get fetch
+                async function getRequest(url) {
+                    try {
+                        const response = await fetch(url, {
+                            method: 'GET',
+                            headers: {
+                                'merApiKey': MER_API_KEY,
+                            },
+                        });
+
+                        if(response?.status !== 200) {
+                            alert('거래내역 조회에 실패했습니다.');
+                            console.error('Error:', response);
+                            return;
+                        }
+
+                        const data = await response.json();
+                        console.log(data);
+                        return data
+
+                    } catch (error) {
+                        console.error('Error:', error);
+                        return;
+                    }
+                }
+
+                // patch fetch
+                async function patchRequest(url) {
+                    try {
+                        const response = await fetch(url, {
+                            method: 'PATCH',
+                            headers: {
+                                'merApiKey': MER_API_KEY,
+                            },
+                        });
+
+                        if(response?.status !== 200) {
+                            alert('거래 취소에 실패했습니다.');
+                            console.error('Error:', response);
+                            return;
+                        }
+
+                        alert('거래가 취소되었습니다.');
+
+                    } catch (error) {
+                        console.error('Error:', error);
+                        return;
+                    }
+                }
+
+                return app;
+            }
+        </script>
+    </body>
 </html>
