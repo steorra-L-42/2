@@ -35,11 +35,6 @@ public class Parking {
     @Column(name = "paid", nullable = false)
     private Boolean paid = false;
 
-    public Parking goExit(LocalDateTime exit) {
-        this.exit = exit;
-        return this;
-    }
-
     @Builder
     public Parking(String number, LocalDateTime entry) {
         this.number = number;
@@ -48,8 +43,17 @@ public class Parking {
 
     public static Parking of(ParkingEntryRequest request) {
         return Parking.builder()
-            .number(request.getCarNumber())
-            .entry(request.getEntry())
-            .build();
+                .number(request.getCarNumber())
+                .entry(request.getEntry())
+                .build();
+    }
+
+    public Parking goExit(LocalDateTime exit) {
+        this.exit = exit;
+        return this;
+    }
+
+    public void changePaid() {
+        this.paid = true;
     }
 }
