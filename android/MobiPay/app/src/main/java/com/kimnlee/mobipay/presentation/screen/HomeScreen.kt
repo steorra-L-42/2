@@ -154,6 +154,14 @@ fun HomeScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             if (vehicles.isEmpty()) {
+                Image(
+                    painter = painterResource(id = R.drawable.no_car),
+                    contentDescription = "No car image",
+                    modifier = Modifier
+                        .size(200.dp)
+                        .padding(bottom = 16.dp)
+                )
+                Spacer(modifier = Modifier.height(18.dp))
                 Text(
                     text = "차량을 등록해주세요",
                     style = MaterialTheme.typography.headlineMedium,
