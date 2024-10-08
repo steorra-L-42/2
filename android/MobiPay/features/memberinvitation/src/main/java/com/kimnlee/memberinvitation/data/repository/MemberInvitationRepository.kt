@@ -48,16 +48,51 @@ class MemberInvitationRepository(
 
                     if (response.isSuccessful) { // 초대요청 성공
                         Log.d(TAG, "sendInvitation onResponse: 초대요청 성공")
+                        mobiNotificationManager.showPlainNotification("멤버 초대 성공", "멤버 초대요청에 성공했어요!\n초대받은 회원이 수락하면 멤버에 추가돼요.")
 
                     } else {
                         // 서버에서 결과는 받았으나 오류 발생
                         Log.d(TAG, "sendInvitation: 초대 요청 실패 - 서버 메세지: ${response.code()} : ${response.message()}")
-
                         // TODO 인 앱 알림목록에 추가
-
                         // 모바일에 알림 표시
-                        mobiNotificationManager.showPlainNotification("초대 요청 성공", "멤버 초대에 성공했어요.")
+                        mobiNotificationManager.showPlainNotification("멤버 초대 실패", "멤버 초대에 실패했어요.\n모비페이에 가입된 회원이 아니에요.")
                     }
+
+                }
+
+                override fun onFailure(call: Call<Void>, t: Throwable) {
+                    Log.d(TAG, "sendInvitation: 초대 요청 실패 - 네트워크 오류: ${t.localizedMessage}")
+                    // 네트워크 오류 처리
+                    mobiNotificationManager.showPlainNotification("초대 요청 실패", "네트워크 오류로 멤버 초대에 실패했어요.")
+                    // TODO 인 앱 알림 목록에 추가
+                }
+            })
+        }
+
+
+    }
+
+    fun sendInvitationPhone(phoneNumber:String, vehicleId: Int, onResult: () -> Unit){
+
+        val apiClient = (context.applicationContext as? FCMDependencyProvider)?.apiClient
+        if(apiClient != null){
+            val call = authenticatedApi.invitationRequest(MemberInvitationData(phoneNumber, vehicleId))
+            call.enqueue(object : Callback<Void> {
+                override fun onResponse(call: Call<Void>, response: Response<Void>) {
+
+                    if (response.isSuccessful) { // 초대요청 성공
+                        Log.d(TAG, "sendInvitation onResponse: 초대요청 성공")
+                        mobiNotificationManager.showPlainNotification("멤버 초대 성공", "멤버 초대요청에 성공했어요!\n초대받은 회원이 수락하면 멤버에 추가돼요.")
+
+                    } else {
+                        // 서버에서 결과는 받았으나 오류 발생
+                        Log.d(TAG, "sendInvitation: 초대 요청 실패 - 서버 메세지: ${response.code()} : ${response.message()}")
+                        // TODO 인 앱 알림목록에 추가
+                        // 모바일에 알림 표시
+                        mobiNotificationManager.showPlainNotification("멤버 초대 실패", "멤버 초대에 실패했어요.\n모비페이에 가입된 회원이 아니에요.")
+                    }
+                    onResult()
+
                 }
 
                 override fun onFailure(call: Call<Void>, t: Throwable) {

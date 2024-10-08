@@ -44,7 +44,8 @@ fun NavGraphBuilder.memberInvitationNavGraph(navController: NavHostController, c
             MemberInvitationViaPhoneScreen(
                 onNavigateBack = { navController.navigateUp() },
                 vehicleId = vehicleId,
-                onNavigateToConfirmation = { navController.navigate("member_confirmation/$vehicleId") }
+                context = context,
+                viewModel = memberInvitationViewModel
             )
         }
         composable("member_confirmation/{vehicleId}",
