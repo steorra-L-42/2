@@ -14,8 +14,9 @@ import kotlinx.coroutines.launch
 import com.kimnlee.vehiclemanagement.data.api.VehicleApiService
 import com.kimnlee.vehiclemanagement.data.model.CarMember
 import com.kimnlee.vehiclemanagement.data.model.VehicleItem
+import com.kimnlee.common.auth.AuthManager
 
-class HomeViewModel (apiClient: ApiClient) : ViewModel() {
+class HomeViewModel (apiClient: ApiClient, private val authManager: AuthManager) : ViewModel() {
     private val _naverMapService = MutableStateFlow<NaverMapService?>(apiClient.naverMapService)
     val naverMapService: StateFlow<NaverMapService?> = _naverMapService
 
@@ -30,6 +31,9 @@ class HomeViewModel (apiClient: ApiClient) : ViewModel() {
     private val _carMembers = MutableStateFlow<List<CarMember>>(emptyList())
     val carMembers: StateFlow<List<CarMember>> = _carMembers
 
+    private val _userName = MutableStateFlow("")
+    val userName: StateFlow<String> = _userName
+
     init {
         viewModelScope.launch {
             EventBus.events.collectLatest { event ->
@@ -39,6 +43,12 @@ class HomeViewModel (apiClient: ApiClient) : ViewModel() {
             }
         }
         getUserVehicles()
+        loadUserName()
+    }
+
+    private fun loadUserName() {
+        val userInfo = authManager.getUserInfo()
+        _userName.value = userInfo.name
     }
 
     private fun updateNotificationStatus(hasNew: Boolean) {

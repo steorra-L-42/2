@@ -70,6 +70,7 @@ fun HomeScreen(
     val vehicles by homeViewModel.vehicles.collectAsState()
     val carMembers by homeViewModel.carMembers.collectAsState()
     val currentVehicle = vehicles.firstOrNull()
+    val userName by homeViewModel.userName.collectAsState()
 
     LaunchedEffect(vehicles) {
         if (vehicles.isNotEmpty()) {
@@ -113,7 +114,7 @@ fun HomeScreen(
                         .padding(top = 3.dp)
                 )
                 Text(
-                    text = " 원영님, 반가워요!",
+                    text = " ${userName} 님, 반가워요!",
                     style = MaterialTheme.typography.headlineMedium,
                     color = MobiTextAlmostBlack,
                     fontSize = 24.sp,
