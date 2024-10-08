@@ -1,14 +1,15 @@
 package com.kimnlee.mobipay.presentation.screen
 
 import android.net.Uri
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -23,14 +24,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.PlatformTextStyle
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
@@ -86,12 +83,22 @@ fun ShowMoreScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(
-                    text = "더보기",
-                    style = MaterialTheme.typography.headlineMedium,
-                    color = MobiTextAlmostBlack,
-                    fontSize = 24.sp
-                ) },
+                title = {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "🗂",
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontFamily = FontFamily(Font(R.font.emoji)),
+                            modifier = Modifier
+                                .padding(top = 8.dp, end = 8.dp)
+                        )
+                        Text(
+                            text = "더보기",
+                            style = MaterialTheme.typography.headlineMedium,
+                            color = MobiTextAlmostBlack
+                        )
+                    }
+                },
                 actions = {
                     IconButton(onClick = { showSettingsMenu = true }) {
                         Icon(
@@ -109,7 +116,7 @@ fun ShowMoreScreen(
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MobiBgGray,
-                    titleContentColor = MobiTextDarkGray
+                    titleContentColor = MobiTextAlmostBlack
                 )
             )
         },
@@ -121,34 +128,38 @@ fun ShowMoreScreen(
                 .padding(innerPadding)
                 .padding(horizontal = 16.dp)
         ) {
-            item { Spacer(modifier = Modifier.height(16.dp)) }
+            item { Spacer(modifier = Modifier.height(24.dp)) }
 
             // 프로필 영역
             item {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White)
-                ) {
-                    Column(modifier = Modifier.padding(24.dp)) {
-                        ProfileSection(userName, userPicture, userEmail, formattedPhoneNumber)
-                    }
+                ProfileSection(userName, userPicture, userEmail, formattedPhoneNumber)
+            }
+
+            item { Spacer(modifier = Modifier.height(32.dp)) }
+
+            item {
+                Text(
+                    text = "모든 서비스",
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.Bold
+                    ),
+                    color = MobiTextDarkGray,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+            }
+
+            item {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    MenuItem("결제 내역", "💳") { navController.navigate("paymenthistory") }
+                    MenuItem("초대 대기", "📩") { navController.navigate("memberinvitation_invitationwaiting") }
+                    MenuItem("결제화면(임시)", "💰") { navController.navigate("payment_requestmanualpay?fcmData=${fcmDataJson}") }
                 }
             }
 
-            item { Spacer(modifier = Modifier.height(24.dp)) }
+            item { Spacer(modifier = Modifier.height(32.dp)) }
 
             item {
-                MenuSection(
-                    title = "모든 서비스",
-                    items = listOf(
-                        MenuItem("결제 내역", { navController.navigate("paymenthistory") }, emoji = "💳"),
-                        MenuItem("초대 대기", { navController.navigate("memberinvitation_invitationwaiting") }, emoji = "📩"),
-                        MenuItem("프리오더", { }, emoji = "🍴"),
-                        MenuItem("결제화면(임시)", { navController.navigate("payment_requestmanualpay?fcmData=${fcmDataJson}") }),
-                        MenuItem("로그아웃", { loginViewModel.logout() })
-                    )
-                )
+                LogoutButton { loginViewModel.logout() }
             }
         }
     }
@@ -157,32 +168,32 @@ fun ShowMoreScreen(
 @Composable
 fun ProfileSection(userName: String, userPicture: String, userEmail: String, userPhoneNumber: String) {
     Row(
-        verticalAlignment = Alignment.Top,
-        modifier = Modifier.fillMaxWidth()
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MobiBgWhite, shape = RoundedCornerShape(16.dp))
+            .padding(16.dp)
     ) {
         ProfileImage(userPicture)
-        Spacer(modifier = Modifier.width(20.dp))
+        Spacer(modifier = Modifier.width(16.dp))
         Column {
             Text(
                 text = userName,
-                style = MaterialTheme.typography.headlineMedium,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                color = MobiTextAlmostBlack,
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = userEmail,
-                style = MaterialTheme.typography.bodyMedium,
-                fontSize = 16.sp,
-                color = MobiTextDarkGray,
+                style = MaterialTheme.typography.titleLarge.copy(
+                    fontWeight = FontWeight.Bold
+                ),
+                color = MobiTextAlmostBlack
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
+                text = userEmail,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MobiTextDarkGray
+            )
+            Text(
                 text = userPhoneNumber,
                 style = MaterialTheme.typography.bodyMedium,
-                fontSize = 16.sp,
-                color = MobiTextDarkGray,
+                color = MobiTextDarkGray
             )
         }
     }
@@ -212,99 +223,63 @@ fun ProfileImage(userPicture: String?) {
 }
 
 @Composable
-fun MenuSection(title: String, items: List<MenuItem>) {
-    Text(
-        text = title,
-        fontWeight = FontWeight.Bold,
-        fontSize = 18.sp,
-        color = MobiTextDarkGray,
-        modifier = Modifier.padding(bottom = 16.dp, top = 8.dp)
-    )
-    items.forEachIndexed { index, item ->
-        MenuItemCard(item = item)
-        if (index < items.size - 1) {
-            Spacer(modifier = Modifier.height(12.dp))
+fun MenuItem(text: String, emoji: String, onClick: () -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(64.dp)
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        colors = CardDefaults.cardColors(containerColor = MobiBgWhite)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = emoji,
+                style = MaterialTheme.typography.titleLarge,
+                fontFamily = FontFamily(Font(R.font.emoji)),
+                modifier = Modifier
+                    .padding(end = 16.dp)
+                    .padding(top = 8.dp)
+            )
+            Text(
+                text = text,
+                style = MaterialTheme.typography.titleMedium,
+                color = MobiTextAlmostBlack
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            Icon(
+                imageVector = Icons.Default.ArrowForward,
+                contentDescription = "Navigate",
+                tint = MobiTextDarkGray
+            )
         }
     }
 }
 
 @Composable
-fun MenuItemCard(item: MenuItem) {
-    val isLogout = item.text == "로그아웃"
-    val cardColor = if (isLogout) Color.Transparent else Color.White
-    val textColor = if (isLogout) Color.Red else MobiTextAlmostBlack
-    val borderColor = if (isLogout) Color.LightGray else Color.Transparent
-
-    Card(
+fun LogoutButton(onClick: () -> Unit) {
+    Button(
+        onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
             .height(56.dp),
-        shape = RoundedCornerShape(8.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = if (isLogout) 0.dp else 2.dp),
-        onClick = item.onClick,
-        colors = CardDefaults.cardColors(containerColor = cardColor),
-        border = if (isLogout) BorderStroke(1.dp, borderColor) else null
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Color(0xFFFF3B30),
+            contentColor = Color.White
+        ),
+        shape = RoundedCornerShape(12.dp)
     ) {
-        if (isLogout) {
-            // 로그아웃 버튼 레이아웃
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = item.text,
-                    color = textColor,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Medium,
-                    textAlign = TextAlign.Center,
-                    style = TextStyle(
-                        platformStyle = PlatformTextStyle(
-                            includeFontPadding = false
-                        )
-                    )
-                )
-            }
-        } else {
-            // 다른 버튼들의 레이아웃
-            Row(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 16.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Start
-            ) {
-                if (item.emoji != null) {
-                    Text(
-                        text = item.emoji,
-                        fontFamily = FontFamily(Font(R.font.emoji)),
-                        fontSize = 22.sp,
-                        style = TextStyle(
-                            platformStyle = PlatformTextStyle(
-                                includeFontPadding = false
-                            )
-                        ),
-                        modifier = Modifier
-                            .width(40.dp)
-                            .padding(8.dp)
-                    )
-                } else {
-                    Spacer(modifier = Modifier.width(40.dp))
-                }
-                Text(
-                    text = item.text,
-                    color = textColor,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Medium,
-                    textAlign = TextAlign.Start,
-                    style = TextStyle(
-                        platformStyle = PlatformTextStyle(
-                            includeFontPadding = false
-                        )
-                    ),
-                    modifier = Modifier.weight(1f)
-                )
-            }
-        }
+        Text(
+            text = "로그아웃",
+            style = MaterialTheme.typography.titleMedium,
+            fontFamily = FontFamily(Font(R.font.pbold))
+        )
     }
 }
 
@@ -319,7 +294,7 @@ fun SettingsDropdownMenu(
         expanded = expanded,
         onDismissRequest = onDismissRequest,
         modifier = Modifier
-            .background(Color(0xFFF5F5F5))
+            .background(MobiBgWhite)
     ) {
         Row(
             modifier = Modifier
@@ -338,7 +313,8 @@ fun SettingsDropdownMenu(
             )
             CustomSwitch(
                 checked = isAutoSaveParking,
-                onCheckedChange = onAutoSaveParkingChange
+                onCheckedChange = onAutoSaveParkingChange,
+                modifier = Modifier.background(MobiBgWhite)
             )
         }
     }
@@ -358,7 +334,7 @@ fun CustomSwitch(
             checkedThumbColor = MobiBgWhite,
             checkedTrackColor = MobiBlue,
             uncheckedThumbColor = MobiUnselectedButtonGray,
-            uncheckedTrackColor = MobiBgGray
+            uncheckedTrackColor = MobiBgWhite
         )
     )
 }
@@ -375,9 +351,3 @@ fun formatPhoneNumber(phoneNumber: String): String {
         phoneNumber
     }
 }
-
-data class MenuItem(
-    val text: String,
-    val onClick: () -> Unit,
-    val emoji: String? = null
-)
