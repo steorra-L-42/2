@@ -52,7 +52,7 @@ public class PostPaymentsRequestService {
 
         return PaymentResponse.of(approvalWaiting, car, merchant, request);
     }
-    
+
     // 그룹 멤버에게 FCM 푸시
     private void sendFcmToCarGroupMembers(PaymentRequest request, ApprovalWaiting approvalWaiting, Merchant merchant,
                                           Car car) {
@@ -89,6 +89,7 @@ public class PostPaymentsRequestService {
             // 자동결제 등록 카드가 있다면 자동결제 요청 FCM 푸시
             RegisteredCard registeredCard = optionalRegisteredCard.get();
             sendFcmForAutoPay(request, approvalWaiting, merchant, owner, registeredCard);
+            return;
         }
         // 자동차 autoPay가 꺼져있으면 수동결제 요청 FCM 푸시
         sendFcmForManualPay(request, approvalWaiting, merchant, owner);

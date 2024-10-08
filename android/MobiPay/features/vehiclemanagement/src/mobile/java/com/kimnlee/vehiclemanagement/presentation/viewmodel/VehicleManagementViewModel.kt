@@ -146,7 +146,11 @@ class VehicleManagementViewModel(
                 val response = vehicleService.getVehicleMembers(carId)
                 if (response.isSuccessful) {
                     response.body()?.let { carMembersResponse ->
-                        _carMembers.value = carMembersResponse.items
+                        val vehicle = _vehicles.value.find { it.carId == carId }
+                        val sortedMembers = carMembersResponse.items.sortedWith(compareBy<CarMember> {
+                            it.mobiUserId != vehicle?.ownerId
+                        }.thenBy { it.name })
+                        _carMembers.value = sortedMembers
                     }
                 } else {
                     Log.e(TAG, "Failed to get car members: ${response.code()}")
