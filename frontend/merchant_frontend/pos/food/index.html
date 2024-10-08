@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>모비페이 가맹점 POS</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100..900&display=swap');
+  </style>
+  <script src="https://unpkg.com/idb@6.1.5/build/iife/index-min.js"></script>
+  <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+  <!-- TensorFlow.js 불러옴 -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
+  <!-- COCO-SSD 모델 불러옴 -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@latest"></script>
+  <script src="js/script.js"></script>
+  <!-- 디버깅 방지 도구 -->
+  <!-- <script disable-devtool-auto src="https://cdn.jsdelivr.net/npm/disable-devtool"></script> -->
+</head>
+<body class="bg-blue-gray-50" x-data="initApp()" x-init="initVideo(); initDatabase();">
+  <div class="hide-print flex flex-row h-screen antialiased text-blue-gray-800">
+    <div class="flex flex-row w-auto flex-shrink-0 pl-4 pr-2 py-4">
+      <div class="flex flex-col items-center py-4 flex-shrink-0 w-20 bg-blue-500 rounded-3xl">
+        <a href="#"
+           class="flex items-center justify-center h-14 w-14 bg-white text-blue-700 rounded-full">
+          <div class="m-2"><img src="img/mobipay_logo.png"></img></div>
+        </a>
+        <ul class="flex flex-col space-y-2 mt-12">
+          <li>
+            <a href="#"
+               class="flex items-center">
+              <span
+                class="flex items-center justify-center h-12 w-12 rounded-2xl"
+                :class="{
+                  'hover:bg-blue-400 text-blue-100': activeMenu !== 'pos',
+                  'bg-blue-300 shadow-lg text-white': activeMenu === 'pos',
+                }"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                </svg>
+              </span>
+            </a>
+          </li>
+          <li>
+            <a href="#"
+               class="flex items-center" @click="resumeDetection()">
+              <span class="flex items-center justify-center text-blue-100 hover:bg-blue-400 h-12 w-12 rounded-2xl">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                </svg>
+              </span>
+            </a>
+          </li>
+          <li>
+            <a href="#" class="flex items-center" @click="openCameraChooseModal()">
+              <span class="flex items-center justify-center text-blue-100 hover:bg-blue-400 h-12 w-12 rounded-2xl">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
+              </span>
+            </a>
+          </li>
+          <li>
+            <a href="#"
+              class="flex items-center"
+              @click="openLPnoModal()">
+              <span class="flex items-center justify-center text-blue-100 hover:bg-blue-400 h-12 w-12 rounded-2xl">
+                <svg class="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                  <path stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+              </span>
+            </a>
+          </li>
+        </ul>
+        <a
+          href="https://merchant.mobipay.kr/guide/guide.html"
+          target="_blank"
+          class="mt-auto flex items-center justify-center text-blue-200 hover:text-blue-100 h-10 w-10 focus:outline-none"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+          </svg>
+        </a>
+      </div>
+    </div>
+
+    <div class="flex-grow flex">
+      <div class="flex flex-col bg-blue-gray-50 h-full w-full py-4">
+        <div class="flex flex-row w-full">
+          <div class="w-60 ml-2">
+            <video id="video" autoplay muted></video>
+          </div>
+          <div class="flex w-full ml-4 mr-3 px-2 flex-row items-center rounded-3xl shadow text-lg h-22 py-4 px-6 transition-shadow focus:shadow-2xl focus:outline-none"
+               :class="{
+                'mobi-error': lpno === null,
+                'mobi-warn': lpno !== null && !isMobiUser,
+                'mobi-success': lpno !== null && isMobiUser,
+             }">
+            <div class="flex flex-row w-full items-center">
+              <div class="flex flex-row text-3xl items-center ml-2 w-80 font-bold">
+  <!--              <div>차량번호: </div>-->
+                <div id="lpno" class="items-center" x-text="lpno || '차량 감지 안 됨'"></div>
+              </div>
+              <div id="isMobiUser" class="mr-2 text-2xl items-center font-bold flex flex-row-reverse justify-items-end w-full">
+                <div class="flex" x-text="isMobiUser ? '모비페이 회원' : '모비페이 비회원'"
+                     :class="{
+                      'text-orange-700': !isMobiUser,
+                      'text-green-800': isMobiUser
+                   }"
+                     :visibility="{
+                      'hidden': (lpno === null),
+                      'visible': (lpno !== null)
+                   }"
+                ></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+        <div class="h-full overflow-hidden mt-4">
+          <div class="h-full overflow-y-auto px-2">
+            <div
+              class="select-none bg-blue-gray-100 rounded-3xl flex flex-wrap content-center justify-center h-full opacity-25"
+              x-show="products.length === 0"
+            >
+              <div class="w-full text-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
+                </svg>
+                <p class="text-xl">
+                  표시할 상품이 없습니다.
+                  <br/>
+                  상품을 추가한 후 모비페이 POS를 이용해주세요.
+                </p>
+              </div>
+            </div>
+            <div x-show="getProducts().length" class="grid grid-cols-4 gap-4 pb-3">
+              <template x-for="product in getProducts()" :key="product.id">
+                <div
+                        role="button"
+                        class="select-none cursor-pointer transition-shadow overflow-hidden rounded-2xl bg-white shadow hover:shadow-lg"
+                        :title="product.name"
+                        @click="addToCart(product)"
+                >
+                  <img :src="product.image" :alt="product.name">
+                  <div class="flex pb-3 px-3 text-sm -mt-3">
+                    <p class="flex-grow truncate mr-1" x-text="product.name"></p>
+                    <p class="nowrap font-semibold" x-text="priceFormat(product.price)"></p>
+                  </div>
+                </div>
+              </template>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="w-5/12 flex flex-col bg-blue-gray-50 h-full bg-white pr-4 pl-2 py-4">
+        <div class="bg-white rounded-3xl flex flex-col h-full shadow">
+          <div x-show="cart.length === 0" class="flex-1 w-full p-4 opacity-25 select-none flex flex-col flex-wrap content-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+            <p>
+              상품을 담아주세요.
+            </p>
+          </div>
+
+          <div x-show="cart.length > 0" class="flex-1 flex flex-col overflow-auto">
+            <div class="h-16 text-center flex justify-center">
+              <div class="pl-8 text-left text-lg py-4 relative">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+                <div x-show="getItemsCount() > 0" class="text-center absolute bg-blue-500 text-white w-5 h-5 text-xs p-0 leading-5 rounded-full -right-2 top-3" x-text="getItemsCount()"></div>
+              </div>
+              <div class="flex-grow px-8 text-right text-lg py-4 relative">
+                <button @click="clear()" class="text-blue-gray-300 hover:text-pink-500 focus:outline-none">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="flex-1 w-full px-4 overflow-auto">
+              <template x-for="item in cart" :key="item.productId">
+                <div class="select-none mb-3 bg-blue-gray-50 rounded-lg w-full text-blue-gray-700 py-2 px-2 flex justify-center">
+                  <img :src="item.image" alt="" class="rounded-lg h-10 w-10 bg-white shadow mr-2">
+                  <div class="flex-grow">
+                    <h5 class="text-sm" x-text="item.name"></h5>
+                    <p class="text-xs block" x-text="priceFormat(item.price)"></p>
+                  </div>
+                  <div class="py-1">
+                    <div class="w-28 grid grid-cols-3 gap-2 ml-2">
+                      <button @click="addQty(item, -1)" class="rounded-lg text-center py-1 text-white bg-blue-gray-600 hover:bg-blue-gray-700 focus:outline-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-3 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
+                        </svg>
+                      </button>
+                      <input x-model.number="item.qty" type="text" class="bg-white rounded-lg text-center shadow focus:outline-none focus:shadow-lg text-sm">
+                      <button @click="addQty(item, 1)" class="rounded-lg text-center py-1 text-white bg-blue-gray-600 hover:bg-blue-gray-700 focus:outline-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-3 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <div class="select-none h-auto w-full text-center pt-3 pb-4 px-4">
+            <div class="flex mb-3 text-lg font-semibold text-blue-gray-700">
+              <div class="w-10">합계</div>
+              <div class="text-right w-full" x-text="priceFormat(getTotalPrice())"></div>
+            </div>
+            <button
+                    class="text-white rounded-2xl text-lg w-full py-3 focus:outline-none"
+                    :class="{
+                      'bg-blue-500 hover:bg-blue-600': (submitable() && isMobiUser),
+                      'bg-blue-gray-200': !(submitable() && isMobiUser)
+                    }"
+                    :disabled="!(submitable() && isMobiUser)"
+                    @click="submit()"
+            >
+              모비페이 결제 요청
+            </button>
+            <div class="grid grid-cols-2 gap-2 mt-2">
+              <button
+                      class="text-white rounded-2xl text-lg w-full py-3 focus:outline-none"
+                      :class="{
+                        'mobi-others-blue-button hover:mobi-others-blue-button': submitable(),
+                        'bg-blue-gray-200': !submitable(),
+                        'text-white' : !submitable()
+                      }"
+                      :disabled="!submitable()"
+                      @click="submit()"
+              >
+                카드결제
+              </button>
+              <button
+                      class="rounded-2xl text-lg w-full py-3 focus:outline-none"
+                      :class="{
+                        'mobi-others-blue-button hover:mobi-others-blue-button': submitable(),
+                        'bg-blue-gray-200': !submitable(),
+                        'text-white' : !submitable()
+                      }"
+                      :disabled="!submitable()"
+                      @click="submit()"
+              >
+                현금결제
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 결제 처리 중 모달 -->
+    <div
+        x-show="isLoading"
+        class="fixed w-full h-screen left-0 top-0 z-20 flex flex-wrap justify-center content-center p-24"
+    >
+      <div class="fixed glass w-full h-screen left-0 top-0 z-10"></div>
+      <div class="w-96 rounded-3xl bg-white shadow-xl overflow-hidden z-20">
+        <div class="text-center p-6">
+          <img src="img/loading.gif" alt="Loading..." class="mb-2 w-28 h-28 inline-block">
+          <h2 class="text-3xl font-semibold">결제 처리 중...</h2>
+        </div>
+        <div class="p-4">
+          <button
+            class="bg-red-500 text-white text-lg px-4 py-3 rounded-2xl w-full focus:outline-none"
+            @click="cancelLoading(); resumeDetection()"
+          >
+            취소하기
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 결제 성공 모달 -->
+    <div
+        x-show="isShowModalSuccess"
+        class="fixed w-full h-screen left-0 top-0 z-20 flex flex-wrap justify-center content-center p-24"
+    >
+      <div class="fixed glass w-full h-screen left-0 top-0 z-10" @click="closeModalSuccess()"></div>
+      <div class="w-96 rounded-3xl bg-white shadow-xl overflow-hidden z-20">
+        <div class="text-center p-6">
+          <img src="img/success.png" alt="Success" class="mb-8 w-28 h-28 inline-block">
+          <h2 class="text-3xl mb-2 font-semibold">결제 성공</h2>
+          <p>결제가 성공적으로 처리되었습니다.</p>
+        </div>
+        <div class="p-4">
+          <!-- Changed Button Text to "닫기" -->
+          <button
+            class="bg-blue-500 text-white text-lg px-4 py-3 rounded-2xl w-full focus:outline-none"
+            @click="closeModalSuccess(); resumeDetection()"
+          >
+            닫기
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 카메라 선택 모달 -->
+    <div x-show="isShowCameraChooseModal" class="fixed z-50 inset-0 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+      <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+          <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+            <div class="sm:flex sm:items-start">
+              <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">카메라 선택</h3>
+                <div class="mt-2">
+                  <ul>
+                    <template x-for="(device, index) in cameraDevices" :key="index">
+                      <li @click="selectCamera(device.deviceId)" class="cursor-pointer hover:bg-gray-200 px-4 py-2">
+                        <span x-text="device.label || 'Camera ' + (index + 1)"></span>
+                      </li>
+                    </template>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+            <button @click="closeCameraChooseModal()" type="button" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 차량번호 수기입력 모달 -->
+    <div x-show="isManualLPnoModalOpen" class="fixed z-10 inset-0 overflow-y-auto">
+      <div class="flex items-center justify-center min-h-screen px-4 text-center">
+        <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+          <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+        </div>
+
+        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:align-middle sm:max-w-lg sm:w-full">
+          <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+            <div class="sm:flex sm:items-start">
+              <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 sm:mx-0 sm:h-10 sm:w-10">
+                <svg class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+              </div>
+              <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">
+                  차량번호 수기입력
+                </h3>
+                <div class="mt-2">
+                  <input type="text" class="mt-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                        placeholder="차량번호" x-model="manualLpno">
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+            <button @click="submitManualLpno()" type="button" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm">
+              입력
+            </button>
+            <button @click="closeLPnoModal()" type="button" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:w-auto sm:text-sm">
+              취소
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <div
+      x-show="isShowModalReceipt"
+      class="fixed w-full h-screen left-0 top-0 z-10 flex flex-wrap justify-center content-center p-24"
+    >
+      <div
+        x-show="isShowModalReceipt"
+        class="fixed glass w-full h-screen left-0 top-0 z-0" @click="closeModalReceipt()"
+        x-transition:enter="transition ease-out duration-100"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-100"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+      ></div>
+      <div
+        x-show="isShowModalReceipt"
+        class="w-96 rounded-3xl bg-white shadow-xl overflow-hidden z-10"
+        x-transition:enter="transition ease-out duration-100"
+        x-transition:enter-start="opacity-0 transform scale-90"
+        x-transition:enter-end="opacity-100 transform scale-100"
+        x-transition:leave="transition ease-in duration-100"
+        x-transition:leave-start="opacity-100 transform scale-100"
+        x-transition:leave-end="opacity-0 transform scale-90"
+      >
+        <div id="receipt-content" class="text-left w-full text-sm p-6 overflow-auto">
+          <div class="text-center">
+            <img src="img/mobipay_logo.png" alt="모비페이 가맹점 POS" class="mb-2 w-12 h-12 inline-block">
+            <h2 class="text-xl font-semibold">모비페이 가맹점 POS</h2>
+            <p>싸피벅스 상파울루점</p>
+          </div>
+          <div class="flex mt-4 text-xs">
+            <div class="flex-grow">No: <span x-text="receiptNo"></span></div>
+            <div x-text="receiptDate"></div>
+          </div>
+          <hr class="my-2">
+          <div>
+            <table class="w-full text-xs">
+              <thead>
+                <tr>
+                  <th class="py-1 w-1/12 text-center">#</th>
+                  <th class="py-1 text-left">제품</th>
+                  <th class="py-1 w-2/12 text-center">수량</th>
+                  <th class="py-1 w-3/12 text-right">금액</th>
+                </tr>
+              </thead>
+              <tbody>
+                <template x-for="(item, index) in cart" :key="item.productId">
+                  <tr>
+                    <td class="px-4 py-2 text-center" x-text="index + 1"></td>
+                    <td class="px-4 py-2 text-left">
+                      <span x-text="item.name"></span><br/>
+                      <small x-text="priceFormat(item.price)"></small>
+                    </td>
+                    <td class="px-4 py-2 text-center" x-text="item.qty"></td>
+                    <td class="px-4 py-2 text-right" x-text="priceFormat(item.qty * item.price)"></td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+          </div>
+          <hr class="my-2">
+          <div>
+            <div class="flex font-semibold">
+              <div class="flex-grow">합계</div>
+              <div x-text="priceFormat(getTotalPrice())"></div>
+            </div>
+          </div>
+        </div>
+        <div class="p-4 w-full">
+          <button class="bg-blue-500 text-white text-lg px-4 py-3 rounded-2xl w-full focus:outline-none" @click="requestPayMobi()">결제요청</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

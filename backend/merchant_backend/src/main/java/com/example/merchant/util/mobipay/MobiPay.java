@@ -1,7 +1,7 @@
 package com.example.merchant.util.mobipay;
 
 import com.example.merchant.domain.cancel.dto.CancelTransactionResponse;
-import com.example.merchant.domain.cancel.dto.MerchantTranscactionResponse;
+import com.example.merchant.domain.cancel.dto.MerchantTransactionResponse;
 import com.example.merchant.global.enums.MerchantType;
 import com.example.merchant.util.mobipay.dto.MobiPaymentRequest;
 import com.example.merchant.util.mobipay.dto.MobiPaymentResponse;
@@ -17,7 +17,7 @@ public interface MobiPay {
     // 2. 결제 내역 조회
     // GET /api/v1/merchants/{merchant_id}/transactions
     // MerchantTransactionResponse
-    public ResponseEntity<MerchantTranscactionResponse> getTransactionList(MerchantType type, Class<MerchantTranscactionResponse> responseClass);
+    public ResponseEntity<MerchantTransactionResponse> getTransactionList(MerchantType type, Class<MerchantTransactionResponse> responseClass);
 
     // 3. 결제 취소 요청
     // PATCH /api/v1/merchants/{merchant_id}/cancelled-transactions/{transactionUniqueNo}

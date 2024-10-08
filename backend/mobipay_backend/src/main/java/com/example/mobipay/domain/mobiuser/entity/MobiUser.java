@@ -56,6 +56,9 @@ public class MobiUser extends AuditableCreatedEntity {
     @Column(name = "picture", nullable = false)
     private String picture;
 
+    @Column(name = "my_data_consent", nullable = false)
+    private Boolean myDataConsent = false;
+
     @Enumerated(value = EnumType.STRING)
     @Column(name = "role", nullable = false)
     private Role role = USER;
@@ -102,6 +105,9 @@ public class MobiUser extends AuditableCreatedEntity {
         this.picture = picture;
     }
 
+    public static MobiUser of(String email, String name, String phoneNumber, String picture) {
+        return new MobiUser(email, name, phoneNumber, picture);
+    }
 
     public void updatePicture(String picture) {
         this.picture = picture;
@@ -123,8 +129,8 @@ public class MobiUser extends AuditableCreatedEntity {
         this.fcmToken = null;
     }
 
-    public static MobiUser of(String email, String name, String phoneNumber, String picture) {
-        return new MobiUser(email, name, phoneNumber, picture);
+    public void approveMyDataConsent() {
+        this.myDataConsent = true;
     }
 
     public void setSsafyUser(SsafyUser ssafyUser) {

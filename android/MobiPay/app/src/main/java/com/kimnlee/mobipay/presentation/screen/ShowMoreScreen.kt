@@ -3,6 +3,7 @@ package com.kimnlee.mobipay.presentation.screen
 import android.net.Uri
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
@@ -13,7 +14,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -37,11 +40,13 @@ import com.kimnlee.auth.presentation.viewmodel.LoginViewModel
 import com.kimnlee.common.FCMData
 import com.kimnlee.common.R
 import com.kimnlee.common.ui.theme.MobiBgGray
+import com.kimnlee.common.ui.theme.MobiBgWhite
+import com.kimnlee.common.ui.theme.MobiBlue
 import com.kimnlee.common.ui.theme.MobiTextAlmostBlack
 import com.kimnlee.common.ui.theme.MobiTextDarkGray
+import com.kimnlee.common.ui.theme.MobiUnselectedButtonGray
 import com.kimnlee.mobipay.presentation.viewmodel.ShowMoreViewModel
 
-val ButtonColor = Color(0xFFF2F3F5)
 val SettingsIconColor = Color(0xFFB1B8C0)
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -60,6 +65,9 @@ fun ShowMoreScreen(
     val formattedPhoneNumber = remember(userPhoneNumber) {
         formatPhoneNumber(userPhoneNumber)
     }
+
+    var showSettingsMenu by remember { mutableStateOf(false) }
+    var isAutoSaveParking by remember { mutableStateOf(false) }
 
     val fcmDataTemporary = FCMData(
         paymentBalance="2100",
@@ -85,13 +93,19 @@ fun ShowMoreScreen(
                     fontSize = 24.sp
                 ) },
                 actions = {
-                    IconButton(onClick = { }) {
+                    IconButton(onClick = { showSettingsMenu = true }) {
                         Icon(
                             imageVector = Icons.Default.Settings,
                             contentDescription = "Settings",
                             tint = SettingsIconColor
                         )
                     }
+                    SettingsDropdownMenu(
+                        expanded = showSettingsMenu,
+                        onDismissRequest = { showSettingsMenu = false },
+                        isAutoSaveParking = isAutoSaveParking,
+                        onAutoSaveParkingChange = { isAutoSaveParking = it }
+                    )
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MobiBgGray,
@@ -292,6 +306,61 @@ fun MenuItemCard(item: MenuItem) {
             }
         }
     }
+}
+
+@Composable
+fun SettingsDropdownMenu(
+    expanded: Boolean,
+    onDismissRequest: () -> Unit,
+    isAutoSaveParking: Boolean,
+    onAutoSaveParkingChange: (Boolean) -> Unit
+) {
+    DropdownMenu(
+        expanded = expanded,
+        onDismissRequest = onDismissRequest,
+        modifier = Modifier
+            .background(Color(0xFFF5F5F5))
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = "주차 위치 자동 저장",
+                style = MaterialTheme.typography.titleMedium,
+                color = MobiTextAlmostBlack,
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(8.dp)
+            )
+            CustomSwitch(
+                checked = isAutoSaveParking,
+                onCheckedChange = onAutoSaveParkingChange
+            )
+        }
+    }
+}
+
+@Composable
+fun CustomSwitch(
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Switch(
+        checked = checked,
+        onCheckedChange = onCheckedChange,
+        modifier = modifier,
+        colors = SwitchDefaults.colors(
+            checkedThumbColor = MobiBgWhite,
+            checkedTrackColor = MobiBlue,
+            uncheckedThumbColor = MobiUnselectedButtonGray,
+            uncheckedTrackColor = MobiBgGray
+        )
+    )
 }
 
 fun formatPhoneNumber(phoneNumber: String): String {
