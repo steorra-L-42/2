@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -71,12 +70,14 @@ fun VehicleManagementDetailScreen(
         Log.d(TAG, "VehicleManagementDetailScreen: 차량 모델 NULL! return 하겠음!!!!")
         return
     }
+
     val imageResId = CarModelImageProvider.getImageResId(vehicle?.carModel!!)
 
     val userPhoneNumber by viewModel.userPhoneNumber.collectAsState()
 
     LaunchedEffect(vehicleId) {
         viewModel.requestCarMembers(vehicleId)
+        viewModel.initializeAutoPaymentStatus(vehicleId)
     }
 
     Box(
@@ -143,8 +144,8 @@ fun VehicleManagementDetailScreen(
             ) {
                 Switch(
                     checked = autoPaymentStatus,
-                    onCheckedChange = {
-                        viewModel.toggleAutoPayment(vehicleId, it)
+                    onCheckedChange = { newStatus ->
+                        viewModel.toggleAutoPayment(vehicleId, newStatus)
                     },
                     colors = SwitchDefaults.colors(
                         checkedThumbColor = MobiBlue,
@@ -164,7 +165,7 @@ fun VehicleManagementDetailScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(16.dp)
-                            .height(250.dp)  // 카드 높이를 늘림
+                            .height(250.dp)
                     ) {
                         Image(
                             painter = painterResource(id = findCardCompany(card.cardNo)),
