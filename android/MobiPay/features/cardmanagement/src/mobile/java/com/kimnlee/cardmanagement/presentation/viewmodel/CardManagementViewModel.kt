@@ -62,6 +62,12 @@ class CardManagementViewModel(
     private val _autoPaymentMessage = MutableStateFlow<String?>(null)
     val autoPaymentMessage: StateFlow<String?> = _autoPaymentMessage.asStateFlow()
 
+    private val _myDataAgreementState = MutableStateFlow<MyDataAgreementState>(MyDataAgreementState.Initial)
+    val myDataAgreementState: StateFlow<MyDataAgreementState> = _myDataAgreementState.asStateFlow()
+
+    private val _myDataConsentStatus = MutableStateFlow<MyDataConsentStatus>(MyDataConsentStatus.Unknown)
+    val myDataConsentStatus: StateFlow<MyDataConsentStatus> = _myDataConsentStatus.asStateFlow()
+
     private var messageJob: Job? = null
 
     private var isFirstCardRegistration = true
@@ -240,6 +246,56 @@ class CardManagementViewModel(
     fun closeDialog() {
         _showDialog.value = false
     }
+
+    // 마이 데이터 동의하기
+    fun setMyDataAgreement() {
+        viewModelScope.launch {
+            try {
+                val response = cardManagementService.submitMyDataAgreement()
+                if (response.isSuccessful) {
+                    val myDataConsentResponse = response.body()
+                    if (myDataConsentResponse != null) {
+                        _myDataAgreementState.value = MyDataAgreementState.Success(myDataConsentResponse.myDataConsent)
+                    } else {
+                        _myDataAgreementState.value = MyDataAgreementState.Error("Response body is null")
+                    }
+                } else {
+                    _myDataAgreementState.value = MyDataAgreementState.Error("Failed to submit agreement: ${response.code()}")
+                }
+            } catch (e: Exception) {
+                _myDataAgreementState.value = MyDataAgreementState.Error("Exception occurred: ${e.message}")
+            }
+        }
+    }
+
+    // 마이 데이터 동의 여부 확인
+    fun checkMyDataConsentStatus(callback: (MyDataConsentStatus) -> Unit) {
+        viewModelScope.launch {
+            try {
+                val response = cardManagementService.getMyDataConsentStatus()
+                if (response.isSuccessful) {
+                    val myDataConsentResponse = response.body()
+                    if (myDataConsentResponse != null) {
+                        val status = MyDataConsentStatus.Fetched(myDataConsentResponse.myDataConsent)
+                        _myDataConsentStatus.value = status
+                        callback(status)
+                    } else {
+                        val status = MyDataConsentStatus.Error("Response body is null")
+                        _myDataConsentStatus.value = status
+                        callback(status)
+                    }
+                } else {
+                    val status = MyDataConsentStatus.Error("Failed to fetch consent status: ${response.code()}")
+                    _myDataConsentStatus.value = status
+                    callback(status)
+                }
+            } catch (e: Exception) {
+                val status = MyDataConsentStatus.Error("Exception occurred: ${e.message}")
+                _myDataConsentStatus.value = status
+                callback(status)
+            }
+        }
+    }
 }
 
 sealed class OwnedCardUiState {
@@ -252,4 +308,16 @@ sealed class RegisteredCardState {
     object Loading : RegisteredCardState()
     data class Success(val cards: List<RegisteredCard>) : RegisteredCardState()
     data class Error(val message: String) : RegisteredCardState()
+}
+
+sealed class MyDataAgreementState {
+    object Initial : MyDataAgreementState()
+    data class Success(val isAgreed: Boolean) : MyDataAgreementState()
+    data class Error(val message: String) : MyDataAgreementState()
+}
+
+sealed class MyDataConsentStatus {
+    object Unknown : MyDataConsentStatus()
+    data class Fetched(val isConsented: Boolean) : MyDataConsentStatus()
+    data class Error(val message: String) : MyDataConsentStatus()
 }

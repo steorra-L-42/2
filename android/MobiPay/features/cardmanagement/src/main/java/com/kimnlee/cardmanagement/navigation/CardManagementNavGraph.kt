@@ -16,6 +16,7 @@ import com.kimnlee.cardmanagement.presentation.screen.CardDetailScreen
 import com.kimnlee.cardmanagement.presentation.screen.CardManagementOwnedCardListScreen
 import com.kimnlee.cardmanagement.presentation.screen.CardManagementScreen
 import com.kimnlee.cardmanagement.presentation.screen.CardRegistrationScreen
+import com.kimnlee.cardmanagement.presentation.screen.MyDataAgreementScreen
 import com.kimnlee.cardmanagement.presentation.viewmodel.CardManagementViewModel
 import com.kimnlee.common.auth.AuthManager
 import com.kimnlee.common.components.BottomNavigation
@@ -34,11 +35,22 @@ fun NavGraphBuilder.cardManagementNavGraph(
                 CardManagementScreen(
                     viewModel = viewModel,
                     onNavigateToOwnedCards = { navController.navigate("cardmanagement_owned") },
+                    onNavigateToMyDataAgreement = { navController.navigate("cardmanagement_mydata_agreement") },
                     onNavigateToCardDetail = { cardId ->
                         navController.navigate("cardmanagement_detail/$cardId")
                     }
                 )
             }
+        }
+        composable("cardmanagement_mydata_agreement",
+            enterTransition = { EnterTransition.None },
+            exitTransition = { ExitTransition.None }
+        ) {
+            MyDataAgreementScreen(
+                viewModel = viewModel,
+                onNavigateToOwnedCards = { navController.navigate("cardmanagement_owned") },
+                onNavigateBack = { navController.navigateUp() }
+            )
         }
         composable("cardmanagement_owned",
             enterTransition = { EnterTransition.None },
@@ -47,7 +59,7 @@ fun NavGraphBuilder.cardManagementNavGraph(
             BottomNavigation(navController) {
                 CardManagementOwnedCardListScreen(
                     viewModel = viewModel,
-                    onNavigateBack = { navController.navigateUp() },
+                    onNavigateBack = { navController.navigate("cardmanagement_main") },
                     onNavigateToRegistration = { selectedCards ->
                         val cardInfos = selectedCards.map { CardInfo(it.id, it.cardNo) }
                         val json = Uri.encode(Gson().toJson(cardInfos))

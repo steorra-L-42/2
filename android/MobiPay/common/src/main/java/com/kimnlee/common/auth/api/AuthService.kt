@@ -9,7 +9,6 @@ import com.kimnlee.common.auth.model.SendTokenRequest
 import com.kimnlee.common.auth.model.SendTokenResponse
 import retrofit2.Response
 import retrofit2.http.Body
-import retrofit2.http.Header
 import retrofit2.http.POST
 
 interface AuthService {
@@ -23,5 +22,5 @@ interface AuthService {
     suspend fun sendTokens(@Body sendTokenRequest: SendTokenRequest): Response<SendTokenResponse>
 
     @POST("api/v1/users/logout")
-    suspend fun logout(): Response<Void> // 아직 미완성
+    suspend fun logout(): Response<Void>
 }
