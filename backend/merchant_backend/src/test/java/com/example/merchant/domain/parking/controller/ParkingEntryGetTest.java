@@ -9,6 +9,7 @@ import com.example.merchant.MerchantApplication;
 import com.example.merchant.domain.parking.dto.ParkingEntryTimeResponse;
 import com.example.merchant.domain.parking.entity.Parking;
 import com.example.merchant.domain.parking.repository.ParkingRepository;
+import com.example.merchant.domain.parking.util.ParkingUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.AfterEach;
@@ -142,8 +143,9 @@ public class ParkingEntryGetTest {
                 .build();
         parking = parkingRepository.save(parking);
 
-        String carNumber = "123가4567";
+        final String carNumber = "123가4567";
         final String url = "/api/v1/merchants/parking/cars/" + carNumber + "/entry";
+        final int expectedPaymentBalance = ParkingUtil.getPaymentBalance(parking.getEntry(), LocalDateTime.now());
 
         // when
         ResultActions result = mockMvc.perform(get(url));
@@ -154,14 +156,21 @@ public class ParkingEntryGetTest {
                 .andExpect(mvcResult -> {
                     String content = mvcResult.getResponse().getContentAsString();
                     ParkingEntryTimeResponse actual = objectMapper.readValue(content, ParkingEntryTimeResponse.class);
+                    assertThat(actual.getParkingLotName()).isEqualTo("진평주차장");
                     assertThat(actual.getParkingId()).isEqualTo(finalParking.getId());
                     assertThat(actual.getCarNumber()).isEqualTo(finalParking.getNumber());
                     assertThat(isWithinOneMinute(actual.getEntry(), finalParking.getEntry())).isTrue();
+                    assertThat(isWithinOneHundredWon(actual.getPaymentBalance(), expectedPaymentBalance)).isTrue();
                 });
     }
 
     // 1분 이내로 두 시간이 차이나는 경우 true를 반환
-    private boolean isWithinOneMinute(LocalDateTime before, LocalDateTime after) {
-        return after.minusMinutes(1).isBefore(before) && after.plusMinutes(1).isAfter(before);
+    private boolean isWithinOneMinute(LocalDateTime actual, LocalDateTime expected) {
+        return expected.minusMinutes(1).isBefore(actual) && expected.plusMinutes(1).isAfter(actual);
+    }
+
+    // 100원 이내로 요금이 차이나는 경우 true를 반환
+    private boolean isWithinOneHundredWon(int actual, int expected) {
+        return expected - 100 <= actual && actual <= expected + 100;
     }
 }
