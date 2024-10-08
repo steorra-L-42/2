@@ -1,11 +1,13 @@
 package com.kimnlee.payment.data.repository
 
 import android.app.PendingIntent
+import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.location.Location
 import android.net.Uri
 import android.util.Log
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavDeepLinkBuilder
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -18,8 +20,14 @@ import com.kimnlee.common.utils.MobiNotificationManager
 import com.kimnlee.common.utils.moneyFormat
 import com.kimnlee.payment.data.api.PaymentApiService
 import com.kimnlee.payment.data.model.PaymentApprovalData
+import com.kimnlee.payment.data.model.RegisteredCard
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -31,14 +39,50 @@ class PaymentRepository(
     private val mobiNotificationManager: MobiNotificationManager,
     private val context: Context
 ) : PaymentOperations {
-
-    private val _fcmDataToNavigate = MutableStateFlow<FCMData?>(null)
-    val fcmDataToNavigate: StateFlow<FCMData?> get() = _fcmDataToNavigate
-
+    private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
     private var currentLocation: LatLng? = null
     private val fusedLocationClient: FusedLocationProviderClient =
         LocationServices.getFusedLocationProviderClient(context)
+
+
+    // 등록 카드 리스트 상태
+    private val _registeredCardState =
+        MutableStateFlow<RegisteredCardState>(RegisteredCardState.Loading)
+
+    private val _registeredCards = MutableStateFlow<List<RegisteredCard>>(emptyList())
+
+
+    sealed class RegisteredCardState {
+        object Loading : RegisteredCardState()
+        data class Success(val cards: List<RegisteredCard>) : RegisteredCardState()
+        data class Error(val message: String) : RegisteredCardState()
+    }
+
+
+    // 등록된 카드 불러오기
+    fun getRegisteredCards() {
+        coroutineScope.launch {
+            _registeredCardState.value = RegisteredCardState.Loading
+            try {
+                val response = authenticatedApi.getRegistrationCards()
+                if (response.isSuccessful) {
+                    val cardList = response.body()?.items ?: emptyList()
+                    _registeredCards.value = cardList
+                    _registeredCardState.value = RegisteredCardState.Success(cardList)
+                    Log.d(ContentValues.TAG, "등록된 카드 목록 받아오기 성공: ${cardList.size} 개의 카드")
+                    Log.d(ContentValues.TAG, "등록된 카드 목록: ${response.body()}")
+                } else {
+                    _registeredCardState.value =
+                        RegisteredCardState.Error("Failed to fetch cards: ${response.code()}")
+                }
+            } catch (e: Exception) {
+                _registeredCardState.value =
+                    RegisteredCardState.Error("Failed to fetch cards: ${e.message}")
+            }
+        }
+    }
+
 
     fun getCurrentLocation(onLocationReceived: (LatLng?) -> Unit) {
         try {
@@ -137,23 +181,30 @@ class PaymentRepository(
             override fun onResponse(call: Call<Void>, response: Response<Void>) {
 
                 if (response.isSuccessful) { // 결제 성공
-//                if (response.isSuccessful || 1 == 1) { // 임시 코드
-//                    Log.e(TAG, "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
-//                    Log.e(TAG, "@@@        임시 코드 사용중        @@")
-//                    Log.e(TAG, "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
 
                     Log.d(TAG, "processPay: 결제 성공")
-                    // 모바일에 알림 표시
 
+                    val alreadyPaidFCMData = FCMData(
+                        fcmData.autoPay,
+                        fcmData.cardNo,
+                        fcmData.approvalWaitingId,
+                        fcmData.merchantId,
+                        fcmData.paymentBalance,
+                        fcmData.merchantName,
+                        fcmData.info,
+                        fcmData.lat,
+                        fcmData.lng,
+                        "payment_successful")
 
-                    val deepLinkUri = "mobipay://paymentsucceed"
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(deepLinkUri)).apply {
-                        flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                        putExtra("fcmData", Gson().toJson(fcmData))
+                    val fcmDataJson = Uri.encode(Gson().toJson(alreadyPaidFCMData))
+                    val deepLinkUri = Uri.parse("mobipay://payment_successful?fcmData=$fcmDataJson")
+
+                    val intent = Intent(Intent.ACTION_VIEW, deepLinkUri).apply {
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                     }
 
                     val pendingIntent = PendingIntent.getActivity(
-                        context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                        context, Random.nextInt(), intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
                     )
 
                     val amountKRW = moneyFormat(fcmData.paymentBalance!!.toBigInteger())
@@ -176,8 +227,13 @@ class PaymentRepository(
                         // HUN
                         mobiNotificationManager.broadcastForPlainHUN(notiTitle, "${fcmData.merchantName}  ${amountKRW}원")
                     }
+
                     // 휴대폰은 무조건
                     mobiNotificationManager.showNotification(notiTitle, notiMsg, pendingIntent)
+
+                    if(!isAutoPay){
+                        context.startActivity(intent)
+                    }
 
                 } else {
                     // 서버에서 결과는 받았으나 오류 발생
@@ -224,8 +280,6 @@ class PaymentRepository(
         }else{
             // 폰
             // TODO 휴대폰으로 결제 요청하는 로직 작성 필요
-//            _fcmDataToNavigate.value = fcmData
-            // mobiNotificationManager.showNotification() ??????
             val fcmDataJson = Uri.encode(Gson().toJson(fcmData))
             val deepLinkUri = Uri.parse("mobipay://payment_requestmanualpay?fcmData=$fcmDataJson")
 

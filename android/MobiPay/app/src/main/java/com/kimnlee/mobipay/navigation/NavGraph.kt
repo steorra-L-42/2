@@ -13,9 +13,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.kimnlee.auth.navigation.authNavGraph
-import com.kimnlee.payment.presentation.viewmodel.BiometricViewModel
 import com.kimnlee.auth.presentation.viewmodel.LoginViewModel
-import com.kimnlee.cardmanagement.data.model.RegisteredCard
 import com.kimnlee.cardmanagement.navigation.cardManagementNavGraph
 import com.kimnlee.cardmanagement.presentation.viewmodel.CardManagementViewModel
 import com.kimnlee.common.auth.AuthManager
@@ -30,7 +28,7 @@ import com.kimnlee.mobipay.presentation.viewmodel.ShowMoreViewModel
 import com.kimnlee.notification.navigation.notificationNavGraph
 import com.kimnlee.payment.data.repository.PaymentRepository
 import com.kimnlee.payment.navigation.paymentNavGraph
-import com.kimnlee.payment.presentation.screen.ManualPaymentScreen
+import com.kimnlee.payment.presentation.viewmodel.BiometricViewModel
 import com.kimnlee.vehiclemanagement.navigation.vehicleManagementNavGraph
 import com.kimnlee.vehiclemanagement.presentation.viewmodel.VehicleManagementViewModel
 
@@ -72,7 +70,6 @@ fun AppNavGraph(
         navController = navController,
         startDestination = if (isLoggedIn) "home" else "auth"
     ) {
-
         composable(
             "home",
             enterTransition = { EnterTransition.None },

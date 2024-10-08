@@ -2,7 +2,6 @@ package com.kimnlee.mobipay.presentation.screen
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.location.Geocoder
 import android.view.Gravity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -43,7 +42,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -52,11 +50,11 @@ import com.kimnlee.auth.presentation.viewmodel.LoginViewModel
 import com.kimnlee.common.BuildConfig
 import com.kimnlee.common.R
 import com.kimnlee.common.auth.repository.NaverMapRepository
-import com.kimnlee.common.network.ApiClient
 import com.kimnlee.common.network.NaverMapService
 import com.kimnlee.common.ui.theme.MobiCardBgGray
 import com.kimnlee.common.ui.theme.MobiPayTheme
 import com.kimnlee.common.ui.theme.MobiTextAlmostBlack
+import com.kimnlee.common.ui.theme.pMedium
 import com.kimnlee.mobipay.presentation.viewmodel.HomeViewModel
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.CameraUpdate
@@ -64,12 +62,9 @@ import com.naver.maps.map.MapView
 import com.naver.maps.map.overlay.Marker
 import com.naver.maps.map.overlay.OverlayImage
 import kotlinx.coroutines.runBlocking
-import pMediumFontFamily
-import retrofit2.Retrofit
-import java.util.Locale
 
-private val YOUR_CLIENT_SECRET = BuildConfig.NAVER_MAP_CLIENT_SECRET
-
+private val NAVER_MAP_CLIENT_SECRET = BuildConfig.NAVER_MAP_CLIENT_SECRET
+private const val TAG = "HomeScreen"
 @Composable
 fun HomeScreen(
     loginViewModel: LoginViewModel,
@@ -154,7 +149,6 @@ fun HomeScreen(
                 ) {
                     Spacer(modifier = Modifier.height(20.dp))
                     Image(
-//                        painter = painterResource(id = com.kimnlee.vehiclemanagement.R.drawable.genesis_g90),
                         painter = painterResource(id = com.kimnlee.mobipay.R.drawable.gv80),
                         contentDescription = "차량 이미지",
                         modifier = Modifier
@@ -295,7 +289,7 @@ fun NaverMapView(lastLocation: Pair<Double, Double>?, naverMapService: NaverMapS
     val lastLocationLatLng = lastLocation?.let { LatLng(it.first, it.second) } ?: LatLng(
         37.526665, 126.927127) // 37.526665, 126.927127
     runBlocking {
-        val repository = NaverMapRepository("81dn8nvzim", YOUR_CLIENT_SECRET, naverMapService)
+        val repository = NaverMapRepository("81dn8nvzim", NAVER_MAP_CLIENT_SECRET, naverMapService)
         address = repository.getAddressFromCoords(lastLocationLatLng)
     }
 
@@ -336,7 +330,7 @@ fun NaverMapView(lastLocation: Pair<Double, Double>?, naverMapService: NaverMapS
             fontSize = 16.sp,
             letterSpacing = 0.1.sp,
             lineHeight = 13.sp,
-            fontFamily = pMediumFontFamily,
+            fontFamily = pMedium,
             textAlign = TextAlign.Center,
             modifier = Modifier
                 .fillMaxWidth()
