@@ -2,7 +2,6 @@ package com.kimnlee.payment.data.api
 
 import com.kimnlee.payment.data.model.PaymentApprovalData
 import com.kimnlee.payment.data.model.PaymentHistoryResponse
-import com.kimnlee.payment.data.model.ReceiptRequest
 import com.kimnlee.payment.data.model.ReceiptResponse
 import retrofit2.Call
 import retrofit2.Response
@@ -21,12 +20,12 @@ interface PaymentApiService {
     @POST("/api/v1/postpayments/approval")
     fun approvePaymentRequest(@Body paymentApprovalData: PaymentApprovalData): Call<Void>
 
+    // 결제 내역 조회
     @GET("api/v1/postpayments/history")
     suspend fun getPaymentHistory(): Response<PaymentHistoryResponse>
 
+    // 전자 영수증 출력
     @GET("api/v1/postpayments/receipt/{transaction_unique_no}")
     suspend fun printReceipt(
-        @Path("transaction_unique_no") transactionUniqueNo: Int,
-        @Body receiptRequest: ReceiptRequest
-    ): Response<ReceiptResponse>
+        @Path("transaction_unique_no") transactionUniqueNo: Int): Response<ReceiptResponse>
 }

@@ -12,10 +12,6 @@ data class PaymentHistoryResponse(
     val items: List<PaymentHistoryItem>
 )
 
-data class ReceiptRequest(
-    val transactionUniqueNo: Int
-)
-
 data class ReceiptResponse(
     val transactionUniqueNo: Int,
     val transactionDate: String,
