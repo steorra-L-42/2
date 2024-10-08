@@ -1,6 +1,7 @@
 let lpnumber = null;
 const url = "https://merchant.mobipay.kr/api/v1";
 const MERCHANT_TYPE = 'OIL';
+const MERCHANT_TYPE_URL = 'oil';
 const MER_API_KEY = 'Da19J03F6g7H8iB2c54e';
 
 async function loadDatabase() {
@@ -497,7 +498,33 @@ function initApp() {
       } else {
         console.error('getUserMedia 사용불가.');
       }
-    }
+    },
+
+    // 결제 취소
+    isShowTransactionListModal: false,
+    transactionList: [],
+
+    openTransactionListModal() {
+        this.isShowTransactionListModal = true;
+    },
+
+    closeTransactionListModal() {
+        this.isShowTransactionListModal = false;
+    },
+
+    async getTransactions() {
+        const url = `/api/v1/merchants/${MERCHANT_TYPE_URL}/transactions`;
+        const data = await getRequest(url);
+        this.transactionList = data?.items;
+    },
+
+    cancelTransaction(transactionUniqueNo) {
+        const url = `/api/v1/merchants/${MERCHANT_TYPE_URL}/cancelled-transactions/${transactionUniqueNo}`;
+        patchRequest(url).then(() => {
+            this.getTransactions();
+        });
+    },
+    // 결제 취소
   };
 
   async function postRequest(api, data = {}) {
@@ -518,6 +545,54 @@ function initApp() {
       throw new Error(`postRequest() : error! status: ${response.status}`);
     }
     return response;
+  }
+
+  async function getRequest(url) {
+      try {
+          const response = await fetch(url, {
+              method: 'GET',
+              headers: {
+                  'merApiKey': MER_API_KEY,
+              },
+          });
+
+          if(response?.status !== 200) {
+              alert('거래내역 조회에 실패했습니다.');
+              console.error('Error:', response);
+              return;
+          }
+
+          const data = await response.json();
+          // console.log(data);
+          return data
+
+      } catch (error) {
+          console.error('Error:', error);
+          return;
+      }
+  }
+
+  async function patchRequest(url) {
+      try {
+          const response = await fetch(url, {
+              method: 'PATCH',
+              headers: {
+                  'merApiKey': MER_API_KEY,
+              },
+          });
+
+          if(response?.status !== 200) {
+              alert('거래 취소에 실패했습니다.');
+              console.error('Error:', response);
+              return;
+          }
+
+          alert('거래가 취소되었습니다.');
+
+      } catch (error) {
+          console.error('Error:', error);
+          return;
+      }
   }
 
   app.initANPR();
