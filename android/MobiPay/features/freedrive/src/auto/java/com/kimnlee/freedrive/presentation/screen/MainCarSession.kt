@@ -154,9 +154,9 @@ class MainCarSession : Session() {
             onClickListener = OnClickListener {
                 // 결제 처리
                 val paymentApprovalIntent = Intent("com.kimnlee.mobipay.PAYMENT_APPROVAL").apply {
-                    putExtra("fcmData", fcmData)  // Assuming you have an FCMData object to send as an extra
+                    putExtra("fcmData", fcmData)
                 }
-
+                Log.d(TAG, "processAlert: 승인 intent 날림")
                 carContext.sendBroadcast(paymentApprovalIntent)
             }
         }else if(intentType == "manual_pay_complete"){

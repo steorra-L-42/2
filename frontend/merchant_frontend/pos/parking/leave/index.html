@@ -12,17 +12,15 @@
     @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100..900&display=swap');
   </style>
   <script src="https://unpkg.com/idb@6.1.5/build/iife/index-min.js"></script>
+  <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 
   <!-- TensorFlow.js 불러옴 -->
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
   <!-- COCO-SSD 모델 불러옴 -->
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@latest"></script>
-
-  <!-- 자신의 스크립트 -->
-  <script src="js/script.js" defer></script>
-
-  <!-- Alpine.js 불러옴 -->
-  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="js/script.js"></script>
+  <!-- 디버깅 방지 도구 -->
+  <!-- <script disable-devtool-auto src="https://cdn.jsdelivr.net/npm/disable-devtool"></script> -->
 </head>
 <body class="bg-blue-gray-50" x-data="initApp()" x-init="initVideo();">
 <div class="hide-print flex flex-row h-screen antialiased text-blue-gray-800">
@@ -91,6 +89,19 @@
               </span>
           </a>
         </li>
+        <!-- 거래내역 조회 -->
+        <li>
+          <a href="#"
+          class="flex items-center"
+            @click="getTransactions(); openTransactionListModal();">
+            <span class="flex items-center justify-center text-blue-100 hover:bg-blue-400 h-12 w-12 rounded-2xl">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M1.611,12c.759,0,1.375,.57,1.485,1.32,.641,4.339,4.389,7.68,8.903,7.68,5.476,0,9.827-4.917,8.867-10.569-.453-2.665-2.148-5.023-4.523-6.313-3.506-1.903-7.48-1.253-10.18,1.045l1.13,1.13c.63,.63,.184,1.707-.707,1.707H2c-.552,0-1-.448-1-1V2.414c0-.891,1.077-1.337,1.707-.707l1.332,1.332C7.6-.115,12.921-1.068,17.637,1.408c3.32,1.743,5.664,5.027,6.223,8.735,1.122,7.437-4.633,13.857-11.86,13.857-6.021,0-11.021-4.457-11.872-10.246-.135-.92,.553-1.754,1.483-1.754Z"/>
+              </svg>
+            </span>
+          </a>
+        </li>
+        <!-- 거래내역 조회 -->
       </ul>
       <a
               href="https://merchant.mobipay.kr/guide/guide.html"
@@ -144,34 +155,32 @@
         </div>
 
         <!-- 오른쪽 영역 -->
-<!--        <div x-data="app">-->
-          <template x-if="entryTime === null || isNaN(entryTime)">
-            <div class="select-none bg-blue-gray-100 rounded-3xl flex flex-wrap content-center justify-center h-full w-[500px] opacity-25">
-              <p class="text-4xl font-bold">
-                인식된 차량이 없습니다.
-                </br>
-                잠시 기다려주세요.
-              </p>
+        <div x-show="entryTime === ''">
+          <div class="select-none bg-blue-gray-100 rounded-3xl flex flex-wrap content-center justify-center h-full w-[500px] opacity-25">
+            <p class="text-4xl font-bold">
+              인식된 차량이 없습니다.
+              <br>
+              잠시 기다려주세요.
+            </p>
+          </div>
+        </div>
+
+        <div x-show="entryTime !== ''">
+          <div class="select-none bg-blue-gray-100 opacity-70 rounded-3xl flex flex-col justify-center h-full w-[500px] p-8">
+            <div class="font-bold text-left space-y-4 mt-10">
+              <p class="text-3xl text-blue-800 mt-4">입차 시간 :</p>
+              <div class="text-5xl text-black" x-text="prettyEntryDate"></div>
+              <div class="text-5xl text-black" x-text="prettyEntryTime"></div>
+
+              <p class="text-3xl text-blue-800 mt-4">출차 시간 :</p>
+              <div class="text-5xl text-black" x-text="prettyExitDate"></div>
+              <div class="text-5xl text-black" x-text="prettyExitTime"></div>
+
+              <p class="text-3xl text-blue-800 mt-4">결제 금액 :</p>
+              <div class="text-5xl text-black" x-text="paymentBalance"></div>
             </div>
-          </template>
-
-          <template x-if="entryTime !== null && !isNaN(entryTime)">
-            <div class="select-none bg-blue-gray-100 opacity-70 rounded-3xl flex flex-col justify-center h-full w-[500px] p-8">
-              <div class="font-bold text-left space-y-4 mt-10">
-                <p class="text-3xl text-blue-800 mt-4">입차 시간 :</p>
-                <div class="text-5xl text-black" x-text="prettyEntryDate"></div>
-                <div class="text-5xl text-black" x-text="prettyEntryTime"></div>
-
-                <p class="text-3xl text-blue-800 mt-4">출차 시간 :</p>
-                <div class="text-5xl text-black" x-text="prettyExitDate"></div>
-                <div class="text-5xl text-black" x-text="prettyExitTime"></div>
-
-                <p class="text-3xl text-blue-800 mt-4">결제 금액 :</p>
-                <div class="text-5xl text-black" x-text="paymentBalance"></div>
-              </div>
-            </div>
-          </template>
-
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -320,6 +329,49 @@
       </div>
     </div>
   </div>
+  <!-- 거래내역 조회 모달 --> 
+  <div x-show="isShowTransactionListModal" class="fixed z-50 inset-0 overflow-y-auto">
+    <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+    <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
+      <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+      <button @click="closeTransactionListModal()" type="button" class="bg-blue-500 text-white px-4 py-2 rounded-md">
+        닫기
+      </button>
+      <table id="transaction-table">
+        <tr id="transaction-table">
+        <th id="transaction-table">거래번호</th>
+        <th id="transaction-table">거래일자</th>
+        <th id="transaction-table">거래시간</th>
+        <th id="transaction-table">거래금액</th>
+        <th id="transaction-table">거래정보</th>
+        <th id="transaction-table">취소 가능 여부</th>
+        <th id="transaction-table">거래취소</th>
+        </tr>
+        <template
+        x-for="(transaction, index) in transactionList"
+        :key="index"
+        >
+        <tr id="transaction-table">
+          <td x-text="transaction.transactionUniqueNo" id="transaction-table"></td>
+          <td x-text="transaction.transactionDate" id="transaction-table"></td>
+          <td x-text="transaction.transactionTime.substring(0, 2) + '시 ' + transaction.transactionTime.substring(2, 4) + '분'" id="transaction-table"></td> 
+          <td x-text="transaction.paymentBalance + '원'" id="transaction-table"></td>
+          <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" x-text="transaction.info" id="transaction-table"></td>
+          <td x-text="transaction.cancelled ? 'X' : 'O'" id="transaction-table"></td>
+          <td id="transaction-table">
+            <button @click="cancelTransaction(transaction.transactionUniqueNo)" class="bg-red-500 text-white px-2 py-1 rounded-md">
+              취소
+            </button>
+          </td>
+        </tr>
+        </template>
+      </table>
+      </div>
+    </div>
+    </div>
+  </div>
+  <!-- 거래내역 조회 -->
 </div>
 
 <div

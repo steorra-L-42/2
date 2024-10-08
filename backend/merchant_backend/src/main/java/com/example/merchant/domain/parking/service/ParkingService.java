@@ -1,5 +1,7 @@
 package com.example.merchant.domain.parking.service;
 
+import com.example.merchant.domain.parking.dto.PaidChangeRequest;
+import com.example.merchant.domain.parking.dto.PaidChangeResponse;
 import com.example.merchant.domain.parking.dto.ParkingEntryRequest;
 import com.example.merchant.domain.parking.dto.ParkingEntryResponse;
 import com.example.merchant.domain.parking.dto.ParkingEntryTimeResponse;
@@ -33,7 +35,7 @@ public class ParkingService {
 
         List<Parking> parkings = parkingRepository.findAllByNumberAndPaidFalse(carNumber);
 
-        if(parkings.isEmpty()) {
+        if (parkings.isEmpty()) {
             throw new NotExistParkingException();
         }
         if (parkings.size() > 1) {
@@ -63,9 +65,21 @@ public class ParkingService {
         validateExistParking(parkings);
         validateMultipleNotPaid(parkings);
 
-       Parking exitedParking = parkings.get(0).goExit(request.getExit());
+        Parking exitedParking = parkings.get(0).goExit(request.getExit());
 
         return ParkingExitResponse.of(exitedParking);
+    }
+
+    @Transactional
+    public PaidChangeResponse changePaid(PaidChangeRequest request, String merApiKey) {
+
+        validateMerApiKey(merApiKey);
+
+        Parking parking = parkingRepository.findByNumber(request.getCarNumber())
+                .orElseThrow(NotExistParkingException::new);
+
+        parking.changePaid();
+        return PaidChangeResponse.newInstance(parking);
     }
 
     private void validateMerApiKey(String merApiKey) {

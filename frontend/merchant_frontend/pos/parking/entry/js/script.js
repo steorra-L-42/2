@@ -1,6 +1,7 @@
 let lpnumber = null;
 const url = "https://merchant.mobipay.kr/api/v1";
-const MERCHANT_TYPE = 'FOOD';
+const MERCHANT_TYPE = 'PARKING';
+const MERCHANT_TYPE_URL = 'parking';
 const MER_API_KEY = 'Da19J03F6g7H8iB2c54e';
 
 async function loadDatabase() {
@@ -431,9 +432,13 @@ function initApp() {
 
                                 // prettyEntrytime을 원하는 형식으로 설정
                                 const date = new Date(self.$data.entrytime);
-                                self.$data.prettyDate = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
-                                self.$data.prettyTime = `${date.getHours()}시 ${date.getMinutes()}분 ${date.getSeconds()}초`;
-                                console.log("entrytime 반영완료");
+                                if (isNaN(date.getTime())) {
+                                  alert("이미 입차한 차량입니다.");
+                                } else {
+                                  self.$data.prettyDate = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+                                  self.$data.prettyTime = `${date.getHours()}시 ${date.getMinutes()}분 ${date.getSeconds()}초`;
+                                  console.log("entrytime 반영완료");
+                                }
                               })
                               .catch(error => {
                                 // 에러 발생 시 콘솔에 출력
@@ -525,7 +530,33 @@ function initApp() {
       } else {
         console.error('getUserMedia 사용불가.');
       }
-    }
+    },
+
+    // 결제 취소
+    isShowTransactionListModal: false,
+    transactionList: [],
+
+    openTransactionListModal() {
+        this.isShowTransactionListModal = true;
+    },
+
+    closeTransactionListModal() {
+        this.isShowTransactionListModal = false;
+    },
+
+    async getTransactions() {
+        const url = `/api/v1/merchants/${MERCHANT_TYPE_URL}/transactions`;
+        const data = await getRequest(url);
+        this.transactionList = data?.items;
+    },
+
+    cancelTransaction(transactionUniqueNo) {
+        const url = `/api/v1/merchants/${MERCHANT_TYPE_URL}/cancelled-transactions/${transactionUniqueNo}`;
+        patchRequest(url).then(() => {
+            this.getTransactions();
+        });
+    },
+    // 결제 취소
   };
 
   async function postRequest(api, data = {}) {
@@ -548,6 +579,54 @@ function initApp() {
     }
 
     return response;
+  }
+
+  async function getRequest(url) {
+      try {
+          const response = await fetch(url, {
+              method: 'GET',
+              headers: {
+                  'merApiKey': MER_API_KEY,
+              },
+          });
+
+          if(response?.status !== 200) {
+              alert('거래내역 조회에 실패했습니다.');
+              console.error('Error:', response);
+              return;
+          }
+
+          const data = await response.json();
+          // console.log(data);
+          return data
+
+      } catch (error) {
+          console.error('Error:', error);
+          return;
+      }
+  }
+
+  async function patchRequest(url) {
+      try {
+          const response = await fetch(url, {
+              method: 'PATCH',
+              headers: {
+                  'merApiKey': MER_API_KEY,
+              },
+          });
+
+          if(response?.status !== 200) {
+              alert('거래 취소에 실패했습니다.');
+              console.error('Error:', response);
+              return;
+          }
+
+          alert('거래가 취소되었습니다.');
+
+      } catch (error) {
+          console.error('Error:', error);
+          return;
+      }
   }
 
   app.initANPR();

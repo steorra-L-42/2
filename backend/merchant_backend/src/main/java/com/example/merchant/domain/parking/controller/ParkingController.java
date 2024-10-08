@@ -1,11 +1,12 @@
 package com.example.merchant.domain.parking.controller;
 
+import com.example.merchant.domain.parking.dto.PaidChangeRequest;
+import com.example.merchant.domain.parking.dto.PaidChangeResponse;
 import com.example.merchant.domain.parking.dto.ParkingEntryRequest;
 import com.example.merchant.domain.parking.dto.ParkingEntryResponse;
 import com.example.merchant.domain.parking.dto.ParkingEntryTimeResponse;
 import com.example.merchant.domain.parking.dto.ParkingExitRequest;
 import com.example.merchant.domain.parking.dto.ParkingExitResponse;
-import com.example.merchant.domain.parking.entity.Parking;
 import com.example.merchant.domain.parking.service.ParkingService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +37,7 @@ public class ParkingController {
 
     @PostMapping("/entry")
     public ResponseEntity<ParkingEntryResponse> entryPost(@RequestBody @Valid ParkingEntryRequest request,
-                                                      @RequestHeader("merApiKey") String merApiKey) {
+                                                          @RequestHeader("merApiKey") String merApiKey) {
 
         ParkingEntryResponse response = parkingService.entryPost(request, merApiKey);
 
@@ -48,6 +49,15 @@ public class ParkingController {
                                                     @RequestHeader("merApiKey") String merApiKey) {
 
         ParkingExitResponse response = parkingService.exit(request, merApiKey);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/paid")
+    public ResponseEntity<PaidChangeResponse> changePaid(@RequestBody @Valid PaidChangeRequest request,
+                                                         @RequestHeader("merApiKey") String merApiKey) {
+
+        PaidChangeResponse response = parkingService.changePaid(request, merApiKey);
 
         return ResponseEntity.ok(response);
     }
