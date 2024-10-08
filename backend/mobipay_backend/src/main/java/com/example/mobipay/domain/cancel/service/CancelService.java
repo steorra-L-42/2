@@ -86,8 +86,8 @@ public class CancelService {
         // fcm 전송
         Map<String, String> data = Map.of(
                 "type", TRANSACTION_CANCEL.getValue(),
-                "title", "거래 취소",
-                "body", "거래가 취소되었습니다.",
+                "title", "결제 취소",
+                "body", "결제가 취소되었습니다.",
                 "merchantName", merchantTransaction.getMerchant().getMerchantName(),
                 "paymentBalance", merchantTransaction.getPaymentBalance().toString(),
                 "cardNo", merchantTransaction.getRegisteredCard().getOwnedCard().getCardNo()
