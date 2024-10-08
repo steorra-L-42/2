@@ -83,6 +83,31 @@ class PaymentRepository(
         }
     }
 
+    fun getRegisteredCards2(onResult: (List<RegisteredCard>) -> Unit) {
+        coroutineScope.launch {
+            _registeredCardState.value = RegisteredCardState.Loading
+            try {
+                val response = authenticatedApi.getRegistrationCards()
+                if (response.isSuccessful) {
+                    val cardList = response.body()?.items ?: emptyList()
+                    _registeredCards.value = cardList
+                    _registeredCardState.value = RegisteredCardState.Success(cardList)
+                    Log.d(ContentValues.TAG, "등록된 카드 목록 받아오기 성공: ${cardList.size} 개의 카드")
+                    Log.d(ContentValues.TAG, "등록된 카드 목록: ${response.body()}")
+                    onResult(cardList)  // Pass the result to the callback
+                } else {
+                    _registeredCardState.value =
+                        RegisteredCardState.Error("Failed to fetch cards: ${response.code()}")
+                    onResult(emptyList())  // Return empty list on failure
+                }
+            } catch (e: Exception) {
+                _registeredCardState.value =
+                    RegisteredCardState.Error("Failed to fetch cards: ${e.message}")
+                onResult(emptyList())  // Return empty list on exception
+            }
+        }
+    }
+
 
     fun getCurrentLocation(onLocationReceived: (LatLng?) -> Unit) {
         try {
@@ -143,7 +168,33 @@ class PaymentRepository(
         processPay(newFcmData, false)
     }
 
+
+
     override fun processPay(fcmData: FCMData, isAutoPay: Boolean){
+
+        var cardNo: String? = fcmData.cardNo
+        Log.d(TAG, "processPay: 통합 결제 처리 시작.")
+
+        if(cardNo == null) {
+            Log.d(TAG, "processPay: 카드번호 null 확인, 카드목록 조회 시작")
+            getRegisteredCards2 { myRegisteredCards ->
+                if (myRegisteredCards.isNotEmpty()) {
+                    Log.d(TAG, "processPay: 카드목록 조회 성공해서 autoPay 여부 확인중")
+                    val autoPayCard = myRegisteredCards.find { it.autoPayStatus }
+                    cardNo = autoPayCard?.cardNo
+                    Log.d(TAG, "processPay: 별찍 카드번호: ${cardNo}")
+                    approvePay(fcmData, isAutoPay, cardNo!!)
+                } else {
+                    Log.d(TAG, "processPay: 등록된 카드가 없음.")
+                }
+            }
+        }else{
+            approvePay(fcmData, isAutoPay, cardNo!!)
+        }
+
+    }
+
+    fun approvePay(fcmData: FCMData, isAutoPay: Boolean, cardNo:String){
 
         val approvalWaitingId = fcmData.approvalWaitingId?.toLongOrNull()
         val merchantId = fcmData.merchantId?.toLongOrNull()
@@ -153,13 +204,11 @@ class PaymentRepository(
                 fcmData.approvalWaitingId,
                 fcmData.merchantId,
                 fcmData.paymentBalance,
-                fcmData.cardNo,
+//                fcmData.cardNo,
+                cardNo,
                 fcmData.info
             ).any { it == null }) {
-            Log.d(TAG, "processPay: NULL 값이 확인되어 결제 요청을 승인할 수 없습니다.")
-            if(fcmData != null){
-                Log.d(TAG, "processPay: $fcmData")
-            }
+            Log.d(TAG, "approvePay: null값 확인되어 결제 요청을 승인불가. fcmDate = $fcmData")
             return
         }
 
@@ -167,13 +216,13 @@ class PaymentRepository(
             approvalWaitingId = approvalWaitingId!!,
             merchantId = merchantId!!,
             paymentBalance = paymentBalance!!,
-            cardNo = fcmData.cardNo!!,
+//            cardNo = fcmData.cardNo!!,
+            cardNo = cardNo,
             info = fcmData.info!!,
             approved = true
         )
 
-        Log.d(TAG, "processPay: 서버에 결제요청. 이 정보로: ${paymentApprovalData.toString()}")
-        val paymentApprovalDataJson = Gson().toJson(paymentApprovalData)
+        Log.d(TAG, "approvePay: 서버에 결제요청. 이 정보로: $paymentApprovalData")
         // 서버로 Approval 전송
         val call = authenticatedApi.approvePaymentRequest(paymentApprovalData)
 
@@ -182,11 +231,12 @@ class PaymentRepository(
 
                 if (response.isSuccessful) { // 결제 성공
 
-                    Log.d(TAG, "processPay: 결제 성공")
+                    Log.d(TAG, "approvePay: 결제 성공")
 
                     val alreadyPaidFCMData = FCMData(
                         fcmData.autoPay,
-                        fcmData.cardNo,
+//                        fcmData.cardNo,
+                        cardNo,
                         fcmData.approvalWaitingId,
                         fcmData.merchantId,
                         fcmData.paymentBalance,
@@ -225,7 +275,7 @@ class PaymentRepository(
 
                     } else if (AAFocusManager.isAAConnected) {
                         // HUN
-                        mobiNotificationManager.broadcastForPlainHUN(notiTitle, "${fcmData.merchantName}  ${amountKRW}원")
+                        mobiNotificationManager.broadcastForPlainHUN(notiTitle, "${fcmData.merchantName}  ${amountKRW}")
                     }
 
                     // 휴대폰은 무조건
