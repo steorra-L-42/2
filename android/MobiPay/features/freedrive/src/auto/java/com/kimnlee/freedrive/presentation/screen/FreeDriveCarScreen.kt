@@ -31,6 +31,7 @@ import com.mapbox.androidauto.internal.logAndroidAuto
 import com.mapbox.androidauto.location.CarLocationRenderer
 import com.mapbox.androidauto.navigation.CarCameraMode
 import com.mapbox.androidauto.navigation.CarNavigationCamera
+import com.mapbox.androidauto.navigation.audioguidance.CarAudioGuidanceAction
 import com.mapbox.androidauto.navigation.roadlabel.CarRoadLabelRenderer
 import com.mapbox.androidauto.navigation.speedlimit.CarSpeedLimitRenderer
 import com.mapbox.androidauto.preview.CarRouteLineRenderer
@@ -125,7 +126,7 @@ internal class FreeDriveCarScreen @UiThread constructor(
 
     private fun getNavigationTemplate(): Template {
         val customFreeDriveActionStrip = ActionStrip.Builder()
-            .addAction(customBuildSearchAction())
+            .addAction(CarAudioGuidanceAction().getAction(this)) // 음소거 버튼으로 변경
             .addAction(customBuildFavoritesAction())
             .build()
 
@@ -187,23 +188,6 @@ internal class FreeDriveCarScreen @UiThread constructor(
             )
             .build()
     }
-
-
-
-
-    private fun customBuildSearchAction(): Action = Action.Builder()
-        .setIcon(
-            CarIcon.Builder(
-                IconCompat.createWithResource(
-                    carContext,
-                    R.drawable.ic_search_black36dp
-                )
-            ).build()
-        )
-        .setOnClickListener {
-            MapboxScreenManager.push(MapboxScreen.SEARCH)
-        }
-        .build()
 
     private fun customBuildFavoritesAction(): Action = Action.Builder()
         .setTitle("주변가맹점 보기")

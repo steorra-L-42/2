@@ -29,6 +29,8 @@ import com.kimnlee.notification.navigation.notificationNavGraph
 import com.kimnlee.payment.data.repository.PaymentRepository
 import com.kimnlee.payment.navigation.paymentNavGraph
 import com.kimnlee.payment.presentation.viewmodel.BiometricViewModel
+import com.kimnlee.payment.presentation.screen.ManualPaymentScreen
+import com.kimnlee.payment.presentation.viewmodel.PaymentViewModel
 import com.kimnlee.vehiclemanagement.navigation.vehicleManagementNavGraph
 import com.kimnlee.vehiclemanagement.presentation.viewmodel.VehicleManagementViewModel
 
@@ -47,6 +49,7 @@ fun AppNavGraph(
     val cardManagementViewModel = CardManagementViewModel(authManager, apiClient)
     val vehicleManagementViewModel = VehicleManagementViewModel(apiClient, context, authManager)
     val showMoreViewModel = ShowMoreViewModel(authManager)
+    val paymentViewModel = PaymentViewModel(authManager, apiClient)
     val isLoggedIn by loginViewModel.isLoggedIn.collectAsState()
     val homeViewModel = HomeViewModel(apiClient, authManager)
 
@@ -98,7 +101,7 @@ fun AppNavGraph(
         }
 
         authNavGraph(navController, authManager, loginViewModel)
-        paymentNavGraph(navController, biometricViewModel, paymentRepository)
+        paymentNavGraph(navController, biometricViewModel, paymentRepository, paymentViewModel)
         cardManagementNavGraph(
             navController = navController,
             authManager = authManager,

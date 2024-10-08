@@ -12,22 +12,21 @@ import androidx.navigation.navigation
 import com.google.gson.Gson
 import com.kimnlee.common.FCMData
 import com.kimnlee.common.components.BottomNavigation
-import com.kimnlee.payment.data.dummyMerchants
-import com.kimnlee.payment.data.dummyTransactions
-import com.kimnlee.payment.data.model.MerchantTransaction
 import com.kimnlee.payment.data.repository.PaymentRepository
+import com.kimnlee.payment.presentation.screen.DigitalReceiptScreen
 import com.kimnlee.payment.presentation.screen.ManualPaymentScreen
+import com.kimnlee.payment.presentation.screen.PaymentHistoryScreen
 import com.kimnlee.payment.presentation.screen.PaymentCancelScreen
-import com.kimnlee.payment.presentation.screen.PaymentDetailListScreen
-import com.kimnlee.payment.presentation.screen.PaymentDetailScreen
 import com.kimnlee.payment.presentation.screen.PaymentSuccessfulScreen
 import com.kimnlee.payment.presentation.viewmodel.BiometricViewModel
+import com.kimnlee.payment.presentation.viewmodel.PaymentViewModel
 
 
 fun NavGraphBuilder.paymentNavGraph(
     navController: NavHostController,
     biometricViewModel: BiometricViewModel,
-    paymentRepository: PaymentRepository
+    paymentRepository: PaymentRepository,
+    paymentViewModel: PaymentViewModel
 ) {
     navigation(startDestination = "payment_main", route = "paymenthistory") {
         composable("payment_main",
@@ -35,35 +34,26 @@ fun NavGraphBuilder.paymentNavGraph(
             exitTransition = { ExitTransition.None }
         ) {
             BottomNavigation(navController) {
-                PaymentDetailListScreen(
-                    transactions = dummyTransactions,
-                    merchants = dummyMerchants,
-                    onNavigateToDetail = { transaction ->
-                        navController.navigate("paymenthistory/${transaction.transaction_unique_no}")
-                    },
-                    onNavigateBack = { navController.navigateUp() }
+                PaymentHistoryScreen(
+                    onNavigateBack = { navController.navigateUp() },
+                    paymentViewModel = paymentViewModel,
+                    onNavigateToDetail = { transactionUniqueNo ->
+                        navController.navigate("paymenthistory/$transactionUniqueNo")
+                    }
                 )
             }
         }
         composable("paymenthistory/{transactionUniqueNo}",
-                enterTransition = { EnterTransition.None },
-                exitTransition = { ExitTransition.None }
-            ) {
-            val transactionUniqueNo = it.arguments?.getString("transactionUniqueNo")?.toLongOrNull() ?: 0L
+            enterTransition = { EnterTransition.None },
+            exitTransition = { ExitTransition.None },
+            arguments = listOf(navArgument("transactionUniqueNo") { type = NavType.IntType })
+        ) { backStackEntry ->
+            val transactionUniqueNo = backStackEntry.arguments?.getInt("transactionUniqueNo") ?: 0
             BottomNavigation(navController) {
-                PaymentDetailScreen(
-                    transaction =  dummyTransactions.find { it.transaction_unique_no == transactionUniqueNo} ?: MerchantTransaction(
-                        transaction_unique_no = 0,
-                        transaction_date = "",
-                        transaction_time = "",
-                        payment_balance = 0,
-                        info = "",
-                        cancelled = false,
-                        merchant_id = 0,
-                        mobi_user_id = 0,
-                        owned_card_id = 0
-                    ),
-                    onNavigateBack = { navController.navigateUp() }
+                DigitalReceiptScreen(
+                    onNavigateBack = { navController.navigateUp() },
+                    paymentViewModel = paymentViewModel,
+                    transactionUniqueNo = transactionUniqueNo
                 )
             }
         }
