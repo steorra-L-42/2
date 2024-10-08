@@ -210,7 +210,7 @@ fun NotificationItem(notification: Notification) {
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .align(Alignment.CenterStart)
-                .padding(start = 32.dp)
+                .padding(start = 32.dp, end = 80.dp)
         ) {
             Column {
                 Text(
@@ -218,6 +218,7 @@ fun NotificationItem(notification: Notification) {
                     style = MaterialTheme.typography.bodyMedium,
                     color = MobiTextAlmostBlack,
                     maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                     fontWeight = FontWeight.SemiBold,
                 )
                 Spacer(modifier = Modifier.height(8.dp))
@@ -225,13 +226,12 @@ fun NotificationItem(notification: Notification) {
                     Text(
                         text = notification.details.info ?: "정보 없음",
                         style = MaterialTheme.typography.bodySmall,
-                        color = Color.Gray
+                        color = Color.Gray,
+                        maxLines = 3,
+                        overflow = TextOverflow.Ellipsis
                     )
                 } else if (notification.type == NotificationType.MEMBER) {
                     val details = notification.details
-                    details.inviterPicture?.let { picture ->
-                        Image(painter = rememberImagePainter(picture), contentDescription = null)
-                    }
                     Text(
                         text = "차량 번호: ${details.carNumber ?: "정보 없음"}",
                         style = MaterialTheme.typography.bodySmall,

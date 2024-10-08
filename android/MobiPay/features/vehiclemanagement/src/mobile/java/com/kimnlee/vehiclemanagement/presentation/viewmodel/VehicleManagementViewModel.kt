@@ -16,6 +16,10 @@ import com.kimnlee.vehiclemanagement.data.model.CarMember
 import com.kimnlee.vehiclemanagement.data.model.VehicleItem
 import com.kimnlee.vehiclemanagement.data.model.VehicleRegistrationRequest
 import kotlinx.coroutines.flow.update
+import com.kimnlee.common.event.EventBus
+import com.kimnlee.common.event.NewNotificationEvent
+import kotlinx.coroutines.flow.collectLatest
+
 
 data class Vehicle(
     val carId: Int,
@@ -30,6 +34,16 @@ class VehicleManagementViewModel(
     private val apiClient: ApiClient,
     private val context: Context
 ) : ViewModel() {
+
+    init {
+        viewModelScope.launch {
+            EventBus.events.collectLatest { event ->
+                when (event) {
+                    is NewNotificationEvent -> updateNotificationStatus(event.hasNew)
+                }
+            }
+        }
+    }
 
     private val vehicleService: VehicleApiService = apiClient.authenticatedApi.create(VehicleApiService::class.java)
 
