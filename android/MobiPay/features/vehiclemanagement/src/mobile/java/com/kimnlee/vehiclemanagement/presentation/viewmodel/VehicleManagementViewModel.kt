@@ -5,6 +5,7 @@ import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kimnlee.common.auth.AuthManager
 import com.kimnlee.common.network.ApiClient
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -32,8 +33,12 @@ data class Vehicle(
 
 class VehicleManagementViewModel(
     private val apiClient: ApiClient,
-    private val context: Context
+    private val context: Context,
+    private val authManager: AuthManager
 ) : ViewModel() {
+
+    private val _userPhoneNumber = MutableStateFlow("")
+    val userPhoneNumber: StateFlow<String> = _userPhoneNumber
 
     init {
         viewModelScope.launch {
@@ -41,6 +46,19 @@ class VehicleManagementViewModel(
                 when (event) {
                     is NewNotificationEvent -> updateNotificationStatus(event.hasNew)
                 }
+            }
+        }
+        loadUserPhoneNumber()
+    }
+
+    private fun loadUserPhoneNumber() {
+        viewModelScope.launch {
+            try {
+                val userInfo = authManager.getUserInfo()
+                _userPhoneNumber.value = userInfo.phoneNumber
+            } catch (e: Exception) {
+                Log.e("VehicleManagementViewModel", "Error loading user phone number", e)
+                _userPhoneNumber.value = ""
             }
         }
     }
@@ -147,9 +165,11 @@ class VehicleManagementViewModel(
                 if (response.isSuccessful) {
                     response.body()?.let { carMembersResponse ->
                         val vehicle = _vehicles.value.find { it.carId == carId }
-                        val sortedMembers = carMembersResponse.items.sortedWith(compareBy<CarMember> {
-                            it.mobiUserId != vehicle?.ownerId
-                        }.thenBy { it.name })
+                        val sortedMembers = carMembersResponse.items.sortedWith(
+                            compareBy<CarMember> {
+                                it.phoneNumber != _userPhoneNumber.value
+                            }.thenBy { it.name }
+                        )
                         _carMembers.value = sortedMembers
                     }
                 } else {

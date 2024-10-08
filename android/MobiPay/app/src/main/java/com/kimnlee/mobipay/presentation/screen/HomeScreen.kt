@@ -6,6 +6,7 @@ import android.location.Geocoder
 import android.view.Gravity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -71,6 +72,9 @@ fun HomeScreen(
     val carMembers by homeViewModel.carMembers.collectAsState()
     val currentVehicle = vehicles.firstOrNull()
     val userName by homeViewModel.userName.collectAsState()
+    val userPhoneNumber by homeViewModel.userPhoneNumber.collectAsState()
+
+
 
     LaunchedEffect(vehicles) {
         if (vehicles.isNotEmpty()) {
@@ -90,6 +94,10 @@ fun HomeScreen(
 
     LaunchedEffect(Unit) {
         lastLocation = getLastLocation(context)
+        snapshotFlow { navController.currentBackStackEntry }
+            .collect {
+                homeViewModel.refreshVehicles()
+            }
     }
 
     MobiPayTheme {
@@ -154,23 +162,35 @@ fun HomeScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             if (vehicles.isEmpty()) {
-                Image(
-                    painter = painterResource(id = R.drawable.no_car),
-                    contentDescription = "No car image",
+                Box(
                     modifier = Modifier
-                        .size(200.dp)
-                        .padding(bottom = 16.dp)
-                )
-                Spacer(modifier = Modifier.height(18.dp))
-                Text(
-                    text = "차량을 등록해주세요",
-                    style = MaterialTheme.typography.headlineMedium,
-                    color = MobiTextAlmostBlack,
-                    fontSize = 24.sp,
-                    modifier = Modifier
-                        .padding(top = 2.dp)
-                        .align(Alignment.CenterHorizontally)
-                )
+                        .fillMaxWidth()
+                        .padding(top = 16.dp)
+                        .clickable {
+                            navController.navigate("vehiclemanagement_registration")
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.no_car),
+                            contentDescription = "No car image",
+                            modifier = Modifier
+                                .size(200.dp)
+                        )
+                        Text(
+                            text = "차량을 등록해주세요",
+                            style = MaterialTheme.typography.headlineMedium,
+                            color = MobiTextAlmostBlack,
+                            fontSize = 24.sp,
+                            modifier = Modifier
+                                .padding(top = 2.dp)
+                                .align(Alignment.CenterHorizontally)
+                        )
+                }
+                }
             } else {
                 val firstVehicle = vehicles.first()
                 Card(
@@ -196,7 +216,7 @@ fun HomeScreen(
                         TextOnLP(formatLicensePlate(firstVehicle.number))
 
                         Spacer(modifier = Modifier.height(28.dp))
-                        CarUserIconsRow(carMembers = carMembers, vehicle = currentVehicle)
+                        CarUserIconsRow(carMembers = carMembers, userPhoneNumber = userPhoneNumber)
                     }
                 }
             }
@@ -417,7 +437,7 @@ private fun getLastLocation(context: Context): Pair<Double, Double>? {
 }
 
 @Composable
-fun CarUserIconsRow(carMembers: List<CarMember>, vehicle: VehicleItem?) {
+fun CarUserIconsRow(carMembers: List<CarMember>, userPhoneNumber: String) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
