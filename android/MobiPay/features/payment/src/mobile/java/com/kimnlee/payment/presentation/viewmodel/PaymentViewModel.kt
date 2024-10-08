@@ -52,28 +52,25 @@ class PaymentViewModel(
 
     // 전자 영수증 출력
     fun loadElectronicReceipt(transactionUniqueNo: Int) {
-        Log.d(TAG, "전자 영수증 출력 메서드 호출: $transactionUniqueNo")
         viewModelScope.launch {
-            _electronicReceipt.value = ElectronicReceiptState.Loading
             try {
                 val response = paymentService.printReceipt(transactionUniqueNo)
-                Log.d(TAG, "전자영수증 출력 결과: $response")
                 if (response.isSuccessful) {
                     val receiptResponse = response.body()
                     if (receiptResponse != null) {
                         _electronicReceipt.value = ElectronicReceiptState.Success(receiptResponse)
-                    } else {
-                        _electronicReceipt.value = ElectronicReceiptState.Error("Response body is null")
                     }
                 } else {
-                    Log.d(TAG, "전자영수증 출력 실패: $response")
-                    _electronicReceipt.value = ElectronicReceiptState.Error("Error: ${response.code()}")
+                    Log.d(TAG, "전자 영수증 출력 실패: ${response.code()}")
                 }
             } catch (e: Exception) {
-                Log.d(TAG, "전자영수증 출력 실패: $e")
-                _electronicReceipt.value = ElectronicReceiptState.Error("Network error: ${e.message}")
+                Log.d(TAG, "네트워크 문제로 전자 영수증 출력 실패: $e")
             }
         }
+    }
+
+    fun clearElectronicReceipt() {
+        _electronicReceipt.value = ElectronicReceiptState.Initial
     }
 }
 
@@ -85,7 +82,6 @@ sealed class PaymentHistoryState {
 
 sealed class ElectronicReceiptState {
     object Initial : ElectronicReceiptState()
-    object Loading : ElectronicReceiptState()
     data class Success(val data: ReceiptResponse) : ElectronicReceiptState()
     data class Error(val message: String) : ElectronicReceiptState()
 }
