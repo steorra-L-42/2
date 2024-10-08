@@ -10,6 +10,7 @@ import com.example.merchant.domain.parking.dto.ParkingEntryTimeResponse;
 import com.example.merchant.domain.parking.entity.Parking;
 import com.example.merchant.domain.parking.repository.ParkingRepository;
 import com.example.merchant.domain.parking.util.ParkingUtil;
+import com.example.merchant.util.TimeUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.AfterEach;
@@ -159,14 +160,9 @@ public class ParkingEntryGetTest {
                     assertThat(actual.getParkingLotName()).isEqualTo("진평주차장");
                     assertThat(actual.getParkingId()).isEqualTo(finalParking.getId());
                     assertThat(actual.getCarNumber()).isEqualTo(finalParking.getNumber());
-                    assertThat(isWithinOneMinute(actual.getEntry(), finalParking.getEntry())).isTrue();
+                    assertThat(TimeUtil.isSimilarDateTime(actual.getEntry(), finalParking.getEntry())).isTrue();
                     assertThat(isWithinOneHundredWon(actual.getPaymentBalance(), expectedPaymentBalance)).isTrue();
                 });
-    }
-
-    // 1분 이내로 두 시간이 차이나는 경우 true를 반환
-    private boolean isWithinOneMinute(LocalDateTime actual, LocalDateTime expected) {
-        return expected.minusMinutes(1).isBefore(actual) && expected.plusMinutes(1).isAfter(actual);
     }
 
     // 100원 이내로 요금이 차이나는 경우 true를 반환
