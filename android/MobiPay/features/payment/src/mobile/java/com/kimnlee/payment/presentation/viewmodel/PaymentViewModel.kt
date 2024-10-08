@@ -35,19 +35,17 @@ class PaymentViewModel(
                         val paymentHistoryResponse = response.body()
                         if (paymentHistoryResponse != null) {
                             _paymentHistory.value = PaymentHistoryState.Success(paymentHistoryResponse)
-                        } else {
-                            _paymentHistory.value = PaymentHistoryState.Error("Response body is null")
                         }
                     }
                     204 -> {
                         _paymentHistory.value = PaymentHistoryState.NoContent
                     }
                     else -> {
-                        _paymentHistory.value = PaymentHistoryState.Error("Error: ${response.code()}")
+                        Log.d(TAG, "결제 내역 조회 실패: ${response.code()}")
                     }
                 }
             } catch (e: Exception) {
-                _paymentHistory.value = PaymentHistoryState.Error("Network error: ${e.message}")
+                Log.d(TAG, "네트워크 오류로 결제 내역 조회 실패: $e")
             }
         }
     }
@@ -83,7 +81,6 @@ sealed class PaymentHistoryState {
     object Initial : PaymentHistoryState()
     data class Success(val data: PaymentHistoryResponse) : PaymentHistoryState()
     object NoContent : PaymentHistoryState()
-    data class Error(val message: String) : PaymentHistoryState()
 }
 
 sealed class ElectronicReceiptState {
