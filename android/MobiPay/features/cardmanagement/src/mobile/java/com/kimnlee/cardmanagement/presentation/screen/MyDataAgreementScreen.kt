@@ -46,6 +46,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.kimnlee.cardmanagement.presentation.viewmodel.CardManagementViewModel
 import com.kimnlee.common.ui.theme.MobiBgWhite
@@ -54,6 +57,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import com.kimnlee.common.R
+import com.kimnlee.common.ui.theme.MobiTextAlmostBlack
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -85,7 +90,23 @@ fun MyDataAgreementScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("서비스 신청 및 이용약관동의") },
+                title = {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "📑",
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontFamily = FontFamily(Font(R.font.emoji)),
+                            modifier = Modifier
+                                .padding(top = 8.dp, end = 8.dp)
+                        )
+                        Text(
+                            text = "서비스 신청 및 이용약관동의",
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontFamily = FontFamily(Font(R.font.pbold)),
+                            color = MobiTextAlmostBlack
+                        )
+                    }
+                },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
@@ -106,8 +127,12 @@ fun MyDataAgreementScreen(
         ) {
             Text(
                 "마이데이터 서비스 이용을 위해\n아래 약관 동의가 필요해요.",
-                style = MaterialTheme.typography.bodyLarge
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center
             )
+            
+            Spacer(modifier = Modifier.height(8.dp))
 
             Card(
                 modifier = Modifier.fillMaxWidth(),
