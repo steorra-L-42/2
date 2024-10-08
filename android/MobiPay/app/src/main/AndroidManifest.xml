@@ -58,6 +58,8 @@
                 <data android:host="payment_requestmanualpay"/>
                 <data android:scheme="mobipay"/>
                 <data android:host="payment_successful"/>
+                <data android:scheme="mobipay"/>
+                <data android:host="payment_cancelled"/>
             </intent-filter>
         </activity>
 

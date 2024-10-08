@@ -227,75 +227,78 @@ fun HomeScreen(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(20.dp))
-                    .background(MobiCardBgGray)
-                    .padding(24.dp, 18.dp, 24.dp, 24.dp),
-            ) {
-                Column(
+            var enteredPaidParkingLot = false
+            enteredPaidParkingLot = true
+            if(enteredPaidParkingLot){
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(MobiCardBgGray)
+                        .padding(24.dp, 18.dp, 24.dp, 24.dp),
                 ) {
-                    Row(
-                    ){
-                        Text(
-                            text = "\uD83C\uDD7F",
-                            style = MaterialTheme.typography.headlineMedium,
-                            fontFamily = FontFamily(Font(R.font.emoji)),
-                            fontSize = 22.sp,
-                            modifier = Modifier
-                                .padding(top = 0.dp)
-                        )
-                        Text(
-                            text = "  유료주차장 이용중",
-                            style = MaterialTheme.typography.headlineMedium,
-                            color = MobiTextAlmostBlack,
-                            fontSize = 21.sp,
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(17.dp))
                     Column(
                         modifier = Modifier
-                            .padding(start = 5.dp, end = 5.dp)
-                            .clip(RoundedCornerShape(6.dp))
-                    ){
-                        Text(
-                            text = "여의도 더현대 지하주차장",
-                            style = MaterialTheme.typography.headlineMedium,
-                            color = MobiTextAlmostBlack,
-                            fontSize = 22.5.sp,
-                        )
-                        Spacer(modifier = Modifier.height(7.dp))
-                        Text(
-                            text = "입차: 2024년 9월 29일 오전 10시 11분",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MobiTextAlmostBlack,
-                        )
-                        Spacer(modifier = Modifier.height(21.dp))
-                        Text(
-                            text = "2시간 14분 경과",
-                            style = MaterialTheme.typography.headlineMedium,
-                            color = MobiTextAlmostBlack,
-                            fontSize = 19.sp,
-                            textAlign = TextAlign.End,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                        Spacer(modifier = Modifier.height(6.dp))
-                        Text(
-                            text = "예상 요금  8,000원",
-                            style = MaterialTheme.typography.headlineMedium,
-                            color = MobiTextAlmostBlack,
-                            fontSize = 19.sp,
-                            textAlign = TextAlign.End,
-                            modifier = Modifier.fillMaxWidth()
-                        )
+                            .fillMaxWidth()
+                    ) {
+                        Row(
+                        ){
+                            Text(
+                                text = "\uD83C\uDD7F",
+                                style = MaterialTheme.typography.headlineMedium,
+                                fontFamily = FontFamily(Font(R.font.emoji)),
+                                fontSize = 22.sp,
+                                modifier = Modifier
+                                    .padding(top = 0.dp)
+                            )
+                            Text(
+                                text = "  유료주차장 이용중",
+                                style = MaterialTheme.typography.headlineMedium,
+                                color = MobiTextAlmostBlack,
+                                fontSize = 21.sp,
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(17.dp))
+                        Column(
+                            modifier = Modifier
+                                .padding(start = 5.dp, end = 5.dp)
+                                .clip(RoundedCornerShape(6.dp))
+                        ){
+                            Text(
+                                text = "여의도 더현대 지하주차장",
+                                style = MaterialTheme.typography.headlineMedium,
+                                color = MobiTextAlmostBlack,
+                                fontSize = 22.5.sp,
+                            )
+                            Spacer(modifier = Modifier.height(7.dp))
+                            Text(
+                                text = "입차: 2024년 9월 29일 오전 10시 11분",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MobiTextAlmostBlack,
+                            )
+                            Spacer(modifier = Modifier.height(21.dp))
+                            Text(
+                                text = "2시간 14분 경과",
+                                style = MaterialTheme.typography.headlineMedium,
+                                color = MobiTextAlmostBlack,
+                                fontSize = 19.sp,
+                                textAlign = TextAlign.End,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                            Spacer(modifier = Modifier.height(6.dp))
+                            Text(
+                                text = "예상 요금  8,000원",
+                                style = MaterialTheme.typography.headlineMedium,
+                                color = MobiTextAlmostBlack,
+                                fontSize = 19.sp,
+                                textAlign = TextAlign.End,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
                     }
                 }
+                Spacer(modifier = Modifier.height(20.dp))
             }
-
-            Spacer(modifier = Modifier.height(20.dp))
 
             Box(
                 modifier = Modifier
@@ -321,7 +324,7 @@ fun HomeScreen(
                                 .padding(top = 0.dp)
                         )
                         Text(
-                            text = "  여기에 주차했어요!",
+                            text = if(lastLocation != null) "  여기에 주차했어요!" else "  주차하면 여기에 표시 돼요!",
                             style = MaterialTheme.typography.headlineMedium,
                             color = MobiTextAlmostBlack,
                             fontSize = 21.sp,
@@ -346,13 +349,14 @@ fun NaverMapView(lastLocation: Pair<Double, Double>?, naverMapService: NaverMapS
     val context = LocalContext.current
     var mapView = remember { MapView(context) }
 
-    lateinit var address : String
+    var address = "안드로이드 오토에 연결해야 저장할 수 있어요."
     // 주차 정보가 없으면 기본 위치 표시
     val lastLocationLatLng = lastLocation?.let { LatLng(it.first, it.second) } ?: LatLng(
-        36.107368, 128.425046) // 37.526665, 126.927127
+        37.526665, 126.927127) // 37.526665, 126.927127
     runBlocking {
         val repository = NaverMapRepository("81dn8nvzim", NAVER_MAP_CLIENT_SECRET, naverMapService)
-        address = repository.getAddressFromCoords(lastLocationLatLng)
+        if(lastLocation != null)
+            address = repository.getAddressFromCoords(lastLocationLatLng)
     }
 
     Column {
@@ -392,6 +396,7 @@ fun NaverMapView(lastLocation: Pair<Double, Double>?, naverMapService: NaverMapS
             letterSpacing = 0.1.sp,
             lineHeight = 13.sp,
             fontFamily = pMedium,
+            color = MobiTextDarkGray,
             textAlign = TextAlign.Center,
             modifier = Modifier
                 .fillMaxWidth()
