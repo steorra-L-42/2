@@ -28,18 +28,23 @@ class PaymentViewModel(
     // 결제 내역 조회
     fun loadPaymentHistory() {
         viewModelScope.launch {
-            _paymentHistory.value = PaymentHistoryState.Loading
             try {
                 val response = paymentService.getPaymentHistory()
-                if (response.isSuccessful) {
-                    val paymentHistoryResponse = response.body()
-                    if (paymentHistoryResponse != null) {
-                        _paymentHistory.value = PaymentHistoryState.Success(paymentHistoryResponse)
-                    } else {
-                        _paymentHistory.value = PaymentHistoryState.Error("Response body is null")
+                when (response.code()) {
+                    200 -> {
+                        val paymentHistoryResponse = response.body()
+                        if (paymentHistoryResponse != null) {
+                            _paymentHistory.value = PaymentHistoryState.Success(paymentHistoryResponse)
+                        } else {
+                            _paymentHistory.value = PaymentHistoryState.Error("Response body is null")
+                        }
                     }
-                } else {
-                    _paymentHistory.value = PaymentHistoryState.Error("Error: ${response.code()}")
+                    204 -> {
+                        _paymentHistory.value = PaymentHistoryState.NoContent
+                    }
+                    else -> {
+                        _paymentHistory.value = PaymentHistoryState.Error("Error: ${response.code()}")
+                    }
                 }
             } catch (e: Exception) {
                 _paymentHistory.value = PaymentHistoryState.Error("Network error: ${e.message}")
@@ -76,8 +81,8 @@ class PaymentViewModel(
 
 sealed class PaymentHistoryState {
     object Initial : PaymentHistoryState()
-    object Loading : PaymentHistoryState()
     data class Success(val data: PaymentHistoryResponse) : PaymentHistoryState()
+    object NoContent : PaymentHistoryState()
     data class Error(val message: String) : PaymentHistoryState()
 }
 

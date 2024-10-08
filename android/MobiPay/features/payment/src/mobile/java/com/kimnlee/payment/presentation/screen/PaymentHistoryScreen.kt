@@ -89,11 +89,6 @@ fun PaymentHistoryScreen(
         containerColor = MobiBgGray
     ) { innerPadding ->
         when (paymentHistoryState) {
-            is PaymentHistoryState.Loading -> {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
-                }
-            }
             is PaymentHistoryState.Success -> {
                 val paymentHistory = (paymentHistoryState as PaymentHistoryState.Success).data
                 LazyColumn(
@@ -111,14 +106,25 @@ fun PaymentHistoryScreen(
                     }
                 }
             }
-            is PaymentHistoryState.Error -> {
-                Text(
-                    text = "Error: ${(paymentHistoryState as PaymentHistoryState.Error).message}",
-                    color = Color.Red,
-                    modifier = Modifier.padding(16.dp)
-                )
+            is PaymentHistoryState.NoContent -> {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(
+                        text = "결제 내역이 없어요",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MobiTextDarkGray
+                    )
+                }
             }
-            else -> {}
+            is PaymentHistoryState.Error -> {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(
+                        text = "Error: ${(paymentHistoryState as PaymentHistoryState.Error).message}",
+                        color = Color.Red,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                }
+            }
+            PaymentHistoryState.Initial -> {}
         }
     }
 }
