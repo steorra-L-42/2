@@ -13,8 +13,8 @@ import androidx.car.app.model.Action
 import androidx.car.app.model.ActionStrip
 import androidx.car.app.model.CarColor
 import androidx.car.app.model.CarIcon
-import androidx.car.app.model.Pane
-import androidx.car.app.model.PaneTemplate
+import androidx.car.app.model.ItemList
+import androidx.car.app.model.ListTemplate
 import androidx.car.app.model.Row
 import androidx.car.app.model.Template
 import androidx.car.app.navigation.model.NavigationTemplate
@@ -36,7 +36,6 @@ import com.mapbox.androidauto.navigation.speedlimit.CarSpeedLimitRenderer
 import com.mapbox.androidauto.preview.CarRouteLineRenderer
 import com.mapbox.androidauto.screenmanager.MapboxScreen
 import com.mapbox.androidauto.screenmanager.MapboxScreenManager
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 
 internal class FreeDriveCarScreen @UiThread constructor(
     private val mapboxCarContext: MapboxCarContext
@@ -56,6 +55,7 @@ internal class FreeDriveCarScreen @UiThread constructor(
     private var fcmContent: String? = null
     private var showFcmContent = false
     private var roomId: String? = null
+    private var merchantName: String? = null
     private var isCallStarted = false
     private lateinit var uiUpdateReceiver: BroadcastReceiver
     private lateinit var webRTCManager: WebRTCManager
@@ -68,10 +68,12 @@ internal class FreeDriveCarScreen @UiThread constructor(
         uiUpdateReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 Log.d("uiUpdateReceiver", "Broadcast received: ${intent?.getStringExtra("new_text")}")
-                intent?.getStringExtra("new_text")?.let { newText ->
+
+                intent?.getStringExtra("menus")?.let { newText ->
                     fcmContent = newText
                     showFcmContent = true
                     roomId = intent.getStringExtra("room_id") ?: "1"
+                    merchantName = intent.getStringExtra("merchant_name") ?: "모비페이 가맹점 메뉴 (음성주문 가능)"
 
                     if (!this@FreeDriveCarScreen::webRTCManager.isInitialized) {
                         webRTCManager = WebRTCManager(carContext)
@@ -135,16 +137,16 @@ internal class FreeDriveCarScreen @UiThread constructor(
     }
 
     private fun getFcmContentTemplate(): Template {
-        val rows = fcmContent?.split("\n")?.map { menuItem ->
+
+        val menuRows = fcmContent?.split("\n")?.map { menuItem ->
             Row.Builder().setTitle(menuItem).build()
         } ?: listOf()
 
-        val paneBuilder = Pane.Builder()
-        rows.forEach { paneBuilder.addRow(it) }
+        val itemListBuilder = ItemList.Builder()
+        menuRows.forEach { itemListBuilder.addItem(it) }
 
-        // Add the call button
         val callButton = Action.Builder()
-            .setTitle(if (isCallStarted) "End Call" else "Start Call")
+            .setTitle(if (isCallStarted) "음성 주문 종료" else "음성 주문 연결")
             .setOnClickListener {
                 if (!isCallStarted) {
                     webRTCManager.startCall()
@@ -157,11 +159,12 @@ internal class FreeDriveCarScreen @UiThread constructor(
             }
             .build()
 
-        paneBuilder.addAction(callButton)
-
-        // 뒤로가기 버튼
-        val customBackAction = Action.Builder()
-            .setTitle("뒤로 가기")
+        val backAction = Action.Builder()
+            .setIcon(
+                CarIcon.Builder(
+                    IconCompat.createWithResource(carContext, R.drawable.ic_mobi_back)
+                ).build()
+            )
             .setOnClickListener {
                 if (isCallStarted) {
                     webRTCManager.hangup()
@@ -172,11 +175,21 @@ internal class FreeDriveCarScreen @UiThread constructor(
             }
             .build()
 
-        paneBuilder.addAction(customBackAction)
-
-        return PaneTemplate.Builder(paneBuilder.build())
+        return ListTemplate.Builder()
+            .setTitle(merchantName!!)
+            .setHeaderAction(Action.APP_ICON) // Show the app icon in the header
+            .setSingleList(itemListBuilder.build()) // Add the scrollable item list
+            .setActionStrip(
+                ActionStrip.Builder()
+                    .addAction(callButton) // Add the custom call action button
+                    .addAction(backAction) // Add the icon-based back action (no custom title)
+                    .build()
+            )
             .build()
     }
+
+
+
 
     private fun customBuildSearchAction(): Action = Action.Builder()
         .setIcon(
