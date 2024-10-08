@@ -12,17 +12,15 @@
     @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100..900&display=swap');
   </style>
   <script src="https://unpkg.com/idb@6.1.5/build/iife/index-min.js"></script>
+  <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 
   <!-- TensorFlow.js 불러옴 -->
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
   <!-- COCO-SSD 모델 불러옴 -->
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@latest"></script>
-
-  <!-- 자신의 스크립트 -->
-  <script src="js/script.js" defer></script>
-
-  <!-- Alpine.js 불러옴 -->
-  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="js/script.js"></script>
+  <!-- 디버깅 방지 도구 -->
+  <!-- <script disable-devtool-auto src="https://cdn.jsdelivr.net/npm/disable-devtool"></script> -->
 </head>
 <body class="bg-blue-gray-50" x-data="initApp()" x-init="initVideo();">
 <div class="hide-print flex flex-row h-screen antialiased text-blue-gray-800">
@@ -144,34 +142,32 @@
         </div>
 
         <!-- 오른쪽 영역 -->
-<!--        <div x-data="app">-->
-          <template x-if="entryTime === null || isNaN(entryTime)">
-            <div class="select-none bg-blue-gray-100 rounded-3xl flex flex-wrap content-center justify-center h-full w-[500px] opacity-25">
-              <p class="text-4xl font-bold">
-                인식된 차량이 없습니다.
-                </br>
-                잠시 기다려주세요.
-              </p>
+        <div x-show="entryTime === ''">
+          <div class="select-none bg-blue-gray-100 rounded-3xl flex flex-wrap content-center justify-center h-full w-[500px] opacity-25">
+            <p class="text-4xl font-bold">
+              인식된 차량이 없습니다.
+              <br>
+              잠시 기다려주세요.
+            </p>
+          </div>
+        </div>
+
+        <div x-show="entryTime !== ''">
+          <div class="select-none bg-blue-gray-100 opacity-70 rounded-3xl flex flex-col justify-center h-full w-[500px] p-8">
+            <div class="font-bold text-left space-y-4 mt-10">
+              <p class="text-3xl text-blue-800 mt-4">입차 시간 :</p>
+              <div class="text-5xl text-black" x-text="prettyEntryDate"></div>
+              <div class="text-5xl text-black" x-text="prettyEntryTime"></div>
+
+              <p class="text-3xl text-blue-800 mt-4">출차 시간 :</p>
+              <div class="text-5xl text-black" x-text="prettyExitDate"></div>
+              <div class="text-5xl text-black" x-text="prettyExitTime"></div>
+
+              <p class="text-3xl text-blue-800 mt-4">결제 금액 :</p>
+              <div class="text-5xl text-black" x-text="paymentBalance"></div>
             </div>
-          </template>
-
-          <template x-if="entryTime !== null && !isNaN(entryTime)">
-            <div class="select-none bg-blue-gray-100 opacity-70 rounded-3xl flex flex-col justify-center h-full w-[500px] p-8">
-              <div class="font-bold text-left space-y-4 mt-10">
-                <p class="text-3xl text-blue-800 mt-4">입차 시간 :</p>
-                <div class="text-5xl text-black" x-text="prettyEntryDate"></div>
-                <div class="text-5xl text-black" x-text="prettyEntryTime"></div>
-
-                <p class="text-3xl text-blue-800 mt-4">출차 시간 :</p>
-                <div class="text-5xl text-black" x-text="prettyExitDate"></div>
-                <div class="text-5xl text-black" x-text="prettyExitTime"></div>
-
-                <p class="text-3xl text-blue-800 mt-4">결제 금액 :</p>
-                <div class="text-5xl text-black" x-text="paymentBalance"></div>
-              </div>
-            </div>
-          </template>
-
+          </div>
+        </div>
       </div>
     </div>
   </div>

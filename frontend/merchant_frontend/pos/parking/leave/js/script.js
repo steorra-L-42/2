@@ -57,12 +57,12 @@ function initApp() {
     detectionStopped: false,
     manualLpno: '',
     cameraDevices: [],
-    prettyEntryDate: null,
-    prettyEntryTime: null,
-    prettyExitDate: null,
-    prettyExitTime: null,
+    prettyEntryDate: "",
+    prettyEntryTime: "",
+    prettyExitDate: "",
+    prettyExitTime: "",
     paymentBalance: 0,
-    entryTime: null,
+    entryTime: "",
 
     initVideo() {
       this.video = document.getElementById('video');
@@ -353,16 +353,17 @@ function initApp() {
             this.lpno = null;
             this.isMobiUser = false;
             this.cart = [];
-            this.prettyExitDate = null;
-            this.prettyExitTime = null;
-            this.prettyEntryDate = null;
-            this.prettyEntryTime = null;
-            this.entryTime = null;
+            this.prettyExitDate = "";
+            this.prettyExitTime = "";
+            this.prettyEntryDate = "";
+            this.prettyEntryTime = "";
+            console.log(this.entryTime);
+            this.entryTime = "";
+            console.log(this.entryTime);
             this.paymentBalance = 0;
             this.socket.close();
-
-            console.log(this.entryTime);
             alert('결제 성공');
+            this.resumeDetection();
           } else {
             this.isLoading = false;
 
@@ -467,35 +468,40 @@ function initApp() {
                             const jsonResponse1 = await response1.json(); // 응답을 JSON 형태로 파싱
 
                             const entryDate = new Date(jsonResponse1.entry);
-                            self.$data.entryTime = entryDate;
+                            if (isNaN(entryDate.getTime())) {
+                              alert("입차 하지 않은 차량 입니다.");
+                              this.resumeDetection();
+                            } else {
+                              self.$data.entryTime = entryDate;
 
-                            self.$data.prettyEntryDate = `${entryDate.getFullYear()}-${(entryDate.getMonth() + 1).toString().padStart(2, '0')}-${entryDate.getDate().toString().padStart(2, '0')}`;
-                            self.$data.prettyEntryTime = `${entryDate.getHours()}시 ${entryDate.getMinutes()}분 ${entryDate.getSeconds()}초`;
+                              self.$data.prettyEntryDate = `${entryDate.getFullYear()}-${(entryDate.getMonth() + 1).toString().padStart(2, '0')}-${entryDate.getDate().toString().padStart(2, '0')}`;
+                              self.$data.prettyEntryTime = `${entryDate.getHours()}시 ${entryDate.getMinutes()}분 ${entryDate.getSeconds()}초`;
 
-                            const exitDate = new Date(jsonResponse1.exit);
-                            self.$data.prettyExitDate = `${exitDate.getFullYear()}-${(exitDate.getMonth() + 1).toString().padStart(2, '0')}-${exitDate.getDate().toString().padStart(2, '0')}`;
-                            self.$data.prettyExitTime = `${exitDate.getHours()}시 ${exitDate.getMinutes()}분 ${exitDate.getSeconds()}초`;
+                              const exitDate = new Date(jsonResponse1.exit);
+                              self.$data.prettyExitDate = `${exitDate.getFullYear()}-${(exitDate.getMonth() + 1).toString().padStart(2, '0')}-${exitDate.getDate().toString().padStart(2, '0')}`;
+                              self.$data.prettyExitTime = `${exitDate.getHours()}시 ${exitDate.getMinutes()}분 ${exitDate.getSeconds()}초`;
 
-                            self.$data.paymentBalance = jsonResponse1.paymentBalance;
+                              self.$data.paymentBalance = jsonResponse1.paymentBalance;
 
-                            console.log("출차 시간 : " + self.$data.prettyEntryTime);
-                            console.log("출차 시 요금 : " + self.$data.paymentBalance);
+                              console.log("출차 시간 : " + self.$data.prettyEntryTime);
+                              console.log("출차 시 요금 : " + self.$data.paymentBalance);
 
-                            console.log("출차 완료되었음. 결제 요청 보냅니다.");
-                            // 두 번째 요청
-                            const paymentRequestData = {
-                              "entry": jsonResponse1.entry,
-                              "exit": jsonResponse1.exit,
-                              "paymentBalance": jsonResponse1.paymentBalance,
-                              "carNumber": self.$data.lpno
-                              // 필요한 추가 데이터가 있다면 여기에 추가
-                            };
+                              console.log("출차 완료되었음. 결제 요청 보냅니다.");
+                              // 두 번째 요청
+                              const paymentRequestData = {
+                                "entry": jsonResponse1.entry,
+                                "exit": jsonResponse1.exit,
+                                "paymentBalance": jsonResponse1.paymentBalance,
+                                "carNumber": self.$data.lpno
+                                // 필요한 추가 데이터가 있다면 여기에 추가
+                              };
 
-                            console.log(paymentRequestData);
+                              console.log(paymentRequestData);
 
-                            this.requestPayMobi(paymentRequestData);
-                            console.log("requestPayMobi 끝");
-                            console.log("detection을 resume하는 함수 호출완료");
+                              this.requestPayMobi(paymentRequestData);
+                              console.log("requestPayMobi 끝");
+                              console.log("detection을 resume하는 함수 호출완료");
+                            }
 
                           } catch (error) {
                             console.log('Fetch error:', error); // 에러 발생 시 콘솔에 출력
