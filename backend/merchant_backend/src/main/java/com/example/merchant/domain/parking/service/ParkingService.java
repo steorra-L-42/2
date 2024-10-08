@@ -2,10 +2,12 @@ package com.example.merchant.domain.parking.service;
 
 import com.example.merchant.domain.parking.dto.ParkingEntryRequest;
 import com.example.merchant.domain.parking.dto.ParkingEntryResponse;
+import com.example.merchant.domain.parking.dto.ParkingEntryTimeResponse;
 import com.example.merchant.domain.parking.dto.ParkingExitRequest;
 import com.example.merchant.domain.parking.dto.ParkingExitResponse;
 import com.example.merchant.domain.parking.entity.Parking;
 import com.example.merchant.domain.parking.error.DuplicatedParkingException;
+import com.example.merchant.domain.parking.error.InvalidCarNumberException;
 import com.example.merchant.domain.parking.error.InvalidMerApiKeyException;
 import com.example.merchant.domain.parking.error.MultipleNotPaidException;
 import com.example.merchant.domain.parking.error.NotExistParkingException;
@@ -13,7 +15,6 @@ import com.example.merchant.domain.parking.repository.ParkingRepository;
 import com.example.merchant.util.credential.CredentialUtil;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,8 +25,26 @@ public class ParkingService {
     private final ParkingRepository parkingRepository;
     private final CredentialUtil credentialUtil;
 
+    public ParkingEntryTimeResponse entryGet(String carNumber) {
+
+        if (carNumber.length() < 7 || carNumber.length() > 8) {
+            throw new InvalidCarNumberException();
+        }
+
+        List<Parking> parkings = parkingRepository.findAllByNumberAndPaidFalse(carNumber);
+
+        if(parkings.isEmpty()) {
+            throw new NotExistParkingException();
+        }
+        if (parkings.size() > 1) {
+            throw new MultipleNotPaidException();
+        }
+
+        return ParkingEntryTimeResponse.from(parkings.get(0));
+    }
+
     @Transactional
-    public ParkingEntryResponse entry(ParkingEntryRequest request, String merApiKey) {
+    public ParkingEntryResponse entryPost(ParkingEntryRequest request, String merApiKey) {
 
         validateMerApiKey(merApiKey);
         validateDuplicateParking(request.getCarNumber());
@@ -74,4 +93,5 @@ public class ParkingService {
             throw new MultipleNotPaidException();
         }
     }
+
 }
