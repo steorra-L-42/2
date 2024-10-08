@@ -76,3 +76,9 @@ data class AutoPaymentCardResponse(
     val ownedCardId: Int,
     val autoPayStatus: Boolean
 )
+
+// 마이 데이타 동의 설정
+data class MyDataConsentResponse(
+    val mobiUserId: Int,
+    val myDataConsent: Boolean
+)
