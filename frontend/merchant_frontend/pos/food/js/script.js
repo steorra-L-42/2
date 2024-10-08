@@ -56,6 +56,7 @@ function initApp() {
     lpnoCounter: 0,
     detectionStopped: false, 
     manualLpno: '',
+    cameraDevices: [],
 
     initVideo() {
       this.video = document.getElementById('video');
@@ -84,7 +85,7 @@ function initApp() {
         const devices = await navigator.mediaDevices.enumerateDevices();
         this.cameraDevices = devices.filter(device => device.kind === 'videoinput');
       } catch (error) {
-        console.error('Failed to enumerate devices:', error);
+        console.error('카메라 뭐뭐 있는지 파악 실패:', error);
       }
     },
 
