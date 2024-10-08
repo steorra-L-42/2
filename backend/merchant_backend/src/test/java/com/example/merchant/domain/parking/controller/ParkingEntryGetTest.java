@@ -10,6 +10,7 @@ import com.example.merchant.domain.parking.dto.ParkingEntryTimeResponse;
 import com.example.merchant.domain.parking.entity.Parking;
 import com.example.merchant.domain.parking.repository.ParkingRepository;
 import com.example.merchant.domain.parking.util.ParkingUtil;
+import com.example.merchant.util.ParkingTestUtil;
 import com.example.merchant.util.TimeUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.LocalDateTime;
@@ -35,22 +36,22 @@ public class ParkingEntryGetTest {
     private final WebApplicationContext context;
     private final ParkingRepository parkingRepository;
     private final ObjectMapper objectMapper;
-
-    @Autowired
     private MockMvc mockMvc;
 
     @Autowired
     public ParkingEntryGetTest(ParkingRepository parkingRepository, ObjectMapper objectMapper,
-                               WebApplicationContext context) {
+                               WebApplicationContext context, MockMvc mockMvc) {
         this.parkingRepository = parkingRepository;
         this.objectMapper = objectMapper;
         this.context = context;
+        this.mockMvc = mockMvc;
     }
 
     @BeforeEach
     void setUp() {
         parkingRepository.deleteAll();
     }
+
     @BeforeEach()
     void EncodingSetUp() {
         this.mockMvc = MockMvcBuilders.webAppContextSetup(context)
@@ -161,12 +162,8 @@ public class ParkingEntryGetTest {
                     assertThat(actual.getParkingId()).isEqualTo(finalParking.getId());
                     assertThat(actual.getCarNumber()).isEqualTo(finalParking.getNumber());
                     assertThat(TimeUtil.isSimilarDateTime(actual.getEntry(), finalParking.getEntry())).isTrue();
-                    assertThat(isWithinOneHundredWon(actual.getPaymentBalance(), expectedPaymentBalance)).isTrue();
+                    assertThat(ParkingTestUtil.isWithinOneHundredWon(actual.getPaymentBalance(), expectedPaymentBalance)).isTrue();
                 });
     }
 
-    // 100원 이내로 요금이 차이나는 경우 true를 반환
-    private boolean isWithinOneHundredWon(int actual, int expected) {
-        return expected - 100 <= actual && actual <= expected + 100;
-    }
 }
