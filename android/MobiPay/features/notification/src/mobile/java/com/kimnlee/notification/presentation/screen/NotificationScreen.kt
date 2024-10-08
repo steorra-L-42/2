@@ -39,6 +39,18 @@ fun NotificationScreen(
     var selectedTab by remember { mutableStateOf(0) }
     val tabs = listOf("전체", "결제", "멤버")
 
+    var allNotifications by remember { mutableStateOf(listOf<Notification>()) }
+    var paymentNotifications by remember { mutableStateOf(listOf<Notification>()) }
+    var invitationNotifications by remember { mutableStateOf(listOf<Notification>()) }
+
+    LaunchedEffect(Unit) {
+        loadNotifications(notificationRepository) { all, payment, invitation ->
+            allNotifications = all
+            paymentNotifications = payment
+            invitationNotifications = invitation
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -319,4 +331,16 @@ fun EmptyNotificationState() {
             )
         }
     }
+}
+
+private fun loadNotifications(
+    notificationRepository: NotificationRepository,
+    onNotificationsLoaded: (List<Notification>, List<Notification>, List<Notification>) -> Unit
+) {
+    val allNotifications = (notificationRepository.paymentRequestMessages + notificationRepository.invitationMessages)
+        .sortedByDescending { it.timestamp }
+    val paymentNotifications = notificationRepository.paymentRequestMessages.sortedByDescending { it.timestamp }
+    val invitationNotifications = notificationRepository.invitationMessages.sortedByDescending { it.timestamp }
+
+    onNotificationsLoaded(allNotifications, paymentNotifications, invitationNotifications)
 }
