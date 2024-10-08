@@ -220,19 +220,17 @@ fun VehicleManagementDetailScreen(
             modifier = Modifier.align(Alignment.TopEnd)
         ) {
             Box {
+                val notificationIcon = if (hasNewNotifications) {
+                    painterResource(id = com.kimnlee.common.R.drawable.bell_new)
+                } else {
+                    painterResource(id = com.kimnlee.common.R.drawable.bell)
+                }
                 Icon(
-                    imageVector = Icons.Outlined.Notifications,
+                    painter = notificationIcon,
                     contentDescription = "알림",
+                    tint = Color.Unspecified,
                     modifier = Modifier.size(30.dp)
                 )
-                if (hasNewNotifications) {
-                    Box(
-                        modifier = Modifier
-                            .size(8.dp)
-                            .background(Color.Red, shape = CircleShape)
-                            .align(Alignment.TopEnd)
-                    )
-                }
             }
         }
     }

@@ -68,6 +68,8 @@ class FCMService : FirebaseMessagingService() {
 
     private lateinit var notificationManager: MobiNotificationManager
 
+    private lateinit var notificationRepository: NotificationRepository
+
     private val fcmApi: Retrofit? by lazy {
         apiClient?.fcmApi
     }
@@ -112,6 +114,7 @@ class FCMService : FirebaseMessagingService() {
         Log.d(TAG, "onCreate: FCM onCreate")
 
         initializeDependencies()
+        notificationRepository = NotificationRepository(applicationContext)
 
         // FCM 토큰 확인
         FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
@@ -160,7 +163,7 @@ class FCMService : FirebaseMessagingService() {
                             timestamp = LocalDateTime.now(),
                             type = NotificationType.PAYMENT
                         )
-                        NotificationRepository.addPaymentRequestNotification(notification)
+                        notificationRepository.addPaymentRequestNotification(notification)
 
                         paymentOperations?.processFCM(fcmData)
                     }
@@ -184,7 +187,7 @@ class FCMService : FirebaseMessagingService() {
                         timestamp = LocalDateTime.now(),
                         type = NotificationType.MEMBER
                     )
-                    NotificationRepository.addInvitationNotification(notification)
+                    notificationRepository.addInvitationNotification(notification)
 
                     memberInvitationOperations?.processFCM(fcmDataForInvitation)
                 }
