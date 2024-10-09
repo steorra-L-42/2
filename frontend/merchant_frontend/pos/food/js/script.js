@@ -84,14 +84,19 @@ function initApp() {
     async detectCameras() {
       try {
         const devices = await navigator.mediaDevices.enumerateDevices();
+        console.log("Devices detected:", devices);
         this.cameraDevices = devices.filter(device => device.kind === 'videoinput');
+        if (this.cameraDevices.length === 0) {
+          console.error("No video input devices found.");
+        }
       } catch (error) {
-        console.error('카메라 뭐뭐 있는지 파악 실패:', error);
+        console.error('Failed to detect cameras:', error);
       }
     },
 
     async selectCamera(deviceId) {
       try {
+        console.log("Selected camera deviceId:", deviceId);
         const stream = await navigator.mediaDevices.getUserMedia({
           video: {
             deviceId: { exact: deviceId },
@@ -100,7 +105,6 @@ function initApp() {
             frameRate: { ideal: 60 }
           }
         });
-
         this.video.srcObject = stream;
         this.video.play();
         this.closeCameraChooseModal();
@@ -255,6 +259,147 @@ function initApp() {
       sound.onended = () => delete(sound);
     },
 
+    joinWebRTCRoom(roomId) {
+      const pcConfig = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
+      let localStream;
+      let peerConnections = {};
+      let mySocketId;
+      
+      const SOCKET_SERVER_URL = 'wss://anpr.mobipay.kr/';
+      
+      async function getLocalStream() {
+          try {
+              const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+              localStream = stream;
+          } catch (error) {
+              console.error('Error getting local stream:', error);
+          }
+      }
+      
+      const socket = io(SOCKET_SERVER_URL, {
+          transports: ['websocket'],
+          path: '/ws/'
+      });
+
+      getLocalStream();
+
+      const callStatusElement = document.getElementById('call-status');
+      callStatusElement.textContent = "음성 주문 대기중";
+      callStatusElement.classList.remove('bg-gray-400');
+      callStatusElement.classList.add('bg-lime-500'); 
+
+      socket.on('connect', () => {
+          console.log('Connected to WebRTC server');
+          mySocketId = socket.id;
+          socket.emit('join_room', { room: roomId });
+      });
+
+      socket.on('connect_error', (error) => {
+          console.error('WebRTC Socket.IO connection error:', error);
+      });
+
+      socket.on('all_users', (users) => {
+          console.log('All users in room:', users);
+          users.forEach(userID => {
+              if (userID !== mySocketId) {
+                  createPeerConnection(userID);
+              }
+          });
+      });
+
+      socket.on('getOffer', async (data) => {
+          console.log('Received offer from', data.offerSendID);
+          const pc = createPeerConnection(data.offerSendID);
+          await pc.setRemoteDescription(new RTCSessionDescription({ type: 'offer', sdp: data.sdp }));
+          const answer = await pc.createAnswer();
+          await pc.setLocalDescription(answer);
+          socket.emit('answer', {
+              sdp: answer.sdp,
+              answerSendID: mySocketId,
+              answerReceiveID: data.offerSendID
+          });
+      });
+
+      socket.on('getAnswer', async (data) => {
+          console.log('Received answer from', data.answerSendID);
+          const pc = peerConnections[data.answerSendID];
+          await pc.setRemoteDescription(new RTCSessionDescription({ type: 'answer', sdp: data.sdp }));
+      });
+
+      socket.on('getCandidate', async (data) => {
+          console.log('Received candidate from', data.candidateSendID);
+          const pc = peerConnections[data.candidateSendID];
+          await pc.addIceCandidate(new RTCIceCandidate({
+              sdpMid: data.sdpMid,
+              sdpMLineIndex: data.sdpMLineIndex,
+              candidate: data.candidate
+          }));
+      });
+
+      socket.on('user_exit', (data) => {
+          console.log('User exited:', data.id);
+          if (peerConnections[data.id]) {
+              peerConnections[data.id].close();
+              delete peerConnections[data.id];
+          }
+      });
+
+      function createPeerConnection(remoteSocketId) {
+          if (peerConnections[remoteSocketId]) {
+              return peerConnections[remoteSocketId];
+          }
+
+          const pc = new RTCPeerConnection(pcConfig);
+          peerConnections[remoteSocketId] = pc;
+
+          pc.onicecandidate = (event) => {
+              if (event.candidate) {
+                  socket.emit('candidate', {
+                      candidate: event.candidate.candidate,
+                      sdpMid: event.candidate.sdpMid,
+                      sdpMLineIndex: event.candidate.sdpMLineIndex,
+                      candidateSendID: mySocketId,
+                      candidateReceiveID: remoteSocketId
+                  });
+              }
+          };
+
+          pc.ontrack = (event) => {
+              console.log('Remote stream received');
+              const remoteAudio = new Audio();
+              remoteAudio.srcObject = event.streams[0];
+              remoteAudio.play(); 
+              callStatusElement.textContent = "음성 주문 연결됨";
+              callStatusElement.classList.remove('bg-lime-500', 'bg-yellow-500');
+              callStatusElement.classList.add('bg-green-500');
+          };
+
+          localStream.getTracks().forEach((track) => {
+              pc.addTrack(track, localStream);
+          });
+
+          if (mySocketId < remoteSocketId) {
+              createOffer(pc, remoteSocketId);
+          }
+
+          return pc;
+      }
+
+      async function createOffer(pc, remoteSocketId) {
+          try {
+              const offer = await pc.createOffer();
+              await pc.setLocalDescription(offer);
+              socket.emit('offer', {
+                  sdp: offer.sdp,
+                  offerSendID: mySocketId,
+                  offerReceiveID: remoteSocketId
+              });
+          } catch (error) {
+              console.error('Error creating offer:', error);
+          }
+      }
+  },
+
     
     cancelLoading() {
       if (this.socket) {
@@ -403,6 +548,11 @@ function initApp() {
                           self.detectionStopped = true;
                           self.$data.lpno = detectedLpno;
                           self.$data.isMobiUser = true;
+                          const randomRoomId = Math.floor(Math.random() * 100000);
+                          sendMenuList(MERCHANT_TYPE_URL, self.$data.lpno, randomRoomId);
+                          console.log("Joining WebRTC room with ID:", randomRoomId);
+                          self.joinWebRTCRoom(randomRoomId);
+
 
                           document.querySelector('.flex-col.items-center.py-4').classList.add('bg-blue-300');
                         } else {
@@ -516,6 +666,38 @@ function initApp() {
     },
     // 결제 취소
   };
+
+  async function sendMenuList(merchantType, carNumber, roomId) {
+    const info = "아메리카노(HOT/ICE)#3800%카페라떼(HOT/ICE)#4500%카푸치노(HOT/ICE)#5100%쿠키#1600%마카롱#2400%크로와상#2200%잠봉뵈르#4400";
+    
+    const menuListRequest = {
+      carNumber: carNumber,
+      info: info,
+      roomId: roomId
+    };
+
+    const apiUrl = `https://merchant.mobipay.kr/api/v1/merchants/${merchantType}/menu-list`;
+
+    try {
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'merApikey': MER_API_KEY,
+        },
+        body: JSON.stringify(menuListRequest)
+      });
+
+      if (!response.ok) {
+        throw new Error(`Menu list POST failed with status: ${response.status}`);
+      }
+
+      console.log('Menu list POST successful');
+      return response;
+    } catch (error) {
+      console.error('Failed to send menu list:', error);
+    }
+  }
 
   async function postRequest(api, data = {}) {
     console.log(data);

@@ -21,6 +21,8 @@
     <uses-permission android:name="android.permission.NEARBY_WIFI_DEVICES" />
     <uses-permission android:name="android.permission.NFC" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.car.permission.CAR_MICROPHONE" />
+    <uses-permission android:name="androidx.car.app.ACCESS_SURFACE" />
 
     <!-- Conflict 해결 -->
     <!--        android:roundIcon="@mipmap/ic_launcher_round"-->

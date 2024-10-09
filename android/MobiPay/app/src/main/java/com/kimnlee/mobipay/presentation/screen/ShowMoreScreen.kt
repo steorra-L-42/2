@@ -158,7 +158,7 @@ fun ShowMoreScreen(
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     MenuItem("결제 내역", "💳") { navController.navigate("paymenthistory") }
                     MenuItem("초대 대기", "📩") { navController.navigate("memberinvitation_invitationwaiting") }
-                    MenuItem("결제화면(임시)", "💰") { navController.navigate("payment_requestmanualpay?fcmData=${fcmDataJson}") }
+                    MenuItem("Developed by KIM&LEE Dev.", "\uD83D\uDCBB") {  }
                 }
             }
 
@@ -259,11 +259,13 @@ fun MenuItem(text: String, emoji: String, onClick: () -> Unit) {
                 color = MobiTextAlmostBlack
             )
             Spacer(modifier = Modifier.weight(1f))
-            Icon(
-                imageVector = Icons.Default.ArrowForward,
-                contentDescription = "Navigate",
-                tint = MobiTextDarkGray
-            )
+            if(!text.contains("Developed by")) {
+                Icon(
+                    imageVector = Icons.Default.ArrowForward,
+                    contentDescription = "Navigate",
+                    tint = MobiTextDarkGray
+                )
+            }
         }
     }
 }
