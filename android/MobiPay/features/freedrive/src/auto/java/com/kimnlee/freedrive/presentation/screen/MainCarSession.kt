@@ -4,6 +4,7 @@ import android.Manifest
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -153,7 +154,12 @@ class MainCarSession : Session() {
             title = "모비페이 결제요청"
             onClickListener = OnClickListener {
                 // 결제 처리
-                val paymentApprovalIntent = Intent("com.kimnlee.mobipay.PAYMENT_APPROVAL").apply {
+//                val paymentApprovalIntent = Intent("com.kimnlee.mobipay.PAYMENT_APPROVAL").apply {
+//                    putExtra("fcmData", fcmData)
+//                }
+                val paymentApprovalIntent = Intent().apply {
+                    action = "com.kimnlee.mobipay.PAYMENT_APPROVAL"
+                    setComponent(ComponentName("com.kimnlee.mobipay", "com.kimnlee.payment.PaymentApprovalReceiver"))
                     putExtra("fcmData", fcmData)
                 }
                 Log.d(TAG, "processAlert: 승인 intent 날림")

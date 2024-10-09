@@ -146,6 +146,9 @@ class FCMService : FirebaseMessagingService() {
 
             when (fcmData.type) {
                 FCM_TYPE_PAYMENT_REQUEST -> {
+                    val intent = Intent("com.kimnlee.mobipay.CLOSE_MENU")
+                    LocalBroadcastManager.getInstance(applicationContext).sendBroadcast(intent)
+
                     if (fcmData.lat != null && fcmData.lng != null) {
 
                         val notificationDetails = NotificationDetails(
@@ -208,11 +211,14 @@ class FCMService : FirebaseMessagingService() {
                     )
 
                     notificationManager.showNotification("모비페이 결제취소", "${fcmData.merchantName}\n${moneyFormat(fcmData.paymentBalance!!.toBigInteger())}", pendingIntent)
+                    notificationManager.broadcastForPlainHUN("모비페이 결제취소", "${fcmData.merchantName}\n${moneyFormat(fcmData.paymentBalance!!.toBigInteger())}")
                 }
                 FCM_TYPE_AUTO_PAY_FAILURE -> {
 
                 }
                 FCM_TYPE_PAYMENT_RESULT -> {
+                    val intent = Intent("com.kimnlee.mobipay.CLOSE_MENU")
+                    LocalBroadcastManager.getInstance(applicationContext).sendBroadcast(intent)
                     // 결제 결과화면 표시
                 }
 
