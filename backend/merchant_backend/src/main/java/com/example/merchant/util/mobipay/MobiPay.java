@@ -2,6 +2,8 @@ package com.example.merchant.util.mobipay;
 
 import com.example.merchant.domain.cancel.dto.CancelTransactionResponse;
 import com.example.merchant.domain.cancel.dto.MerchantTransactionResponse;
+import com.example.merchant.domain.menu.dto.MenuListRequest;
+import com.example.merchant.domain.menu.dto.MobiMenuListRequest;
 import com.example.merchant.global.enums.MerchantType;
 import com.example.merchant.util.mobipay.dto.MobiPaymentRequest;
 import com.example.merchant.util.mobipay.dto.MobiPaymentResponse;
@@ -23,5 +25,10 @@ public interface MobiPay {
     // PATCH /api/v1/merchants/{merchant_id}/cancelled-transactions/{transactionUniqueNo}
     // CancelTransactionResponse
     public ResponseEntity<CancelTransactionResponse> cancelTransaction(MerchantType type, Long transactionUniqueNo, Class<CancelTransactionResponse> responseClass);
+
+    // 4. 메뉴 리스트 전달
+    // POST /api/v1/fcm/menu-list
+    public ResponseEntity<?> sendMenuList(MerchantType type, MobiMenuListRequest MobiMenuListRequest);
+
 
 }

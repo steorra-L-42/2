@@ -2,6 +2,8 @@ package com.example.merchant.util.mobipay;
 
 import com.example.merchant.domain.cancel.dto.CancelTransactionResponse;
 import com.example.merchant.domain.cancel.dto.MerchantTransactionResponse;
+import com.example.merchant.domain.menu.dto.MenuListRequest;
+import com.example.merchant.domain.menu.dto.MobiMenuListRequest;
 import com.example.merchant.global.enums.MerchantType;
 import com.example.merchant.util.credential.CredentialUtil;
 import com.example.merchant.util.mobipay.dto.MobiPaymentRequest;
@@ -58,6 +60,13 @@ public class MobiPayImpl implements MobiPay{
         validate(responseEntity);
 
         return responseEntity;
+    }
+
+    @Override
+    public ResponseEntity<?> sendMenuList(MerchantType merchantType, MobiMenuListRequest mobiMenuListRequest) {
+
+        final String url = MOBI_PAY_URL + "/fcm/menu-list";
+        return post(merchantType, mobiMenuListRequest, url, Object.class);
     }
 
     private <R> ResponseEntity<R> get(MerchantType merchantType, String url, Class<R> responseClass) {
