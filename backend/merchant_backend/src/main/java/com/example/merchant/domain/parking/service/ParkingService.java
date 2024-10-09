@@ -75,9 +75,11 @@ public class ParkingService {
 
         validateMerApiKey(merApiKey);
 
-        Parking parking = parkingRepository.findByNumber(request.getCarNumber())
-                .orElseThrow(NotExistParkingException::new);
+        List<Parking> parkings = parkingRepository.findAllByNumberAndPaidFalse(request.getCarNumber());
+        validateExistParking(parkings);
+        validateMultipleNotPaid(parkings);
 
+        Parking parking = parkings.get(0);
         parking.changePaid();
         return PaidChangeResponse.newInstance(parking);
     }

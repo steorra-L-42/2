@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -26,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.kimnlee.cardmanagement.presentation.screen.TextWithShadow
 import com.kimnlee.cardmanagement.presentation.screen.findCardCompany
 import com.kimnlee.cardmanagement.presentation.viewmodel.CardManagementViewModel
 import com.kimnlee.common.ui.theme.MobiBlue
@@ -36,6 +36,8 @@ import com.kimnlee.memberinvitation.presentation.viewmodel.MemberInvitationViewM
 import com.kimnlee.vehiclemanagement.R
 import com.kimnlee.vehiclemanagement.data.model.CarMember
 import com.kimnlee.vehiclemanagement.presentation.viewmodel.VehicleManagementViewModel
+import androidx.compose.ui.text.AnnotatedString
+import com.kimnlee.common.utils.MoneyFormat
 
 private const val TAG = "VehicleManagementDetail"
 
@@ -68,12 +70,14 @@ fun VehicleManagementDetailScreen(
         Log.d(TAG, "VehicleManagementDetailScreen: 차량 모델 NULL! return 하겠음!!!!")
         return
     }
+
     val imageResId = CarModelImageProvider.getImageResId(vehicle?.carModel!!)
 
     val userPhoneNumber by viewModel.userPhoneNumber.collectAsState()
 
     LaunchedEffect(vehicleId) {
         viewModel.requestCarMembers(vehicleId)
+        viewModel.initializeAutoPaymentStatus(vehicleId)
     }
 
     Box(
@@ -140,8 +144,8 @@ fun VehicleManagementDetailScreen(
             ) {
                 Switch(
                     checked = autoPaymentStatus,
-                    onCheckedChange = {
-                        viewModel.toggleAutoPayment(vehicleId, it)
+                    onCheckedChange = { newStatus ->
+                        viewModel.toggleAutoPayment(vehicleId, newStatus)
                     },
                     colors = SwitchDefaults.colors(
                         checkedThumbColor = MobiBlue,
@@ -161,7 +165,7 @@ fun VehicleManagementDetailScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(16.dp)
-                            .height(250.dp)  // 카드 높이를 늘림
+                            .height(250.dp)
                     ) {
                         Image(
                             painter = painterResource(id = findCardCompany(card.cardNo)),
@@ -172,32 +176,18 @@ fun VehicleManagementDetailScreen(
                         Column(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .padding(16.dp),
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally
+                                .padding(start = 24.dp, bottom = 50.dp),
+                            verticalArrangement = Arrangement.Bottom,
+                            horizontalAlignment = Alignment.Start
                         ) {
-                            Text(
+                            TextWithShadow(
                                 text = formatCardNumber(card.cardNo),
-                                color = Color.White,
-                                style = MaterialTheme.typography.titleLarge.copy(
-                                    shadow = Shadow(
-                                        color = Color.Black.copy(alpha = 0.6f),
-                                        offset = Offset(2f, 2f),
-                                        blurRadius = 4f
-                                    )
-                                )
+                                style = MaterialTheme.typography.titleLarge
                             )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = "1회 한도: ${card.oneTimeLimit}원",
-                                color = Color.White,
-                                style = MaterialTheme.typography.bodyLarge.copy(
-                                    shadow = Shadow(
-                                        color = Color.Black.copy(alpha = 0.6f),
-                                        offset = Offset(1f, 1f),
-                                        blurRadius = 2f
-                                    )
-                                )
+                            Spacer(modifier = Modifier.height(30.dp))
+                            TextWithShadow(
+                                text = "1회 한도: ${formatMoney(card.oneTimeLimit)}",
+                                style = MaterialTheme.typography.bodyMedium
                             )
                         }
                     }
@@ -330,4 +320,10 @@ fun formatLicensePlate(number: String): String {
     return number.reversed().chunked(4)
         .joinToString(" ")
         .reversed()
+}
+
+private fun formatMoney(amount: Int): String {
+    val moneyFormat = MoneyFormat()
+    val formattedText = moneyFormat.filter(AnnotatedString(amount.toString()))
+    return formattedText.text.toString()
 }

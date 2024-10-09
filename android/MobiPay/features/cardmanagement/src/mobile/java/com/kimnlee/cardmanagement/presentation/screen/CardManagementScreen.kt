@@ -175,18 +175,18 @@ fun CardItem(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(start = 30.dp, bottom = 50.dp),
+                .padding(start = 20.dp, bottom = 30.dp),
             verticalArrangement = Arrangement.Bottom,
             horizontalAlignment = Alignment.Start
         ) {
             TextWithShadow(
                 text = formatCardNumber(card.cardNo),
-                style = MaterialTheme.typography.titleLarge
+                style = MaterialTheme.typography.titleMedium
             )
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(25.dp))
             TextWithShadow(
                 text = "VALID THRU ${formatExpiryDate(card.cardExpriyDate)}",
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.bodySmall
             )
         }
         Box(

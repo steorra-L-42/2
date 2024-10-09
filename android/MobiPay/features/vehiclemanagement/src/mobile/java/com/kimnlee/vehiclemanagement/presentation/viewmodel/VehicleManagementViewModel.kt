@@ -41,6 +41,29 @@ class VehicleManagementViewModel(
     private val _userPhoneNumber = MutableStateFlow("")
     val userPhoneNumber: StateFlow<String> = _userPhoneNumber
 
+    private val vehicleService: VehicleApiService = apiClient.authenticatedApi.create(VehicleApiService::class.java)
+
+    private val _vehicles = MutableStateFlow<List<Vehicle>>(emptyList())
+    val vehicles: StateFlow<List<Vehicle>> = _vehicles
+
+    private val _apiVehicles = MutableStateFlow<List<VehicleItem>>(emptyList())
+    val apiVehicles: StateFlow<List<VehicleItem>> = _apiVehicles
+
+    private val _registrationStatus = MutableStateFlow<RegistrationStatus>(RegistrationStatus.Idle)
+    val registrationStatus: StateFlow<RegistrationStatus> = _registrationStatus
+
+    private val _carMembers = MutableStateFlow<List<CarMember>>(emptyList())
+    val carMembers: StateFlow<List<CarMember>> = _carMembers
+
+    private val _autoPaymentStatuses = MutableStateFlow<Map<Int, Boolean>>(emptyMap())
+    val autoPaymentStatuses: StateFlow<Map<Int, Boolean>> = _autoPaymentStatuses
+
+    private val _autoPaymentStatus = MutableStateFlow<Boolean>(false)
+    val autoPaymentStatus: StateFlow<Boolean> = _autoPaymentStatus
+
+    private val _hasNewNotifications = MutableStateFlow<Boolean>(false)
+    val hasNewNotifications: StateFlow<Boolean> = _hasNewNotifications
+
     init {
         viewModelScope.launch {
             EventBus.events.collectLatest { event ->
@@ -64,27 +87,6 @@ class VehicleManagementViewModel(
         }
     }
 
-    private val vehicleService: VehicleApiService = apiClient.authenticatedApi.create(VehicleApiService::class.java)
-
-    private val _vehicles = MutableStateFlow<List<Vehicle>>(emptyList())
-    val vehicles: StateFlow<List<Vehicle>> = _vehicles
-
-    private val _apiVehicles = MutableStateFlow<List<VehicleItem>>(emptyList())
-    val apiVehicles: StateFlow<List<VehicleItem>> = _apiVehicles
-
-    private val _registrationStatus = MutableStateFlow<RegistrationStatus>(RegistrationStatus.Idle)
-    val registrationStatus: StateFlow<RegistrationStatus> = _registrationStatus
-
-    private val _carMembers = MutableStateFlow<List<CarMember>>(emptyList())
-    val carMembers: StateFlow<List<CarMember>> = _carMembers
-
-    private val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
-    private val _autoPaymentStatus = MutableStateFlow<Boolean>(sharedPreferences.getBoolean("auto_payment_status", false)) // 초기값 설정
-    val autoPaymentStatus: StateFlow<Boolean> = _autoPaymentStatus
-
-    private val _hasNewNotifications = MutableStateFlow<Boolean>(false)
-    val hasNewNotifications: StateFlow<Boolean> = _hasNewNotifications
-
     // 사용자가 소속된 차량의 목록 불러오기
     fun getUserVehicles() {
         viewModelScope.launch {
@@ -95,7 +97,7 @@ class VehicleManagementViewModel(
                     vehicleResponse?.let { listResponse ->
                         _apiVehicles.value = listResponse.items
 
-                        // API 응답을 기존 Vehicle 형식으로 변환
+                        // API 응답을 기존 Vehicle 형식으로 변환하고 자동 결제 상태 맵 업데이트
                         _vehicles.value = listResponse.items.map { apiVehicle ->
                             Vehicle(
                                 carId = apiVehicle.carId,
@@ -106,6 +108,11 @@ class VehicleManagementViewModel(
                                 carModel = apiVehicle.carModel
                             )
                         }
+
+                        // 각 차량의 자동 결제 상태를 맵에 저장
+                        _autoPaymentStatuses.value = listResponse.items.associate {
+                            it.carId to it.autoPayStatus
+                        }
                     }
                     Log.d(TAG, "차량 목록 가져오기 성공")
                 } else {
@@ -115,6 +122,10 @@ class VehicleManagementViewModel(
                 Log.e("VehicleManagementViewModel", "Error getting vehicles", e)
             }
         }
+    }
+
+    fun getAutoPaymentStatus(carId: Int): Boolean {
+        return _autoPaymentStatuses.value[carId] ?: false
     }
 
     // 차량 등록
@@ -204,19 +215,31 @@ class VehicleManagementViewModel(
                                 }
                             }
                         }
-                        _autoPaymentStatus.value = it.autoPayStatus
+                        // 개별 차량의 자동 결제 상태 업데이트
+                        _autoPaymentStatuses.update { statuses ->
+                            statuses + (carId to it.autoPayStatus)
+                        }
 
-                        sharedPreferences.edit().putBoolean("auto_payment_status", it.autoPayStatus).apply()
+                        // 현재 선택된 차량(디테일 페이지)의 자동 결제 상태 업데이트
+                        _autoPaymentStatus.value = it.autoPayStatus
+                        Log.d(TAG, "Auto payment status updated successfully for car $carId")
                     }
-                    Log.d(TAG, "Auto payment status updated successfully")
                 } else {
-                    Log.e(TAG, "Failed to update auto payment status: ${response.code()}")
+                    Log.e(TAG, "Failed to update auto payment status for car $carId: ${response.code()}")
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "Error updating auto payment status", e)
+                Log.e(TAG, "Error updating auto payment status for car $carId", e)
             }
         }
     }
+
+    fun initializeAutoPaymentStatus(carId: Int) {
+        viewModelScope.launch {
+            val status = getAutoPaymentStatus(carId)
+            _autoPaymentStatus.value = status
+        }
+    }
+
     // 알림 상태 업데이트
     fun updateNotificationStatus(hasNew: Boolean) {
         _hasNewNotifications.value = hasNew

@@ -12,6 +12,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.example.merchant.MerchantApplication;
 import com.example.merchant.domain.parking.dto.PaidChangeRequest;
 import com.example.merchant.domain.parking.dto.ParkingEntryRequest;
+import com.example.merchant.domain.parking.dto.ParkingExitRequest;
 import com.example.merchant.domain.parking.entity.Parking;
 import com.example.merchant.domain.parking.repository.ParkingRepository;
 import com.example.merchant.util.credential.CredentialUtil;
@@ -22,6 +23,7 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -96,9 +98,8 @@ public class ParkingPaidChangeTest {
 
     @ParameterizedTest(name = "{index} : {0}")
     @MethodSource("BadRequestParameter")
-    @DisplayName("entry: 400 BadRequest")
-    public void entryFail(String testName, String carNumber)
-            throws Exception {
+    @DisplayName("paid: 400 BadRequest")
+    public void changePaidFail(String testName, String carNumber) throws Exception {
         // given
         final String url = "/api/v1/merchants/parking/paid";
         final PaidChangeRequest paidChangeRequest = new PaidChangeRequest(carNumber);
@@ -118,9 +119,8 @@ public class ParkingPaidChangeTest {
 
     @ParameterizedTest(name = "{index} : {0}")
     @MethodSource("UnauthorizedParameter")
-    @DisplayName("entry: 401 Unauthorized")
-    public void entryFailUnauthorized(String testName, String invalidMerApiKey)
-            throws Exception {
+    @DisplayName("paid: 401 Unauthorized")
+    public void changePaidFailUnauthorized(String testName, String invalidMerApiKey) throws Exception {
         // given
         final String url = "/api/v1/merchants/parking/paid";
         final PaidChangeRequest paidChangeRequest = new PaidChangeRequest("123가4567");
@@ -138,12 +138,40 @@ public class ParkingPaidChangeTest {
         assertThat(parkingList.size()).isZero();
     }
 
+    @Test
+    @DisplayName("paid: 400 BadRequest - 실패: Parking한 적 있지만 미결제가 여러번인 차량일 때")
+    public void changePaidFailMultipleNotPaid() throws Exception {
+        // given
+        final String url = "/api/v1/merchants/parking/exit";
+        final ParkingExitRequest request = new ParkingExitRequest("123가4567", LocalDateTime.now());
+        final String requestBody = objectMapper.writeValueAsString(request);
+        parkingRepository.save(Parking.builder()
+                .number("123가4567")
+                .entry(LocalDateTime.now().minusDays(1))
+                .build());
+
+        parkingRepository.save(Parking.builder()
+                .number("123가4567")
+                .entry(LocalDateTime.now().minusDays(1))
+                .build());
+
+        // when
+        ResultActions result = mockMvc.perform(patch(url)
+                .header("merApiKey", POS_MER_API_KEY)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody));
+
+        // then
+        result.andExpect(status().isBadRequest());
+        List<Parking> notPaidParkingList = parkingRepository.findAllByNumberAndPaidFalse("123가4567");
+        assertThat(notPaidParkingList.size()).isEqualTo(2);
+    }
+
     // 성공: 모든 값이 올바른 경우 200 OK
     @ParameterizedTest(name = "{index} : {0}")
     @MethodSource("validParameter")
-    @DisplayName("entry: 200 OK")
-    public void entrySuccess(String testName, String carNumber)
-            throws Exception {
+    @DisplayName("paid: 200 OK")
+    public void changePaidSuccess(String testName, String carNumber) throws Exception {
         // given
         ParkingEntryRequest request = mock(ParkingEntryRequest.class);
         when(request.getCarNumber()).thenReturn(carNumber);
