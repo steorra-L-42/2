@@ -248,12 +248,7 @@ fun CarMembersRow(
             .padding(horizontal = 16.dp),
         horizontalArrangement = Arrangement.Center
     ) {
-        val sortedMembers = carMembers.sortedWith(
-            compareBy<CarMember> { member ->
-                member.phoneNumber != userPhoneNumber
-            }.thenBy { it.name }
-        )
-        val displayMembers = sortedMembers.take(3)
+        val displayMembers = carMembers.take(3)
 
         displayMembers.forEachIndexed { index, member ->
             Box(

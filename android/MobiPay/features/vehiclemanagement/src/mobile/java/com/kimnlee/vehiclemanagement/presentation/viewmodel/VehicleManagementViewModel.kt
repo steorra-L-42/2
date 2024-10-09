@@ -177,10 +177,15 @@ class VehicleManagementViewModel(
                 if (response.isSuccessful) {
                     response.body()?.let { carMembersResponse ->
                         val vehicle = _vehicles.value.find { it.carId == carId }
+                        val ownerId = vehicle?.ownerId
                         val sortedMembers = carMembersResponse.items.sortedWith(
-                            compareBy<CarMember> {
-                                it.phoneNumber != _userPhoneNumber.value
-                            }.thenBy { it.name }
+                            compareBy<CarMember> { member ->
+                                when {
+                                    member.memberId == ownerId -> 0 // 오너를 첫 번째로
+                                    member.phoneNumber == _userPhoneNumber.value -> 1 // 현재 사용자를 두 번째로 (오너가 아닌 경우)
+                                    else -> 2 // 다른 멤버들
+                                }
+                            }.thenBy { it.name } // 각 그룹 내에서 이름순으로 정렬
                         )
                         _carMembers.value = sortedMembers
                     }
