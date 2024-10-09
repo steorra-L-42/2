@@ -53,7 +53,7 @@ fun CardDetailScreen(
                             text = "💳",
                             style = MaterialTheme.typography.headlineMedium,
                             fontFamily = FontFamily(Font(R.font.emoji)),
-                            modifier = Modifier.padding(top = 8.dp, end = 8.dp)
+                            modifier = Modifier.padding(top = 4.dp, end = 8.dp)
                         )
                         Text(
                             text = "카드 상세",

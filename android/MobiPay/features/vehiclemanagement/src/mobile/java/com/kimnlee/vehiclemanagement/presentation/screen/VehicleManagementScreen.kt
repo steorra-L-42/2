@@ -52,16 +52,16 @@ fun VehicleManagementScreen(
                             text = "🚗",
                             style = MaterialTheme.typography.headlineMedium,
                             fontFamily = FontFamily(Font(com.kimnlee.common.R.font.emoji)),
-                            fontSize = 24.sp,
+//                            fontSize = 24.sp,
                             modifier = Modifier
-                                .padding(top = 10.dp)
-                                .padding(end = 8.dp)
+//                                .padding(top = 2.dp)
+                                .padding(end = 11.dp)
                         )
                         Text(
                             text = "차량 관리",
                             style = MaterialTheme.typography.headlineMedium,
                             color = MobiTextAlmostBlack,
-                            fontSize = 24.sp,
+//                            fontSize = 24.sp,
                             fontWeight = FontWeight.Bold
                         )
                     }
