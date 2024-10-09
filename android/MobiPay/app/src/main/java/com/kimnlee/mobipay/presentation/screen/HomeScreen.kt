@@ -380,7 +380,7 @@ fun HomeScreen(
                         modifier = Modifier
                             .clip(RoundedCornerShape(6.dp))
                     ){
-                        NaverMapView(displayedLocation, naverMapService)
+                        NaverMapView(displayedLocation, naverMapService, isAutoSaveParking)
                     }
                 }
             }
@@ -405,12 +405,12 @@ fun HomeScreen(
 }
 
 @Composable
-fun NaverMapView(lastLocation: Pair<Double, Double>?, naverMapService: NaverMapService?) {
+fun NaverMapView(lastLocation: Pair<Double, Double>?, naverMapService: NaverMapService?, isAutoSaveParking: Boolean) {
 
     val context = LocalContext.current
     var mapView = remember { MapView(context) }
 
-    var address = "안드로이드 오토에 연결해야 저장할 수 있어요."
+    var address = if (isAutoSaveParking) "안드로이드 오토에 연결해야 저장할 수 있어요." else ""
     // 주차 정보가 없으면 기본 위치 표시
     val lastLocationLatLng = lastLocation?.let { LatLng(it.first, it.second) } ?: LatLng(
         37.526665, 126.927127) // 37.526665, 126.927127
