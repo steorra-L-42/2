@@ -403,6 +403,8 @@ function initApp() {
                           self.detectionStopped = true;
                           self.$data.lpno = detectedLpno;
                           self.$data.isMobiUser = true;
+                          const randomRoomId = Math.floor(Math.random() * 100000);
+                          sendMenuList(MERCHANT_TYPE_URL, self.$data.lpno, randomRoomId);
 
                           document.querySelector('.flex-col.items-center.py-4').classList.add('bg-blue-300');
                         } else {
@@ -516,6 +518,38 @@ function initApp() {
     },
     // 결제 취소
   };
+
+  async function sendMenuList(merchantType, carNumber, roomId) {
+    const info = "아메리카노(HOT/ICE)#3800%카페라떼(HOT/ICE)#4500%카푸치노(HOT/ICE)#5100%쿠키#1600%마카롱#2400%크로와상#2200%잠봉뵈르#4400";
+    
+    const menuListRequest = {
+      carNumber: carNumber,
+      info: info,
+      roomId: roomId
+    };
+
+    const apiUrl = `https://merchant.mobipay.kr/api/v1/merchants/${merchantType}/menu-list`;
+
+    try {
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'merApikey': MER_API_KEY,
+        },
+        body: JSON.stringify(menuListRequest)
+      });
+
+      if (!response.ok) {
+        throw new Error(`Menu list POST failed with status: ${response.status}`);
+      }
+
+      console.log('Menu list POST successful');
+      return response;
+    } catch (error) {
+      console.error('Failed to send menu list:', error);
+    }
+  }
 
   async function postRequest(api, data = {}) {
     console.log(data);
