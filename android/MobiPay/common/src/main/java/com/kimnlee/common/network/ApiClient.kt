@@ -1,25 +1,18 @@
 package com.kimnlee.common.network
 
-import android.content.ContentValues.TAG
-import android.util.Log
 import com.kimnlee.common.BuildConfig
-import com.kimnlee.common.auth.AuthManager
-import com.kimnlee.common.auth.model.ReverseGeocodeResponse
 import okhttp3.Interceptor
 import okhttp3.JavaNetCookieJar
 import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.net.CookieManager
 import java.net.CookiePolicy
-import retrofit2.http.GET
-import retrofit2.http.Header
-import retrofit2.http.Query
 
 class ApiClient private constructor(private val tokenProvider: () -> String?) {
 
     private val baseUrl = BuildConfig.BASE_URL
+    private val baseMenchantUrl = BuildConfig.BASE_MERCHANT_URL
     private val fcmBaseUrl = BuildConfig.FCM_BASE_URL
     private val ocrBaseUrl = BuildConfig.OCR_BASE_URL
 
@@ -53,6 +46,13 @@ class ApiClient private constructor(private val tokenProvider: () -> String?) {
     // AuthToken을 사용하는 Api (백엔드 통신할 때 사용)
     val authenticatedApi: Retrofit = Retrofit.Builder()
         .baseUrl(baseUrl)
+        .client(authenticatedOkHttpClient)
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
+
+
+    val authenticatedMerchantApi: Retrofit = Retrofit.Builder()
+        .baseUrl(baseMenchantUrl)
         .client(authenticatedOkHttpClient)
         .addConverterFactory(GsonConverterFactory.create())
         .build()

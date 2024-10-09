@@ -5,9 +5,14 @@ import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
 import androidx.navigation.navigation
+import com.google.gson.Gson
+import com.kimnlee.common.FCMData
+import com.kimnlee.common.FCMDataForInvitation
 import com.kimnlee.common.components.BottomNavigation
 import com.kimnlee.memberinvitation.presentation.screen.InvitationWaitingScreen
 import com.kimnlee.memberinvitation.presentation.screen.InvitedScreen
@@ -23,8 +28,8 @@ fun NavGraphBuilder.memberInvitationNavGraph(navController: NavHostController, c
             enterTransition = { EnterTransition.None },
             exitTransition = { ExitTransition.None }
         ) { backStackEntry ->
-//            val vehicleId = backStackEntry.arguments?.getString("vehicleId")?.toIntOrNull() ?: -1
-            val vehicleId = 5 //임시로 넣어둔 것
+            val vehicleId = backStackEntry.arguments?.getString("vehicleId")?.toIntOrNull() ?: -1
+//            val vehicleId = 5 //임시로 넣어둔 것
             BottomNavigation(navController) {
                 MemberInvitationScreen(
                     context = context,
@@ -44,7 +49,8 @@ fun NavGraphBuilder.memberInvitationNavGraph(navController: NavHostController, c
             MemberInvitationViaPhoneScreen(
                 onNavigateBack = { navController.navigateUp() },
                 vehicleId = vehicleId,
-                onNavigateToConfirmation = { navController.navigate("member_confirmation/$vehicleId") }
+                context = context,
+                viewModel = memberInvitationViewModel
             )
         }
         composable("member_confirmation/{vehicleId}",
@@ -68,14 +74,32 @@ fun NavGraphBuilder.memberInvitationNavGraph(navController: NavHostController, c
             )
         }
         composable(
-            "memberinvitation_invited",
+            route = "memberinvitation_invited?fcmDataForInvitation={fcmDataForInvitation}",
             enterTransition = { EnterTransition.None },
             exitTransition = { ExitTransition.None },
-        ) {
+            arguments = listOf(
+                navArgument("fcmDataForInvitation") { type = NavType.StringType; nullable = true }
+            ),
+            deepLinks = listOf(navDeepLink { uriPattern = "mobipay://youvegotinvited/?fcmDataForInvitation={fcmDataForInvitation}" })
+        ) { backStackEntry ->
+            val fcmDataJson = backStackEntry.arguments?.getString("fcmDataForInvitation")
+            val fcmDataForInvitation = fcmDataJson?.let { Gson().fromJson(it, FCMDataForInvitation::class.java) }
+
             InvitedScreen(
                 memberInvitationViewModel = memberInvitationViewModel,
-                navController = navController
+                navController = navController,
+                fcmDataForInvitationFromDeeplink = fcmDataForInvitation
             )
         }
+//        composable(
+//            "memberinvitation_invited",
+//            enterTransition = { EnterTransition.None },
+//            exitTransition = { ExitTransition.None },
+//        ) {
+//            InvitedScreen(
+//                memberInvitationViewModel = memberInvitationViewModel,
+//                navController = navController
+//            )
+//        }
     }
 }

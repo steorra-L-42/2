@@ -15,6 +15,8 @@ import com.kimnlee.vehiclemanagement.data.api.VehicleApiService
 import com.kimnlee.vehiclemanagement.data.model.CarMember
 import com.kimnlee.vehiclemanagement.data.model.VehicleItem
 import com.kimnlee.common.auth.AuthManager
+import com.kimnlee.vehiclemanagement.data.api.MerchantApiService
+import com.kimnlee.vehiclemanagement.data.model.PaidParkingLotResponse
 
 class HomeViewModel (apiClient: ApiClient, private val authManager: AuthManager) : ViewModel() {
     private val _naverMapService = MutableStateFlow<NaverMapService?>(apiClient.naverMapService)
@@ -24,6 +26,8 @@ class HomeViewModel (apiClient: ApiClient, private val authManager: AuthManager)
     val hasNewNotifications: StateFlow<Boolean> = _hasNewNotifications
 
     private val vehicleService: VehicleApiService = apiClient.authenticatedApi.create(VehicleApiService::class.java)
+
+    private val merchantService: MerchantApiService = apiClient.authenticatedMerchantApi.create(MerchantApiService::class.java)
 
     private val _vehicles = MutableStateFlow<List<VehicleItem>>(emptyList())
     val vehicles: StateFlow<List<VehicleItem>> = _vehicles
@@ -37,6 +41,9 @@ class HomeViewModel (apiClient: ApiClient, private val authManager: AuthManager)
     private val _userPhoneNumber = MutableStateFlow("")
     val userPhoneNumber: StateFlow<String> = _userPhoneNumber
 
+    private val _paidParkingDetail = MutableStateFlow<PaidParkingLotResponse?>(null)
+    val paidParkingDetail: StateFlow<PaidParkingLotResponse?> = _paidParkingDetail
+
     init {
         viewModelScope.launch {
             EventBus.events.collectLatest { event ->
@@ -48,6 +55,7 @@ class HomeViewModel (apiClient: ApiClient, private val authManager: AuthManager)
         getUserVehicles()
         loadUserName()
         loadUserPhoneNumber()
+//        getIfUserParkedAtPaidParkingLot()
     }
 
     private fun loadUserName() {
@@ -72,10 +80,33 @@ class HomeViewModel (apiClient: ApiClient, private val authManager: AuthManager)
                 if (response.isSuccessful) {
                     response.body()?.let { listResponse ->
                         _vehicles.value = listResponse.items
+                        // 주차 정보 불러옴
+                        getIfUserParkedAtPaidParkingLot()
                     }
                 }
             } catch (e: Exception) {
                 Log.d("HomeViewModel", "Error fetching user vehicles: ${e.message}")
+            }
+        }
+    }
+
+    private fun getIfUserParkedAtPaidParkingLot() {
+        viewModelScope.launch {
+            try {
+                _vehicles.value.forEach { vehicle ->
+                    val carNumber = vehicle.number
+                    Log.d("HomeViewModel", "getIfUserParkedAtPaidParkingLot 차량번호 확인: $carNumber")
+
+                    val response = merchantService.getIfUsingPaidParkingLot(carNumber)
+                    if (response.isSuccessful) {
+                        _paidParkingDetail.value = response.body()
+                        Log.d("HomeViewModel", "getIfUserParkedAtPaidParkingLot 유료주차장 입차정보 $carNumber: $paidParkingDetail")
+                    } else {
+                        Log.d("HomeViewModel", "getIfUserParkedAtPaidParkingLot 유료주차장 입차정보 가져오기 실패: $carNumber \n getIfUserParkedAtPaidParkingLot ${response.code()} / ${response.message()}")
+                    }
+                }
+            } catch (e: Exception) {
+                Log.d("HomeViewModel", "getIfUserParkedAtPaidParkingLot 유료주차장 입차정보 가져오기 실패: ${e.message}")
             }
         }
     }
