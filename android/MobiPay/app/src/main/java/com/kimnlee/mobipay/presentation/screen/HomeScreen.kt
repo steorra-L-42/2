@@ -368,11 +368,11 @@ fun HomeScreen(
                             text = if(isAutoSaveParking) {
                                 if(displayedLocation != null) "  여기에 주차했어요!" else "  주차하면 여기에 표시 돼요!"
                             } else {
-                                "  주차위치를 저장하려면 설정을 켜야해요."
+                                "  주차위치 저장 설정을 켜주세요!"
                             },
                             style = MaterialTheme.typography.headlineMedium,
                             color = MobiTextAlmostBlack,
-                            fontSize = 21.sp,
+                            fontSize = if (!isAutoSaveParking) 18.sp else 21.sp,
                         )
                     }
                     Spacer(modifier = Modifier.height(12.dp))
