@@ -71,7 +71,7 @@ fun DigitalReceiptScreen(
                             style = MaterialTheme.typography.headlineMedium,
                             fontFamily = FontFamily(Font(R.font.emoji)),
                             modifier = Modifier
-                                .padding(top = 8.dp)
+                                .padding(top = 5.dp)
                                 .padding(end = 8.dp)
                         )
                         Text(

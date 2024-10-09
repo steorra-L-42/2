@@ -93,7 +93,7 @@ fun ShowMoreScreen(
                             style = MaterialTheme.typography.headlineMedium,
                             fontFamily = FontFamily(Font(R.font.emoji)),
                             modifier = Modifier
-                                .padding(top = 8.dp, end = 8.dp)
+                                .padding(top = 4.dp, end = 8.dp)
                         )
                         Text(
                             text = "더보기",
@@ -251,7 +251,7 @@ fun MenuItem(text: String, emoji: String, onClick: () -> Unit) {
                 fontFamily = FontFamily(Font(R.font.emoji)),
                 modifier = Modifier
                     .padding(end = 16.dp)
-                    .padding(top = 8.dp)
+                    .padding(top = 1.dp)
             )
             Text(
                 text = text,
