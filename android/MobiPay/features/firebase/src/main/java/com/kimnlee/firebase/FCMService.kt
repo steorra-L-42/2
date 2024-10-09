@@ -244,13 +244,11 @@ class FCMService : FirebaseMessagingService() {
         remoteMessage.data.let { data ->
             Log.d("FCM Serv", "Data payload: $data")
 
-            if (data.containsKey("menus")) {
-                val menusData = data["menus"]
+            if (data.containsKey("type") && data["type"] == "menuList") {
+                val menusData = data["info"]
 
-                // Split the string by '%' to get each menu item
                 val menuItems = menusData?.split("%") ?: listOf()
 
-                // Create a string representation of the menu for UI
                 val displayMenu = menuItems.joinToString(separator = "\n") { item ->
                     val details = item.split("#")
                     val name = details[0]  // 메뉴 이름
@@ -258,11 +256,11 @@ class FCMService : FirebaseMessagingService() {
                     "${name}: ${moneyFormat(price.toBigInteger())}"
                 }
 
-                // Send this to the screen through LocalBroadcastManager
                 val intent = Intent("com.kimnlee.testmsg.UPDATE_UI")
                 intent.putExtra("menus", displayMenu)
+                intent.putExtra("roomId", data["roomId"])
 
-                val merchantName = data["merchant_name"] ?: "모비페이 가맹점 메뉴 (음성주문 가능)"
+                val merchantName = data["merchantName"] ?: "모비페이 가맹점 메뉴 (음성주문 가능)"
 
                 intent.putExtra("merchant_name", merchantName)
                 LocalBroadcastManager.getInstance(applicationContext).sendBroadcast(intent)
