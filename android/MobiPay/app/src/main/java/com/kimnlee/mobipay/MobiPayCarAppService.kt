@@ -11,12 +11,16 @@ import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.kimnlee.common.utils.AAFocusManager
+import com.kimnlee.common.utils.AutoSaveParkingManager
 import com.kimnlee.freedrive.presentation.screen.MainCarSession
 
 private const val TAG = "MobiPayCarAppService"
 class MobiPayCarAppService : CarAppService() {
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private val autoSaveParkingManager: AutoSaveParkingManager by lazy {
+        (application as MobiPayApplication).autoSaveParkingManager
+    }
 
     override fun createHostValidator(): HostValidator {
         return HostValidator.ALLOW_ALL_HOSTS_VALIDATOR
@@ -40,6 +44,11 @@ class MobiPayCarAppService : CarAppService() {
 
 
     private fun getAndSaveLastLocation() {
+        if (!autoSaveParkingManager.isAutoSaveParkingEnabled) {
+            Log.d(TAG, "주차 위치 자동 저장이 비활성화 되어있음")
+            return
+        }
+
         if (ActivityCompat.checkSelfPermission(
                 this,
                 Manifest.permission.ACCESS_FINE_LOCATION
@@ -60,7 +69,7 @@ class MobiPayCarAppService : CarAppService() {
                     val lastLng = location.longitude
 
                     // Save the retrieved location in SharedPreferences
-                    saveLastLocation(lastLat, lastLng)
+                    autoSaveParkingManager.saveLastLocation(lastLat, lastLng)
 
                     Log.d(TAG, "마지막 위치를 저장합니다. Lat = $lastLat, Lng = $lastLng")
                 } else {
@@ -73,13 +82,13 @@ class MobiPayCarAppService : CarAppService() {
     }
 
 
-    private fun saveLastLocation(lat: Double, lng: Double) {
-        val sharedPreferences: SharedPreferences = getSharedPreferences("last_location", Context.MODE_PRIVATE)
-        val editor = sharedPreferences.edit()
-        editor.putString("last_latitude", lat.toString())
-        editor.putString("last_longitude", lng.toString())
-        editor.apply()
-    }
+//    private fun saveLastLocation(lat: Double, lng: Double) {
+//        val sharedPreferences: SharedPreferences = getSharedPreferences("last_location", Context.MODE_PRIVATE)
+//        val editor = sharedPreferences.edit()
+//        editor.putString("last_latitude", lat.toString())
+//        editor.putString("last_longitude", lng.toString())
+//        editor.apply()
+//    }
 
     /*
      * 기존 Screen 메뉴를 활성화 하려면 주석 풀면 됨

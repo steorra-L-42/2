@@ -20,6 +20,7 @@ import com.kimnlee.common.auth.model.SendTokenRequest
 import com.kimnlee.common.auth.model.SendTokenResponse
 import com.kimnlee.common.auth.model.UserInfo
 import com.kimnlee.common.network.ApiClient
+import com.kimnlee.common.utils.AutoSaveParkingManager
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.security.Keys
 import kotlinx.coroutines.Dispatchers
@@ -49,6 +50,8 @@ class AuthManager(private val context: Context) {
         EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
         EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
     )
+
+    private val autoSaveParkingManager: AutoSaveParkingManager by lazy { AutoSaveParkingManager(context) }
 
     val isLoggedIn: Flow<Boolean> = context.dataStore.data
         .map { preferences ->
@@ -140,6 +143,7 @@ class AuthManager(private val context: Context) {
             .remove(KEY_USER_EMAIL)
             .apply()
         Log.d(TAG, "유저 정보 전부 지워짐")
+        autoSaveParkingManager.resetToDefaults() // 주차위치 자동설정 토글 상태 초기화
     }
 
     suspend fun loginWithKakao(activity: Activity): Result<OAuthToken> = suspendCancellableCoroutine { continuation ->
