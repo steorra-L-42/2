@@ -28,6 +28,7 @@ import com.kimnlee.payment.presentation.viewmodel.BiometricViewModel
 import com.kimnlee.auth.presentation.viewmodel.LoginViewModel
 import com.kimnlee.cardmanagement.presentation.viewmodel.CardManagementViewModel
 import com.kimnlee.common.FCMData
+import com.kimnlee.common.FCMDataForInvitation
 import com.kimnlee.common.ui.theme.MobiPayTheme
 import com.kimnlee.memberinvitation.presentation.viewmodel.MemberInvitationViewModel
 import com.kimnlee.mobipay.navigation.AppNavGraph
@@ -52,6 +53,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var paymentRepository: PaymentRepository
 
     private val fcmDataFromIntent = MutableStateFlow<FCMData?>(null)
+    private val fcmDataForInvitationFromIntent = MutableStateFlow<FCMDataForInvitation?>(null)
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -89,6 +91,8 @@ class MainActivity : ComponentActivity() {
                 val isLoggedIn by authManager.isLoggedIn.collectAsState(initial = false)
                 val fcmData by fcmDataFromIntent.collectAsState()
                 val registeredCards by cardManagementViewModel.registeredCards.collectAsState()
+
+                val fcmDataForInvitation by fcmDataForInvitationFromIntent.collectAsState()
 
                 LaunchedEffect(isLoggedIn, fcmData, registeredCards) {
                     if (isLoggedIn && fcmData != null && fcmData!!.type != "payment_success" && registeredCards.isNotEmpty()) {
@@ -136,6 +140,21 @@ class MainActivity : ComponentActivity() {
                         Log.d(TAG, "onCreate: 여기도 불림")
                         if(fcmData != null)
                             Log.d(TAG, "onCreate: fcmData 타입 = ${fcmData!!.type}")
+                    }
+                }
+
+                LaunchedEffect(isLoggedIn, fcmDataForInvitation) {
+                    Log.d(TAG, "onCreate fcmDataForInvitation: 여긴 불림")
+                    if (isLoggedIn && fcmDataForInvitation != null && fcmDataForInvitation!!.type == "invitation") {
+                        Log.d(TAG, "멤버초대 화면 넘어감")
+
+                        val fcmDataForInvitationJson = Uri.encode(Gson().toJson(fcmDataForInvitation))
+                        navController.navigate("memberinvitation_invited?fcmDataForInvitation=$fcmDataForInvitationJson") {
+                            popUpTo("home") { inclusive = false }
+                        }
+
+                        // 처리 후 fcmData 리셋
+                        fcmDataForInvitationFromIntent.value = null
                     }
                 }
 
@@ -279,6 +298,15 @@ class MainActivity : ComponentActivity() {
                 fcmDataJson?.let {
                     val fcmData = Gson().fromJson(it, FCMData::class.java)
                     fcmDataFromIntent.value = fcmData
+                    Log.d(TAG, "handleIntent: $fcmDataJson")
+                }
+            }
+            if (uri.scheme == "mobipay" && (uri.host == "youvegotinvited")) {
+                val fcmDataJson = uri.getQueryParameter("fcmDataForInvitation")
+                Log.d(TAG, "handleIntent: $fcmDataJson")
+                fcmDataJson?.let {
+                    val fcmData = Gson().fromJson(it, FCMDataForInvitation::class.java)
+                    fcmDataForInvitationFromIntent.value = fcmData
                     Log.d(TAG, "handleIntent: $fcmDataJson")
                 }
             }

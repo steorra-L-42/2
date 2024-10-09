@@ -55,15 +55,15 @@ private const val TAG = "InvitedScreen"
 @Composable
 fun InvitedScreen(
     memberInvitationViewModel: MemberInvitationViewModel = viewModel(),
-    navController: NavController
+    navController: NavController,
+    fcmDataForInvitationFromDeeplink: FCMDataForInvitation?
 ) {
 
     val context = LocalContext.current
     val fcmDataForInvitationJson = (context as? Activity)?.intent?.getStringExtra("fcmDataForInvitation")
 
-    val fcmDataForInvitation = navController.previousBackStackEntry
-        ?.savedStateHandle
-        ?.get<FCMDataForInvitation>("invitationData")
+    val fcmDataForInvitation =
+        fcmDataForInvitationFromDeeplink ?: navController.previousBackStackEntry?.savedStateHandle?.get<FCMDataForInvitation>("invitationData")
 
 //    val fcmDataForInvitationExtra = fcmDataForInvitationJson?.let { Gson().fromJson(it, FCMDataForInvitation::class.java) }
 //

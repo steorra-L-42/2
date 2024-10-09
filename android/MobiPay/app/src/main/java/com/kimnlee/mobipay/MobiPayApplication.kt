@@ -16,6 +16,7 @@ import com.kimnlee.common.auth.AuthManager
 import com.kimnlee.firebase.FCMService
 import com.kimnlee.common.auth.KakaoSdkInitializer
 import com.kimnlee.common.network.ApiClient
+import com.kimnlee.common.utils.AppLifecycleTracker
 import com.kimnlee.common.utils.MobiNotificationManager
 import com.kimnlee.memberinvitation.data.api.MemberInvitationApiService
 import com.kimnlee.memberinvitation.data.repository.MemberInvitationRepository
@@ -66,6 +67,8 @@ class MobiPayApplication : Application(), FCMDependencyProvider {
 
         val memberInvitationApiService = apiClient.authenticatedApi.create(MemberInvitationApiService::class.java)
         memberInvitationRepository = MemberInvitationRepository(memberInvitationApiService, mobiNotificationManager, applicationContext, memberInvitationViewModel)
+
+        registerActivityLifecycleCallbacks(AppLifecycleTracker())
 
         // 카카오 SDK 초기화
         KakaoSdkInitializer.initialize(this)
