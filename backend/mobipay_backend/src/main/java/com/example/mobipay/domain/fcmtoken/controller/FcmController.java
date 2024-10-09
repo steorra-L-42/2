@@ -3,8 +3,10 @@ package com.example.mobipay.domain.fcmtoken.controller;
 import com.example.mobipay.domain.fcmtoken.dto.FcmSendDto;
 import com.example.mobipay.domain.fcmtoken.dto.FcmTokenRequestDto;
 import com.example.mobipay.domain.fcmtoken.dto.FcmTokenResponseDto;
+import com.example.mobipay.domain.fcmtoken.dto.MenuListRequest;
 import com.example.mobipay.domain.fcmtoken.error.FCMException;
 import com.example.mobipay.domain.fcmtoken.service.FcmService;
+import com.example.mobipay.domain.fcmtoken.service.MenuListService;
 import com.example.mobipay.oauth2.dto.CustomOAuth2User;
 import com.google.firebase.FirebaseException;
 import jakarta.validation.Valid;
@@ -16,6 +18,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -26,6 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class FcmController {
 
     private final FcmService fcmService;
+    private final MenuListService menuListService;
 
     // 로그인 후 fcm 토큰을 받아서 mobiUser와 연관관계 설정
     @PreAuthorize("isAuthenticated()")
@@ -55,5 +59,11 @@ public class FcmController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @PostMapping("/menu-list")
+    public ResponseEntity<?> sendMenuList(@RequestHeader("mobiApiKey") String mobiApiKey,
+                                          @RequestBody @Valid MenuListRequest request) {
+        menuListService.sendMenuList(mobiApiKey, request);
 
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }
