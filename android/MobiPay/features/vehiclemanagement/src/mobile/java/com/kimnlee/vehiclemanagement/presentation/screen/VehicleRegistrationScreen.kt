@@ -97,9 +97,9 @@ fun VehicleRegistrationScreen(
         onResult = { isGranted ->
             hasCameraPermission = isGranted
             if (isGranted) {
-                Toast.makeText(context, "Camera permission granted", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "차량의 전체 실루엣이 보여야 인식돼요.", Toast.LENGTH_SHORT).show()
             } else {
-                Toast.makeText(context, "Camera permission denied", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "카메라 권한을 허용해주세요.", Toast.LENGTH_SHORT).show()
             }
         }
     )
