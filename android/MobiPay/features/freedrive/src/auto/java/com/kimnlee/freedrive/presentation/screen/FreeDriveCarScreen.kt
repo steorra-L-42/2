@@ -78,7 +78,7 @@ internal class FreeDriveCarScreen @UiThread constructor(
 
                     if (!this@FreeDriveCarScreen::webRTCManager.isInitialized) {
                         webRTCManager = WebRTCManager(carContext)
-                        webRTCManager.joinRoom(roomId!!)
+//                        webRTCManager.joinRoom(roomId!!)
                     }
 
                     refreshScreen()
@@ -150,7 +150,11 @@ internal class FreeDriveCarScreen @UiThread constructor(
             .setTitle(if (isCallStarted) "음성 주문 종료" else "음성 주문 연결")
             .setOnClickListener {
                 if (!isCallStarted) {
-                    webRTCManager.startCall()
+                    if (!this@FreeDriveCarScreen::webRTCManager.isInitialized) {
+                        webRTCManager = WebRTCManager(carContext)
+                        Log.d("WebRTC", "getFcmContentTemplate: roomId: $roomId")
+                    }
+                    webRTCManager.startCall(roomId!!)
                     isCallStarted = true
                 } else {
                     webRTCManager.hangup()
@@ -178,12 +182,12 @@ internal class FreeDriveCarScreen @UiThread constructor(
 
         return ListTemplate.Builder()
             .setTitle(merchantName!!)
-            .setHeaderAction(Action.APP_ICON) // Show the app icon in the header
-            .setSingleList(itemListBuilder.build()) // Add the scrollable item list
+            .setHeaderAction(Action.APP_ICON)
+            .setSingleList(itemListBuilder.build())
             .setActionStrip(
                 ActionStrip.Builder()
-                    .addAction(callButton) // Add the custom call action button
-                    .addAction(backAction) // Add the icon-based back action (no custom title)
+                    .addAction(callButton)
+                    .addAction(backAction)
                     .build()
             )
             .build()
