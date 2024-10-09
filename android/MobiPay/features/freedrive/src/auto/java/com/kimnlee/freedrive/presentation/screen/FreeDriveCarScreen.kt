@@ -73,7 +73,7 @@ internal class FreeDriveCarScreen @UiThread constructor(
                 intent?.getStringExtra("menus")?.let { newText ->
                     fcmContent = newText
                     showFcmContent = true
-                    roomId = intent.getStringExtra("room_id") ?: "1"
+                    roomId = intent.getStringExtra("roomId") ?: "1"
                     merchantName = intent.getStringExtra("merchant_name") ?: "모비페이 가맹점 메뉴 (음성주문 가능)"
 
                     if (!this@FreeDriveCarScreen::webRTCManager.isInitialized) {
