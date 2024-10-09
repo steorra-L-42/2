@@ -279,15 +279,15 @@ function initApp() {
 
       getLocalStream();
 
+      const callStatusElement = document.getElementById('call-status');
+      callStatusElement.textContent = "음성 주문 대기중";
+      callStatusElement.classList.remove('bg-gray-400');
+      callStatusElement.classList.add('bg-lime-500'); 
+
       socket.on('connect', () => {
           console.log('Connected to WebRTC server');
           mySocketId = socket.id;
           socket.emit('join_room', { room: roomId });
-
-          const callStatusElement = document.getElementById('call-status');
-          callStatusElement.textContent = "음성 주문 연결됨";
-          callStatusElement.classList.remove('bg-gray-400');
-          callStatusElement.classList.add('bg-green-500');
       });
 
       socket.on('connect_error', (error) => {
@@ -365,6 +365,9 @@ function initApp() {
               const remoteAudio = new Audio();
               remoteAudio.srcObject = event.streams[0];
               remoteAudio.play(); 
+              callStatusElement.textContent = "음성 주문 연결됨";
+              callStatusElement.classList.remove('bg-lime-500', 'bg-yellow-500');
+              callStatusElement.classList.add('bg-green-500');
           };
 
           localStream.getTracks().forEach((track) => {
