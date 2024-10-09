@@ -169,7 +169,7 @@ class VehicleManagementViewModel(
         }
     }
 
-    // 차량에 포함된 멤버 등록
+    // 차량에 포함된 멤버 조회
     fun requestCarMembers(carId: Int) {
         viewModelScope.launch {
             try {

@@ -15,9 +15,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -38,6 +36,7 @@ import com.kimnlee.vehiclemanagement.data.model.CarMember
 import com.kimnlee.vehiclemanagement.presentation.viewmodel.VehicleManagementViewModel
 import androidx.compose.ui.text.AnnotatedString
 import com.kimnlee.common.utils.MoneyFormat
+import com.kimnlee.vehiclemanagement.presentation.viewmodel.Vehicle
 
 private const val TAG = "VehicleManagementDetail"
 
@@ -75,11 +74,12 @@ fun VehicleManagementDetailScreen(
 
     val userPhoneNumber by viewModel.userPhoneNumber.collectAsState()
 
+    Log.d(TAG, "차 정보 조회: $vehicle")
+
     LaunchedEffect(vehicleId) {
         viewModel.requestCarMembers(vehicleId)
         viewModel.initializeAutoPaymentStatus(vehicleId)
     }
-
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -125,6 +125,7 @@ fun VehicleManagementDetailScreen(
             Spacer(modifier = Modifier.height(28.dp))
 
             CarMembersRow(
+                vehicle = vehicle,
                 carMembers = carMembers,
                 userPhoneNumber = userPhoneNumber,
                 onAddMember = {
@@ -235,10 +236,12 @@ fun VehicleManagementDetailScreen(
 
 @Composable
 fun CarMembersRow(
+    vehicle: Vehicle,
     carMembers: List<CarMember>,
     userPhoneNumber: String,
     onAddMember: () -> Unit
 ) {
+    Log.d(TAG, "차 멤버들 번호 조회: $carMembers")
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -266,7 +269,7 @@ fun CarMembersRow(
                         .fillMaxSize(),
                     contentScale = ContentScale.Crop
                 )
-                if (userPhoneNumber.isNotEmpty() && member.phoneNumber == userPhoneNumber) {
+                if (userPhoneNumber.isNotEmpty() && member.memberId == vehicle.ownerId) {
                     Image(
                         painter = painterResource(id = R.drawable.ic_crown),
                         contentDescription = "오너",
