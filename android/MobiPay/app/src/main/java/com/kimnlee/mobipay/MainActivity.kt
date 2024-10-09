@@ -85,6 +85,8 @@ class MainActivity : ComponentActivity() {
 
         handleIntent(intent)
 
+        val autoSaveParkingManager = app.autoSaveParkingManager
+
         setContent {
             MobiPayTheme {
                 val navController = rememberNavController()
@@ -165,7 +167,8 @@ class MainActivity : ComponentActivity() {
                     apiClient,
                     loginViewModel,
                     memberInvitationViewModel,
-                    paymentRepository
+                    paymentRepository,
+                    autoSaveParkingManager
                 )
             }
         }

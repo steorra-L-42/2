@@ -17,6 +17,7 @@ import com.kimnlee.firebase.FCMService
 import com.kimnlee.common.auth.KakaoSdkInitializer
 import com.kimnlee.common.network.ApiClient
 import com.kimnlee.common.utils.AppLifecycleTracker
+import com.kimnlee.common.utils.AutoSaveParkingManager
 import com.kimnlee.common.utils.MobiNotificationManager
 import com.kimnlee.memberinvitation.data.api.MemberInvitationApiService
 import com.kimnlee.memberinvitation.data.repository.MemberInvitationRepository
@@ -37,6 +38,9 @@ class MobiPayApplication : Application(), FCMDependencyProvider {
     private lateinit var paymentRepository: PaymentRepository
     private lateinit var memberInvitationViewModel: MemberInvitationViewModel
     private lateinit var memberInvitationRepository: MemberInvitationRepository
+
+    lateinit var autoSaveParkingManager: AutoSaveParkingManager
+        private set
 
     val aMemberInvitationViewModel: MemberInvitationViewModel
         get() = memberInvitationViewModel
@@ -81,6 +85,8 @@ class MobiPayApplication : Application(), FCMDependencyProvider {
         fcmService.getToken { token ->
             Log.d(TAG, "이 기기의 FCM 토큰: $token")
         }
+
+        autoSaveParkingManager = AutoSaveParkingManager(this)
 
 //        val naverMapClientSecret = BuildConfig.NAVER_MAP_CLIENT_SECRET
 //        Log.d(TAG, "onCreate: 네이버 Client Secret ${naverMapClientSecret}")

@@ -2,6 +2,7 @@ package com.kimnlee.mobipay.presentation.screen
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.util.Log
 import android.view.Gravity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -42,6 +43,7 @@ import com.kimnlee.common.ui.theme.MobiTextAlmostBlack
 import com.kimnlee.common.ui.theme.MobiTextDarkGray
 import com.kimnlee.common.ui.theme.pMedium
 import com.kimnlee.common.ui.theme.tossEmoji
+import com.kimnlee.common.utils.AutoSaveParkingManager
 import com.kimnlee.common.utils.CarModelImageProvider
 import com.kimnlee.common.utils.moneyFormat
 import com.kimnlee.memberinvitation.presentation.components.MemberInvitationBottomSheet
@@ -71,7 +73,8 @@ fun HomeScreen(
     homeViewModel: HomeViewModel,
     memberInvitationViewModel: MemberInvitationViewModel,
     navController: NavController,
-    context: Context
+    context: Context,
+    autoSaveParkingManager: AutoSaveParkingManager
 ) {
     val isLoggedIn by loginViewModel.isLoggedIn.collectAsState()
     var lastLocation by remember { mutableStateOf<Pair<Double, Double>?>(null) }
@@ -87,7 +90,16 @@ fun HomeScreen(
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
+    var isAutoSaveParking by remember { mutableStateOf(autoSaveParkingManager.isAutoSaveParkingEnabled) }
+    var displayedLocation by remember { mutableStateOf<Pair<Double, Double>?>(null) }
 
+    LaunchedEffect(isAutoSaveParking) {
+        displayedLocation = if (isAutoSaveParking) {
+            autoSaveParkingManager.getLastLocation()
+        } else {
+            null
+        }
+    }
 
     LaunchedEffect(vehicles) {
         if (vehicles.isNotEmpty()) {
@@ -106,7 +118,7 @@ fun HomeScreen(
     }
 
     LaunchedEffect(Unit) {
-        lastLocation = getLastLocation(context)
+//        lastLocation = getLastLocation(context)
         snapshotFlow { navController.currentBackStackEntry }
             .collect {
                 homeViewModel.refreshVehicles()
@@ -351,8 +363,13 @@ fun HomeScreen(
                             modifier = Modifier
                                 .padding(top = 0.dp)
                         )
+                            Log.d(TAG, "isAutoSaveParking: $isAutoSaveParking")
                         Text(
-                            text = if(lastLocation != null) "  여기에 주차했어요!" else "  주차하면 여기에 표시 돼요!",
+                            text = if(isAutoSaveParking) {
+                                if(displayedLocation != null) "  여기에 주차했어요!" else "  주차하면 여기에 표시 돼요!"
+                            } else {
+                                "  주차위치를 저장하려면 설정을 켜야해요."
+                            },
                             style = MaterialTheme.typography.headlineMedium,
                             color = MobiTextAlmostBlack,
                             fontSize = 21.sp,
@@ -363,7 +380,7 @@ fun HomeScreen(
                         modifier = Modifier
                             .clip(RoundedCornerShape(6.dp))
                     ){
-                        NaverMapView(lastLocation, naverMapService)
+                        NaverMapView(displayedLocation, naverMapService)
                     }
                 }
             }

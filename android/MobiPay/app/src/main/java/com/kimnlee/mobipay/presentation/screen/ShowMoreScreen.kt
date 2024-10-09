@@ -42,6 +42,7 @@ import com.kimnlee.common.ui.theme.MobiBlue
 import com.kimnlee.common.ui.theme.MobiTextAlmostBlack
 import com.kimnlee.common.ui.theme.MobiTextDarkGray
 import com.kimnlee.common.ui.theme.MobiUnselectedButtonGray
+import com.kimnlee.common.utils.AutoSaveParkingManager
 import com.kimnlee.mobipay.presentation.viewmodel.ShowMoreViewModel
 
 val SettingsIconColor = Color(0xFFB1B8C0)
@@ -51,7 +52,8 @@ val SettingsIconColor = Color(0xFFB1B8C0)
 fun ShowMoreScreen(
     loginViewModel: LoginViewModel,
     showMoreViewModel: ShowMoreViewModel,
-    navController: NavController
+    navController: NavController,
+    autoSaveParkingManager: AutoSaveParkingManager
 ) {
 
     val userName by showMoreViewModel.userName.collectAsState()
@@ -59,12 +61,13 @@ fun ShowMoreScreen(
     val userPhoneNumber by showMoreViewModel.userPhoneNumber.collectAsState()
     val userEmail by showMoreViewModel.userEmail.collectAsState()
 
+    var isAutoSaveParking by remember { mutableStateOf(autoSaveParkingManager.isAutoSaveParkingEnabled) }
+
     val formattedPhoneNumber = remember(userPhoneNumber) {
         formatPhoneNumber(userPhoneNumber)
     }
 
     var showSettingsMenu by remember { mutableStateOf(false) }
-    var isAutoSaveParking by remember { mutableStateOf(false) }
 
     val fcmDataTemporary = FCMData(
         paymentBalance="2100",
@@ -111,7 +114,10 @@ fun ShowMoreScreen(
                         expanded = showSettingsMenu,
                         onDismissRequest = { showSettingsMenu = false },
                         isAutoSaveParking = isAutoSaveParking,
-                        onAutoSaveParkingChange = { isAutoSaveParking = it }
+                        onAutoSaveParkingChange = {
+                            isAutoSaveParking = it
+                            autoSaveParkingManager.isAutoSaveParkingEnabled = it
+                        }
                     )
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
