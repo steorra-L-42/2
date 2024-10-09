@@ -79,7 +79,7 @@ class MainActivity : ComponentActivity() {
 
         requestPermissions()
 
-        registerPayReceiver()
+//        registerPayReceiver()
 
         paymentRepository = (application as MobiPayApplication).paymentOperations as PaymentRepository
 
@@ -315,28 +315,28 @@ class MainActivity : ComponentActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        unregisterPayReceiver()
+//        unregisterPayReceiver()
     }
 
 
-    private fun registerPayReceiver() {
-        val intentFilter = IntentFilter("com.kimnlee.mobipay.PAYMENT_APPROVAL")
-        paymentApprovalReceiver = PaymentApprovalReceiver()
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            registerReceiver(paymentApprovalReceiver, intentFilter, Context.RECEIVER_EXPORTED)
-        } else {
-            registerReceiver(paymentApprovalReceiver, intentFilter)
-        }
-    }
-
-
-    private fun unregisterPayReceiver() {
-        paymentApprovalReceiver?.let {
-            unregisterReceiver(it)
-            paymentApprovalReceiver = null
-        }
-    }
+//    private fun registerPayReceiver() {
+//        val intentFilter = IntentFilter("com.kimnlee.mobipay.PAYMENT_APPROVAL")
+//        paymentApprovalReceiver = PaymentApprovalReceiver()
+//
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+//            registerReceiver(paymentApprovalReceiver, intentFilter, Context.RECEIVER_EXPORTED)
+//        } else {
+//            registerReceiver(paymentApprovalReceiver, intentFilter)
+//        }
+//    }
+//
+//
+//    private fun unregisterPayReceiver() {
+//        paymentApprovalReceiver?.let {
+//            unregisterReceiver(it)
+//            paymentApprovalReceiver = null
+//        }
+//    }
 
     override fun onPause() {
         Log.d(TAG, "onPause called")

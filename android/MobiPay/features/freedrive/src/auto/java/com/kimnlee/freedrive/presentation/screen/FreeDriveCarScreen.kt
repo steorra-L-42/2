@@ -59,6 +59,7 @@ internal class FreeDriveCarScreen @UiThread constructor(
     private var merchantName: String? = null
     private var isCallStarted = false
     private lateinit var uiUpdateReceiver: BroadcastReceiver
+    private lateinit var menuCloseReceiver: BroadcastReceiver
     private lateinit var webRTCManager: WebRTCManager
 
     init {
@@ -86,9 +87,21 @@ internal class FreeDriveCarScreen @UiThread constructor(
             }
         }
 
+        menuCloseReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                Log.d("menuCloseReceiver", "Broadcast received: menuCloseReceiver")
+                showFcmContent = false
+            }
+        }
+
         LocalBroadcastManager.getInstance(carContext).registerReceiver(
             uiUpdateReceiver,
             IntentFilter("com.kimnlee.testmsg.UPDATE_UI")
+        )
+
+        LocalBroadcastManager.getInstance(carContext).registerReceiver(
+            menuCloseReceiver,
+            IntentFilter("com.kimnlee.mobipay.CLOSE_MENU")
         )
 
         lifecycle.addObserver(object : DefaultLifecycleObserver {
@@ -157,6 +170,7 @@ internal class FreeDriveCarScreen @UiThread constructor(
                     webRTCManager.startCall(roomId!!)
                     isCallStarted = true
                 } else {
+                    showFcmContent = false
                     webRTCManager.hangup()
                     isCallStarted = false
                 }

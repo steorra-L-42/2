@@ -5,11 +5,19 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <application>
+        <receiver
+            android:name="com.kimnlee.payment.PaymentApprovalReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.kimnlee.mobipay.PAYMENT_APPROVAL" />
+            </intent-filter>
+        </receiver>
+
         <service
             android:name=".data.api.PaymentApiService"
             android:enabled="true"
-            android:exported="true"
-            ></service>
+            android:exported="true" />
+
     </application>
 
 </manifest>
