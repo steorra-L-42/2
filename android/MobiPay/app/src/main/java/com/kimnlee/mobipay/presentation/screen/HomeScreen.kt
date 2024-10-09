@@ -44,6 +44,8 @@ import com.kimnlee.common.ui.theme.pMedium
 import com.kimnlee.common.ui.theme.tossEmoji
 import com.kimnlee.common.utils.CarModelImageProvider
 import com.kimnlee.common.utils.moneyFormat
+import com.kimnlee.memberinvitation.presentation.components.MemberInvitationBottomSheet
+import com.kimnlee.memberinvitation.presentation.viewmodel.MemberInvitationViewModel
 import com.kimnlee.mobipay.presentation.viewmodel.HomeViewModel
 import com.kimnlee.vehiclemanagement.data.model.CarMember
 import com.kimnlee.vehiclemanagement.data.model.VehicleItem
@@ -62,10 +64,12 @@ import java.util.Locale
 
 private val NAVER_MAP_CLIENT_SECRET = BuildConfig.NAVER_MAP_CLIENT_SECRET
 private const val TAG = "HomeScreen"
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     loginViewModel: LoginViewModel,
     homeViewModel: HomeViewModel,
+    memberInvitationViewModel: MemberInvitationViewModel,
     navController: NavController,
     context: Context
 ) {
@@ -79,6 +83,9 @@ fun HomeScreen(
     val userName by homeViewModel.userName.collectAsState()
     val userPhoneNumber by homeViewModel.userPhoneNumber.collectAsState()
     val paidParkingDetail by homeViewModel.paidParkingDetail.collectAsState()
+    val showBottomSheet by memberInvitationViewModel.showBottomSheet.collectAsState()
+    val scope = rememberCoroutineScope()
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
 
 
@@ -170,7 +177,13 @@ fun HomeScreen(
 
 
             Card(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        currentVehicle?.let { vehicle ->
+                            navController.navigate("vehiclemanagement_detail/${vehicle.carId}")
+                        }
+                    },
                 shape = RoundedCornerShape(20.dp),
                 colors = CardDefaults.cardColors(containerColor = MobiCardBgGray),
             ) {
@@ -209,7 +222,13 @@ fun HomeScreen(
                     if(firstVehicle != null) {
                         TextOnLP(formatLicensePlate(firstVehicle.number))
                         Spacer(modifier = Modifier.height(28.dp))
-                        CarUserIconsRow(carMembers = carMembers, vehicle = firstVehicle)
+                        CarUserIconsRow(
+                            carMembers = carMembers,
+                            vehicle = currentVehicle,
+                            onAddMember = {
+                                memberInvitationViewModel.openBottomSheet()
+                            }
+                        )
                     }else{
                         Row(
                             modifier = Modifier
@@ -349,6 +368,22 @@ fun HomeScreen(
                 }
             }
         }
+        if (showBottomSheet) {
+            val currentVehicleId = currentVehicle?.carId ?: 0
+            MemberInvitationBottomSheet(
+                context = context,
+                vehicleId = currentVehicleId,
+                sheetState = sheetState,
+                scope = scope,
+                viewModel = memberInvitationViewModel,
+                onNavigateToInvitePhone = {
+                    navController.navigate("invite_phone/$currentVehicleId")
+                },
+                onNavigateToConfirmation = {
+                    navController.navigate("member_confirmation/$currentVehicleId")
+                }
+            )
+        }
     }
 }
 
@@ -466,7 +501,11 @@ private fun getLastLocation(context: Context): Pair<Double, Double>? {
 }
 
 @Composable
-fun CarUserIconsRow(carMembers: List<CarMember>, vehicle: VehicleItem) {
+fun CarUserIconsRow(
+    carMembers: List<CarMember>,
+    vehicle: VehicleItem?,
+    onAddMember: () -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -487,7 +526,7 @@ fun CarUserIconsRow(carMembers: List<CarMember>, vehicle: VehicleItem) {
                         .fillMaxSize(),
                     contentScale = ContentScale.Crop
                 )
-                if (member.memberId == vehicle.ownerId) {
+                if (member.memberId == vehicle?.ownerId) {
                     Image(
                         painter = painterResource(id = R.drawable.ic_crown),
                         contentDescription = "오너",
@@ -522,7 +561,8 @@ fun CarUserIconsRow(carMembers: List<CarMember>, vehicle: VehicleItem) {
             modifier = Modifier
                 .size(44.dp)
                 .clip(CircleShape)
-                .background(Color(0xFFEEEEEE)),
+                .background(Color(0xFFEEEEEE))
+                .clickable(onClick = onAddMember),
             contentAlignment = Alignment.Center
         ) {
             Icon(
