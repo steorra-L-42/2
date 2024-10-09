@@ -47,7 +47,6 @@ class WebRTCManager(private val context: Context) {
 
         val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
         audioManager.mode = AudioManager.MODE_IN_COMMUNICATION
-        audioManager.isSpeakerphoneOn = true
 
         val audioConstraints = MediaConstraints()
         audioSource = peerConnectionFactory.createAudioSource(audioConstraints)
@@ -189,8 +188,21 @@ class WebRTCManager(private val context: Context) {
             override fun onTrack(transceiver: RtpTransceiver?) {
                 Log.d("WebRTCManager", "Track added: ${transceiver?.receiver?.track()?.id()}")
 
+//                val remoteTrack = transceiver?.receiver?.track() as? AudioTrack
+//                remoteTrack?.setEnabled(true)
                 val remoteTrack = transceiver?.receiver?.track() as? AudioTrack
-                remoteTrack?.setEnabled(true)
+                if (remoteTrack != null) {
+                    Log.d("WebRTCManager", "Remote audio track received and enabled")
+                    remoteTrack.setEnabled(true)
+
+                    // Add the track to a media stream or player if needed
+                    val streamId = "remote_audio_stream"
+                    val remoteMediaStream = peerConnectionFactory.createLocalMediaStream(streamId)
+                    remoteMediaStream.addTrack(remoteTrack)
+                    // Optionally play the remote stream via an audio manager or player
+                } else {
+                    Log.e("WebRTCManager", "Failed to receive remote audio track")
+                }
             }
         })
 
