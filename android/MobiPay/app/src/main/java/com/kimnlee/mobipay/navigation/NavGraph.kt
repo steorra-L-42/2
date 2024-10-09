@@ -82,6 +82,7 @@ fun AppNavGraph(
                 HomeScreen(
                     loginViewModel = loginViewModel,
                     homeViewModel = homeViewModel,
+                    memberInvitationViewModel = memberInvitationViewModel,
                     navController = navController,
                     context = context
                 )
