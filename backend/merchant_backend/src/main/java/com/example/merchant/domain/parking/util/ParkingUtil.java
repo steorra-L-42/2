@@ -8,6 +8,6 @@ public class ParkingUtil {
     public static int getPaymentBalance(LocalDateTime from, LocalDateTime to) {
         long seconds = ChronoUnit.SECONDS.between(from, to);
         long minutes = (long) Math.ceil(seconds / 60.0); // 초 단위를 60으로 나눠서 올림 처리
-        return (int) Math.ceil(minutes / 10.0) * 1000; // 10분당 천원
+        return (int) Math.ceil(minutes / 10.0) * 500; // 10분당 500원
     }
 }
