@@ -84,14 +84,19 @@ function initApp() {
     async detectCameras() {
       try {
         const devices = await navigator.mediaDevices.enumerateDevices();
+        console.log("Devices detected:", devices);
         this.cameraDevices = devices.filter(device => device.kind === 'videoinput');
+        if (this.cameraDevices.length === 0) {
+          console.error("No video input devices found.");
+        }
       } catch (error) {
-        console.error('카메라 뭐뭐 있는지 파악 실패:', error);
+        console.error('Failed to detect cameras:', error);
       }
     },
 
     async selectCamera(deviceId) {
       try {
+        console.log("Selected camera deviceId:", deviceId);
         const stream = await navigator.mediaDevices.getUserMedia({
           video: {
             deviceId: { exact: deviceId },
@@ -100,7 +105,6 @@ function initApp() {
             frameRate: { ideal: 60 }
           }
         });
-
         this.video.srcObject = stream;
         this.video.play();
         this.closeCameraChooseModal();
