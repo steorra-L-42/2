@@ -17,6 +17,8 @@
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
   <!-- COCO-SSD 모델 불러옴 -->
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@latest"></script>
+  <!-- WebRTC를 위해 Socket.io 불러옴 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
   <script src="js/script.js"></script>
   <!-- 디버깅 방지 도구 -->
   <!-- <script disable-devtool-auto src="https://cdn.jsdelivr.net/npm/disable-devtool"></script> -->
@@ -141,6 +143,9 @@
                       'visible': (lpno !== null)
                    }"
                 ></div>
+                <div class="flex items-center justify-center px-4">
+                  <div id="call-status" class="bg-gray-400 text-white px-4 py-2 rounded-full text-sm w-36 text-center">음성 주문 연결안됨</div>
+                </div>
               </div>
             </div>
           </div>
