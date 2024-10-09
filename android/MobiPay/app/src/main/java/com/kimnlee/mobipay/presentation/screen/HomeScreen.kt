@@ -47,6 +47,7 @@ import com.kimnlee.common.utils.moneyFormat
 import com.kimnlee.mobipay.presentation.viewmodel.HomeViewModel
 import com.kimnlee.vehiclemanagement.data.model.CarMember
 import com.kimnlee.vehiclemanagement.data.model.VehicleItem
+import com.kimnlee.vehiclemanagement.presentation.viewmodel.Vehicle
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.CameraUpdate
 import com.naver.maps.map.MapView
@@ -208,7 +209,7 @@ fun HomeScreen(
                     if(firstVehicle != null) {
                         TextOnLP(formatLicensePlate(firstVehicle.number))
                         Spacer(modifier = Modifier.height(28.dp))
-                        CarUserIconsRow(carMembers = carMembers, userPhoneNumber = userPhoneNumber)
+                        CarUserIconsRow(carMembers = carMembers, vehicle = firstVehicle)
                     }else{
                         Row(
                             modifier = Modifier
@@ -465,7 +466,7 @@ private fun getLastLocation(context: Context): Pair<Double, Double>? {
 }
 
 @Composable
-fun CarUserIconsRow(carMembers: List<CarMember>, userPhoneNumber: String) {
+fun CarUserIconsRow(carMembers: List<CarMember>, vehicle: VehicleItem) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -486,7 +487,7 @@ fun CarUserIconsRow(carMembers: List<CarMember>, userPhoneNumber: String) {
                         .fillMaxSize(),
                     contentScale = ContentScale.Crop
                 )
-                if (index == 0) {
+                if (member.memberId == vehicle.ownerId) {
                     Image(
                         painter = painterResource(id = R.drawable.ic_crown),
                         contentDescription = "오너",
