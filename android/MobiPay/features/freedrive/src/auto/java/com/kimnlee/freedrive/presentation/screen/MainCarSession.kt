@@ -74,25 +74,46 @@ class MainCarSession : Session() {
         val merchantList = listOf(
             PlaceRecord(
                 id = "1",
-                name = "맥도날드 구미 인동점",
-                coordinate = Point.fromLngLat(128.42016424518943, 36.104488876950704),
-                description = "경상북도 구미시 인동가산로 20",
-                categories = listOf("음식점", "패스트푸드")
+                name = "진평주차장",
+                coordinate = Point.fromLngLat(128.419555, 36.108690),
+                description = "경상북도 구미시 황상동 305-5",
+                categories = listOf("", "주차장")
             ),
             PlaceRecord(
                 id = "2",
-                name = "스타벅스 구미인동DT점",
-                coordinate = Point.fromLngLat(128.41955, 36.10396),
-                description = "경상북도 구미시 인동가산로 14",
-                categories = listOf("카페", "음료")
+                name = "인동주유소",
+                coordinate = Point.fromLngLat(128.419550, 36.110484),
+                description = "경상북도 구미시 황상동 376-5",
+                categories = listOf("", "주유소")
             ),
             PlaceRecord(
                 id = "3",
-                name = "구미역사주차장",
-                coordinate = Point.fromLngLat(128.33131, 36.12825),
-                description = "경상북도 구미시 구미중앙로 45",
-                categories = listOf("교통", "기차역")
-            )
+                name = "인동셀프손세차장",
+                coordinate = Point.fromLngLat(128.422617, 36.110290),
+                description = "경상북도 구미시 수출대로 524-1",
+                categories = listOf("", "세차장")
+            ),
+            PlaceRecord(
+                id = "4",
+                name = "노상주차장",
+                coordinate = Point.fromLngLat(128.421024, 36.107011),
+                description = "경상북도 구미시 인동중앙로 16",
+                categories = listOf("", "주차장")
+            ),
+            PlaceRecord(
+                id = "5",
+                name = "투스데이",
+                coordinate = Point.fromLngLat(128.419280, 36.108661),
+                description = "경상북도 구미시 인동중앙로3길 26",
+                categories = listOf("", "호텔")
+            ),
+            PlaceRecord(
+                id = "6",
+                name = "스타벅스 구미인의DT점",
+                coordinate = Point.fromLngLat(128.431260, 36.095567),
+                description = "경상북도 구미시 인의동 1005-6",
+                categories = listOf("", "카페")
+            ),
         )
     }
 
