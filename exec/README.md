@@ -45,9 +45,11 @@ docker-compose -f ./app/app-compose.yml up -d
 
 ## 5. AI server
 
-
+<br>
 
 ## 6. WebRTC Signaling server
+
+<br>
 
 
 ## 7. Jenkins - CI/CD
@@ -69,38 +71,45 @@ docker-compose -f ./jenkins/jenkins-compose.yml up -d
 
 
 ### Android
-- Android Studio : 3.3.2
-- Android min SDK : 
-- Android max SDK : 
-- Android target SDK :
+- Android Studio : 2024.1.1
+- Android min SDK : 28
+- Android target SDK : 34
+- Android max SDK : 34
 
 ### Backend
 - OpenJDK : 17.0.12
-- SpringBoot : 3.3.3
+- Spring Boot : 3.3.3
+- Spring Data JPA : 3.3.3
 - Nginx : 1.27.2
 - MySQL : mysql:8.4.1
-- Node.js : 
+- Node.js : 20.18.0
+- FastAPI : 0.115.0
 
 - Jenkins : jenkins/jenkins:2.462.2-jdk17
 
 ### Front
-- Alpine.js : 
+- Alpine.js : 3.14.1
 
 ### AI
-- NVIDIA GPU Driver : 
+- NVIDIA GPU Driver : 560.94
 - Torch : 2.3.1
 - Torch Vision : 0.18.1
 - MSVC : 143
 - CUDA : 12.1
 - cuDNN : 9.3.0
-- AI Model : TPS ResNet BiLSTM CTC
+- AI Model : TPS ResNet BiLSTM Attn
 
+<br>
 
 ---
 # 외부 서비스
+<br>
 
+- Firebase Cloud Messaging
 - 카카오 Oauth
 - SSAFY 금융 API
+
+<br>
 
 ---
 # 환경변수
