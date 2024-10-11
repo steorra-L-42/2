@@ -80,12 +80,16 @@ docker-compose -f ./jenkins/jenkins-compose.yml up -d
 - OpenJDK : 17.0.12
 - Spring Boot : 3.3.3
 - Spring Data JPA : 3.3.3
+- JUnit : 5.10.3
 - Nginx : 1.27.2
 - MySQL : mysql:8.4.1
 - Node.js : 20.18.0
 - FastAPI : 0.115.0
 
+### CI/CD
 - Jenkins : jenkins/jenkins:2.462.2-jdk17
+- docker : 27.1.1
+- docker compose : 2.29.1
 
 ### Front
 - Alpine.js : 3.14.1
