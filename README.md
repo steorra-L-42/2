@@ -1,4 +1,4 @@
-![image.png](https://lab.ssafy.com/s11-fintech-finance-sub1/S11P21D102/-/raw/dev/etc/images/mobipay.png?ref_type=heads)
+![image.png](https://raw.githubusercontent.com/steorra-L-42/2/dev/etc/images/mobipay.png)
 
 ## 👨‍👨‍👦‍👦 Kim & Lee 팀 소개
 | 이상철 | 김세진 | 이철민 | 이재빈 |
