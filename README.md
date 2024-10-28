@@ -103,11 +103,10 @@
 
 ### 💵 창문을 내리지 않고 자동결제를 진행해 보세요.
 차량 번호가 인식되고, 점원의 POS에서 제품을 선택해 결제 요청을 하면 앱에서 자동결제가 이루어집니다.
-<img src = "https://lab.ssafy.com/s11-fintech-finance-sub1/S11P21D102/-/raw/dev/etc/gif/15.%20food%EC%9E%90%EB%8F%99.gif?ref_type=heads" width="800">
-
+<img src="https://github.com/steorra-L-42/2/blob/dev/etc/gif/15.%20food%EC%9E%90%EB%8F%99.gif?raw=true" width="800">
 ### 💵 깜빡하고 자동결제를 체크하지 않았다면 수동결제도 가능해요.
 앱에 결제 요청이 오면 지문인식으로 수동결제가 이루어집니다.
-<img src="https://lab.ssafy.com/s11-fintech-finance-sub1/S11P21D102/-/raw/dev/etc/gif/15.%20food%EC%88%98%EB%8F%99.gif?ref_type=heads" width="800">
+<img src="https://github.com/steorra-L-42/2/blob/dev/etc/gif/15.%20food%EC%88%98%EB%8F%99.gif?raw=true" width="800">
 
 ### 👬 블루투스로 옆자리 지인을 차량에 초대가 가능해요.
 | 블루투스 멤버 초대 | 블루투스 초대 수락 |
