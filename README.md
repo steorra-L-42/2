@@ -112,51 +112,51 @@
 | 블루투스 멤버 초대 | 블루투스 초대 수락 |
 |--------------------|---------------------|
 |초대받을 지인이 블루투스 초대 대기상태라면<br> 여러명도 동시에 초대가 가능해요.|블루투스 초대 대기상태에 진입했을 때<br> 차량 그룹에 초대받을 수 있어요.|
-|<img src="https://lab.ssafy.com/s11-fintech-finance-sub1/S11P21D102/-/raw/dev/etc/gif/5.%20%EB%A9%A4%EB%B2%84%EC%B4%88%EB%8C%80%20%EB%B8%94%EB%A3%A8%ED%88%AC%EC%8A%A4.gif?ref_type=heads" width="250"/>|<img src="https://lab.ssafy.com/s11-fintech-finance-sub1/S11P21D102/-/raw/dev/etc/gif/5.%20%EC%B0%A8%EB%9F%89%20%EC%88%98%EB%9D%BD%20%EB%B8%94%EB%A3%A8%ED%88%AC%EC%8A%A4.gif?ref_type=heads" width="250"/>|
+|<img src="https://github.com/steorra-L-42/2/blob/dev/etc/gif/5.%20%EB%A9%A4%EB%B2%84%EC%B4%88%EB%8C%80%20%EB%B8%94%EB%A3%A8%ED%88%AC%EC%8A%A4.gif?raw=true" width="250"/>|<img src="https://github.com/steorra-L-42/2/blob/dev/etc/gif/5.%20%EC%B0%A8%EB%9F%89%20%EC%88%98%EB%9D%BD%20%EB%B8%94%EB%A3%A8%ED%88%AC%EC%8A%A4.gif?raw=true" width="250"/>|
 
 ### 👭 전화번호로 초대도 가능해요.
 | 전화번호 멤버 초대 | 전화번호 멤버 수락 |
 |--------------------|---------------------|
 |초대받을 지인의 전화번호를 입력해<br>차량에 초대해 보세요.|초대 알림이 오면 알림을 클릭해<br> 차량 그룹에 가입할 수 있어요. |
-<img src="https://lab.ssafy.com/s11-fintech-finance-sub1/S11P21D102/-/raw/dev/etc/gif/5.%20%EB%A9%A4%EB%B2%84%20%EC%B4%88%EB%8C%80%20%EC%88%98%EA%B8%B0%20%EC%9E%85%EB%A0%A5.gif?ref_type=heads" width="250"/>|<img src="https://lab.ssafy.com/s11-fintech-finance-sub1/S11P21D102/-/raw/dev/etc/gif/5.%20%EC%B0%A8%EB%9F%89%20%EC%88%98%EB%9D%BD%20%EC%88%98%EA%B8%B0%20%EC%9E%85%EB%A0%A5.gif?ref_type=heads" width="250"/>|
+<img src="https://github.com/steorra-L-42/2/blob/dev/etc/gif/5.%20%EB%A9%A4%EB%B2%84%20%EC%B4%88%EB%8C%80%20%EC%88%98%EA%B8%B0%20%EC%9E%85%EB%A0%A5.gif?raw=true" width="250"/>|<img src="https://github.com/steorra-L-42/2/blob/dev/etc/gif/5.%20%EC%B0%A8%EB%9F%89%20%EC%88%98%EB%9D%BD%20%EC%88%98%EA%B8%B0%20%EC%9E%85%EB%A0%A5.gif?raw=true" width="250"/>|
 
 
 ### 📱작동 화면
 | 1. 로그인 | 2. 카드 여러개 등록 | 3. 카드 한개 등록 | 4. 자동결제 상태 변경|
 |---|---|---|---|
 |카카오 소셜 로그인이 가능해요.<br>추가로 전화번호 이름도 입력해주세요.|여러장의 카드를 등록할 수 있어요.<br>(일괄 한도 적용도 가능해요.)|한장의 카드도 등록이 가능해요.|자동결제로 이용할 카드를 정할 수 있어요.<br>물론 해제도 가능해요.|
-|<img src="https://lab.ssafy.com/s11-fintech-finance-sub1/S11P21D102/-/raw/dev/etc/gif/1.%20%EB%A1%9C%EA%B7%B8%EC%9D%B8.gif?ref_type=heads" width="250"/>|<img src="https://lab.ssafy.com/s11-fintech-finance-sub1/S11P21D102/-/raw/dev/etc/gif/2.%20%EC%B9%B4%EB%93%9C%20%EC%83%81%EC%84%B8%EC%A1%B0%ED%9A%8C.gif?ref_type=heads" width="250"/>|<img src="https://lab.ssafy.com/s11-fintech-finance-sub1/S11P21D102/-/raw/dev/etc/gif/2.%20%EB%8B%A8%EC%9D%BC%20%EC%B9%B4%EB%93%9C%20%EC%B6%94%EA%B0%80.gif?ref_type=heads" width="250"/>|<img src="https://lab.ssafy.com/s11-fintech-finance-sub1/S11P21D102/-/raw/dev/etc/gif/3.%20%EC%B9%B4%EB%93%9C%20%EC%9E%90%EB%8F%99%EA%B2%B0%EC%A0%9C%20%EC%B2%B4%ED%81%AC%20%ED%95%B4%EC%A0%9C.gif?ref_type=heads" width="250"/>|
+|<img src="https://github.com/steorra-L-42/2/blob/dev/etc/gif/1.%20%EB%A1%9C%EA%B7%B8%EC%9D%B8.gif?raw=true" width="250"/>|<img src="https://github.com/steorra-L-42/2/blob/dev/etc/gif/2.%20%EC%B9%B4%EB%93%9C%20%EC%83%81%EC%84%B8%EC%A1%B0%ED%9A%8C.gif?raw=true" width="250"/>|<img src="https://github.com/steorra-L-42/2/blob/dev/etc/gif/2.%20%EB%8B%A8%EC%9D%BC%20%EC%B9%B4%EB%93%9C%20%EC%B6%94%EA%B0%80.gif?raw=true" width="250"/>|<img src="https://github.com/steorra-L-42/2/blob/dev/etc/gif/3.%20%EC%B9%B4%EB%93%9C%20%EC%9E%90%EB%8F%99%EA%B2%B0%EC%A0%9C%20%EC%B2%B4%ED%81%AC%20%ED%95%B4%EC%A0%9C.gif?raw=true" width="250"/>|
 
 | 5. 번호판 인식 차량 등록 | 6. 번호판 입력 차량 등록 | 7. 차량 자동결제 여부 체크 |
 |---|---|---|
 |차량 번호판을 촬영해서<br>간편하게 차량을 등록할 수 있어요.|차량 번호를 직접 입력해서<br> 차량 등록도 가능해요.|모비페이를 이용하며 해당 차량으로<br>자동결제 여부를 정할 수 있어요.|
-|<img src="https://lab.ssafy.com/s11-fintech-finance-sub1/S11P21D102/-/raw/dev/etc/gif/4.%20%EC%B0%A8%EB%9F%89%20%EB%93%B1%EB%A1%9D%20%EC%82%AC%EC%A7%84%20%EC%9D%B8%EC%8B%9D.gif?ref_type=heads" width="250"/>|<img src="https://lab.ssafy.com/s11-fintech-finance-sub1/S11P21D102/-/raw/dev/etc/gif/4.%20%EC%B0%A8%EB%9F%89%20%EB%93%B1%EB%A1%9D%20%EC%88%98%EA%B8%B0%EC%9E%85%EB%A0%A5.gif?ref_type=heads" width="250"/>|<img src="https://lab.ssafy.com/s11-fintech-finance-sub1/S11P21D102/-/raw/dev/etc/gif/6.%20%EC%B0%A8%20%EC%9E%90%EB%8F%99%EA%B2%B0%EC%A0%9C%20%EC%B2%B4%ED%81%AC.gif?ref_type=heads" width="250"/>|
+|<img src="https://github.com/steorra-L-42/2/blob/dev/etc/gif/4.%20%EC%B0%A8%EB%9F%89%20%EB%93%B1%EB%A1%9D%20%EC%82%AC%EC%A7%84%20%EC%9D%B8%EC%8B%9D.gif?raw=true" width="250"/>|<img src="https://github.com/steorra-L-42/2/blob/dev/etc/gif/4.%20%EC%B0%A8%EB%9F%89%20%EB%93%B1%EB%A1%9D%20%EC%88%98%EA%B8%B0%EC%9E%85%EB%A0%A5.gif?raw=true" width="250"/>|<img src="https://github.com/steorra-L-42/2/blob/dev/etc/gif/6.%20%EC%B0%A8%20%EC%9E%90%EB%8F%99%EA%B2%B0%EC%A0%9C%20%EC%B2%B4%ED%81%AC.gif?raw=true" width="250"/>|
 
 8. **입차 시 예상 결제 금액 표시** <br>
 주차장에 입차를 하면 메인 화면에 주차 예상 금액이 표시돼요.
-<img src="https://lab.ssafy.com/s11-fintech-finance-sub1/S11P21D102/-/raw/dev/etc/gif/18.%20%EC%A3%BC%EC%B0%A8%EC%9E%A5%EC%9A%94%EA%B8%88%20%EC%83%9D%EC%84%B1.gif?ref_type=heads" width="800"/>
+<img src="https://github.com/steorra-L-42/2/blob/dev/etc/gif/18.%20%EC%A3%BC%EC%B0%A8%EC%9E%A5%EC%9A%94%EA%B8%88%20%EC%83%9D%EC%84%B1.gif?raw=true" width="800"/>
 
 <br>
 <br>
 
 9. **입차 후 주차한 위치 표시** <br>
 입차 후 일정 거리를 벗어나면 메인 화면에 주차한 위치가 표시돼요.
-<img src="https://lab.ssafy.com/s11-fintech-finance-sub1/S11P21D102/-/raw/dev/etc/gif/19.%20%EC%95%88%EC%98%A4%ED%86%A0%20%EC%A3%BC%EC%B0%A8%20%EC%9C%84%EC%B9%98%20%EC%A0%80%EC%9E%A5.gif?ref_type=heads" width="800"/>
+<img src="https://github.com/steorra-L-42/2/blob/dev/etc/gif/19.%20%EC%95%88%EC%98%A4%ED%86%A0%20%EC%A3%BC%EC%B0%A8%20%EC%9C%84%EC%B9%98%20%EC%A0%80%EC%9E%A5.gif?raw=true" width="800"/>
 <br>
 <br>
 
 10. **출차 시 예상 결제 금액 미표시** <br>
 주차장에서 출차를 하면 메인 화면에 주차 예상 금액이 표시되지 않아요.
-<img src="https://lab.ssafy.com/s11-fintech-finance-sub1/S11P21D102/-/raw/dev/etc/gif/18.%20%EC%A3%BC%EC%B0%A8%EC%9E%A5%EC%9A%94%EA%B8%88%20%EC%82%AD%EC%A0%9C.gif?ref_type=heads" width="800"/>
+<img src="https://github.com/steorra-L-42/2/blob/dev/etc/gif/18.%20%EC%A3%BC%EC%B0%A8%EC%9E%A5%EC%9A%94%EA%B8%88%20%EC%82%AD%EC%A0%9C.gif?raw=true" width="800"/>
 
 | 11. 결제내역 조회 | 12. 전자 영수증 조회 |
 |--------------------|---------------------|
 | 모비페이를 이용하면서 결제한 내역을<br>조회할 수 있어요. | 결제내역을 클릭하면 상세 정보를<br>조회할 수 있어요. |
-|<img src="https://lab.ssafy.com/s11-fintech-finance-sub1/S11P21D102/-/raw/dev/etc/gif/13.%20%EA%B2%B0%EC%A0%9C%20%EB%82%B4%EC%97%AD%20%EC%A1%B0%ED%9A%8C.gif?ref_type=heads" width="250">|<img src="https://lab.ssafy.com/s11-fintech-finance-sub1/S11P21D102/-/raw/dev/etc/gif/14.%20%EC%98%81%EC%88%98%EC%A6%9D%20%EC%A1%B0%ED%9A%8C.gif?ref_type=heads" width="250">|
+|<img src="https://github.com/steorra-L-42/2/blob/dev/etc/gif/13.%20%EA%B2%B0%EC%A0%9C%20%EB%82%B4%EC%97%AD%20%EC%A1%B0%ED%9A%8C.gif?raw=true" width="250">|<img src="https://github.com/steorra-L-42/2/blob/dev/etc/gif/14.%20%EC%98%81%EC%88%98%EC%A6%9D%20%EC%A1%B0%ED%9A%8C.gif?raw=true" width="250">|
 
 13. **결제 취소** <br>
 가맹점 POS에서 결제 취소를 하면, 사용자에게 결제 취소 알림이 와요.<br> (클릭하면 결제취소 내역을 확인할 수 있어요.)
-<img src="https://lab.ssafy.com/s11-fintech-finance-sub1/S11P21D102/-/raw/dev/etc/gif/17.%20%EA%B2%B0%EC%A0%9C%20%EC%B7%A8%EC%86%8C.gif?ref_type=heads" width="1000"/>
+<img src="https://github.com/steorra-L-42/2/blob/dev/etc/gif/17.%20%EA%B2%B0%EC%A0%9C%20%EC%B7%A8%EC%86%8C.gif?raw=true" width="1000"/>
 
 # 🔨 기술 소개
 
