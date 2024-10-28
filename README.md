@@ -1,4 +1,4 @@
-![image.png](https://raw.githubusercontent.com/steorra-L-42/2/dev/etc/images/mobipay.png)
+![image.png](https://raw.githubusercontent.com/<username>/<repository>/dev/etc/images/mobipay.png)
 
 ## 👨‍👨‍👦‍👦 Kim & Lee 팀 소개
 | 이상철 | 김세진 | 이철민 | 이재빈 |
