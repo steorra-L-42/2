@@ -94,10 +94,10 @@
 </details>
 
 # 🏗️ 서비스 아키텍처
-<img src="https://lab.ssafy.com/s11-fintech-finance-sub1/S11P21D102/-/raw/dev/etc/images/transparent.png?ref_type=heads">
+<img src="https://github.com/steorra-L-42/2/blob/dev/etc/images/transparent.png?raw=true">
 
 # 결제 처리 과정    
-<img src="https://lab.ssafy.com/s11-fintech-finance-sub1/S11P21D102/-/raw/dev/etc/images/payment.png?ref_type=heads">
+<img src="https://github.com/steorra-L-42/2/blob/dev/etc/images/payment.png?raw=true">
 
 # **✨  주요 기능**
 
