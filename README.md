@@ -203,7 +203,7 @@
 - **메모리 사용량 감소 및 렌더링 성능 향상**: 효율적인 컴포지션 시스템으로 메모리 사용량을 최적화 시킬 수 있었고, 필요한 부분만 다시 그리는 방식으로 UI업데이트 성능을 향상 시킬 수 있었습니다.
 
 ## ➡️ 멀티모듈
-<img src="https://lab.ssafy.com/s11-fintech-finance-sub1/S11P21D102/-/raw/dev/etc/images/multimodule.png?ref_type=heads" witdh="200">
+<img src="https://github.com/steorra-L-42/2/blob/dev/etc/images/multimodule.png?raw=true" width="200">
 
 ### 도입 이유
 
@@ -261,28 +261,28 @@
 <details>
   <summary>📋✨ 기능 정의서</summary>
   
-  <img src="https://lab.ssafy.com/s11-fintech-finance-sub1/S11P21D102/-/raw/dev/etc/images/function.png?ref_type=heads" width="700">
+  <img src="https://github.com/steorra-L-42/2/blob/dev/etc/images/function.png?raw=true" width="700">
 
 </details>
 
 <details>
   <summary>🗂️ ERD (Entity Relationship Diagram)</summary>
   
-  <img src="https://lab.ssafy.com/s11-fintech-finance-sub1/S11P21D102/-/raw/dev/etc/images/MobiPayERD.png?ref_type=heads">
+  <img src="https://github.com/steorra-L-42/2/blob/dev/etc/images/MobiPayERD.png?raw=true">
 
 </details>
 
 <details>
   <summary>👣 유저 플로우 (User Flow)</summary>
   
-  <img src="https://lab.ssafy.com/s11-fintech-finance-sub1/S11P21D102/-/raw/dev/etc/images/userflow.png?ref_type=heads">
+  <img src="https://github.com/steorra-L-42/2/blob/dev/etc/images/userflow.png?raw=true">
 
 </details>
 
 <details>
   <summary>🖼️ 와이어프레임 (Wireframe)</summary>
   
-  <img src="https://lab.ssafy.com/s11-fintech-finance-sub1/S11P21D102/-/raw/dev/etc/images/wireframe.png?ref_type=heads">
+  <img src="https://github.com/steorra-L-42/2/blob/dev/etc/images/wireframe.png?raw=true">
 
 </details>
 
@@ -290,23 +290,23 @@
   <summary> 📊 시퀀스 다이어그램 (Sequence Diagram)</summary>
   <details>
     <summary> 📝 회원가입 </summary>
-    <img src="https://lab.ssafy.com/s11-fintech-finance-sub1/S11P21D102/-/raw/dev/etc/images/seq_signup.png?ref_type=heads">
+    <img src="https://github.com/steorra-L-42/2/blob/dev/etc/images/seq_signup.png?raw=true">
   </details>
   <details>
     <summary> 🔑 로그인 </summary>
-    <img src="https://lab.ssafy.com/s11-fintech-finance-sub1/S11P21D102/-/raw/dev/etc/images/seq_login.png?ref_type=heads">
+    <img src="https://github.com/steorra-L-42/2/blob/dev/etc/images/seq_login.png?raw=true">
   </details>
   <details>
     <summary> 💳 결제요청 </summary>
-    <img src="https://lab.ssafy.com/s11-fintech-finance-sub1/S11P21D102/-/raw/dev/etc/images/seq_payment.png?ref_type=heads">
+    <img src="https://github.com/steorra-L-42/2/blob/dev/etc/images/seq_payment.png?raw=true">
   </details>
   <details>
     <summary> ✅ 결제승인 </summary>
-    <img src="https://lab.ssafy.com/s11-fintech-finance-sub1/S11P21D102/-/raw/dev/etc/images/seq_approval.png?ref_type=heads">
+    <img src="https://github.com/steorra-L-42/2/blob/dev/etc/images/seq_approval.png?raw=true">
   </details>
   <details>
     <summary> 📜 결제내역 조회 & ❌ 결제 취소 </summary>
-    <img src="https://lab.ssafy.com/s11-fintech-finance-sub1/S11P21D102/-/raw/dev/etc/images/seq_cancel.png?ref_type=heads">
+    <img src="https://github.com/steorra-L-42/2/blob/dev/etc/images/seq_cancel.png?raw=true">
   </details>
 
 </details>
